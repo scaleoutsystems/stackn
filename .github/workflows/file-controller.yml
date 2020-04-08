@@ -33,7 +33,7 @@ jobs:
 
     - name: docker login
       run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_URL
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
     - name: docker build file-controller
       env:      
