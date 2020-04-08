@@ -16,7 +16,7 @@ jobs:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKER_URL: scaleoutsystems
-
+      working-directory: ./components/file-controller
 
     steps:
     - uses: actions/checkout@v2
@@ -31,9 +31,6 @@ jobs:
         echo ::set-output name=IMAGE_NAME::$IMAGE_NAME
         echo ::set-output name=IMAGE_TAG::$IMAGE_TAG
 
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)    
-    
     - name: docker login
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_URL
