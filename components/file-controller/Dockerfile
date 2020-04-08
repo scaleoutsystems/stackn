@@ -9,7 +9,7 @@ FROM pythonbuild1
 COPY . /app
 WORKDIR /app
 
-
+ENV PROJECT_DIR .
 
 ENTRYPOINT ["python"]
 CMD ["serve.py"]
