@@ -19,7 +19,7 @@ COPY . /app/
 WORKDIR /app
 
 RUN mkdir -p /root/.kube/
-RUN cp cluster_prod.conf /root/.kube/config
+RUN touch /root/.kube/config
 
 RUN pip install -r requirements.txt
 
