@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package grpc;
+
+message Response {
+    string client = 1;
+    string response = 2;
+}
+
+message Status {
+    string client = 1;
+    string status = 2;
+}
+
+message Request {
+    string client = 1;
+
+    enum RequestType {
+      CONNECT = 0;
+      TRAIN = 1;
+      VALIDATE = 2;
+      VOTE = 3;
+      GLOBALMODEL = 4;
+      MODEL = 5;
+      SCORE = 6;
+      HEARTBEAT = 7;
+    }
+
+    RequestType command = 2;
+    string payload = 3;
+    string extra = 4;
+    string to_client = 5;
+}
+
+message Heartbeat {
+  string client = 1;
+  string timestamp = 2;
+}
+
+message ClientList {
+  repeated string client = 1;
+}
+
+service AllianceServer {
+    rpc AllianceStream (Response) returns (stream Request);
+    rpc SendRequest (Request) returns (Response);
+    rpc SendStatus (Status) returns (Response);
+    rpc ListClients (Request) returns (ClientList);
+}
