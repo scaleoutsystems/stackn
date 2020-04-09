@@ -4,24 +4,24 @@ import json
 import os
 
 
-def refresh_charts():
+def refresh_charts(branch='master'):
 
     cwd = os.getcwd()
     try:
         charts_url = os.environ['CHARTS_URL']
     except Exception:
-        charts_url = 'https://github.com/scaleoutsystems/charts/archive/master.zip'
+        charts_url = 'https://github.com/scaleoutsystems/charts/archive/{}.zip'.format(branch)
 
-    status = subprocess.run('rm -rf charts-master'.split(' '), cwd=cwd)
-    status = subprocess.run('wget -O master.zip {}'.format(charts_url).split(' '), cwd=cwd)
-    status = subprocess.run('unzip master.zip'.split(' '),cwd=cwd)
+    status = subprocess.run('rm -rf charts-{}'.format(branch).split(' '), cwd=cwd)
+    status = subprocess.run('wget -O {}.zip {}'.format(branch, charts_url).split(' '), cwd=cwd)
+    status = subprocess.run('unzip {}.zip'.format(branch).split(' '),cwd=cwd)
 
 
 class Controller:
 
     def __init__(self, cwd):
         self.cwd = cwd
-
+        self.branch = os.environ['BRANCH']
         self.default_args = ['helm']
         pass
 
@@ -62,12 +62,16 @@ class Controller:
         for key in options:
             extras = extras + ' --set {}={}'.format(key,options[key])
 
-        refresh_charts()
+        refresh_charts(self.branch)
 
-        args = 'helm install {release} charts-master/scaleout/{chart}{extras}'.format(release=options['release'],
-                                                                      chart=options['chart'], extras=extras).split(' ')
-
+        args = 'helm install {release} charts-{branch}/scaleout/{chart}{extras}'.format(release=options['release'],
+                                                                                        branch=self.branch,
+                                                                                        chart=options['chart'],
+                                                                                        extras=extras).split(' ')
+        print(args, flush=True)
+        #return True
         status = subprocess.run(args, cwd=self.cwd)
+        #status = True
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):
