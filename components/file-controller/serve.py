@@ -31,6 +31,8 @@ def index():
         for name in dirnames:
             d.append({'name':name,'path':os.path.join(dirpath,name)})
 
+    return json.dumps({'status': 'OK', 'files': f, 'dirs': d})
+
 
 @app.route('/readme')
 def readme():
@@ -63,6 +65,26 @@ def readme():
         print(e)
 
     return json.dumps({'status': 'OK', 'filename': filename, 'readme': readme})
+
+
+@app.route('/reports')
+def get_report_generators():
+    generators = []
+    for root, _, files in os.walk("/app/work/reports", topdown=False):
+        for name in files:
+            stats = Path(os.path.join(root, name)).stat()
+            size = stats.st_size / 1024 * 1024
+            created = str(datetime.datetime.fromtimestamp(stats.st_ctime))
+            modified = str(datetime.datetime.fromtimestamp(stats.st_mtime))
+            generators.append({
+                'name': name,
+                'path': os.path.join(root, name),
+                'created': created,
+                'modified': modified,
+                'size': size
+            })
+
+    return json.dumps({'status': 'OK', 'generators': generators})
 
 
 if __name__ == "__main__":
