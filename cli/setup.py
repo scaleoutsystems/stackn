@@ -32,7 +32,7 @@ setup(
         "six>=1.14.0",
         "scaleout-proto>=0.0.1",
         "python-slugify",
-        "prettyprint",
+        "prettytable",
     ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
