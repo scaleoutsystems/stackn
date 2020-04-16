@@ -87,6 +87,21 @@ def get_report_generators():
     return json.dumps({'status': 'OK', 'generators': generators})
 
 
+@app.route('/file/<filename>')
+def get_file_content(filename):
+    cwd = "/app/work/reports"
+
+    content = None
+    try:
+        if os.path.isfile(os.path.join(cwd, filename)):
+            with open(os.path.join(cwd, filename)) as f:
+                content = f.read()
+    except Exception as e:
+        print(e)
+
+    return json.dumps({'status': 'OK', 'filename': filename, 'content': content})
+
+
 if __name__ == "__main__":
     import os
 
