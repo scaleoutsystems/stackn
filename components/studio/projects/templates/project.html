@@ -1,0 +1,123 @@
+{% extends 'baseproject.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+<div class="col-md-10" style="padding-left: 30px; padding-right: 30px;">
+    <div class="d-flex flex-column pt-3 pb-3 mb-5 border-bottom">
+        <h3>{{ project.name }}</h3>
+        <h5>{{ project.description }}</h5>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            {% if not readme %}
+            <h4>
+                Get started
+            </h4>
+            <div>
+                <div class="get-started-header">
+                    <h3 style="font-size: 20px;">Quick setup — if you don't know where to start</h3>
+                    <p class="mb-0">
+                        This is a quick introduction to Scaleout Studio which will get you through the basics
+                        and help you spin up your own project by creating a Jupyter Notebook in a new
+                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> environment.
+                    </p>
+                </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Create a new
+                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> session
+                    </h3>
+                    <p>
+                        Labs is the work area for experimentation and development of machine learning projects.
+                        It's based on Lab Sessions which is a provisioned Jupyter Notebook session running in a
+                        virtual environment.
+                    </p>
+                    <p class="d-flex flex-column">
+                        In the most simple case, everything to run a machine learning experiment is contained
+                        within one Labs Session, which is what we will do next.
+                    </p>
+                    <div class="get-started-code-box">
+                        <pre class="d-flex flex-column" style="margin-bottom: 0px;">
+                            <span class="get-started-code-row">1. Go to <a
+                                    href="{% url 'labs:index' request.user project.slug %}">Labs</a></span>
+                            <span class="get-started-code-row">2. Select 1 CPU, 2 RAM to start an instance with 1 virtual CPU and 2 GB RAM from the Kubernestes cluster</span>
+                            <span class="get-started-code-row">3. Wait for a minute and click the link to the notebook in the list under Lab Session</span>
+                        </pre>
+                    </div>
+                </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Add required modules to the instance</h3>
+                    <p>
+                        We need to add some additional Python modules to the setup provided in the minimal-notebook.
+                        There are several ways to do this, but we'll install using <b>pip</b> in the Jupyter Terminal.
+                    </p>
+                    <div class="get-started-code-box">
+                        <pre class="d-flex flex-column" style="margin-bottom: 0px;">
+                            <span class="get-started-code-row">pip install tensorflow</span>
+                            <span class="get-started-code-row">pip install matplotlib</span>
+                            <span class="get-started-code-row">pip freeze</span>
+                        </pre>
+                    </div>
+                </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Upload datasets to MinIO S3 storage</h3>
+                    <p class="mb-0">
+                        You can also upload files to a
+                        <a href="https://{{ project.slug }}-minio.demo.scaleoutsystems.com/">MinIO</a>
+                        S3 storage.
+                        You can find the access and secret keys on the
+                        <a href="{% url 'projects:settings' request.user project.slug %}">Settings</a>
+                        page.
+                    </p>
+                </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Import code from another repository</h3>
+                    <p>You're seeing this quick set-up guide because you haven't imported files from an
+                        existing GitHub repository. If you have such repository, you can still import its files
+                        and use them in your project.</p>
+                    <a href="#">
+                        <button type="button" class="btn btn-light">Import</button>
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <h4>
+                {{ filename }}
+            </h4>
+            <div class="readme-box">
+                {{ readme }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-sm-6">
+            <h4>
+                Project activity
+                <button class="btn btn-light dropdown-toggle" type="button" id="project_activity" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="margin-bottom: 4px;">
+                    This week
+                </button>
+            </h4>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="timeline">
+                            <li>
+                                <a target="_blank" href="#">Getting started</a>
+                                <a href="#" class="float-right">{{ project.created_at }}</a>
+                                <p>Getting started with project {{ project.name }}</p>
+                            </li>
+                            <li>
+                                <a target="_blank" href="{% url 'projects:details' request.user project.slug %}">
+                                    Project created
+                                </a>
+                                <a href="#" class="float-right">{{ project.created_at }}</a>
+                                <p>Created project {{ project.name }}</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
