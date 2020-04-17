@@ -1,0 +1,70 @@
+
+name: CI
+
+on:
+  push:
+    branches: '*'
+  #pull_request:
+  #  branches: '*'
+
+
+jobs:
+ 
+  build:
+    
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_URL: scaleoutsystems
+    
+    steps:
+    
+    - uses: actions/checkout@v2     
+    
+    - name: Setup variables
+      id: wf-vars
+      run: |
+        BRANCH=${GITHUB_REF##*/}
+        VERSION=${GITHUB_REF##*-}
+        IMAGE_NAME="studio"
+        IMAGE_TAG="$BRANCH"
+        echo ::set-output name=IMAGE_NAME::$IMAGE_NAME
+        echo ::set-output name=IMAGE_TAG::$IMAGE_TAG
+  
+    - name: docker login
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_URL
+
+    - name: Checkout alliance-admin
+      uses: actions/checkout@v2
+      with:
+        repository: scaleoutsystems/scaleout-studio-alliance-admin
+        ssh-key: ${{ secrets.ALLIANCE_ADMIN_KEY }}
+        path: modules/scaleout-studio-alliance-admin
+      
+    - name: Checkout platform-module
+      uses: actions/checkout@v2
+      with:
+        repository: scaleoutsystems/scaleout-studio-platform-module
+        ssh-key: ${{ secrets.PLATFORM_KEY }}
+        path: modules/scaleout-studio-platform-module
+
+    - name: docker build studio
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker build -t $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }} .
+        
+    - name: docker build ingress
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:master .
+
+    - name: docker push
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker push $DOCKER_URL/ingress:master
+        docker push $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}

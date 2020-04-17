@@ -1,0 +1,56 @@
+name: RELEASE
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+
+jobs:
+ 
+  build:
+    
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_URL: scaleoutsystems
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: docker login
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_URL
+    
+    - name: Checkout alliance-admin
+      uses: actions/checkout@v2
+      with:
+        repository: scaleoutsystems/scaleout-studio-alliance-admin
+        ssh-key: ${{ secrets.ALLIANCE_ADMIN_KEY }}
+        path: modules/scaleout-studio-alliance-admin
+      
+    - name: Checkout platform-module
+      uses: actions/checkout@v2
+      with:
+        repository: scaleoutsystems/scaleout-studio-platform-module
+        ssh-key: ${{ secrets.PLATFORM_KEY }}
+        path: modules/scaleout-studio-platform-module
+    
+    - name: docker build studio
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker build -t $DOCKER_URL/studio:${GITHUB_REF/refs\/tags\//} .
+        
+    - name: docker build ingress
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:${GITHUB_REF/refs\/tags\//} .
+    - name: docker push
+      env:      
+        DOCKER_URL: scaleoutsystems
+      run: |
+        docker push $DOCKER_URL/ingress:${GITHUB_REF/refs\/tags\//}
+        docker push $DOCKER_URL/studio:${GITHUB_REF/refs\/tags\//}
