@@ -20,8 +20,16 @@ CONTEXT_SETTINGS = dict(
     ),
     type=click.Path(exists=False, dir_okay=True),
 )
+@click.option(
+    '--login/--no-login',
+    default=True
+)
+@click.option(
+    '--endpoints/--no-endpoints',
+    default=True
+)
 @click.pass_context
-def main(ctx, project_dir):
+def main(ctx, project_dir, login, endpoints):
     ctx.obj = dict()
     ctx.obj['PROJECT_DIR'] = project_dir
 
@@ -34,4 +42,4 @@ def main(ctx, project_dir):
         from scaleout.alliance.controller import Controller
         controller = Controller(project)
         ctx.obj['CONTROLLER'] = controller
-        ctx.obj['CLIENT'] = StudioClient()
+        ctx.obj['CLIENT'] = StudioClient(login=login, endpoints=endpoints)

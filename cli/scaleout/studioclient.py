@@ -38,29 +38,42 @@ def _get_bearer_token(url, username, password):
 
 class StudioClient(Runtime):
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, login=True, endpoints=True):
         super(StudioClient, self).__init__()
-        self.username = self.config['username']
-        self.password = self.config['password']
+        self.login = login
+        if self.login:
+            self.connect()
+            self.auth_headers = {'Authorization': 'Token {}'.format(self.token)}
+        else:
+            self.auth_headers = None
+
         self.project_name = self.config['Project']['project_name']
-        self.connect()
+        
 
         # API endpoints
+        if endpoints:
+            self.get_endpoints()
+
+        self.project = self.get_project(self.project_name)
+        if not self.project:
+            print('Did not find project: {}'.format(self.project_name))
+            self.project_id = None
+        else:
+            self.project_id = self.project['id']
+
+    def get_endpoints(self):
         endpoints = self.list_endpoints()
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
         self.projects_api = endpoints['projects']
         self.generators_api = endpoints['generators']
 
-        self.project = self.get_project(self.project_name)
-        self.project_id = self.project['id']
-
     def connect(self):
         """ Test connection """
         # TODO, read from config
         url = self.config['auth_url']
         try:
-            self.token = _get_bearer_token(url, self.username, self.password)
+            self.token = _get_bearer_token(url, self.config['username'], self.config['password'])
         except AuthenticationError:
             self.token=None
 
@@ -90,13 +103,12 @@ class StudioClient(Runtime):
     def list_endpoints(self):
         """ List api endpoints """
         url = "https://platform.{}/api/".format(self.config['so_domain_name'])
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("Endpoint list failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
-            return r.status_code
+            return None
         else:
             return json.loads(r.content)
 
@@ -106,22 +118,22 @@ class StudioClient(Runtime):
     def list_projects(self):
         """ List all projects a user has access to. """
         url = self.projects_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("List projects failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
-            return r.status_code
+            return None
         else:
             return json.loads(r.content)
 
     def get_project(self, project_name):
         projects = self.list_projects()
+        if not projects:
+            return None
         for p in projects:
             if p['slug'] == slugify(project_name):
                 return p
-        return None
 
     ### Datasets API ###
 
@@ -143,8 +155,7 @@ class StudioClient(Runtime):
     def list_models(self):
         """ List all models associated with a user/project"""
         url = self.models_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=self.auth_headers)
         if _check_status(r,error_msg="List model failed."):
             return json.loads(r.content)
         else:
@@ -182,9 +193,8 @@ class StudioClient(Runtime):
             print(models)
             url = self.models_api
             #url = "https://{}/api/models/{}".format(self.config['so_domain_name'],model["id"])
-            headers = {'Authorization': 'Token {}'.format(self.token)}
             model_uid = model["uid"]
-            r = requests.delete(url,headers=headers)
+            r = requests.delete(url,headers=self.auth_headers)
             if _check_status(r,"Failed to delete model: {}".format(model["uid"])):
                 # Delete the data in minio
                 repo.delete_artifact(model_uid)        
@@ -213,9 +223,8 @@ class StudioClient(Runtime):
                       "project": str(self.project_id)}
 
         url = self.models_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
 
-        r = requests.post(url, json=model_data, headers=headers)
+        r = requests.post(url, json=model_data, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("Publish model failed.")
             print('Returned status code: {}'.format(r.status_code))
