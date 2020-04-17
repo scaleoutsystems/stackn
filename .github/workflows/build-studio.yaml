@@ -1,11 +1,15 @@
 
-name: CI
+name: Build studio and ingress
 
 on:
   push:
     branches: '*'
-  #pull_request:
-  #  branches: '*'
+    paths:
+    - 'components/studio/**'
+  pull_request:
+    branches: '*'
+    paths:
+    - 'components/studio/**'
 
 
 jobs:
@@ -16,8 +20,7 @@ jobs:
     env:
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKER_URL: scaleoutsystems
-    
+      working-directory: ./components/studio
     steps:
     
     - uses: actions/checkout@v2     
@@ -34,37 +37,40 @@ jobs:
   
     - name: docker login
       run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_URL
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
-    - name: Checkout alliance-admin
-      uses: actions/checkout@v2
-      with:
-        repository: scaleoutsystems/scaleout-studio-alliance-admin
-        ssh-key: ${{ secrets.ALLIANCE_ADMIN_KEY }}
-        path: modules/scaleout-studio-alliance-admin
+    #- name: Checkout alliance-admin
+    #  uses: actions/checkout@v2
+    #  with:
+    #    repository: scaleoutsystems/scaleout-studio-alliance-admin
+    #    ssh-key: ${{ secrets.ALLIANCE_ADMIN_KEY }}
+    #    path: modules/scaleout-studio-alliance-admin
       
-    - name: Checkout platform-module
-      uses: actions/checkout@v2
-      with:
-        repository: scaleoutsystems/scaleout-studio-platform-module
-        ssh-key: ${{ secrets.PLATFORM_KEY }}
-        path: modules/scaleout-studio-platform-module
+    #- name: Checkout platform-module
+    #  uses: actions/checkout@v2
+    #  with:
+    #    repository: scaleoutsystems/scaleout-studio-platform-module
+    #    ssh-key: ${{ secrets.PLATFORM_KEY }}
+    #    path: modules/scaleout-studio-platform-module
 
     - name: docker build studio
       env:      
         DOCKER_URL: scaleoutsystems
+      working-directory: ${{env.working-directory}}
       run: |
         docker build -t $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }} .
         
     - name: docker build ingress
       env:      
         DOCKER_URL: scaleoutsystems
+      working-directory: ${{env.working-directory}}
       run: |
         docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:master .
 
     - name: docker push
       env:      
         DOCKER_URL: scaleoutsystems
+      working-directory: ${{env.working-directory}}
       run: |
         docker push $DOCKER_URL/ingress:master
         docker push $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}
