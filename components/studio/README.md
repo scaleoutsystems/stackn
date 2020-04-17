@@ -1,13 +1,3 @@
-# scaleout-studio
-
-
-
-## Setup
-
-### Init repo
-Clone the repository
-###
-```bash
-git submodule init
-git submodule update
-```
+# STACKn Studio
+Studio is the main UI component of the STACKn solution.
+### Install with helm chart
