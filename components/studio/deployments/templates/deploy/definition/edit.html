@@ -1,0 +1,15 @@
+a{% extends 'base.html' %}
+{% block content %}
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Deployment Template Edit</h2>
+    </div>
+    {% if deployment %}
+<form action="{% url 'deployments:deployment_definition_edit' deployment.id %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+{%  endif %}
+</div>
+{% endblock %}

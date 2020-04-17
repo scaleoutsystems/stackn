@@ -1,0 +1,69 @@
+/* Getting started section styling classes */
+
+.get-started-header {
+    border: 1px solid #c8e1ff; 
+    border-radius: 1px; 
+    padding: 24px; 
+    background-color: #f1f8ff;
+}
+
+.get-started-box {
+    border: 1px solid #e1e4e8; 
+    border-top: 0px; 
+    border-radius: 1px; 
+    padding: 24px;
+}
+
+.get-started-code-box {
+    padding: 10px 55px 10px 10px; 
+    background-color: #f6f8fa; 
+    border-radius: 3px;
+}
+
+.get-started-code-row {
+    font-size: 14px!important; 
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+    margin-bottom: 20px;
+}
+
+.readme-box {
+    border: 1px solid #e1e4e8;
+    border-radius: 1px;
+    padding: 24px;
+}
+
+/* Project activity styling classes */
+
+ul.timeline {
+    list-style-type: none;
+    position: relative;
+}
+
+ul.timeline:before {
+    content: ' ';
+    background: #d4d9df;
+    display: inline-block;
+    position: absolute;
+    left: 29px;
+    width: 2px;
+    height: 100%;
+    z-index: 400;
+}
+
+ul.timeline > li {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+ul.timeline > li:before {
+    content: ' ';
+    background: white;
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #22c0e8;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    z-index: 400;
+}
