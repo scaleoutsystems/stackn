@@ -8,7 +8,9 @@ for d in */ ; do
 done
 cd ..
 python3 manage.py makemigrations
-python manage.py makemigrations datasets deployments experiments files ingress labs models projects reports workflows
+python3 manage.py makemigrations ingress datasets deployments experiments files  labs models projects reports workflows
+python3 manage.py migrate
+python3 manage.py makemigrations ingress datasets deployments experiments files  labs models projects reports workflows
 python3 manage.py migrate
 echo "loading seed data..."
 python3 manage.py loaddata projects/fixtures/users.json
