@@ -27,7 +27,10 @@ jobs:
     
     - name: Setup variables
       id: wf-vars
+      env:
+        BASE_BRANCH: ${{ github.base_ref }}
       run: |
+        echo "name of github basebranch is ${BASE_BRANCH}"
         BRANCH=${GITHUB_REF##*/}
         VERSION=${GITHUB_REF##*-}
         IMAGE_NAME="studio"
