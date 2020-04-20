@@ -1,0 +1,205 @@
+{% extends 'baseproject.html' %}
+{% block extra_head %}
+    <style>
+        :root {
+            --jumbotron-padding-y: 3rem;
+        }
+
+        .jumbotron {
+            padding-top: var(--jumbotron-padding-y);
+            padding-bottom: var(--jumbotron-padding-y);
+            margin-bottom: 0;
+            background-color: #fff;
+        }
+
+        @media (min-width: 768px) {
+            .jumbotron {
+                padding-top: calc(var(--jumbotron-padding-y) * 2);
+                padding-bottom: calc(var(--jumbotron-padding-y) * 2);
+            }
+        }
+
+        .jumbotron p:last-child {
+            margin-bottom: 0;
+        }
+
+        .jumbotron-heading {
+            font-weight: 300;
+        }
+
+        .jumbotron .container {
+            max-width: 40rem;
+        }
+
+        footer {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        footer p {
+            margin-bottom: .25rem;
+        }
+
+        .box-shadow {
+            box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Models</h2>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a href="{% url 'models:create' request.user project.slug %}">
+                    <button id="create" class="btn btn-large btn-primary">Add model</button>
+                </a>
+            </div>
+        </div>
+        {% if messsages %}
+            {% for message in messages %}
+                <div class="alert alert-info" role="alert">
+                    Message{{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="table-responsive">
+
+            <table class="table table-striped table-sm">
+                <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Tag</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                    <th>Url</th>
+                    <th>User</th>
+                    <th>Project</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for model in models %}
+                    <tr>
+                        <td>{{ model.id }}</td>
+                        <td><a href="{% url 'models:details' request.user project.slug model.id %}">{{ model.name }}</a>
+                        </td>
+                        <td>{{ model.tag }}</td>
+                        <td>{% if model.status == 'CR' %} READY{% endif %} {% if model.status == 'DP' %}
+                            DEPLOYED{% endif %}</td>
+                        <td>{{ model.description }}</td>
+                        <td>{{ model.uploaded_at }}</td>
+                        <td>
+                            <a href="https://{{ model.url }}" target="_blank">{{ model.url }}</a>
+                        </td>
+                        <td>{{ model.project.owner }}</td>
+                        <td>{{ model.project.slug|slice:":-4" }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                                    data-target="#exampleModal">
+                                Deployment
+                            </button>
+
+                            <a href="{% url 'models:model_reports' request.user project.slug model.id %}">
+                                <button id="model_reports" class="btn btn-sm btn-outline-secondary">Reports</button>
+                            </a>
+
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-sm btn-outline-warning" data-toggle="modal"
+                                    data-target="#deleteModal">
+                                Delete
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm delete</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                            </button>
+                                            <a href="{% url 'models:delete' request.user project.slug model.id %}">
+                                                <button id="delete" class="btn btn-sm btn-outline-warning">Delete
+                                                </button>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Button trigger modal -->
+
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Model Deployment</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% if model.status != 'DP' %}
+                                                <form action="{% url 'deployments:deploy' model.id %}"
+                                                      method="POST">
+                                                    {% csrf_token %}
+                                                    <label>
+                                                        <select name="deployment">
+                                                            <option value="" selected></option>
+                                                            {% for deployment in deployments %}
+                                                                <option value="{{ deployment.name }}">{{ deployment.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </label>
+                                                    <input type="submit" class="btn btn-primary" value="Deploy" data-toggle="modal" data-target=".bd-example-modal-lg">
+                                                </form>
+                                            {% endif %}
+                                            {% if model.status == 'DP' %}
+                                                <a href="{% url 'deployments:undeploy' model.id %}">
+                                                    <button class="btn btn-danger">Undeploy</button>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <section class="jumbotron text-center">
+        <div class="container">
+          <h1 class="jumbotron-heading">Model deployed!</h1>
+          <p class="lead text-muted">Successfully deployed your model {{ success_deployment.name }}</p>
+          <p>
+            <a href="{{  success_deployment.endpoint }}" class="">{{ success_deployment.endpoint}}</a>
+          </p>
+        </div>
+      </section>
+                    </div>
+                </div>
+    </div>
+{% endblock %}

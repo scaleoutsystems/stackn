@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>Labs</h2>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group mr-2">
+                        <form action="{% url 'notebooks:create' %}" method="get">
+                            {% csrf_token %}
+                            <input name="name" value="nb1">
+                            <input type="hidden" name="namespace" value="{{ request.user }}">
+                            <input type="hidden" name="project" value="{{ project.id }}">
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <input type="input" name="image" value="jupyter/minimal-notebook:latest">
+                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="Create">
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Created</th>
+                        <th>State</th>
+                        <th>Address</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for nb in notebooks %}
+                        <tr>
+                            <td>{{ nb.id }}</td>
+                            <td>{{ nb.name }}</td>
+                            <td>{{ nb.created_at }}</td>
+                            <td>{{ nb.state }}</td>
+                            <td>
+                            <a href="{{ nb.address }}" target="_blank">{{ nb.address }}</a>
+                            </td>
+                            <td>{{ nb.image }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary">Pause</button>
+                                <a href="{% url 'notebooks:destroy' nb.id %} "><button id="delete" class="btn btn-sm btn-outline-warning">Delete</button></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+{% endblock %}

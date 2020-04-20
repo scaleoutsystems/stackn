@@ -1,0 +1,203 @@
+{% extends 'baseproject.html' %}
+{% block content %}
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Settings</h2>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
+        <h5>General</h5>
+        <form>
+            <div class="form-group row">
+                <label for="name" class="col-sm-2 col-form-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="{{ project.name }}">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="description" class="col-sm-2 col-form-label">Descriptions</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="description" name="description" rows=5
+                              placeholder="{{ project.description }}"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="save">Save</button>
+            <button type="submit" class="btn btn-danger" name="delete">Delete</button>
+        </form>
+    </div>
+
+    <div class="container-fluid" style="padding: 15px;">
+        <h5>S3 Credentials</h5>
+        <div class="form-group row">
+            <label for="url_minio" class="col-sm-2 col-form-label">URL</label>
+            <div class="col-sm-10">
+                <a class="form-control-plaintext" id="url_minio"
+                   href="https://{{ project.slug }}-minio.{{ url_domain }}/" style="color: #007bff;">
+                    https://{{ project.slug }}-minio.{{ url_domain }}/
+                </a>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="access_key" class="col-sm-2 col-form-label">Access Key</label>
+            <div class="col-sm-10">
+                <input type="url" readonly class="form-control-plaintext" id="access_key"
+                       value="{{ project.project_key }}">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="secret_key" class="col-sm-2 col-form-label">Secret Key</label>
+            <div class="col-sm-10">
+                <input type="url" readonly class="form-control-plaintext" id="secret_key"
+                       value="{{ project.project_secret }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
+        <h5>Environment</h5>
+        <h6>Settings for environment</h6>
+
+        <form action="{% url 'projects:change_environment' request.user project.slug %}" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group row">
+                <label for="id_dockerfile" class="col-form-label col-sm-2 pt-0">Dockerfile</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="id_dockerfile" name="dockerfile" rows="3">
+                        {{ project.environment.dockerfile }}
+                    </textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="id_startup" class="col-form-label col-sm-2 pt-0">Startup</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="id_startup" name="startup" rows="3">
+                        {{ project.environment.startup }}
+                    </textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="id_teardown" class="col-form-label col-sm-2 pt-0">Teardown</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="id_teardown" name="teardown" rows="3">
+                        {{ project.environment.teardown }}
+                    </textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
+        <h5>Workflows</h5>
+        <h6>Settings for workflows</h6>
+
+        <form>
+            <div class="form-group row">
+                <label for="training_workflow" class="col-form-label col-sm-2 pt-0">Default Training workflow</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="training_workflow" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="deployment_workflow" class="col-form-label col-sm-2 pt-0">
+                    Default Deployment workflow
+                </label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="deployment_workflow" rows="3"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
+        <h5>Sharing and collaboration</h5>
+        <h6>Settings for sharing and collaboration</h6>
+
+        <form>
+            <fieldset class="form-group">
+                <div class="row">
+                    <legend class="col-form-label col-sm-2 pt-0">Sharing level</legend>
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sharing_level" id="1" value="" checked>
+                            <label class="form-check-label" for="1">
+                                Private
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sharing_level" id="2" value="" disabled>
+                            <label class="form-check-label" for="2">
+                                Public
+                            </label>
+                        </div>
+                        <div class="form-check disabled">
+                            <input class="form-check-input" type="radio" name="sharing_level" id="3" value="" disabled>
+                            <label class="form-check-label" for="3">
+                                Alliance
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
+        <h5>Transfer or Delete</h5>
+
+        <form>
+            <div class="form-group row">
+                <label for="id_transfer_to" class="col-sm-2 col-form-label">Transfer to</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="id_transfer_to" placeholder="{{ project.name }}">
+                </div>
+                <label class="col-sm-2 col-form-label"></label>
+                <a href="#" style="padding-left: 15px; padding-top: 5px;">
+                    <button class="btn btn-warning">Transfer</button>
+                </a>
+            </div>
+        </form>
+
+        <div>
+            <div class="form-group row">
+                <label for="id_delete_button" class="col-sm-2 col-form-label">Delete project</label>
+                <button type="submit" class="btn btn-danger" id="id_delete_button"
+                        style="padding-left: 12px;margin-left: 15px;" data-toggle="modal" data-target="#deleteModal">
+                    Delete
+                </button>
+                <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+                     aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm delete</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                </button>
+                                <a href="{% url 'projects:delete' request.user project.slug %}">
+                                    <button id="delete" class="btn btn-sm btn-outline-warning">Delete
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'baseproject.html' %}
+{% block content %}
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Model</h2>
+        </div>
+        <div style="min-height:400px;">
+            Model:
+            {{ model.name }}
+            {{ model.tag }}
+            {{ model.description }}
+            {{ model.url }}
+        </div>
+    <div>
+    Deployments:
+        {% for deployment in deployments %}
+        Deployment Name: {{ deployment.name }}
+        Deployment Version: {{ deployment.version }}
+            Deployment Mode: {{ deployment.model }}
+            Deployment Definition: {{ deployment.definition }}
+            Deployment Created At: {{ deployment.created_at }}
+            Deployment Updated At: {{ deployment.updated_at }}
+        {% endfor %}
+    </div>
+{% endblock %}

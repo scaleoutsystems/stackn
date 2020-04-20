@@ -1,0 +1,16 @@
+{% extends 'baseproject.html' %}
+
+{% block content %}
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Report</h2>
+    </div>
+    <div style="min-height:400px;">
+        <form method="post">
+            {% csrf_token %}
+            <p>Are you sure you want to delete item with id {{ report.id }}?</p>
+            <input type="submit" class="btn btn-primary" value="Confirm">
+        </form>
+    </div>
+</div>
+{% endblock %}
