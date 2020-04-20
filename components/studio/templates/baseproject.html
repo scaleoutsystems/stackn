@@ -90,16 +90,6 @@
                 Settings
             </a>
         </li>
-
-        <li class="nav-item list-group-item sidebar-heading">
-            Alliance
-        </li>
-        <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'alliance_admin:index' request.user project.slug %}">
-                <img src="{% static '/icons/people.svg' %}" alt="" width="24" height="24" title="Bootstrap">
-                Alliance Admin
-            </a>
-        </li>
     </ul>
 </div>
 {% endblock %}

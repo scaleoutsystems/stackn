@@ -36,10 +36,6 @@ urlpatterns = [
     path('experiments/', include('experiments.urls', namespace='experiments')),
     path('deployments/', include('deployments.urls', namespace='deployments')),
     path('auth/', auth, name='auth'),
-
-    # imported relative to root from ENV variable APPS
-    #path('', include('alliance_admin.urls', namespace='alliance_admin')),
-    #path('', include('platform_module.urls', namespace='platform_module')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
