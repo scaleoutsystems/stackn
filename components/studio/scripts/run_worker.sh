@@ -7,6 +7,6 @@ for d in */ ; do
 done
 cd ..
 
-sleep 10
+sleep 30
 
 celery -A studio worker -l info
