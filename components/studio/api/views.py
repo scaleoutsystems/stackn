@@ -1,59 +1,63 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer
 
 
-class ModelViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
-
-    queryset = Model.objects.all()
     serializer_class = MLModelSerializer
 
+    def get_queryset(self):
+        """
+        This view should return a list of all the models
+        for the currently authenticated user.
+        """
+        current_user = self.request.user
+        return Model.objects.filter(project__owner__username=current_user)
 
-class ReportViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+
+class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
-
-    queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
+    def get_queryset(self):
+        """
+        This view should return a list of all the reports
+        for the currently authenticated user.
+        """
+        current_user = self.request.user
+        return Report.objects.filter(generator__project__owner__username=current_user)
 
-class ReportGeneratorViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+
+class ReportGeneratorList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
-
-    queryset = ReportGenerator.objects.all()
     serializer_class = ReportGeneratorSerializer
 
+    def get_queryset(self):
+        """
+        This view should return a list of all the report generators
+        for the currently authenticated user.
+        """
+        current_user = self.request.user
+        return ReportGenerator.objects.filter(project__owner__username=current_user)
 
-class ProjectViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+
+class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
     permission_classes = (IsAuthenticated,)
-
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name']
 
-
-class GetProjectInfo(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, project_owner_name, project_name):
-        project = Project.objects \
-            .filter(owner__username=project_owner_name) \
-            .filter(name=project_name) \
-            .first()
-
-        result = {
-            "id": project.id,
-            "name": project.name,
-            "description": project.description,
-            "owner": project_owner_name,
-            "project_key": project.project_key,
-            "project_secret": project.project_secret,
-            "updated_at": project.updated_at,
-            "created_at": project.created_at
-        }
-
-        return Response(result)
+    def get_queryset(self):
+        """
+        This view should return a list of all the projects
+        for the currently authenticated user.
+        """
+        current_user = self.request.user
+        return Project.objects.filter(owner__username=current_user)
