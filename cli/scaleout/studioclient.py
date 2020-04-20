@@ -2,6 +2,8 @@ import os
 from scaleout.config.config import load_config as load_conf, get_default_config_file_path
 
 from scaleout.runtime.runtime import Runtime
+
+from scaleout.auth import get_bearer_token
 from scaleout.errors import AuthenticationError
 
 import requests
@@ -18,34 +20,23 @@ def _check_status(r,error_msg="Failed"):
     else:
         return True 
 
-def _get_bearer_token(url, username, password):
-    """ Exchange username,password for an auth token. """
-    data = {
-        'username': username,
-        'password': password
-    }
-
-    r = requests.post(url, data=data)
-
-    if r.status_code == 200:
-        return json.loads(r.content)['token']
-    else:
-        print('Authentication failed!')
-        print("Requesting an authorization token failed.")
-        print('Returned status code: {}'.format(r.status_code))
-        print('Reason: {}'.format(r.reason))
-        raise AuthenticationError
 
 class StudioClient(Runtime):
 
     def __init__(self, config=None):
         super(StudioClient, self).__init__()
+
         self.username = self.config['username']
         self.password = self.config['password']
         self.project_name = self.config['Project']['project_name']
+        self.auth_url = self.config['auth_url']
+        # TODO: This assumes a certain url-schema
+        self.api_url = self.auth_url.replace("/api-token-auth",'')
+
+        # Connect requests and sets an auth token (unique to this session)
         self.connect()
 
-        # API endpoints
+        # Fetch and set all active API endpoints
         endpoints = self.list_endpoints()
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
@@ -56,13 +47,13 @@ class StudioClient(Runtime):
         self.project_id = self.project['id']
 
     def connect(self):
-        """ Test connection """
-        # TODO, read from config
+        """ Fetch and set an API bearer token """ 
         url = self.config['auth_url']
         try:
-            self.token = _get_bearer_token(url, self.username, self.password)
+            self.token = get_bearer_token(url, self.username, self.password)
         except AuthenticationError:
             self.token=None
+            raise
 
     def _get_repository_conf(self):
         """ Return the project minio keys. """
@@ -89,9 +80,10 @@ class StudioClient(Runtime):
 
     def list_endpoints(self):
         """ List api endpoints """
-        url = "https://platform.{}/api/".format(self.config['so_domain_name'])
+        # TODO: "studio" subdomain hardcoded here
+        #url = "https://studio.{}/api/".format(self.config['so_domain_name'])
         headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(self.api_url, headers=headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("Endpoint list failed.")
             print('Returned status code: {}'.format(r.status_code))
