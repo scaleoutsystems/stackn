@@ -24,7 +24,6 @@ def _get_bearer_token(url, username, password):
         'username': username,
         'password': password
     }
-
     r = requests.post(url, data=data)
 
     if r.status_code == 200:
@@ -48,7 +47,7 @@ class StudioClient(Runtime):
             self.auth_headers = None
 
         self.project_name = self.config['Project']['project_name']
-        
+        self.global_domain = self.config['so_domain_name']
 
         # API endpoints
         if endpoints:
@@ -205,7 +204,6 @@ class StudioClient(Runtime):
         # TODO: Support model tagging, default to 'latest'
         import uuid
         model_uid = str(uuid.uuid1().hex)
-
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
@@ -214,26 +212,59 @@ class StudioClient(Runtime):
         except Exception as e:
             print('Error: Failed to upload model.', e)
             return
-        
+
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "tag": tag,
                       "description": model_description,
                       "url": model_url,
+                      "resource": model_url,
                       "project": str(self.project_id)}
 
         url = self.models_api
+        url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("Publish model failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
+            print(r.text)
             # Remove the already uploaded model.
             repo.delete_artifact(model_uid)
 
             return r.status_code
-        
+
+    def deploy_model(self, model, deploy_context, model_name, version):
+        proj_name = self.project_name
+        context_bucket = 'deploy'
+        url = 'http://{}-deploy-model.{}/deploy'.format(proj_name, self.global_domain)
+        data = {'context_bucket': context_bucket,
+                'context_file': deploy_context,
+                'model_bucket':'models',
+                'model_file': model,
+                'model_name': model_name,
+                'model_version': version}
+        r = requests.post(url, json=data, verify=False)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Deploy model failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            print(r.text)
+        else:
+            print('Deployed model.')
+
+    def list_deployments(self):
+        url = 'https://serve.{}/system/functions'.format(self.global_domain)
+        r = requests.get(url)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("List deployments failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            print(r.text)
+        else:
+            return json.loads(r.content)
+
 
 if __name__ == '__main__':
 

@@ -56,6 +56,32 @@ def publish_cmd(ctx, model, name, tag, url, description):
   client = ctx.obj['CLIENT']
   client.publish_model(model, name, tag, url, description)
 
+@model_cmd.command('deploy')
+@click.option('-m', '--model', required=True)
+@click.option('-n', '--name', required=True)
+@click.option('-c', '--context', required=True)
+@click.option('-v', '--version', required=True)
+@click.pass_context
+def deploy_model_cmd(ctx, model, context, name, version):
+    client = ctx.obj['CLIENT']
+    if context == 'tensorflow':
+        context = 'tensorflow.tar.gz'
+    else:
+        print("Context '{}' doesn't exist.".format(context))
+
+    client.deploy_model(model, context, name, version)
+
+@model_cmd.command('deploy_list')
+@click.pass_context
+def deploy_list_cmd(ctx):
+    client = ctx.obj['CLIENT']
+    deployments = client.list_deployments()
+    x = PrettyTable()
+    x.field_names = ["Name","Image","InvocationCount"]
+    for d in deployments:
+        x.add_row([d["name"],d["image"],d["invocationCount"]])
+    print(x)
+
 @click.option('-m','--model_id',required=True)
 @click.option('-t','--tag')
 @click.option('-o','--output',default="model.out")
