@@ -36,14 +36,32 @@ class StudioClient(Runtime):
         self.api_url = self.auth_url.replace("/api-token-auth",'')
 
         # Connect requests and sets an auth token (unique to this session)
-        self.connect()
+        self.login = login
+        if self.login:
+            self.connect()
+            self.auth_headers = {'Authorization': 'Token {}'.format(self.token)}
+        else:
+            self.auth_headers = None
 
         # Fetch and set all active API endpoints
+        if endpoints:
+            self.get_endpoints()
+
+        self.project = self.get_project(self.project_name)
+        if not self.project:
+            print('Did not find project: {}'.format(self.project_name))
+            self.project_id = None
+        else:
+            self.project_id = self.project['id']
+
+    def get_endpoints(self):
         endpoints = self.list_endpoints()
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
         self.projects_api = endpoints['projects']
         self.generators_api = endpoints['generators']
+        self.deployment_instance_api = endpoints['deploymentInstances']
+        self.deployment_definition_api = endpoints['deploymentDefinitions']
 
     def connect(self):
         """ Fetch and set an API bearer token """ 
@@ -115,6 +133,20 @@ class StudioClient(Runtime):
         for p in projects:
             if p['slug'] == slugify(project_name):
                 return p
+
+    def create_deployment_definition(self, name, definition, bucket, filepath):
+        file_base_path = os.path.dirname(filepath)
+        filename = os.path.basename(filepath)
+        repo = self.get_repository()
+        repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
+        depde_data = {"project": self.project_id,
+                      "name": name,
+                      "definition": definition,
+                      "bucket": bucket,
+                      "filename": filename}
+
+        url = self.deployment_definition_api
+        r = requests.post(url, json=depde_data, headers=self.auth_headers)
 
     ### Datasets API ###
 
@@ -247,7 +279,7 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def predict(self):
+    # def predict(self):
         
 
 

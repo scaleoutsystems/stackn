@@ -57,16 +57,17 @@ class MINIORepository(Repository):
         except ResponseError as err:
             raise
 
-    def set_artifact(self, instance_name, instance, is_file=False):
+    def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
-
+        if bucket is '':
+            bucket = self.bucket
         if not is_file:
             try:
-                self.client.put_object(self.bucket, instance_name, io.BytesIO(instance), len(instance))
+                self.client.put_object(bucket, instance_name, io.BytesIO(instance), len(instance))
             except Exception as e:
                 raise Exception("Could not load data into bytes {}".format(e))
         else:
-            self.client.fput_object(self.bucket, instance_name, instance)
+            self.client.fput_object(bucket, instance_name, instance)
 
         return True
 
