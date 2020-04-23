@@ -1,6 +1,7 @@
 import click
 import os
 from .main import main
+from prettytable import PrettyTable
 
 from scaleout.project import init_project as init_p
 from scaleout.studioclient import StudioClient
@@ -55,3 +56,19 @@ def project_create_cmd(ctx):
 def project_create_deployment_definition(ctx, name, definition, bucket, filepath):
     client = ctx.obj['CLIENT']
     client.create_deployment_definition(name, definition, bucket, filepath)
+
+@project_cmd.group('list')
+@click.pass_context
+def project_list_cmd(ctx):
+    pass
+
+@project_list_cmd.command('deploymentdefinition')
+@click.pass_context
+def project_list_deployment_definition(ctx):
+    client = ctx.obj['CLIENT']
+    deploymentdefinitions = client.list_deployment_definitions()
+    x = PrettyTable()
+    x.field_names = ["Name","Bucket","File"]
+    for d in deploymentdefinitions:
+        x.add_row([d["name"],d["bucket"],d["filename"]])
+    print(x)

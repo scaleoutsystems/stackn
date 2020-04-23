@@ -148,6 +148,14 @@ class StudioClient(Runtime):
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
 
+    def list_deployment_definitions(self):
+        url = self.deployment_definition_api
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="List deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return r.status_code
+
     ### Datasets API ###
 
 
