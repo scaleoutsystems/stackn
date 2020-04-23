@@ -265,6 +265,9 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
+    def predict(self):
+        
+
 
 if __name__ == '__main__':
 

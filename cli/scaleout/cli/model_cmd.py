@@ -82,6 +82,13 @@ def deploy_list_cmd(ctx):
         x.add_row([d["name"],d["image"],d["invocationCount"]])
     print(x)
 
+@model_cmd.command('predict')
+@click.option('-d', '--deployment', required=True)
+@click.option('-i', '--input', required=True)
+@click.pass_context
+def cmd_predict(ctx):
+
+
 @click.option('-m','--model_id',required=True)
 @click.option('-t','--tag')
 @click.option('-o','--output',default="model.out")
