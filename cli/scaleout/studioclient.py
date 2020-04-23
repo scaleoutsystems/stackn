@@ -45,6 +45,7 @@ class StudioClient(Runtime):
 
         self.project = self.get_project(self.project_name)
         self.project_id = self.project['id']
+        self.project_slug = self.project['slug']
 
     def connect(self):
         """ Fetch and set an API bearer token """ 
@@ -64,7 +65,7 @@ class StudioClient(Runtime):
 
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
-            'minio_host': '{}-minio.{}'.format(slugify(self.project_name),self.config['so_domain_name']),
+            'minio_host': '{}-minio.{}'.format(slugify(self.project_slug),self.config['so_domain_name']),
             'minio_port': 9000,
             'minio_access_key': project['project_key'],
             'minio_secret_key': project['project_secret'],
@@ -111,7 +112,7 @@ class StudioClient(Runtime):
     def get_project(self, project_name):
         projects = self.list_projects()
         for p in projects:
-            if p['slug'] == slugify(project_name):
+            if p['name'] == project_name:
                 return p
         return None
 
