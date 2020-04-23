@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <main role="main">
+    <section class="jumbotron text-center">
+        <div class="container">
+          <h1 class="jumbotron-heading">Logged out</h1>
+          <p class="lead text-muted">Login again to get access to the Scaleout Platform.</p>
+          <p>
+            <a href="{% url 'login' %}" class="btn btn-primary my-2">Click here to login again.</a>
+          </p>
+        </div>
+      </section>
+
+
+    </main>
+{% endblock %}

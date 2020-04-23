@@ -1,0 +1,188 @@
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="icon" href="{% static 'img/favicon_6.ico' %}" type="image/x-icon">
+
+    <title>Scaleout</title>
+
+    <link rel="canonical" href="">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/studio.css' %}" rel="stylesheet">
+    <link href="{% static 'css/project.css' %}" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+
+    <style type="text/css">
+        /* Chart.js */
+        @-webkit-keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .chartjs-render-monitor {
+            -webkit-animation: chartjs-render-animation 0.001s;
+            animation: chartjs-render-animation 0.001s;
+        }
+    </style>
+
+    <style type="text/css">
+        #container {
+            max-width: 1150px;
+            height: 500px;
+
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+    {% block extra_head %} {% endblock %}
+</head>
+
+<body>
+
+<main role="main">
+
+        <div class="container-fluid" style="height:100%;">
+            <div class="row" style="height:100%;">
+                {% block topnav %}
+                    <div class="col-md-1 new-sidebar-1" style="min-height:800px; height:100%;">
+                        <ul class="list-group d-flex">
+                            <li>
+                                <a class="list-inline" href="/" style="padding-left: 35px;padding-right: 15px;">
+                                    <p class="d-flex justify-content-center"><img
+                                            src="{% static 'img/SOIconBlackish.png' %}" alt="Scaleout" width="50"></p>
+                                </a>
+                            </li>
+                            <li class="list-inline">
+                                <a class="nav-link" href="/projects">
+                                    <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
+                                                                                  src="{% static '/icons/folder.svg' %}"
+                                                                                  alt="" width="24" height="24"
+                                                                                  title=""></p>
+                                    <p class="d-flex justify-content-center">Projects</p>
+                                </a>
+
+                            </li>
+                            <li class="list-inline">
+                                <a class="nav-link" href="{% url 'deployments:index' %}">
+                                    <p class="d-flex justify-content-center"><img
+                                            src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
+                                            title=""></p>
+                                    <p class="d-flex justify-content-center">Deployments</p>
+                                </a>
+                            </li>
+                            <li class="list-inline">
+                                <a class="nav-link" href="{% url 'deployments:index' %}">
+                                    <p class="d-flex justify-content-center"><img
+                                            src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24"
+                                            title=""></p>
+                                    <p class="d-flex justify-content-center">Environments</p>
+                                </a>
+                            </li>
+                            <li class="list-inline">
+                                <a class="nav-link" href="{% url 'workflows:workflows_definition_index' %}">
+                                    <p class="d-flex justify-content-center"><img
+                                            src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
+                                            title=""></p>
+                                    <p class="d-flex justify-content-center" align="center">
+                                        Workflow Definitions</p>
+                                </a>
+                            </li>
+                            <li class="list-inline mb-auto">
+                                <a class="nav-link" href="{% url 'deployments:deployment_definition_index' %}">
+                                    <p class="d-flex justify-content-center"><img
+                                            src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
+                                            title=""></p>
+                                    <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
+                                </a>
+                            </li>
+                            <li class="list-inline" style="position:absolute;bottom:0;width:100px;">
+                                {% if request.user.is_authenticated %}
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown2" role="button"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       style="padding-right: 20px;">
+                                        <p class="d-flex justify-content-center"><img
+                                                src="{% static '/icons/person-fill.svg' %}" alt="" width="24" height="24"
+                                                title=""></p>
+                                        <p class="d-flex justify-content-center">{{ request.user }}</p>
+                                    </a>
+                                    <div class="dropdown-menu"
+                                         aria-labelledby="navbarDropdown2">
+                                        {% if request.user.is_superuser %}
+                                            <a class="d-flex dropdown-item justify-content-center" href="/api"><b>API</b></a>
+                                            <a class="d-flex dropdown-item justify-content-center" href="{% url 'admin:index' %}"><b>Admin</b></a>
+                                            <div class="dropdown-divider"></div>
+                                        {% endif %}
+                                        <a class="dropdown-item d-flex justify-content-center" href="{% url 'logout' %}">Sign out</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item  d-flex justify-content-center" href="#">View as user</a>
+                                    </div>
+                                {% else %}
+                                    <p class="d-flex justify-content-center"><img src="{% static '/icons/person.svg' %}"
+                                                                                  alt="" width="24" height="24"
+                                                                                  title=""></p>
+                                    <p class="d-flex justify-content-center"><a class="nav-link text-nowrap"
+                                                                                href="{% url 'login' %}">Sign in</a></p>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                {% endblock %}
+                {% block sidebar %} {% endblock %}
+
+                {% block content %} {% endblock %}
+
+            </div>
+        </div>
+
+</main>
+
+{% block footer %} {% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+
+{% block extrascripts %} {% endblock %}
+
+</body>
+</html>

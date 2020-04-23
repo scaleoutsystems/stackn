@@ -1,0 +1,80 @@
+{% extends 'baseproject.html' %}
+{% block content %}
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+        <h2>Datasets</h2>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'datasets:create' request.user project.slug %}">
+                <button id="create" class="btn btn-large btn-primary">Add new</button>
+            </a>
+        </div>
+    </div>
+    <nav aria-label="breadcrumb" style="margin-bottom: 25px;">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="oi oi-hard-drive"></span>
+                dataset
+            </li>
+        </ol>
+    </nav>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col" style="width: 5%;text-align: center;"></th>
+            <th scope="col" style="width: 10%;text-align: left">Location</th>
+            <th scope="col" style="width: 50%;text-align: left">Name</th>
+            <th scope="col" style="width: 10%;text-align: left">Size</th>
+            <th scope="col" style="width: 15%;text-align: left">Last Modified</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for entry in datasets %}
+        <tr>
+            {% if entry.is_dir %}
+            <td><span class="oi oi-folder"></span></td>
+            <td>{{ entry.location }}</td>
+            <td><a href="{% url 'datasets:path_page' user project.slug entry.name 1 %}">{{ entry.name }}</a></td>
+            <td>--</td>
+            <td>--</td>
+            {% else %}
+            <td><span class="oi oi-file"></span></td>
+            <td>{{ entry.location }}</td>
+            <td>{{ entry.name }}</td>
+            <td>{{ entry.size }} MB</td>
+            <td>{{ entry.modified }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <nav aria-label="Datasets page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="{% url 'datasets:page' user project.slug previous_page %}">
+                    Previous
+                </a>
+            </li>
+            {% for page in pages %}
+            {% if page == page_index %}
+            <li class="page-item active">
+                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
+                    {{ page }}
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
+                    {{ page }}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'datasets:page' user project.slug next_page %}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

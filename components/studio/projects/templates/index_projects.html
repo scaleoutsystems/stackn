@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="col-md-10" style="margin-top:20px;">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card card-add-project">
+                <div class="card-body d-flex flex-column">
+                    <form class="needs-validation form-add-project" action="{% url 'projects:create' %}" method="POST">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <input type="text" class="form-control" id="name" name="name"
+                                       placeholder="Give your project a name here..." required>
+                                <div class="invalid-feedback">
+                                    Valid project name is required.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                          placeholder="Write a short description here..."></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <input type="text" class="form-control" id="repository" name="repository"
+                                       placeholder="Import from...">
+                            </div>
+                        </div>
+
+                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;">
+                            Create project
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% for project in projects %}
+        <div class="col-sm-6">
+            <div class="card card-project">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <span>{{ project.name }}</span>
+                    </h5>
+                    <p class="card-text"> {{ project.description }}</p>
+                    <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
+                       style="width: fit-content;">Open project</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

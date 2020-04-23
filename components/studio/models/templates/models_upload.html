@@ -1,0 +1,32 @@
+{% extends 'baseproject.html' %}
+
+{% block content %}
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Model</h2>
+    </div>
+
+    <div style="min-height:400px;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <input type="hidden" name="uid" value="{{ uid }}" id="id_uid">
+            <div class="form-group">
+                <label for="id_name">Name:</label>
+                <input class="form-control" type="text" maxlength="255" id="id_name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="id_description">Description:</label>
+                <input class="form-control" type="text" maxlength="255" id="id_description" name="description">
+            </div>
+            <div class="form-group">
+                <label for="id_resource">RESOURCE:</label>
+                <input class="form-control" type="url" maxlength="512" id="id_resource" name="resource" required>
+            </div>
+            <input type="hidden" name="project" value="{{ project.id }}" id="id_project">
+
+            <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

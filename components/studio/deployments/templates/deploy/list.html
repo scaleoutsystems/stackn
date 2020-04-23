@@ -1,0 +1,83 @@
+{% extends is_authorized|yesno:"baseproject.html,base.html" %}
+{% block extra_head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Deployments</h2>
+            {% if is_authorized %}
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'deployments:deployment_add' request.user project.slug %}">
+                        <button id="create" class="btn btn-large btn-primary">Deploy</button>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        {% if messsages %}
+            {% for message in messages %}
+                <div class="alert alert-info" role="alert">
+                    Message{{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="table-responsive">
+
+            <table class="table table-striped table-sm">
+                <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Sample Input</th>
+                    <th>Sample Output</th>
+                    {% if authorized_as %}
+                        <th>Definition</th>
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for deploy in deployments %}
+                    <tr>
+                        <td>
+                            {% if is_authorized %}
+                                <a href="{% url 'deployments:deployment_edit' request.user project.slug deploy.id %}">{{ deploy.id }}</a>
+                            {% endif %}
+                        </td>
+                        <td>{{ deploy.name }}</td>
+                        <td>{{ deploy.sample_input }}</td>
+                        <td>{{ deploy.sample_output }}</td>
+                        {% if authorized_as %}
+                            <td>{{ deploy.definition }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary" id="monitor{{ deploy.id }}">Monitor</button>
+                                <button class="btn btn-sm btn-secondary" id="monitor{{ deploy.id }}">Log</button>
+                                <button class="btn btn-sm btn-warning" id="undeploy{{ deploy.id }}">Undeploy</button>
+                                CPU: 3%
+                                MEMORY: 100Mb
+                                DISK: 100Mb
+                                Called: 10k times
+                                Callrate: 5 calls/sec
+                            </td>
+                        {% endif %}
+                    </tr>
+                    {% if is_authorized %}
+                        <script>
+                            $(document).ready(function () {
+                                $("#undeploy{{deploy.id}}").click(function () {
+                                    $.get("{% url 'deployments:undeploy' deploy.id %}", function (data, status) {
+
+                                    });
+                                });
+                            });
+                        </script>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
