@@ -110,8 +110,9 @@ class StudioClient(Runtime):
 
     def get_project(self, project_name):
         projects = self.list_projects()
+        print(projects)
         for p in projects:
-            if p['slug'] == slugify(project_name):
+            if p['name'] == project_name:
                 return p
         return None
 
