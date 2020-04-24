@@ -156,6 +156,14 @@ class StudioClient(Runtime):
         else:
             return r.status_code
 
+    def get_deployment_definition(self, name):
+        url = os.path.join(self.deployment_definition_api, '?name={}'.format(name))
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="Get deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return r.status_code
+
     ### Datasets API ###
 
 
@@ -194,8 +202,14 @@ class StudioClient(Runtime):
         print("No model found with id: ", model_id)
         return None
 
-    def get_model(self,model_id):
+    def get_model(self,name):
         """ Return model object and model metadata. """
+        url = os.path.join(self.models_api, '?name={}'.format(name))
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="Get deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return r.status_code
 
     def delete_model(self,model_name, tag=None):
         """ Delete a model. If tag is none, all tags associated with model_name
@@ -259,12 +273,24 @@ class StudioClient(Runtime):
 
     def deploy_model(self, model, deploy_context, model_name, version):
         proj_name = self.project_name
-        context_bucket = 'deploy'
+        
+        dd = self.get_deployment_definition(deploy_context)
+        print(dd)
+        context_bucket = dd[0]['bucket']
+        context_file = dd[0]['filename']
+        context_id = dd[0]['id']
+
+        model_obj = self.get_model(model)
+        print("MODEL:")
+        print(model_obj)
+        model_uid = model_obj[0]['uid']
+        model_id = model_obj[0]['id']
+
         url = 'http://{}-deploy-model.{}/deploy'.format(proj_name, self.global_domain)
         data = {'context_bucket': context_bucket,
-                'context_file': deploy_context,
+                'context_file': context_file,
                 'model_bucket':'models',
-                'model_file': model,
+                'model_file': model_uid,
                 'model_name': model_name,
                 'model_version': version}
         r = requests.post(url, json=data, verify=False)
@@ -274,6 +300,16 @@ class StudioClient(Runtime):
             print('Reason: {}'.format(r.reason))
             print(r.text)
         else:
+            dp_data = {"deployment": context_id,
+                       "model": model_id,
+                       "name": model_name,
+                       "endpoint": 'http://test.com',
+                       "version": version}
+            print(dp_data)
+            url = self.deployment_instance_api
+            # url = url.replace('http:', 'https:')
+            r = requests.post(url, json=dp_data, headers=self.auth_headers)
+            print(r.text)
             print('Deployed model.')
 
     def list_deployments(self):

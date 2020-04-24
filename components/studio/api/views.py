@@ -13,7 +13,8 @@ from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name']
     def get_queryset(self):
         """
         This view should return a list of all the models
@@ -25,7 +26,9 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentDefinitionSerializer
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name']
+    
     def get_queryset(self):
         """
         This view should return a list of all the deployments
@@ -35,7 +38,7 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
 
 class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = DeploymentInstanceSerializer
 
     def get_queryset(self):

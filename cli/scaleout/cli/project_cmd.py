@@ -72,3 +72,20 @@ def project_list_deployment_definition(ctx):
     for d in deploymentdefinitions:
         x.add_row([d["name"],d["bucket"],d["filename"]])
     print(x)
+
+
+@project_cmd.group('get')
+@click.pass_context
+def project_get_cmd(ctx):
+    pass
+
+@project_get_cmd.command('deploymentdefinition')
+@click.option('-n', '--name', required=True)
+@click.pass_context
+def project_get_deployment_definition(ctx, name):
+    client = ctx.obj['CLIENT']
+    dd = client.get_deployment_definition(name)
+    x = PrettyTable()
+    x.field_names = ["Name","Definition","Bucket","File"]
+    x.add_row([dd[0]["name"],dd[0]["definition"],dd[0]["bucket"],dd[0]["filename"]])
+    print(x)

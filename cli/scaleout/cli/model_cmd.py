@@ -17,18 +17,7 @@ def model_cmd(ctx, daemon):
   if daemon:
       print('{} NYI should run as daemon...'.format(__file__))
 
-@model_cmd.command('list')
-@click.pass_context
-def list_cmd(ctx):
-  """ List all models and show their status and endpoints """
-  client = ctx.obj['CLIENT']
-  models = client.list_models()
 
-  x = PrettyTable()
-  x.field_names = ["Name","Tag","ID"]
-  for m in models:
-    x.add_row([m["name"],m["tag"],m["uid"]])
-  print(x)
 
 @model_cmd.command('show')
 @click.option('-m', '--model', required=True)
@@ -72,10 +61,10 @@ def model_create_cmd(ctx):
 @click.pass_context
 def model_cmd_deploy(ctx, model, context, name, version):
     client = ctx.obj['CLIENT']
-    if context == 'tensorflow':
-        context = 'tensorflow.tar.gz'
-    else:
-        print("Context '{}' doesn't exist.".format(context))
+    # if context == 'tensorflow':
+    #     context = 'tensorflow.tar.gz'
+    # else:
+    #     print("Context '{}' doesn't exist.".format(context))
 
     client.deploy_model(model, context, name, version)
 
@@ -116,6 +105,19 @@ def deploy_list_cmd(ctx):
     x.field_names = ["Name","Image","InvocationCount"]
     for d in deployments:
         x.add_row([d["name"],d["image"],d["invocationCount"]])
+    print(x)
+
+@model_list_cmd.command('all')
+@click.pass_context
+def list_cmd(ctx):
+    """ List all models and show their status and endpoints """
+    client = ctx.obj['CLIENT']
+    models = client.list_models()
+
+    x = PrettyTable()
+    x.field_names = ["Name","Tag","ID"]
+    for m in models:
+        x.add_row([m["name"],m["tag"],m["uid"]])
     print(x)
 
 ###########################
