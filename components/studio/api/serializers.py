@@ -16,7 +16,7 @@ class DeploymentDefinitionSerializer(ModelSerializer):
     class Meta:
         model = DeploymentDefinition
         fields = (
-            'project','name', 'definition', 'bucket','filename')
+            'id', 'project','name', 'definition', 'bucket','filename')
 
 
 class DeploymentInstanceSerializer(ModelSerializer):
