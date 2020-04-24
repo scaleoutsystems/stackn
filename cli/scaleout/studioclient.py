@@ -275,14 +275,11 @@ class StudioClient(Runtime):
         proj_name = self.project_name
         
         dd = self.get_deployment_definition(deploy_context)
-        print(dd)
         context_bucket = dd[0]['bucket']
         context_file = dd[0]['filename']
         context_id = dd[0]['id']
 
         model_obj = self.get_model(model)
-        print("MODEL:")
-        print(model_obj)
         model_uid = model_obj[0]['uid']
         model_id = model_obj[0]['id']
 
