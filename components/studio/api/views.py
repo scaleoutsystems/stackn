@@ -38,7 +38,7 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
 
 class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentInstanceSerializer
 
     def get_queryset(self):
