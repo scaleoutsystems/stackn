@@ -23,29 +23,48 @@ def _check_status(r,error_msg="Failed"):
 
 class StudioClient(Runtime):
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, login=True, endpoints=True):
         super(StudioClient, self).__init__()
+
 
         self.username = self.config['username']
         self.password = self.config['password']
         self.project_name = self.config['Project']['project_name']
         self.auth_url = self.config['auth_url']
+        self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
         self.api_url = self.auth_url.replace("/api-token-auth",'')
 
         # Connect requests and sets an auth token (unique to this session)
-        self.connect()
+        self.login = login
+        if self.login:
+            self.connect()
+            self.auth_headers = {'Authorization': 'Token {}'.format(self.token)}
+        else:
+            self.auth_headers = None
 
         # Fetch and set all active API endpoints
+        if endpoints:
+            self.get_endpoints()
+
+        self.project = self.get_project(self.project_name)
+        if not self.project:
+            print('Did not find project: {}'.format(self.project_name))
+            self.project_id = None
+        else:
+            self.project_id = self.project['id']
+            self.project_slug = self.project['slug']
+            self.project_id = self.project['id']
+
+    def get_endpoints(self):
         endpoints = self.list_endpoints()
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
         self.projects_api = endpoints['projects']
         self.generators_api = endpoints['generators']
+        self.deployment_instance_api = endpoints['deploymentInstances']
+        self.deployment_definition_api = endpoints['deploymentDefinitions']
 
-        self.project = self.get_project(self.project_name)
-        self.project_id = self.project['id']
-        self.project_slug = self.project['slug']
 
     def connect(self):
         """ Fetch and set an API bearer token """ 
@@ -81,15 +100,17 @@ class StudioClient(Runtime):
 
     def list_endpoints(self):
         """ List api endpoints """
+
         # TODO: "studio" subdomain hardcoded here
         #url = "https://studio.{}/api/".format(self.config['so_domain_name'])
         headers = {'Authorization': 'Token {}'.format(self.token)}
         r = requests.get(self.api_url, headers=headers)
+
         if (r.status_code < 200 or r.status_code > 299):
             print("Endpoint list failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
-            return r.status_code
+            return None
         else:
             return json.loads(r.content)
 
@@ -99,22 +120,60 @@ class StudioClient(Runtime):
     def list_projects(self):
         """ List all projects a user has access to. """
         url = self.projects_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("List projects failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
-            return r.status_code
+            return None
         else:
             return json.loads(r.content)
 
     def get_project(self, project_name):
         projects = self.list_projects()
+        if not projects:
+            return None
         for p in projects:
             if p['name'] == project_name:
                 return p
-        return None
+
+    def create_deployment_definition(self, name, definition, bucket, filepath):
+        filename = os.path.basename(filepath)
+        repo = self.get_repository()
+        repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
+        depde_data = {"project": self.project_id,
+                      "name": name,
+                      "definition": definition,
+                      "bucket": bucket,
+                      "filename": filename}
+
+        url = self.deployment_definition_api
+        r = requests.post(url, json=depde_data, headers=self.auth_headers)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Failed to set deployment definition")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            repo.delete_artifact(filename, bucket)
+            return None
+        else:
+            print('Created deployment definition: {}'.format(name))
+            
+
+    def list_deployment_definitions(self):
+        url = self.deployment_definition_api
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="List deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return r.status_code
+
+    def get_deployment_definition(self, name):
+        url = os.path.join(self.deployment_definition_api, '?name={}'.format(name))
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="Get deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return []
 
     ### Datasets API ###
 
@@ -136,8 +195,7 @@ class StudioClient(Runtime):
     def list_models(self):
         """ List all models associated with a user/project"""
         url = self.models_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=self.auth_headers)
         if _check_status(r,error_msg="List model failed."):
             return json.loads(r.content)
         else:
@@ -155,8 +213,14 @@ class StudioClient(Runtime):
         print("No model found with id: ", model_id)
         return None
 
-    def get_model(self,model_id):
+    def get_model(self,name):
         """ Return model object and model metadata. """
+        url = os.path.join(self.models_api, '?name={}'.format(name))
+        r = requests.get(url, headers=self.auth_headers)
+        if _check_status(r,error_msg="Get deployment definition failed."):
+            return json.loads(r.content)
+        else:
+            return r.status_code
 
     def delete_model(self,model_name, tag=None):
         """ Delete a model. If tag is none, all tags associated with model_name
@@ -175,9 +239,8 @@ class StudioClient(Runtime):
             print(models)
             url = self.models_api
             #url = "https://{}/api/models/{}".format(self.config['so_domain_name'],model["id"])
-            headers = {'Authorization': 'Token {}'.format(self.token)}
             model_uid = model["uid"]
-            r = requests.delete(url,headers=headers)
+            r = requests.delete(url,headers=self.auth_headers)
             if _check_status(r,"Failed to delete model: {}".format(model["uid"])):
                 # Delete the data in minio
                 repo.delete_artifact(model_uid)        
@@ -188,7 +251,6 @@ class StudioClient(Runtime):
         # TODO: Support model tagging, default to 'latest'
         import uuid
         model_uid = str(uuid.uuid1().hex)
-
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
@@ -197,27 +259,85 @@ class StudioClient(Runtime):
         except Exception as e:
             print('Error: Failed to upload model.', e)
             return
-        
+
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "tag": tag,
                       "description": model_description,
                       "url": model_url,
+                      "resource": model_url,
                       "project": str(self.project_id)}
 
         url = self.models_api
-        headers = {'Authorization': 'Token {}'.format(self.token)}
+        url = url.replace('http:', 'https:')
 
-        r = requests.post(url, json=model_data, headers=headers)
+        r = requests.post(url, json=model_data, headers=self.auth_headers)
         if (r.status_code < 200 or r.status_code > 299):
             print("Publish model failed.")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
+            print(r.text)
             # Remove the already uploaded model.
             repo.delete_artifact(model_uid)
 
             return r.status_code
+
+    def deploy_model(self, model, deploy_context, model_name, version):
+        # proj_name = self.project_name
         
+        dd = self.get_deployment_definition(deploy_context)
+        if dd and ('bucket' in dd[0]) and ('filename' in dd[0]) and ('id' in dd[0]):
+            context_bucket = dd[0]['bucket']
+            context_file = dd[0]['filename']
+            context_id = dd[0]['id']
+        else:
+            print('Deployment definition {} does not exist.'.format(deploy_context))
+
+        model_obj = self.get_model(model)
+        model_uid = model_obj[0]['uid']
+        model_id = model_obj[0]['id']
+
+        url = 'http://{}-deploy-model.{}/deploy'.format(self.project_slug, self.global_domain)
+        print(url)
+        data = {'context_bucket': context_bucket,
+                'context_file': context_file,
+                'model_bucket':'models',
+                'model_file': model_uid,
+                'model_name': model_name,
+                'model_version': version}
+        r = requests.post(url, json=data, verify=False)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Deploy model failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            print(r.text)
+        else:
+            dp_data = {"deployment": context_id,
+                       "model": model_id,
+                       "name": model_name,
+                       "endpoint": 'http://test.com',
+                       "version": version}
+            print(dp_data)
+            url = self.deployment_instance_api
+            # url = url.replace('http:', 'https:')
+            r = requests.post(url, json=dp_data, headers=self.auth_headers)
+            print(r.text)
+            print('Deployed model.')
+
+    def list_deployments(self):
+        url = 'https://serve.{}/system/functions'.format(self.global_domain)
+        r = requests.get(url)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("List deployments failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            print(r.text)
+        else:
+            return json.loads(r.content)
+
+    # def predict(self):
+        
+
 
 if __name__ == '__main__':
 

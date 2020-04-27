@@ -57,16 +57,17 @@ class MINIORepository(Repository):
         except ResponseError as err:
             raise
 
-    def set_artifact(self, instance_name, instance, is_file=False):
+    def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
-
+        if bucket is '':
+            bucket = self.bucket
         if not is_file:
             try:
-                self.client.put_object(self.bucket, instance_name, io.BytesIO(instance), len(instance))
+                self.client.put_object(bucket, instance_name, io.BytesIO(instance), len(instance))
             except Exception as e:
                 raise Exception("Could not load data into bytes {}".format(e))
         else:
-            self.client.fput_object(self.bucket, instance_name, instance)
+            self.client.fput_object(bucket, instance_name, instance)
 
         return True
 
@@ -87,9 +88,12 @@ class MINIORepository(Repository):
         except Exception as e:
             raise Exception("Could not list models in bucket {}".format(self.bucket))
 
-    def delete_artifact(self, instance_name):
+    def delete_artifact(self, instance_name, bucket=[]):
+        if not bucket:
+            bucket = self.bucket
+
         try:
-            self.client.remove_object(self.bucket, instance_name)
+            self.client.remove_object(bucket, instance_name)
         except ResponseError as err:
             print(err)
-            print('Could not delete model: {}'.format(instance_name))
+            print('Could not delete artifact: {}'.format(instance_name))

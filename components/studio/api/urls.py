@@ -1,7 +1,7 @@
 from django.conf.urls import include
 from django.urls import path
 from rest_framework import routers
-from .views import ModelList, ReportList, ReportGeneratorList, ProjectList
+from .views import ModelList, ReportList, ReportGeneratorList, ProjectList, DeploymentInstanceList, DeploymentDefinitionList
 from rest_framework.authtoken.views import obtain_auth_token
 
 app_name = 'api'
@@ -11,6 +11,8 @@ router.register(r'models', ModelList, basename='model')
 router.register(r'reports', ReportList, basename='report')
 router.register(r'generators', ReportGeneratorList, basename='report_generator')
 router.register(r'projects', ProjectList, basename='project')
+router.register(r'deploymentInstances', DeploymentInstanceList, basename='deploymentInstance')
+router.register(r'deploymentDefinitions', DeploymentDefinitionList, basename='deploymentDefinition')
 
 urlpatterns = [
     path('', include(router.urls)),

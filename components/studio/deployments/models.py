@@ -2,8 +2,13 @@ from django.db import models
 
 
 class DeploymentDefinition(models.Model):
+    project = models.ForeignKey('projects.Project',
+                                on_delete=models.DO_NOTHING,
+                                related_name='project_owner')
     name = models.CharField(max_length=512, unique=True)
     definition = models.TextField()
+    bucket = models.CharField(max_length=512)
+    filename = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -30,7 +35,7 @@ class DeploymentInstance(models.Model):
     endpoint = models.URLField()
     sample_input = models.TextField(blank=True, null=True)
     sample_output = models.TextField(blank=True, null=True)
-    version = models.CharField(max_length=512, unique=True)
+    version = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 

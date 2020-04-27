@@ -17,18 +17,7 @@ def model_cmd(ctx, daemon):
   if daemon:
       print('{} NYI should run as daemon...'.format(__file__))
 
-@model_cmd.command('list')
-@click.pass_context
-def list_cmd(ctx):
-  """ List all models and show their status and endpoints """
-  client = ctx.obj['CLIENT']
-  models = client.list_models()
 
-  x = PrettyTable()
-  x.field_names = ["Name","Tag","ID"]
-  for m in models:
-    x.add_row([m["name"],m["tag"],m["uid"]])
-  print(x)
 
 @model_cmd.command('show')
 @click.option('-m', '--model', required=True)
@@ -55,6 +44,65 @@ def publish_cmd(ctx, model, name, tag, url, description):
   """ Publish a model to Studio. """
   client = ctx.obj['CLIENT']
   client.publish_model(model, name, tag, url, description)
+
+
+
+# Create group
+@model_cmd.group('create')
+@click.pass_context
+def model_create_cmd(ctx):
+    pass
+
+@model_create_cmd.command('deployment')
+@click.option('-m', '--model', required=True)
+@click.option('-n', '--name', required=True)
+@click.option('-c', '--context', required=True)
+@click.option('-v', '--version', required=True)
+@click.pass_context
+def model_cmd_deploy(ctx, model, context, name, version):
+    client = ctx.obj['CLIENT']
+    client.deploy_model(model, context, name, version)
+
+
+# List group
+
+@model_cmd.group('list')
+@click.pass_context
+def model_list_cmd(ctx):
+    pass
+
+@model_list_cmd.command('deployments')
+@click.pass_context
+def deploy_list_cmd(ctx):
+    client = ctx.obj['CLIENT']
+    deployments = client.list_deployments()
+    x = PrettyTable()
+    x.field_names = ["Name","Image","InvocationCount"]
+    for d in deployments:
+        x.add_row([d["name"],d["image"],d["invocationCount"]])
+    print(x)
+
+@model_list_cmd.command('all')
+@click.pass_context
+def list_cmd(ctx):
+    """ List all models and show their status and endpoints """
+    client = ctx.obj['CLIENT']
+    models = client.list_models()
+
+    x = PrettyTable()
+    x.field_names = ["Name","Tag","ID"]
+    for m in models:
+        x.add_row([m["name"],m["tag"],m["uid"]])
+    print(x)
+
+###########################
+
+# @model_cmd.command('predict')
+# @click.option('-d', '--deployment', required=True)
+# @click.option('-i', '--input', required=True)
+# @click.pass_context
+# def cmd_predict(ctx):
+
 
 @click.option('-m','--model_id',required=True)
 @click.option('-t','--tag')
