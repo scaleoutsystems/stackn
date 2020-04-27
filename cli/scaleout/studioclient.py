@@ -48,12 +48,12 @@ class StudioClient(Runtime):
             self.get_endpoints()
 
         self.project = self.get_project(self.project_name)
-        self.project_id = self.project['id']
-        self.project_slug = self.project['slug']
         if not self.project:
             print('Did not find project: {}'.format(self.project_name))
             self.project_id = None
         else:
+            self.project_id = self.project['id']
+            self.project_slug = self.project['slug']
             self.project_id = self.project['id']
 
     def get_endpoints(self):
@@ -138,7 +138,6 @@ class StudioClient(Runtime):
                 return p
 
     def create_deployment_definition(self, name, definition, bucket, filepath):
-        file_base_path = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
         repo = self.get_repository()
         repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
@@ -150,6 +149,15 @@ class StudioClient(Runtime):
 
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Failed to set deployment definition")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            repo.delete_artifact(filename, bucket)
+            return None
+        else:
+            print('Created deployment definition: {}'.format(name))
+            
 
     def list_deployment_definitions(self):
         url = self.deployment_definition_api
@@ -165,7 +173,7 @@ class StudioClient(Runtime):
         if _check_status(r,error_msg="Get deployment definition failed."):
             return json.loads(r.content)
         else:
-            return r.status_code
+            return []
 
     ### Datasets API ###
 
@@ -275,18 +283,22 @@ class StudioClient(Runtime):
             return r.status_code
 
     def deploy_model(self, model, deploy_context, model_name, version):
-        proj_name = self.project_name
+        # proj_name = self.project_name
         
         dd = self.get_deployment_definition(deploy_context)
-        context_bucket = dd[0]['bucket']
-        context_file = dd[0]['filename']
-        context_id = dd[0]['id']
+        if dd and ('bucket' in dd[0]) and ('filename' in dd[0]) and ('id' in dd[0]):
+            context_bucket = dd[0]['bucket']
+            context_file = dd[0]['filename']
+            context_id = dd[0]['id']
+        else:
+            print('Deployment definition {} does not exist.'.format(deploy_context))
 
         model_obj = self.get_model(model)
         model_uid = model_obj[0]['uid']
         model_id = model_obj[0]['id']
 
-        url = 'http://{}-deploy-model.{}/deploy'.format(proj_name, self.global_domain)
+        url = 'http://{}-deploy-model.{}/deploy'.format(self.project_slug, self.global_domain)
+        print(url)
         data = {'context_bucket': context_bucket,
                 'context_file': context_file,
                 'model_bucket':'models',

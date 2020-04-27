@@ -61,32 +61,7 @@ def model_create_cmd(ctx):
 @click.pass_context
 def model_cmd_deploy(ctx, model, context, name, version):
     client = ctx.obj['CLIENT']
-    # if context == 'tensorflow':
-    #     context = 'tensorflow.tar.gz'
-    # else:
-    #     print("Context '{}' doesn't exist.".format(context))
-
     client.deploy_model(model, context, name, version)
-
-
-
-
-####################
-
-# @model_cmd.command('deploy')
-# @click.option('-m', '--model', required=True)
-# @click.option('-n', '--name', required=True)
-# @click.option('-c', '--context', required=True)
-# @click.option('-v', '--version', required=True)
-# @click.pass_context
-# def model_cmd_deploy(ctx, model, context, name, version):
-#     client = ctx.obj['CLIENT']
-#     if context == 'tensorflow':
-#         context = 'tensorflow.tar.gz'
-#     else:
-#         print("Context '{}' doesn't exist.".format(context))
-
-#     client.deploy_model(model, context, name, version)
 
 
 # List group

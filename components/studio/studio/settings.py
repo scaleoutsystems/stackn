@@ -20,7 +20,7 @@ AUTHENTICATION_BACKENDS = [
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DOMAIN = 'platform.local'
+DOMAIN = 'platform.stackn.akkelis.com'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -182,8 +182,8 @@ API_PORT = 8080
 GIT_REPOS_ROOT = os.path.join(REPO_DIR, 'repos')
 GIT_REPOS_URL = '/repos/'
 
-CHART_CONTROLLER_URL = 'http://chart-controller-controller'
-STUDIO_URL = 'http://studio:8080'
+CHART_CONTROLLER_URL = 'http://stack-chart-controller'
+STUDIO_URL = 'http://stack-studio:8080'
 
 REDIS_PORT = 6379
 REDIS_DB = 0

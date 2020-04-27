@@ -88,9 +88,12 @@ class MINIORepository(Repository):
         except Exception as e:
             raise Exception("Could not list models in bucket {}".format(self.bucket))
 
-    def delete_artifact(self, instance_name):
+    def delete_artifact(self, instance_name, bucket=[]):
+        if not bucket:
+            bucket = self.bucket
+
         try:
-            self.client.remove_object(self.bucket, instance_name)
+            self.client.remove_object(bucket, instance_name)
         except ResponseError as err:
             print(err)
-            print('Could not delete model: {}'.format(instance_name))
+            print('Could not delete artifact: {}'.format(instance_name))
