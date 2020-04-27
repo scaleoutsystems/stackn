@@ -37,7 +37,6 @@ def create_helm_resources(project, repository=None):
         return True
 
     raise ProjectCreationException(__name__)
-    return False
 
 
 def delete_project_resources(project):
@@ -47,5 +46,4 @@ def delete_project_resources(project):
         return True
 
     return False
-
 
