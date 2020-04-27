@@ -38,7 +38,6 @@ def deploy_model(instance):
     print("deploying model with {}!".format(instance))
 
     model = instance.model
-    print('got model')
 
     model_file = model.uid
     model_bucket = 'models'
@@ -47,12 +46,10 @@ def deploy_model(instance):
     deployment_version = instance.version
  
     context = instance.deployment
-    print('got context')
     context_bucket = context.bucket
     context_file = context.filename
 
     project = context.project
-    print('got project')
     project_slug = project.slug
     minio_access_key = project.project_key
     minio_secret_key = project.project_secret
@@ -76,10 +73,8 @@ def deploy_model(instance):
                   'minio.secret_key': minio_secret_key,
                   'minio.access_key': minio_access_key}
     url = settings.CHART_CONTROLLER_URL + '/deploy'
-    print('calling: '+url)
     retval = requests.get(url, parameters)
     
-    print("CREATE_MODEL_DEPLOYMENT:helm chart creator returned {}".format(retval))
     if retval.status_code >= 200 or retval.status_code < 205:
         return True
 
