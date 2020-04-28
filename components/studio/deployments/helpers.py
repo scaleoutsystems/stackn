@@ -35,7 +35,7 @@ def get_instance_from_definition(instance):
 
 def deploy_model(instance):
 
-    print("deploying model with {}!".format(instance))
+    # print("deploying model with {}!".format(instance))
 
     model = instance.model
 
