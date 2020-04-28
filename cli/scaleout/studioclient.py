@@ -283,46 +283,29 @@ class StudioClient(Runtime):
             return r.status_code
 
     def deploy_model(self, model, deploy_context, model_name, version):
-        # proj_name = self.project_name
         
         dd = self.get_deployment_definition(deploy_context)
-        if dd and ('bucket' in dd[0]) and ('filename' in dd[0]) and ('id' in dd[0]):
-            context_bucket = dd[0]['bucket']
-            context_file = dd[0]['filename']
+        if dd and ('id' in dd[0]):
             context_id = dd[0]['id']
         else:
             print('Deployment definition {} does not exist.'.format(deploy_context))
 
         model_obj = self.get_model(model)
-        model_uid = model_obj[0]['uid']
         model_id = model_obj[0]['id']
 
-        url = 'http://{}-deploy-model.{}/deploy'.format(self.project_slug, self.global_domain)
-        print(url)
-        data = {'context_bucket': context_bucket,
-                'context_file': context_file,
-                'model_bucket':'models',
-                'model_file': model_uid,
-                'model_name': model_name,
-                'model_version': version}
-        r = requests.post(url, json=data, verify=False)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("Deploy model failed.")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
-        else:
-            dp_data = {"deployment": context_id,
-                       "model": model_id,
-                       "name": model_name,
-                       "endpoint": 'http://test.com',
-                       "version": version}
-            print(dp_data)
-            url = self.deployment_instance_api
-            # url = url.replace('http:', 'https:')
-            r = requests.post(url, json=dp_data, headers=self.auth_headers)
-            print(r.text)
-            print('Deployed model.')
+        dp_data = {"deployment": context_id,
+                   "model": model_id,
+                   "name": model_name,
+                   "endpoint": 'http://test.com',
+                   "version": version}
+        url = self.deployment_instance_api
+        r = requests.post(url, json=dp_data, headers=self.auth_headers)
+        print('Deployment registered')
+
+        url = self.deployment_instance_api+'build_instance/'
+        bd_data = {"name": model_name}
+        r = requests.post(url, json=bd_data, headers=self.auth_headers)
+
 
     def list_deployments(self):
         url = 'https://serve.{}/system/functions'.format(self.global_domain)

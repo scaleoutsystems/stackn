@@ -1,8 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse, JsonResponse
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
+from deployments.helpers import deploy_model
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -48,6 +51,15 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         """
         current_user = self.request.user
         return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def build_instance(self, request):
+        print('starting build process...')
+        deployment_name = request.data['name']
+        instance = DeploymentInstance.objects.get(name=deployment_name)
+        print(instance)
+        deploy_model(instance)
+        return HttpResponse('ok', status=200)
 
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):

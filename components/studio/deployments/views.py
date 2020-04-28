@@ -98,7 +98,7 @@ def deployment_add(request, user, project):
             except Exception as e:
                 print(e)
                 print("there was an error deploying")
-            return HttpResponseRedirect(reverse('deployments:deployment_index'))
+            return HttpResponseRedirect(reverse('deployments:deployment_index', kwargs={'user':user, 'project':project.slug}))
     else:
         form = DeploymentInstanceForm()
 
