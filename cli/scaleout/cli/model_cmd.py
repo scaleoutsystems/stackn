@@ -45,6 +45,14 @@ def publish_cmd(ctx, model, name, tag, url, description):
   client = ctx.obj['CLIENT']
   client.publish_model(model, name, tag, url, description)
 
+@model_cmd.command('predict')
+@click.option('-i', '--input_file', required=True)
+@click.option('-n', '--name', required=True)
+@click.option('-v', '--version', required=True)
+@click.pass_context
+def predict_cmd(ctx, input_file, name, version):
+    client = ctx.obj['CLIENT']
+    client.predict(input_file, name, version)
 
 
 # Create group

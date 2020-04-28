@@ -8,6 +8,7 @@ from scaleout.errors import AuthenticationError
 
 import requests
 import json
+import pickle
 from slugify import slugify
 
 
@@ -292,14 +293,17 @@ class StudioClient(Runtime):
 
         model_obj = self.get_model(model)
         model_id = model_obj[0]['id']
-
+        endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
+        print(endpoint)
+        print(type(endpoint))
         dp_data = {"deployment": context_id,
                    "model": model_id,
                    "name": model_name,
-                   "endpoint": 'http://test.com',
+                   "endpoint": endpoint,
                    "version": version}
         url = self.deployment_instance_api
         r = requests.post(url, json=dp_data, headers=self.auth_headers)
+        print(r.text)
         print('Deployment registered')
 
         url = self.deployment_instance_api+'build_instance/'
@@ -318,7 +322,14 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    # def predict(self):
+    def predict(self, inp_file, deployment_name, deployment_version):
+        print(self.auth_headers)
+        f = open(inp_file, 'rb')
+        inp = pickle.load(f)
+        url = self.deployment_instance_api+'predict/?name={}&version={}'.format(deployment_name, deployment_version)
+        r = requests.post(url, json=inp, headers=self.auth_headers)
+        print(r.status_code)
+        print(r.text)
         
 
 

@@ -1,11 +1,15 @@
+import requests
+import json
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
 from deployments.helpers import deploy_model
+
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -61,6 +65,19 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         deploy_model(instance)
         return HttpResponse('ok', status=200)
 
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def predict(self, request):
+        print('predicting...')
+        name = request.query_params['name']
+        version = request.query_params['version']
+        current_user = self.request.user
+        instance = DeploymentInstance.objects.get(model__project__owner__username=current_user,
+                                                  name=name,
+                                                  version=version)
+        internal_endpoint = 'http://{}-{}/v1/models/model:predict'.format(instance.name, instance.version)
+        r = requests.post(internal_endpoint, json=request.data)
+        print(r.text)
+        return HttpResponse(r.text, status=r.status_code)
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
