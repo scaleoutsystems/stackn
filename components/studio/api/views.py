@@ -67,8 +67,20 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def auth(self, request):
-      print(request.headers)
-      return HttpResponse('Ok', status=200)
+      orig_url = request.headers['X-Original-Url']
+      auth_req_red = request.headers['X-Auth-Request-Redirect']
+      scheme = request.headers['X-Scheme']+'://' 
+      endpoint = orig_url.replace(auth_req_red, '').replace(scheme, '')   
+
+      try:
+          instance = DeploymentInstance.objects.get(endpoint=endpoint)
+      except:
+          return HttpResponse(status=401)
+
+      if instance.access == 'PU' or instance.deployment.project.owner == request.user:
+          return HttpResponse('Ok', status=200)
+      else:
+          return HttpResponse(status=401)
 
     # @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     # def predict(self, request):
