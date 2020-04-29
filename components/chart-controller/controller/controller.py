@@ -60,14 +60,14 @@ class Controller:
         """
 
         for key in options:
-            extras = extras + ' --set {}={}'.format(key,options[key])
+            extras = extras + ' --set {}={}'.format(key, options[key])
 
         refresh_charts(self.branch)
 
         args = 'helm install {release} charts-{branch}/scaleout/{chart}{extras}'.format(release=options['release'],
                                                                                         branch=self.branch,
                                                                                         chart=options['chart'],
-                                                                                        extras=extras).split(' ')
+                                                                                        extras=extras)#.split(' ')
         print(args, flush=True)
         #return True
         status = subprocess.run(args, cwd=self.cwd)
@@ -75,7 +75,7 @@ class Controller:
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):
-        args = 'helm delete {release}'.format(release=options['release']).split(' ')
+        args = 'helm delete {release}'.format(release=options['release'])#.split(' ')
         status = subprocess.run(args, cwd=self.cwd)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
