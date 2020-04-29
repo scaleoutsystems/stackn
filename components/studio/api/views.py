@@ -56,7 +56,7 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         current_user = self.request.user
         return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def build_instance(self, request):
         print('starting build process...')
         deployment_name = request.data['name']
@@ -65,19 +65,32 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         deploy_model(instance)
         return HttpResponse('ok', status=200)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def auth(self, request):
+      print(request.headers)
+      return HttpResponse('Ok', status=200)
+
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def predict(self, request):
         print('predicting...')
+        # return HttpResponse('ok', status=200)
+        # print(dir(request))
         name = request.query_params['name']
         version = request.query_params['version']
+        print('name: '+name)
+        print('version: '+version)
         current_user = self.request.user
+        print(current_user)
         instance = DeploymentInstance.objects.get(model__project__owner__username=current_user,
                                                   name=name,
                                                   version=version)
-        internal_endpoint = 'http://{}-{}/v1/models/model:predict'.format(instance.name, instance.version)
-        r = requests.post(internal_endpoint, json=request.data)
-        print(r.text)
+        # # internal_endpoint = 'http://{}-{}/v1/models/model:predict'.format(instance.name, instance.version)
+        # print(request.auth)
+        print(instance.api_endpoint)
+        r = requests.post(instance.endpoint, json=request.data)
+        print(r.status_code)
         return HttpResponse(r.text, status=r.status_code)
+        # return HttpResponse('ok', status=200)
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
