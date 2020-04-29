@@ -5,7 +5,7 @@ from .models import DeploymentDefinition, DeploymentInstance
 class DeploymentDefinitionForm(forms.ModelForm):
     class Meta:
         model = DeploymentDefinition
-        fields = ('name', 'definition')
+        fields = ('name',)
 
 
 class DeploymentInstanceForm(forms.ModelForm):

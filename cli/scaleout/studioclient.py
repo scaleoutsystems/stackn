@@ -10,6 +10,7 @@ import requests
 import json
 import pickle
 from slugify import slugify
+import uuid
 
 
 def _check_status(r,error_msg="Failed"):
@@ -17,6 +18,7 @@ def _check_status(r,error_msg="Failed"):
         print(error_msg)
         print('Returned status code: {}'.format(r.status_code))
         print('Reason: {}'.format(r.reason))
+        print(r.text)
         return False
     else:
         return True 
@@ -138,28 +140,32 @@ class StudioClient(Runtime):
             if p['name'] == project_name:
                 return p
 
-    def create_deployment_definition(self, name, definition, bucket, filepath, path_predict):
-        filename = os.path.basename(filepath)
+    def create_deployment_definition(self, name, filepath, path_predict=''):
+
+        if filepath[-6:] != 'tar.gz':
+            print('Deployment definition should have extension tar.gz')
+            return None
+
+        bucket = 'deploy'
+        # Create unique file name
+        filename = uuid.uuid1().hex+'.tar.gz'
         repo = self.get_repository()
         repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
         depde_data = {"project": self.project_id,
                       "name": name,
-                      "definition": definition,
                       "bucket": bucket,
                       "filename": filename,
                       "path_predict": path_predict}
 
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("Failed to set deployment definition")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
+        status = _check_status(r, error_msg='Failed to create deployment definition')
+        if not status:
             repo.delete_artifact(filename, bucket)
-            return None
-        else:
-            print('Created deployment definition: {}'.format(name))
+            return False
+
+        print('Created deployment definition: {}'.format(name))
+        return True
             
 
     def list_deployment_definitions(self):
@@ -248,7 +254,7 @@ class StudioClient(Runtime):
                 # Delete the data in minio
                 repo.delete_artifact(model_uid)        
 
-    def publish_model(self, instance, model_name, tag="", model_url=None, model_description=None,is_file=True):
+    def create_model(self, instance, model_name, tag='latest', model_description=None,is_file=True):
         """ Publish a model to Studio. """
 
         # TODO: Support model tagging, default to 'latest'
@@ -257,35 +263,27 @@ class StudioClient(Runtime):
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
-        try:
-            repo.set_artifact(model_uid, instance, is_file)
-        except Exception as e:
-            print('Error: Failed to upload model.', e)
-            return
 
+        repo.set_artifact(model_uid, instance, is_file)
+ 
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "tag": tag,
                       "description": model_description,
-                      "url": model_url,
-                      "resource": model_url,
                       "project": str(self.project_id)}
 
         url = self.models_api
         url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("Publish model failed.")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
-            # Remove the already uploaded model.
+        if not _check_status(r, error_msg="Failed to create model."):
             repo.delete_artifact(model_uid)
+            return False
 
-            return r.status_code
+        print('Created model: {}, tag: {}'.format(model_name, tag))
+        return True
 
-    def deploy_model(self, model, deploy_context, model_name, version):
+    def deploy_model(self, model, deploy_context, model_name, version='latest'):
         
         dd = self.get_deployment_definition(deploy_context)
         if dd and ('id' in dd[0]):
@@ -307,12 +305,18 @@ class StudioClient(Runtime):
                    "version": version}
         
         r = requests.post(url, json=dp_data, headers=self.auth_headers)
-        print(r.text)
-        print('Deployment registered')
+        if not _check_status(r, error_msg="Failed to create deployment."):
+            return False
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name}
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
+        if not _check_status(r, error_msg="Failed to start build process."):
+            # Delete registered deployment instance from db
+            return False
+
+        print('Created deployment: {}'.model_name)
+        return True
 
 
     def list_deployments(self):

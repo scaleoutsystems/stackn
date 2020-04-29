@@ -6,7 +6,6 @@ class DeploymentDefinition(models.Model):
                                 on_delete=models.DO_NOTHING,
                                 related_name='project_owner')
     name = models.CharField(max_length=512, unique=True)
-    definition = models.TextField()
     bucket = models.CharField(max_length=512)
     filename = models.CharField(max_length=512)
     path_predict = models.CharField(max_length=512)
@@ -39,6 +38,9 @@ class DeploymentInstance(models.Model):
     version = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('name', 'version')
 
     def __str__(self):
         return "{}:{}".format(self.name, self.version)
