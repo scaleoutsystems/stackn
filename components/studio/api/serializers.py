@@ -16,14 +16,14 @@ class DeploymentDefinitionSerializer(ModelSerializer):
     class Meta:
         model = DeploymentDefinition
         fields = (
-            'id', 'project','name', 'definition', 'bucket','filename')
+            'id', 'project','name', 'definition', 'bucket','filename','path_predict')
 
 
 class DeploymentInstanceSerializer(ModelSerializer):
     class Meta:
         model = DeploymentInstance
         fields = (
-            'deployment', 'model', 'name', 'access', 'endpoint', 'api_endpoint', 'version')
+            'deployment', 'model', 'name', 'access', 'endpoint', 'version')
 
 
 class ReportSerializer(ModelSerializer):
