@@ -3,18 +3,14 @@
 <div class="col-md-10">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
         <h2>Datasets</h2>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'datasets:create' request.user project.slug %}">
-                <button id="create" class="btn btn-large btn-primary">Add new</button>
-            </a>
-        </div>
     </div>
     <nav aria-label="breadcrumb" style="margin-bottom: 25px;">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a href="{% url 'datasets:page' user project.slug 1 %}">
-                    <span class="oi oi-hard-drive"></span>
                     dataset
+                    <img src="/static/icons/folder-check.svg" alt="" width="21" height="21" title="Bootstrap"
+                         style="padding-left: 3px;">
                 </a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
