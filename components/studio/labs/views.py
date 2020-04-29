@@ -42,8 +42,8 @@ def run(request, user, project):
         print("dispatching with {}  ".format(flavor, name))
         import base64
         if name != '' and flavor is not None:
-            prefs = {'labs.resources': base64.b64encode(str(flavor.resources)),
-                     'labs.selectors': base64.b64encode(str(flavor.selectors)),
+            prefs = {'labs.resources': str(flavor.resources),
+                     'labs.selectors': str(flavor.selectors),
                      'labs.image': environment.image,
                      # 'labs.setup': environment.setup,
                      'minio.access_key': project.project_key,
