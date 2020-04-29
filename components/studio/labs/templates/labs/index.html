@@ -19,12 +19,12 @@
                 <div class="form-group">
                     <label for="runExperiment">Start a labs session</label>
                     <label for="runExperiment">Image</label>
-                    <select name="image" class="form-control">
+                    <select name="environment" class="form-control">
                         <option selected value="pharmbio/pharmbio-notebook:tf-2.1.0-gpu">pharmbio/pharmbio-notebook:tf-2.1.0-gpu</option>
-                        {% for environment in envirionments %}
-                            <option value="{{ environment.name }}">{{ envirionment.name }}</option>
+                        {% for environment in environments %}
+                            <option value="{{ environment.name }}">{{ environment.name }}</option>
                         {% endfor %}
-                        <option value="{{ project.image }}">(Project Default Image) {{ project.slug|slice:":-4" }}</option>
+
                         <option value="jupyter/minimal-notebook:latest">jupyter/minimal-notebook:latest</option>
                     </select>
                 </div>
@@ -33,31 +33,11 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group col-sm-6">
-                        <label for="runExperiment">CPU </label>
-                        <select name="cpu" class="form-control">
-                            <option value="200m">200m</option>
-                            <option value="500m">500m</option>
-                            <option value="1000m" selected>1</option>
-                            <option value="2000m">2</option>
-                            <option value="4000m">4</option>
-
-                        </select>
-                    </div>
-                    <div class="form-group col-sm-6">
-                        <label for="runExperiment">Memory </label>
-                        <select name="memory" class="form-control">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="4">4</option>
-                            <option value="8">8</option>
-
-                        </select>
-                    </div>
-                    <div class="form-group col-sm-6">
-                        <label for="gpu">GPU </label>
-                        <select name="gpu" class="form-control">
-                            <option value="0">No</option>
-                            <option value="1">Yes</option>
+                        <label for="Flavor">Flavor</label>
+                        <select name="flavor" class="form-control">
+                        {% for flavor in flavors %}
+                           <option value="{{flavor.slug }}">{{ flavor.name}}</option>
+                        {% endfor %}
                         </select>
                     </div>
                 </div>

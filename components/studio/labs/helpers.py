@@ -5,20 +5,12 @@ import requests as r
 logger = logging.getLogger(__file__)
 
 
-def create_session_resources(session, prefs, project, repository=None):
-    error = None
-    repo = None
-    if repository is None:
-        repo = ''
-    else:
-        repo = repository
+def create_session_resources(session, prefs, project):
 
     print("1; going for the dispatch!")
 
     parameters = {'release': str(session.slug),
                   'chart': session.chart,
-                  'labs.repository': repo,
-     #             'labs.image': prefs['image'],
                   'global.domain': settings.DOMAIN,
                   'project.name': project.slug,
                   }
