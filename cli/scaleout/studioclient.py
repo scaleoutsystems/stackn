@@ -326,15 +326,15 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def predict(self, inp_file, deployment_name, deployment_version):
-        print(self.auth_headers)
-        f = open(inp_file, 'rb')
-        inp = pickle.load(f)
-        url = self.deployment_instance_api+'predict/?name={}&version={}'.format(deployment_name, deployment_version)
-        print(url)
-        r = requests.post(url, json=inp, headers=self.auth_headers)
-        print(r.status_code)
-        print(r.text)
+    # def predict(self, inp_file, deployment_name, deployment_version):
+    #     print(self.auth_headers)
+    #     f = open(inp_file, 'rb')
+    #     inp = pickle.load(f)
+    #     url = self.deployment_instance_api+'predict/?name={}&version={}'.format(deployment_name, deployment_version)
+    #     print(url)
+    #     r = requests.post(url, json=inp, headers=self.auth_headers)
+    #     print(r.status_code)
+    #     print(r.text)
 
 
 

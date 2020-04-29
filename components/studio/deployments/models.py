@@ -33,7 +33,7 @@ class DeploymentInstance(models.Model):
     model = models.ForeignKey('models.Model', on_delete=models.DO_NOTHING, related_name='deployed_model')
     name = models.CharField(max_length=512, unique=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
-    endpoint = models.URLField()
+    endpoint = models.CharField(max_length=512)
     sample_input = models.TextField(blank=True, null=True)
     sample_output = models.TextField(blank=True, null=True)
     version = models.CharField(max_length=512)
