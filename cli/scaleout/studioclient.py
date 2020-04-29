@@ -154,6 +154,7 @@ class StudioClient(Runtime):
             print("Failed to set deployment definition")
             print('Returned status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
+            print(r.text)
             repo.delete_artifact(filename, bucket)
             return None
         else:
@@ -293,15 +294,20 @@ class StudioClient(Runtime):
 
         model_obj = self.get_model(model)
         model_id = model_obj[0]['id']
+
+        url = self.deployment_instance_api
         endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
+        api_endpoint = url+'predict/?name={}&version={}'.format(model_name, version)
+
         print(endpoint)
         print(type(endpoint))
         dp_data = {"deployment": context_id,
                    "model": model_id,
                    "name": model_name,
                    "endpoint": endpoint,
+                   "api_endpoint": api_endpoint,
                    "version": version}
-        url = self.deployment_instance_api
+        
         r = requests.post(url, json=dp_data, headers=self.auth_headers)
         print(r.text)
         print('Deployment registered')
@@ -327,10 +333,11 @@ class StudioClient(Runtime):
         f = open(inp_file, 'rb')
         inp = pickle.load(f)
         url = self.deployment_instance_api+'predict/?name={}&version={}'.format(deployment_name, deployment_version)
+        print(url)
         r = requests.post(url, json=inp, headers=self.auth_headers)
         print(r.status_code)
         print(r.text)
-        
+
 
 
 if __name__ == '__main__':

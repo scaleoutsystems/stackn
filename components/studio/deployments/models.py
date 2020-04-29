@@ -33,6 +33,7 @@ class DeploymentInstance(models.Model):
     name = models.CharField(max_length=512, unique=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     endpoint = models.URLField()
+    api_endpoint = models.URLField()
     sample_input = models.TextField(blank=True, null=True)
     sample_output = models.TextField(blank=True, null=True)
     version = models.CharField(max_length=512)
