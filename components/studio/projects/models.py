@@ -7,9 +7,23 @@ import random
 DEFAULT_ENVIRONMENT_ID = 1
 
 
+class Flavor(models.Model):
+    name = models.CharField(max_length=512)
+    slug = models.CharField(max_length=512)
+    resources = models.TextField(blank=True, null=True)
+    selectors = models.TextField(blank=True, null=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Environment(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, blank=True, null=True)
+    image = models.CharField(max_length=512)
     dockerfile = models.TextField(default='FROM jupyter/base-notebook')
     startup = models.TextField(null=True, blank=True)
     teardown = models.TextField(null=True, blank=True)

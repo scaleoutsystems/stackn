@@ -1,9 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from projects.models import Project
-from .forms import DatasetForm
-from .models import Dataset
 from studio.minio import MinioRepository, ResponseError
 
 
@@ -11,51 +8,6 @@ from studio.minio import MinioRepository, ResponseError
 def index(request, user, project):
     template = 'dataset_index.html'
     project = Project.objects.filter(slug=project).first()
-
-    try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                           project.project_secret)
-
-        if not minio_repository.client.bucket_exists('dataset'):
-            minio_repository.client.make_bucket('dataset')
-    except ResponseError as err:
-        print(err)
-
-    return render(request, template, locals())
-
-
-@login_required(login_url='/accounts/login')
-def create(request, user, project):
-    template = 'dataset_create.html'
-
-    if request.method == 'POST':
-        project = Project.objects.filter(slug=project).first()
-        obj = None
-        form = DatasetForm(request.POST, request.FILES)
-        if form.is_valid():
-            obj = form.save()
-
-            next_page = '/projects/{}/{}/datasets/{}/details'.format(user, project.slug, str(obj.pk))
-
-            return HttpResponseRedirect(next_page)
-
-        next_page = '/projects/{}/{}/datasets/'.format(user, project.slug)
-
-        return HttpResponseRedirect(next_page)
-    else:
-        project = Project.objects.filter(slug=project).first()
-        form = DatasetForm({'project': project.id})
-
-        return render(request, template, locals())
-
-
-@login_required(login_url='/accounts/login')
-def details(request, user, project, id):
-    template = 'dataset_details.html'
-
-    project = Project.objects.filter(slug=project).first()
-    dataset = Dataset.objects.filter(id=id).first()
-
     return render(request, template, locals())
 
 
@@ -65,22 +17,6 @@ def page(request, user, project, page_index):
     project = Project.objects.filter(slug=project).first()
 
     datasets = []
-
-    datasets_studio = Dataset.objects.filter(project=project)
-    for d in datasets_studio:
-
-        size = 0.0
-        try:
-            size = round(d.data.size / 1000000, 2)
-        except FileNotFoundError as err:
-            print(err)
-
-        datasets.append({'is_dir': False,
-                         'name': d.data.name,
-                         'size': size,
-                         'location': 'studio',
-                         'modified': d.uploaded_at})
-
     try:
         minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
                                            project.project_secret)
