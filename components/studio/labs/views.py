@@ -21,7 +21,6 @@ def index(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def run(request, user, project):
-
     project = Project.objects.filter(slug=project, owner=request.user).first()
 
     if request.method == "POST":
@@ -41,11 +40,12 @@ def run(request, user, project):
             environment = Environment.objects.filter.all().first()
 
         print("dispatching with {}  ".format(flavor, name))
+        import base64
         if name != '' and flavor is not None:
-            prefs = {'labs.resources': str(flavor.resources),
-                     'labs.selectors': str(flavor.selectors),
+            prefs = {'labs.resources': base64.b64encode(str(flavor.resources)),
+                     'labs.selectors': base64.b64encode(str(flavor.selectors)),
                      'labs.image': environment.image,
-                     #'labs.setup': environment.setup,
+                     # 'labs.setup': environment.setup,
                      'minio.access_key': project.project_key,
                      'minio.secret_key': project.project_secret,
                      }
