@@ -138,7 +138,7 @@ class StudioClient(Runtime):
             if p['name'] == project_name:
                 return p
 
-    def create_deployment_definition(self, name, definition, bucket, filepath):
+    def create_deployment_definition(self, name, definition, bucket, filepath, path_predict):
         filename = os.path.basename(filepath)
         repo = self.get_repository()
         repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
@@ -146,7 +146,8 @@ class StudioClient(Runtime):
                       "name": name,
                       "definition": definition,
                       "bucket": bucket,
-                      "filename": filename}
+                      "filename": filename,
+                      "path_predict": path_predict}
 
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
@@ -296,16 +297,13 @@ class StudioClient(Runtime):
         model_id = model_obj[0]['id']
 
         url = self.deployment_instance_api
-        endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
-        api_endpoint = url+'predict/?name={}&version={}'.format(model_name, version)
+        #endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
+        # endpoint = url+'predict/?name={}&version={}'.format(model_name, version)
 
-        print(endpoint)
-        print(type(endpoint))
         dp_data = {"deployment": context_id,
                    "model": model_id,
                    "name": model_name,
-                   "endpoint": endpoint,
-                   "api_endpoint": api_endpoint,
+                   "endpoint": 'http://default.com',
                    "version": version}
         
         r = requests.post(url, json=dp_data, headers=self.auth_headers)

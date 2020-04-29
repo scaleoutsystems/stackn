@@ -47,7 +47,7 @@
                             {% endif %}
                         </td>
                         <td>{{ deploy.name }}</td>
-                        <td>{{ deploy.api_endpoint }}</td>
+                        <td>https://{{ deploy.endpoint }}/{{ deploy.deployment.path_predict }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>
                             <td>
