@@ -29,34 +29,17 @@
                     </h3>
                     <p>
                         Labs is the work area for experimentation and development of machine learning projects.
-                        It's based on Lab Sessions which is a provisioned Jupyter Notebook session running in a
+                        It's based on Lab Session which is a provisioned Jupyter Notebook session running in a
                         virtual environment.
                     </p>
-                    <p class="d-flex flex-column">
-                        In the most simple case, everything to run a machine learning experiment is contained
-                        within one Labs Session, which is what we will do next.
-                    </p>
-                    <div class="get-started-code-box">
-                        <pre class="d-flex flex-column" style="margin-bottom: 0px;">
-                            <span class="get-started-code-row">1. Go to <a
-                                    href="{% url 'labs:index' request.user project.slug %}">Labs</a></span>
-                            <span class="get-started-code-row">2. Select 1 CPU, 2 RAM to start an instance with 1 virtual CPU and 2 GB RAM from the Kubernestes cluster</span>
-                            <span class="get-started-code-row">3. Wait for a minute and click the link to the notebook in the list under Lab Session</span>
-                        </pre>
-                    </div>
-                </div>
-                <div class="get-started-box">
-                    <h3 style="font-size: 20px;">Add required modules to the instance</h3>
-                    <p>
-                        We need to add some additional Python modules to the setup provided in the minimal-notebook.
-                        There are several ways to do this, but we'll install using <b>pip</b> in the Jupyter Terminal.
-                    </p>
-                    <div class="get-started-code-box">
-                        <pre class="d-flex flex-column" style="margin-bottom: 0px;">
-                            <span class="get-started-code-row">pip install tensorflow</span>
-                            <span class="get-started-code-row">pip install matplotlib</span>
-                            <span class="get-started-code-row">pip freeze</span>
-                        </pre>
+                    <div class="d-flex flex-column">
+                        To create a Lab Session, do the following:
+                        <ol>
+                            <li>Go to <a href="{% url 'labs:index' request.user project.slug %}">Labs</a></li>
+                            <li>Select 1 CPU, 2 RAM to start an instance with 1 virtual CPU and 2 GB RAM from the
+                                Kubernestes cluster
+                            </li>
+                        </ol>
                     </div>
                 </div>
                 <div class="get-started-box">
@@ -71,6 +54,20 @@
                     </p>
                 </div>
                 <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Check out our example projects</h3>
+                    <p class="mb-0">
+                        We have several example projects available in our
+                        <a href="https://github.com/scaleoutsystems" target="_blank">GitHub</a> page.
+                    </p>
+                    <p class="mb-0">
+                        Start with exploring the
+                        <a href="https://github.com/scaleoutsystems/aml-example-project" target="_blank">AML</a>
+                        example project.
+                    </p>
+                </div>
+                <!-- Not available with the first release!
+
+                <div class="get-started-box">
                     <h3 style="font-size: 20px;">Import code from another repository</h3>
                     <p>You're seeing this quick set-up guide because you haven't imported files from an
                         existing GitHub repository. If you have such repository, you can still import its files
@@ -79,6 +76,7 @@
                         <button type="button" class="btn btn-light">Import</button>
                     </a>
                 </div>
+                -->
             </div>
             {% else %}
             <h4>
