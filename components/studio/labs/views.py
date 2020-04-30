@@ -44,8 +44,8 @@ def run(request, user, project):
         if name != '' and flavor is not None:
             prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
                      'labs.resources.limits.cpu': str(flavor.cpu),
-                     'labs.resources.requests.memory': str(flavor.memory),
-                     'labs.resources.limits.memory': str(flavor.memory),
+                     'labs.resources.requests.memory': str(flavor.mem),
+                     'labs.resources.limits.memory': str(flavor.mem),
                      'labs.resources.requests.gpu': str(flavor.gpu),
                      'labs.resources.limits.gpu': str(flavor.gpu),
                      'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
