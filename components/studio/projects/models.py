@@ -10,8 +10,10 @@ DEFAULT_ENVIRONMENT_ID = 1
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512)
-    resources = models.TextField(blank=True, null=True)
-    selectors = models.TextField(blank=True, null=True)
+
+    cpu = models.TextField(blank=True, null=True)
+    mem = models.TextField(blank=True, null=True)
+    gpu = models.TextField(blank=True, null=True)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
