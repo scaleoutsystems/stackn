@@ -98,9 +98,9 @@ def list_cmd(ctx):
     models = client.list_models()
 
     x = PrettyTable()
-    x.field_names = ["Name","Tag","ID"]
+    x.field_names = ["Name","Tag","Created"]
     for m in models:
-        x.add_row([m["name"],m["tag"],m["uid"]])
+        x.add_row([m["name"],m["tag"],m["uploaded_at"]])
     print(x)
 
 ###########################

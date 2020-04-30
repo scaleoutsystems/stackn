@@ -37,7 +37,7 @@ setup(
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
     entry_points={
-        'console_scripts': ["scaleout=scaleout.cli:main"]
+        'console_scripts': ["stackn=scaleout.cli:main"]
     },
     keywords='',
     packages=find_packages(exclude=["tests", "tests.*"]),

@@ -61,6 +61,7 @@ class StudioClient(Runtime):
 
     def get_endpoints(self):
         endpoints = self.list_endpoints()
+        self.endpoints = endpoints
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
         self.projects_api = endpoints['projects']
@@ -168,13 +169,7 @@ class StudioClient(Runtime):
         return True
             
 
-    def list_deployment_definitions(self):
-        url = self.deployment_definition_api
-        r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="List deployment definition failed."):
-            return json.loads(r.content)
-        else:
-            return r.status_code
+    
 
     def get_deployment_definition(self, name):
         url = os.path.join(self.deployment_definition_api, '?name={}'.format(name))
@@ -201,14 +196,7 @@ class StudioClient(Runtime):
 
     ### Models API ###
 
-    def list_models(self):
-        """ List all models associated with a user/project"""
-        url = self.models_api
-        r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="List model failed."):
-            return json.loads(r.content)
-        else:
-            return r.status_code
+    
 
     def show_model(self, model_id=None):
         """ Get all metadata associated with a model. """
@@ -226,7 +214,7 @@ class StudioClient(Runtime):
         """ Return model object and model metadata. """
         url = os.path.join(self.models_api, '?name={}'.format(name))
         r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="Get deployment definition failed."):
+        if _check_status(r,error_msg="Get model failed."):
             return json.loads(r.content)
         else:
             return r.status_code
@@ -318,28 +306,14 @@ class StudioClient(Runtime):
         print('Created deployment: {}'.model_name)
         return True
 
-
-    def list_deployments(self):
-        url = 'https://serve.{}/system/functions'.format(self.global_domain)
-        r = requests.get(url)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("List deployments failed.")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
+    
+    def create_list(self, resource):
+        url = self.endpoints[resource]
+        r = requests.get(url, headers=self.auth_headers)
+        if not _check_status(r, error_msg="Failed to list {}.".format(resource)):
+            return False
         else:
             return json.loads(r.content)
-
-    # def predict(self, inp_file, deployment_name, deployment_version):
-    #     print(self.auth_headers)
-    #     f = open(inp_file, 'rb')
-    #     inp = pickle.load(f)
-    #     url = self.deployment_instance_api+'predict/?name={}&version={}'.format(deployment_name, deployment_version)
-    #     print(url)
-    #     r = requests.post(url, json=inp, headers=self.auth_headers)
-    #     print(r.status_code)
-    #     print(r.text)
-
 
 
 if __name__ == '__main__':
