@@ -113,8 +113,6 @@ class AllianceRuntimeClient(Runtime):
             self.connection.SendRequest(request)
 
 
-
-
 class MemberRuntimeClient(AllianceRuntimeClient):
 
     def __init__(self):
