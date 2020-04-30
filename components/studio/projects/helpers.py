@@ -18,8 +18,6 @@ def create_environment_image(project, repository=None):
 
 
 def create_helm_resources(project, repository=None):
-    error = None
-    repo = None
 
     parameters = {'release': str(project.slug),
                   'chart': 'project',
@@ -27,6 +25,8 @@ def create_helm_resources(project, repository=None):
                   'minio.secret_key': project.project_secret,
                   'global.domain': settings.DOMAIN,
                   'storageClassName': settings.STORAGECLASS}
+    if repository:
+        parameters.update({'labs.repository': repository})
 
     url = settings.CHART_CONTROLLER_URL + '/deploy'
 

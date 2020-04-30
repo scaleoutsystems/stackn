@@ -10,8 +10,10 @@ DEFAULT_ENVIRONMENT_ID = 1
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512)
-    resources = models.TextField(blank=True, null=True)
-    selectors = models.TextField(blank=True, null=True)
+
+    cpu = models.TextField(blank=True, null=True)
+    mem = models.TextField(blank=True, null=True)
+    gpu = models.TextField(blank=True, null=True)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,11 +52,9 @@ class ProjectManager(models.Manager):
         slug = '{}-{}'.format(slugify(name), slug_extension)
         key = self.generate_passkey()
         secret = self.generate_passkey(40)
-        environment = Environment(name=slug, slug=slug, dockerfile='FROM jupyter/minimal-notebook', startup='',
-                                  teardown='')
-        environment.save()
+
         project = self.create(name=name, owner=owner, slug=slug, project_key=key, project_secret=secret,
-                              description=description, environment=environment, repository=repository,
+                              description=description, repository=repository,
                               repository_imported=False)
 
         return project

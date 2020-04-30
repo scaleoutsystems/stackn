@@ -42,8 +42,13 @@ def run(request, user, project):
         print("dispatching with {}  ".format(flavor, name))
         import base64
         if name != '' and flavor is not None:
-            prefs = {'labs.resources': str(flavor.resources),
-                     'labs.selectors': str(flavor.selectors),
+            prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
+                     'labs.resources.limits.cpu': str(flavor.cpu),
+                     'labs.resources.requests.memory': str(flavor.mem),
+                     'labs.resources.limits.memory': str(flavor.mem),
+                     'labs.resources.requests.gpu': str(flavor.gpu),
+                     'labs.resources.limits.gpu': str(flavor.gpu),
+                     'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
                      'labs.image': environment.image,
                      # 'labs.setup': environment.setup,
                      'minio.access_key': project.project_key,
