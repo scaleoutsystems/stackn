@@ -20,12 +20,9 @@
                     <label for="runExperiment">Start a labs session</label>
                     <label for="runExperiment">Image</label>
                     <select name="environment" class="form-control">
-                        <option selected value="pharmbio/pharmbio-notebook:tf-2.1.0-gpu">pharmbio/pharmbio-notebook:tf-2.1.0-gpu</option>
                         {% for environment in environments %}
-                            <option value="{{ environment.name }}">{{ environment.name }}</option>
+                            <option value="{{ environment.slug }}">{{ environment.name }}</option>
                         {% endfor %}
-
-                        <option value="jupyter/minimal-notebook:latest">jupyter/minimal-notebook:latest</option>
                     </select>
                 </div>
                 <input type="hidden" value="{{ project.id }}" name="project">
