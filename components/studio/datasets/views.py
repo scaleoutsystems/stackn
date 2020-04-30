@@ -2,12 +2,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from projects.models import Project
 from studio.minio import MinioRepository, ResponseError
+from django.conf import settings as sett
 
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
     template = 'dataset_index.html'
     project = Project.objects.filter(slug=project).first()
+    url_domain = sett.DOMAIN
     return render(request, template, locals())
 
 
