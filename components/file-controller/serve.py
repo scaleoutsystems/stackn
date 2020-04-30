@@ -36,15 +36,10 @@ def index():
 
 @app.route('/readme')
 def readme():
-    cwd = os.getcwd()
-    try:
-        cwd = os.environ['PROJECT_DIR']
-    except Exception as e:
-        pass
+    cwd = "/app/work"
 
     filename = None
     readme = None
-    # TODO check for flavors of README file
     try:
         if os.path.isfile(os.path.join(cwd, 'README.md')):
             filename = 'README.md'

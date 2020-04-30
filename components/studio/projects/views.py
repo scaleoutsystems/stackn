@@ -7,6 +7,7 @@ from .helpers import create_project_resources, delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
+import markdown
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +102,9 @@ def details(request, user, project_slug):
             payload = response.json()
             if payload['status'] == 'OK':
                 filename = payload['filename']
-                readme = payload['readme']
+
+                md = markdown.Markdown(extensions=['extra'])
+                readme = md.convert(payload['readme'])
     except Exception as e:
         logger.error("Failed to get response from {} with error: {}".format(url, e))
 
