@@ -52,11 +52,9 @@ class ProjectManager(models.Manager):
         slug = '{}-{}'.format(slugify(name), slug_extension)
         key = self.generate_passkey()
         secret = self.generate_passkey(40)
-        environment = Environment(name=slug, slug=slug, dockerfile='FROM jupyter/minimal-notebook', startup='',
-                                  teardown='')
-        environment.save()
+
         project = self.create(name=name, owner=owner, slug=slug, project_key=key, project_secret=secret,
-                              description=description, environment=environment, repository=repository,
+                              description=description, repository=repository,
                               repository_imported=False)
 
         return project
