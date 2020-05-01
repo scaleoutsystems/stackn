@@ -303,7 +303,7 @@ class StudioClient(Runtime):
             # Delete registered deployment instance from db
             return False
 
-        print('Created deployment: {}'.model_name)
+        print('Created deployment: {}'.format(model_name))
         return True
 
     
