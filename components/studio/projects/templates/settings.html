@@ -158,16 +158,53 @@
     <div class="container-fluid" style="padding:15px;">
         <h5>Transfer or Delete</h5>
 
-        <form>
+        <form method="POST">
+            {% csrf_token %}
+
             <div class="form-group row">
                 <label for="id_transfer_to" class="col-sm-2 col-form-label">Transfer to</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="id_transfer_to" placeholder="{{ project.name }}">
-                </div>
+
+                <span class="col-sm-10">
+                    <select class="form-control" type="text" name="transfer_to" maxlength="256" required=""
+                            id="id_transfer_to">
+                        <option value="">--</option>
+                        {% for user in platform_users %}
+                        <option value="{{ user.pk }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </span>
+
                 <label class="col-sm-2 col-form-label"></label>
-                <a href="#" style="padding-left: 15px; padding-top: 5px;">
-                    <button class="btn btn-warning">Transfer</button>
-                </a>
+
+                <div style="padding-left: 15px; padding-top: 5px;">
+                    <a class="btn btn-warning" data-toggle="modal" data-target="#transferModal">
+                        Transfer
+                    </a>
+                    <div class="modal fade" id="transferModal" tabindex="-1" role="dialog"
+                         aria-labelledby="transferModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="transferModalLabel">Confirm transfer</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                        Close
+                                    </button>
+                                    <button type="submit" id="transfer" class="btn btn-sm btn-outline-warning">
+                                        Transfer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
 

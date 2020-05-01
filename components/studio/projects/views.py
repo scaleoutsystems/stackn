@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
+from .forms import TransferProjectOwnershipForm
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,21 @@ def index(request):
 @login_required(login_url='/accounts/login')
 def settings(request, user, project_slug):
     template = 'settings.html'
-    project = Project.objects.filter(owner=request.user).filter(slug=project_slug).first()
+    project = Project.objects.filter(owner=request.user, slug=project_slug).first()
     url_domain = sett.DOMAIN
+    platform_users = User.objects.filter(~Q(pk=project.owner.pk))
+
+    if request.method == 'POST':
+        form = TransferProjectOwnershipForm(request.POST)
+        if form.is_valid():
+            new_owner_id = int(form.cleaned_data['transfer_to'])
+            new_owner = User.objects.filter(pk=new_owner_id).first()
+            project.owner = new_owner
+            project.save()
+            return HttpResponseRedirect('/projects/')
+    else:
+        form = TransferProjectOwnershipForm()
+
     return render(request, template, locals())
 
 
