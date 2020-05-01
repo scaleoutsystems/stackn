@@ -80,8 +80,8 @@
                 {% block topnav %}
                     <div class="col-md-1 new-sidebar-1" style="min-height:800px; height:100%;">
                         <ul class="list-group d-flex">
-                            <li>
-                                <a class="list-inline" href="/" style="padding-left: 35px;padding-right: 15px;">
+                            <li class="list-inline">
+                                <a href="/" style="padding-left: 35px;padding-right: 15px;">
                                     <p class="d-flex justify-content-center"><img
                                             src="{% static 'img/SOIconBlackish.png' %}" alt="Scaleout" width="50"></p>
                                 </a>
@@ -104,7 +104,8 @@
                                     <p class="d-flex justify-content-center">Deployments</p>
                                 </a>
                             </li>
-                            {% if request.user.is_authenticated %}
+                            <!-- Functionality not available with the first release!
+
                             <li class="list-inline">
                                 <a class="nav-link" href="{% url 'deployments:index' %}">
                                     <p class="d-flex justify-content-center"><img
@@ -130,7 +131,7 @@
                                     <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
                                 </a>
                             </li>
-                            {% endif %}
+                            -->
                             <li class="list-inline" style="position:absolute;bottom:0;width:100px;">
                                 {% if request.user.is_authenticated %}
                                     <a class="dropdown-toggle" href="#" id="navbarDropdown2" role="button"
