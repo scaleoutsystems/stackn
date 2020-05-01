@@ -83,6 +83,8 @@ def create(request):
 def details(request, user, project_slug):
     template = 'project.html'
 
+    url_domain = sett.DOMAIN
+
     project = None
     message = None
 

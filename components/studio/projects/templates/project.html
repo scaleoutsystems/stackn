@@ -46,7 +46,7 @@
                     <h3 style="font-size: 20px;">Upload datasets to MinIO S3 storage</h3>
                     <p class="mb-0">
                         You can also upload files to a
-                        <a href="https://{{ project.slug }}-minio.demo.scaleoutsystems.com/">MinIO</a>
+                        <a href="https://{{ project.slug }}-minio.{{ url_domain }}/">MinIO</a>
                         S3 storage.
                         You can find the access and secret keys on the
                         <a href="{% url 'projects:settings' request.user project.slug %}">Settings</a>
