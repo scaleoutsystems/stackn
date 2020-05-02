@@ -1,11 +1,15 @@
+import requests
+import json
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from deployments.helpers import deploy_model
+
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -61,6 +65,20 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         deploy_model(instance)
         return HttpResponse('ok', status=200)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def auth(self, request):
+      orig_url = request.headers['X-Original-Url']
+      auth_req_red = request.headers['X-Auth-Request-Redirect']
+      scheme = request.headers['X-Scheme']+'://' 
+      endpoint = orig_url.replace(auth_req_red, '').replace(scheme, '') 
+      try:
+          instance = DeploymentInstance.objects.get(endpoint=endpoint)
+      except:
+          return HttpResponse(status=500)
+      if instance.access == 'PU' or instance.deployment.project.owner == request.user:
+          return HttpResponse('Ok', status=200)
+      else:
+          return HttpResponse(status=401)
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
