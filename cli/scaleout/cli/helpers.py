@@ -1,4 +1,5 @@
 import sys
+from prettytable import PrettyTable
 
 
 def prompt(question, default="yes"):
@@ -32,3 +33,16 @@ def prompt(question, default="yes"):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' "
                              "(or 'y' or 'n').\n")
+
+def _print_table(resource, names, keys):
+    x = PrettyTable()
+    x.field_names = names
+    for item in resource:
+        row = [item[k] for k in keys]
+        x.add_row(row)
+    print(x)
+
+def create_table(ctx, resource, names, keys):
+    client = ctx.obj['CLIENT']
+    objects = client.create_list(resource)
+    _print_table(objects, names, keys)

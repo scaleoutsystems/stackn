@@ -24,8 +24,6 @@ def deploy(request, id):
         definition = DeploymentDefinition.objects.filter(name=deployment).first()
         instance = DeploymentInstance(name=model.name, model=model, deployment=definition, version=version, sample_input=sample_input,sample_output=sample_output)
 
-        print("getting deployment in view:{}".format(deployment))
-
         status = None
         try:
             deploy_model(instance)
