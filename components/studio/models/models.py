@@ -11,13 +11,15 @@ class Model(models.Model):
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
-    resource = models.URLField(max_length=2048)
+    resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey('projects.Project', on_delete=models.DO_NOTHING, related_name='model_owner')
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     tag = models.CharField(max_length=10, default='latest')
-
+    
+    class Meta:
+        unique_together = ('name', 'tag')
     def __str__(self):
         return "{name}".format(name=self.name)
 

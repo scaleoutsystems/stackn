@@ -38,12 +38,14 @@
                 Experiments
             </a>
         </li>
+        <!--
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <a class="nav-link" href="{% url 'workflows:workflows_index' request.user project.slug %}">
                 <img src="{% static '/icons/arrow-repeat.svg' %}" alt="" width="24" height="24" title="Bootstrap">
                 Workflows
             </a>
         </li>
+        -->
 
         <li class="nav-item list-group-item sidebar-heading">
             Store
@@ -57,7 +59,7 @@
         </li>
         -->
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'datasets:index' request.user project.slug %}">
+            <a class="nav-link" href="{% url 'datasets:page' request.user project.slug 1 %}">
                 <img src="{% static '/icons/documents-alt.svg' %}" alt="" width="24" height="24"
                      title="Bootstrap">
                 Datasets

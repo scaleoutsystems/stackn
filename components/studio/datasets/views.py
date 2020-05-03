@@ -6,17 +6,10 @@ from django.conf import settings as sett
 
 
 @login_required(login_url='/accounts/login')
-def index(request, user, project):
-    template = 'dataset_index.html'
-    project = Project.objects.filter(slug=project).first()
-    url_domain = sett.DOMAIN
-    return render(request, template, locals())
-
-
-@login_required(login_url='/accounts/login')
 def page(request, user, project, page_index):
     template = 'dataset_page.html'
     project = Project.objects.filter(slug=project).first()
+    url_domain = sett.DOMAIN
 
     datasets = []
     try:
@@ -53,6 +46,7 @@ def page(request, user, project, page_index):
 def path_page(request, user, project, path_name, page_index):
     template = 'dataset_path_page.html'
     project = Project.objects.filter(slug=project).first()
+    url_domain = sett.DOMAIN
 
     datasets = []
     try:

@@ -44,7 +44,11 @@ def deploy_model(instance):
     
     deployment_name = instance.name
     deployment_version = instance.version
- 
+    deployment_endpoint = '{}-{}.{}'.format(instance.name,
+                                            instance.version,
+                                            settings.DOMAIN)
+    instance.endpoint = deployment_endpoint
+    instance.save()
     context = instance.deployment
     context_bucket = context.bucket
     context_file = context.filename
@@ -65,6 +69,7 @@ def deploy_model(instance):
                   'project.slug': project_slug,
                   'deployment.version': deployment_version,
                   'deployment.name': deployment_name,
+                  'deployment.endpoint': deployment_endpoint,
                   'context.bucket': context_bucket,
                   'context.file': context_file,
                   'model.bucket': model_bucket,

@@ -31,8 +31,7 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Sample Input</th>
-                    <th>Sample Output</th>
+                    <th>Endpoint</th>
                     {% if authorized_as %}
                         <th>Definition</th>
                         <th>Actions</th>
@@ -48,8 +47,7 @@
                             {% endif %}
                         </td>
                         <td>{{ deploy.name }}</td>
-                        <td>{{ deploy.sample_input }}</td>
-                        <td>{{ deploy.sample_output }}</td>
+                        <td>https://{{ deploy.endpoint }}/{{ deploy.deployment.path_predict }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>
                             <td>
