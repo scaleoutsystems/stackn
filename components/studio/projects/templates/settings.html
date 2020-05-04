@@ -156,59 +156,68 @@
     </div>
 
     <div class="container-fluid" style="padding:15px;">
-        <h5>Transfer or Delete</h5>
+        <h5 style="padding-bottom: 15px;">Danger Zone</h5>
+        <div>
+            <h6 style="padding-bottom: 15px;">
+                Transfer this project's ownership to another user within your organization.
+            </h6>
+            <form method="POST" style="padding-bottom: 15px;">
+                {% csrf_token %}
 
-        <form method="POST">
-            {% csrf_token %}
+                <div class="form-group row">
+                    <label for="id_transfer_to" class="col-sm-2 col-form-label">Transfer to</label>
 
-            <div class="form-group row">
-                <label for="id_transfer_to" class="col-sm-2 col-form-label">Transfer to</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" type="text" name="transfer_to" maxlength="256" required=""
+                                id="id_transfer_to">
+                            <option value="">--</option>
+                            {% for user in platform_users %}
+                            <option value="{{ user.pk }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <span class="col-sm-10">
-                    <select class="form-control" type="text" name="transfer_to" maxlength="256" required=""
-                            id="id_transfer_to">
-                        <option value="">--</option>
-                        {% for user in platform_users %}
-                        <option value="{{ user.pk }}">{{ user.username }}</option>
-                        {% endfor %}
-                    </select>
-                </span>
+                    <label class="col-sm-2 col-form-label"></label>
 
-                <label class="col-sm-2 col-form-label"></label>
-
-                <div style="padding-left: 15px; padding-top: 5px;">
-                    <a class="btn btn-warning" data-toggle="modal" data-target="#transferModal">
-                        Transfer
-                    </a>
-                    <div class="modal fade" id="transferModal" tabindex="-1" role="dialog"
-                         aria-labelledby="transferModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="transferModalLabel">Confirm transfer</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    Are you sure?
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                        Close
-                                    </button>
-                                    <button type="submit" id="transfer" class="btn btn-sm btn-outline-warning">
-                                        Transfer
-                                    </button>
+                    <div style="padding-left: 15px; padding-top: 5px;">
+                        <button class="btn btn-outline-danger">
+                            <a data-toggle="modal" data-target="#transferModal">
+                                Transfer
+                            </a>
+                        </button>
+                        <div class="modal fade" id="transferModal" tabindex="-1" role="dialog"
+                             aria-labelledby="transferModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="transferModalLabel">Confirm transfer</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="submit" id="transfer" class="btn btn-sm btn-outline-warning">
+                                            Transfer
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
         <div>
+            <h6 style="padding-bottom: 15px;">
+                Once you delete this project, there is no going back. Please be certain.
+            </h6>
             <div class="form-group row">
                 <label for="id_delete_button" class="col-sm-2 col-form-label">Delete project</label>
                 <button type="submit" class="btn btn-danger" id="id_delete_button"
