@@ -123,7 +123,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'studio-db',
+        'HOST': 'stack-studio-db',
         'PORT': 5432,
     }
 }

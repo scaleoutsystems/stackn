@@ -1,8 +1,10 @@
 body {
     font-size: .875rem;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'IBM Plex Sans', 'Roboto', sans-serif;
 }
-
+h2 {
+    font-weight: lighter;
+}
 .feather {
     width: 16px;
     height: 16px;
