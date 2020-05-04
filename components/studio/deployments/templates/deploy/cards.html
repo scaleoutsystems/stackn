@@ -4,9 +4,9 @@
 {% endblock %}
 
 {% block content %}
-    <div class="col-md-11">
+    <div class="col-md-10">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h2>Deployments</h2>
+            <h2>Services</h2>
             {% if is_authorized %}
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <a href="{% url 'deployments:deployment_add' request.user project.slug %}">
@@ -15,14 +15,13 @@
                 </div>
             {% endif %}
         </div>
-        {% if messsages %}
+        {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-info" role="alert">
                     Message{{ message }}
                 </div>
             {% endfor %}
         {% endif %}
-
     {% for deploy in deployments %}
         <div class="col-sm-5">
             <div class="card card-project">
@@ -40,6 +39,8 @@
                 </div>
             </div>
         </div>
+        {% empty %}
+        No publicly published services available.
         {% endfor %}
 
     </div>
