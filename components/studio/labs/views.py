@@ -5,12 +5,13 @@ from projects.models import Environment, Flavor
 from django.contrib.auth.decorators import login_required
 import uuid
 from django.conf import settings
+from django.db.models import Q
 
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
     template = 'labs/index.html'
-    project = Project.objects.filter(slug=project, owner=request.user).first()
+    project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
     sessions = Session.objects.filter(project=project)
     flavors = Flavor.objects.all()
     environments = Environment.objects.filter(project=project)
@@ -21,7 +22,7 @@ def index(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def run(request, user, project):
-    project = Project.objects.filter(slug=project, owner=request.user).first()
+    project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
 
     if request.method == "POST":
         uid = uuid.uuid4()
@@ -73,7 +74,7 @@ def run(request, user, project):
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):
     template = 'labs/index.html'
-    project = Project.objects.filter(slug=project, owner=request.user).first()
+    project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
     session = Session.objects.filter(id=id, project=project).first()
 
     if session:

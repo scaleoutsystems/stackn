@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 @login_required(login_url='/accounts/login')
 def index(request):
     template = 'index_projects.html'
-    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized__username=request.user))
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user))
     return render(request, template, locals())
 
 
 @login_required(login_url='/accounts/login')
 def settings(request, user, project_slug):
     template = 'settings.html'
-    project = Project.objects.filter(owner=request.user).filter(slug=project_slug).first()
+    project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     return render(request, template, locals())
 
@@ -91,7 +91,7 @@ def details(request, user, project_slug):
 
     try:
         owner = User.objects.filter(username=user).first()
-        project = Project.objects.filter(owner=owner, slug=project_slug).first()
+        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'No project found'
 
