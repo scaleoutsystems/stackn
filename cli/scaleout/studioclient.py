@@ -8,7 +8,9 @@ from scaleout.errors import AuthenticationError
 
 import requests
 import json
+import pickle
 from slugify import slugify
+import uuid
 
 
 def _check_status(r,error_msg="Failed"):
@@ -16,6 +18,7 @@ def _check_status(r,error_msg="Failed"):
         print(error_msg)
         print('Returned status code: {}'.format(r.status_code))
         print('Reason: {}'.format(r.reason))
+        print(r.text)
         return False
     else:
         return True 
@@ -58,6 +61,7 @@ class StudioClient(Runtime):
 
     def get_endpoints(self):
         endpoints = self.list_endpoints()
+        self.endpoints = endpoints
         self.models_api = endpoints['models']
         self.reports_api = endpoints['reports']
         self.projects_api = endpoints['projects']
@@ -137,35 +141,35 @@ class StudioClient(Runtime):
             if p['name'] == project_name:
                 return p
 
-    def create_deployment_definition(self, name, definition, bucket, filepath):
-        filename = os.path.basename(filepath)
+    def create_deployment_definition(self, name, filepath, path_predict=''):
+
+        if filepath[-6:] != 'tar.gz':
+            print('Deployment definition should have extension tar.gz')
+            return None
+
+        bucket = 'deploy'
+        # Create unique file name
+        filename = uuid.uuid1().hex+'.tar.gz'
         repo = self.get_repository()
         repo.set_artifact(filename, filepath, is_file=True, bucket=bucket)
         depde_data = {"project": self.project_id,
                       "name": name,
-                      "definition": definition,
                       "bucket": bucket,
-                      "filename": filename}
+                      "filename": filename,
+                      "path_predict": path_predict}
 
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("Failed to set deployment definition")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
+        status = _check_status(r, error_msg='Failed to create deployment definition')
+        if not status:
             repo.delete_artifact(filename, bucket)
-            return None
-        else:
-            print('Created deployment definition: {}'.format(name))
+            return False
+
+        print('Created deployment definition: {}'.format(name))
+        return True
             
 
-    def list_deployment_definitions(self):
-        url = self.deployment_definition_api
-        r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="List deployment definition failed."):
-            return json.loads(r.content)
-        else:
-            return r.status_code
+    
 
     def get_deployment_definition(self, name):
         url = os.path.join(self.deployment_definition_api, '?name={}'.format(name))
@@ -192,14 +196,7 @@ class StudioClient(Runtime):
 
     ### Models API ###
 
-    def list_models(self):
-        """ List all models associated with a user/project"""
-        url = self.models_api
-        r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="List model failed."):
-            return json.loads(r.content)
-        else:
-            return r.status_code
+    
 
     def show_model(self, model_id=None):
         """ Get all metadata associated with a model. """
@@ -217,7 +214,7 @@ class StudioClient(Runtime):
         """ Return model object and model metadata. """
         url = os.path.join(self.models_api, '?name={}'.format(name))
         r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="Get deployment definition failed."):
+        if _check_status(r,error_msg="Get model failed."):
             return json.loads(r.content)
         else:
             return r.status_code
@@ -245,7 +242,7 @@ class StudioClient(Runtime):
                 # Delete the data in minio
                 repo.delete_artifact(model_uid)        
 
-    def publish_model(self, instance, model_name, tag="", model_url=None, model_description=None,is_file=True):
+    def create_model(self, instance, model_name, tag='latest', model_description=None,is_file=True):
         """ Publish a model to Studio. """
 
         # TODO: Support model tagging, default to 'latest'
@@ -254,35 +251,27 @@ class StudioClient(Runtime):
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
-        try:
-            repo.set_artifact(model_uid, instance, is_file)
-        except Exception as e:
-            print('Error: Failed to upload model.', e)
-            return
 
+        repo.set_artifact(model_uid, instance, is_file)
+ 
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "tag": tag,
                       "description": model_description,
-                      "url": model_url,
-                      "resource": model_url,
                       "project": str(self.project_id)}
 
         url = self.models_api
         url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("Publish model failed.")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
-            # Remove the already uploaded model.
+        if not _check_status(r, error_msg="Failed to create model."):
             repo.delete_artifact(model_uid)
+            return False
 
-            return r.status_code
+        print('Created model: {}, tag: {}'.format(model_name, tag))
+        return True
 
-    def deploy_model(self, model, deploy_context, model_name, version):
+    def deploy_model(self, model, deploy_context, model_name, version='latest'):
         
         dd = self.get_deployment_definition(deploy_context)
         if dd and ('id' in dd[0]):
@@ -293,33 +282,38 @@ class StudioClient(Runtime):
         model_obj = self.get_model(model)
         model_id = model_obj[0]['id']
 
+        url = self.deployment_instance_api
+        #endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
+        # endpoint = url+'predict/?name={}&version={}'.format(model_name, version)
+
         dp_data = {"deployment": context_id,
                    "model": model_id,
                    "name": model_name,
-                   "endpoint": 'http://test.com',
+                   "endpoint": 'http://default.com',
                    "version": version}
-        url = self.deployment_instance_api
+        
         r = requests.post(url, json=dp_data, headers=self.auth_headers)
-        print('Deployment registered')
+        if not _check_status(r, error_msg="Failed to create deployment."):
+            return False
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name}
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
+        if not _check_status(r, error_msg="Failed to start build process."):
+            # Delete registered deployment instance from db
+            return False
 
+        print('Created deployment: {}'.format(model_name))
+        return True
 
-    def list_deployments(self):
-        url = 'https://serve.{}/system/functions'.format(self.global_domain)
-        r = requests.get(url)
-        if (r.status_code < 200 or r.status_code > 299):
-            print("List deployments failed.")
-            print('Returned status code: {}'.format(r.status_code))
-            print('Reason: {}'.format(r.reason))
-            print(r.text)
+    
+    def create_list(self, resource):
+        url = self.endpoints[resource]
+        r = requests.get(url, headers=self.auth_headers)
+        if not _check_status(r, error_msg="Failed to list {}.".format(resource)):
+            return False
         else:
             return json.loads(r.content)
-
-    # def predict(self):
-        
 
 
 if __name__ == '__main__':

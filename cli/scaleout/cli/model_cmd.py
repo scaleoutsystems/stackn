@@ -33,18 +33,14 @@ def show_cmd(ctx,model):
   print(x)
 
 
-@model_cmd.command('publish')
-@click.option('-m', '--model', required=True)
+@model_cmd.command('predict')
+@click.option('-i', '--input_file', required=True)
 @click.option('-n', '--name', required=True)
-@click.option('-t', '--tag', required=False,default="latest")
-@click.option('-u', '--url', required=False,default=None)
-@click.option('-d', '--description', required=False,default="")
+@click.option('-v', '--version', required=True)
 @click.pass_context
-def publish_cmd(ctx, model, name, tag, url, description):
-  """ Publish a model to Studio. """
-  client = ctx.obj['CLIENT']
-  client.publish_model(model, name, tag, url, description)
-
+def predict_cmd(ctx, input_file, name, version):
+    client = ctx.obj['CLIENT']
+    client.predict(input_file, name, version)
 
 
 # Create group
@@ -90,9 +86,9 @@ def list_cmd(ctx):
     models = client.list_models()
 
     x = PrettyTable()
-    x.field_names = ["Name","Tag","ID"]
+    x.field_names = ["Name","Tag","Created"]
     for m in models:
-        x.add_row([m["name"],m["tag"],m["uid"]])
+        x.add_row([m["name"],m["tag"],m["uploaded_at"]])
     print(x)
 
 ###########################

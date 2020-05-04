@@ -52,10 +52,11 @@ def project_create_cmd(ctx):
 @click.option('-d', '--definition', required=True)
 @click.option('-b', '--bucket', required=True)
 @click.option('-f', '--filepath', required=True)
+@click.option('-p', '--path_predict')
 @click.pass_context
-def project_create_deployment_definition(ctx, name, definition, bucket, filepath):
+def project_create_deployment_definition(ctx, name, definition, bucket, filepath, path_predict=''):
     client = ctx.obj['CLIENT']
-    client.create_deployment_definition(name, definition, bucket, filepath)
+    client.create_deployment_definition(name, definition, bucket, filepath, path_predict)
 
 @project_cmd.group('list')
 @click.pass_context
