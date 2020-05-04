@@ -15,26 +15,27 @@
 {% block sidebar %}
 <div class="col-md-1 new-sidebar" style="width:350px;">
     <ul class="nav flex-column list-group">
-
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'projects:details' request.user project.slug %}">
-                <img src="{% static '/icons/house.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/house.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'projects:details' request.user project.slug %}">
                 Overview
             </a>
         </li>
-
         <li class="nav-item list-group-item sidebar-heading">
             Studio
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'labs:index' request.user project.slug %}">
-                <img src="{% static '/icons/laptop.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/laptop.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'labs:index' request.user project.slug %}">
                 Labs
             </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'experiments:index' request.user project.slug %}">
-                <img src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'experiments:index' request.user project.slug %}">
                 Experiments
             </a>
         </li>
@@ -46,7 +47,6 @@
             </a>
         </li>
         -->
-
         <li class="nav-item list-group-item sidebar-heading">
             Store
         </li>
@@ -59,38 +59,41 @@
         </li>
         -->
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'datasets:page' request.user project.slug 1 %}">
-                <img src="{% static '/icons/documents-alt.svg' %}" alt="" width="24" height="24"
-                     title="Bootstrap">
+            <img src="{% static '/icons/documents-alt.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'datasets:page' request.user project.slug 1 %}">
                 Datasets
             </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'models:index' request.user project.slug %}">
-                <img src="{% static '/icons/diamond.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/diamond.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'models:index' request.user project.slug %}">
                 Models
             </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'reports:index' request.user project.slug %}">
-                <img src="{% static '/icons/document-richtext.svg' %}" alt="" width="24" height="24"
-                     title="Bootstrap" style="float: left; margin-top: 7px; margin-right: 5px;">
+            <img src="{% static '/icons/document-richtext.svg' %}" alt="" width="24" height="24"
+                 title="Bootstrap" class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'reports:index' request.user project.slug %}"
+               style="text-align: center;">
                 Report Configurations
             </a>
         </li>
-
         <li class="nav-item list-group-item sidebar-heading">
             Serve
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'deployments:deployment_index' request.user project.slug %}">
-                <img src="{% static '/icons/plug.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/plug.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'deployments:deployment_index' request.user project.slug %}">
                 Deployments
             </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
-            <a class="nav-link" href="{% url 'projects:settings' request.user project.slug %}">
-                <img src="{% static '/icons/toggles.svg' %}" alt="" width="24" height="24" title="Bootstrap">
+            <img src="{% static '/icons/toggles.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'projects:settings' request.user project.slug %}">
                 Settings
             </a>
         </li>
