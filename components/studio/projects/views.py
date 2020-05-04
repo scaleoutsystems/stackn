@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 @login_required(login_url='/accounts/login')
 def index(request):
     template = 'index_projects.html'
-    projects = Project.objects.filter(owner=request.user)
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized__username=request.user))
     return render(request, template, locals())
 
 
