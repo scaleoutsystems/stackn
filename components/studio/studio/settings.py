@@ -182,6 +182,7 @@ API_PORT = 8080
 GIT_REPOS_ROOT = os.path.join(REPO_DIR, 'repos')
 GIT_REPOS_URL = '/repos/'
 
+REGISTRY_SVC = 'stack-docker-registry'
 CHART_CONTROLLER_URL = 'http://stack-chart-controller'
 STUDIO_URL = 'http://stack-studio:8080'
 

@@ -160,9 +160,18 @@ class StudioClient(Runtime):
 
         url = self.deployment_definition_api
         r = requests.post(url, json=depde_data, headers=self.auth_headers)
-        status = _check_status(r, error_msg='Failed to create deployment definition')
-        if not status:
+        status1 = _check_status(r, error_msg='Failed to create deployment definition')
+        
+        if not status1:
             repo.delete_artifact(filename, bucket)
+            return False
+
+        url_build = url+'build_definition/'
+        r = requests.post(url_build, json={'name':name}, headers=self.auth_headers)
+        status2 = _check_status(r, error_msg='Failed to start building of definition.')
+        if not status2:
+            repo.delete_artifact(filename, bucket)
+            # TODO: Delete from database as well.
             return False
 
         print('Created deployment definition: {}'.format(name))
@@ -298,7 +307,12 @@ class StudioClient(Runtime):
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name}
+        print('starting build...')
+        print(url)
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
+        print(r.text)
+        print(r.status_code)
+        print('ok')
         if not _check_status(r, error_msg="Failed to start build process."):
             # Delete registered deployment instance from db
             return False

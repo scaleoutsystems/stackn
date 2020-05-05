@@ -8,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from deployments.helpers import deploy_model
+from deployments.helpers import deploy_model, build_definition
 
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
@@ -36,6 +36,15 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['name']
     
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def build_definition(self, request):
+        print('Starting building of definition...')
+        instance = DeploymentDefinition.objects.get(name=request.data['name'])
+        print(instance)
+        build_definition(instance)
+        return HttpResponse('ok', 200)
+
+
     def get_queryset(self):
         """
         This view should return a list of all the deployments
