@@ -8,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from deployments.helpers import deploy_model, build_definition
+from deployments.helpers import build_definition
 
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
@@ -67,12 +67,10 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def build_instance(self, request):
-        print('starting build process...')
 
         model_name = request.data['name']
         model_tag = request.data['tag']
-        environment = request.data['depdef']
-        
+        environment = request.data['depdef']    
 
         try:
             # TODO: Check that we have permission to access the model.
@@ -82,28 +80,16 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         except:
             return HttpResponse('Model {}:{} not found.'.format(model_name, model_tag), status=400)
         
-        print(mod)
-
-        print(environment)
         try:
             # TODO: Check that we have permission to access the deployment definition.
             dep = DeploymentDefinition.objects.get(name=environment)
         except:
             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
 
-        print(dep)
-
         instance = DeploymentInstance(model=mod, deployment=dep)
-
-
-        # deployment_name = request.data['name']
-        # instance = DeploymentInstance.objects.get(name=deployment_name)
-        print(instance)
-        res = deploy_model(instance)
-        if res:
-            return HttpResponse('ok', status=200)
-        else:
-            return HttpResponse('deployment failed', status=400)
+        instance.save()
+        
+        return HttpResponse('ok', status=200)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def auth(self, request):
