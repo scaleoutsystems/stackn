@@ -20,6 +20,6 @@ class Model(models.Model):
     
     class Meta:
         unique_together = ('name', 'tag')
-    def __str__(self):
+    def __str__(self): 
         return "{name}".format(name=self.name)
 

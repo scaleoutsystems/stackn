@@ -11,4 +11,4 @@ class DeploymentDefinitionForm(forms.ModelForm):
 class DeploymentInstanceForm(forms.ModelForm):
     class Meta:
         model = DeploymentInstance
-        fields = ('name', 'model', 'version', 'access', 'sample_input', 'sample_output', 'deployment')
+        fields = ('model', 'access', 'deployment')

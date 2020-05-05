@@ -68,11 +68,42 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def build_instance(self, request):
         print('starting build process...')
-        deployment_name = request.data['name']
-        instance = DeploymentInstance.objects.get(name=deployment_name)
+
+        model_name = request.data['name']
+        model_tag = request.data['tag']
+        environment = request.data['depdef']
+        
+
+        try:
+            # TODO: Check that we have permission to access the model.
+            mod = Model.objects.get(name=model_name, tag=model_tag)
+            if mod.status == 'DP':
+                return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_tag), status=400)
+        except:
+            return HttpResponse('Model {}:{} not found.'.format(model_name, model_tag), status=400)
+        
+        print(mod)
+
+        print(environment)
+        try:
+            # TODO: Check that we have permission to access the deployment definition.
+            dep = DeploymentDefinition.objects.get(name=environment)
+        except:
+            return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
+
+        print(dep)
+
+        instance = DeploymentInstance(model=mod, deployment=dep)
+
+
+        # deployment_name = request.data['name']
+        # instance = DeploymentInstance.objects.get(name=deployment_name)
         print(instance)
-        deploy_model(instance)
-        return HttpResponse('ok', status=200)
+        res = deploy_model(instance)
+        if res:
+            return HttpResponse('ok', status=200)
+        else:
+            return HttpResponse('deployment failed', status=400)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def auth(self, request):

@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.utils.text import slugify
 from .exceptions import ModelDeploymentException
 from pprint import pprint
 from string import Template
 import requests
+from .models import DeploymentDefinition, DeploymentInstance
 
 DEPLOY_DEFAULT_TEMPLATE = """apiVersion: openfaas.com/v1
 kind: Function
@@ -16,7 +18,7 @@ spec:
 DEPLOY_DEFINITION_TEMPLATE = '''apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-deploy-definition-$name
+  name: build-deploy-definition-$name-$jobid
 spec:
   template:
     spec:
@@ -66,11 +68,12 @@ def get_instance_from_definition(instance):
     return ret
 
 def build_definition(instance):
-
+    import uuid
     build_templ = Template(DEPLOY_DEFINITION_TEMPLATE)
     job = build_templ.substitute(bucket=instance.bucket,
                                  context=instance.filename,
                                  name=instance.name,
+                                 jobid=uuid.uuid1().hex,
                                  image='{}.default.svc.cluster.local:5000/depdef-{}'.format(settings.REGISTRY_SVC, instance.name),
                                  access_key=instance.project.project_key,
                                  secret_key=instance.project.project_secret,
@@ -87,19 +90,18 @@ def deploy_model(instance):
     model_file = model.uid
     model_bucket = 'models'
     
-    deployment_name = instance.name
-    deployment_version = instance.version
-    deployment_endpoint = '{}-{}.{}'.format(instance.name,
-                                            instance.version,
+    deployment_name = slugify(model.name)
+    deployment_version = model.tag
+    deployment_endpoint = '{}-{}.{}'.format(model.name,
+                                            model.tag,
                                             settings.DOMAIN)
     instance.endpoint = deployment_endpoint
-    instance.save()
+    
+
     context = instance.deployment
     context_image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, context.name)
-    # context_bucket = context.bucket
-    # context_file = context.filename
 
-    project = context.project
+    project = model.project
     project_slug = project.slug
     minio_access_key = project.project_key
     minio_secret_key = project.project_secret
@@ -127,7 +129,31 @@ def deploy_model(instance):
     retval = requests.get(url, parameters)
     
     if retval.status_code >= 200 or retval.status_code < 205:
+        try:
+            instance.release = parameters['release']
+            instance.save()
+        except Exception as e:
+            print('Failed to save:')
+            print(instance)
+            print(type(instance))
+            print(DeploymentInstance._meta.get_fields())
+            print(e)
+            return False
+            # print(e)
+            # print(instance.get_fields())
+        
+        try:
+            model.status = 'DP'
+            model.save()
+        except Exception as e:
+            print('Failed to update model:')
+            print(model)
+            print(e)
+            return False
         return True
+    else:
+        print('Failed to launch deploy job.')
+        return False
 
     raise ModelDeploymentException(__name__)
 

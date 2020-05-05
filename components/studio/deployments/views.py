@@ -18,11 +18,8 @@ def deploy(request, id):
 
     if request.method == 'POST':
         deployment = request.POST.get('deployment', None)
-        sample_input = request.POST.get('sample_input', None)
-        sample_output = request.POST.get('sample_output', None)
-        version = request.POST.get('version', '1')
         definition = DeploymentDefinition.objects.filter(name=deployment).first()
-        instance = DeploymentInstance(name=model.name, model=model, deployment=definition, version=version, sample_input=sample_input,sample_output=sample_output)
+        instance = DeploymentInstance(model=model, deployment=definition)
 
         status = None
         try:
