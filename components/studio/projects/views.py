@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 @login_required(login_url='/accounts/login')
 def index(request):
     template = 'index_projects.html'
-    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user))
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
     return render(request, template, locals())
 
 
