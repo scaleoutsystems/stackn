@@ -13,25 +13,16 @@ from django.urls import reverse
 
 @login_required(login_url='/accounts/login')
 def deploy(request, id):
-    model = Model.objects.filter(id=id).first()
-
+    model = Model.objects.get(id=id)
+    print(request.user)
     if request.method == 'POST':
         deployment = request.POST.get('deployment', None)
-        definition = DeploymentDefinition.objects.filter(name=deployment).first()
+        definition = DeploymentDefinition.objects.get(name=deployment)
         instance = DeploymentInstance(model=model, deployment=definition)
-
-        # status = None
-        # try:
-        #     deploy_model(instance)
-        # except Exception as e:
-        #     print(e)
-        #     status = '201'
-
-        # if status:
         instance.save()
+        # return JsonResponse({"code": "201"})
 
-        return JsonResponse({"code": "201"})
-    return HttpResponseRedirect(reverse('deployments:deployment_index'))
+    return HttpResponseRedirect(reverse('deployments:deployment_index', kwargs={'user':request.user, 'project':model.project.slug}))
 
 
 @login_required(login_url='/accounts/login')
@@ -39,7 +30,7 @@ def undeploy(request, id):
     model = Model.objects.get(id=id)
     instance = DeploymentInstance.objects.get(model=model)
     instance.delete()
-    return JsonResponse({"code": "200"})
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
 
 
 def index(request):
@@ -65,31 +56,6 @@ def deployment_index(request, user, project):
     deployments = DeploymentInstance.objects.all()
 
     return render(request, temp, locals())
-
-
-@login_required(login_url='/accounts/login')
-def deployment_add(request, user, project):
-    temp = 'deploy/add.html'
-    from projects.models import Project
-    project = Project.objects.filter(slug=project).first()
-
-    deployment = None
-    if request.method == "POST":
-        form = DeploymentInstanceForm(request.POST)
-        if form.is_valid():
-            print("valid form! Saving")
-            obj = form.save()
-            try:
-                deploy_model(obj)
-            except Exception as e:
-                print(e)
-                print("there was an error deploying")
-            return HttpResponseRedirect(reverse('deployments:deployment_index', kwargs={'user':user, 'project':project.slug}))
-    else:
-        form = DeploymentInstanceForm()
-
-    return render(request, temp, locals())
-
 
 @login_required(login_url='/accounts/login')
 def deployment_edit(request, user, project, id=None):

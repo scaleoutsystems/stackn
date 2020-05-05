@@ -4,6 +4,8 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
 
+import requests
+
 class DeploymentDefinition(models.Model):
     project = models.ForeignKey('projects.Project',
                                 on_delete=models.DO_NOTHING,
@@ -58,6 +60,9 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
 def pre_save_deployment(sender, instance, using, **kwargs):
     model = instance.model
 
+    if model.status == 'DP':
+        raise Exception('Model already deployed.')
+
     model_file = model.uid
     model_bucket = 'models'
     
@@ -101,23 +106,8 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     
     if retval.status_code >= 200 or retval.status_code < 205:
         instance.release = parameters['release']
-        # try:
-        #     instance.release = parameters['release']
-        #     instance.save()
-        # except Exception as e:
-        #     print('Failed to save deployment instance.')
-        #     print(e)
-        #     return False
-        
-        try:
-            model.status = 'DP'
-            model.save()
-        except Exception as e:
-            print('Failed to update model object.')
-            print(e)
-            return False
-        return True
+        model.status = 'DP'
+        model.save()
     else:
-        print('Failed to launch deploy job.')
-        return False
+        raise Exception('Failed to launch deploy job.')
 
