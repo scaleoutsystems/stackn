@@ -14,8 +14,15 @@ from reports.helpers import populate_report_by_id, get_download_link
 logger = logging.getLogger(__name__)
 
 
+def index(request):
+    template = 'models_cards.html'
+
+    models = Model.objects.all()
+
+    return render(request, template, locals())
+
 @login_required(login_url='/accounts/login')
-def index(request, user, project):
+def list(request, user, project):
     template = 'models_list.html'
     project = Project.objects.filter(slug=project).first()
 
