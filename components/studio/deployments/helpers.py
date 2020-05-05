@@ -1,10 +1,8 @@
 from django.conf import settings
 from .exceptions import ModelDeploymentException
 from pprint import pprint
+from string import Template
 import requests
-# from .models import DeploymentDefinition
-# from models.models import Model
-# from projects.models import Project
 
 DEPLOY_DEFAULT_TEMPLATE = """apiVersion: openfaas.com/v1
 kind: Function
@@ -15,6 +13,41 @@ spec:
   name: {name}
   image: functions/figlet:latest"""
 
+DEPLOY_DEFINITION_TEMPLATE = '''apiVersion: batch/v1
+kind: Job
+metadata:
+  name: build-deploy-definition-$name
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: build-depdef
+        image: gcr.io/kaniko-project/executor:latest
+        args: [ "--dockerfile=Dockerfile",
+                "--context=s3://$bucket/$context",
+                "--destination=$image"]
+        volumeMounts:
+          - name: kaniko-secret
+            mountPath: /kaniko/.docker
+        env:
+            - name: AWS_ACCESS_KEY_ID
+              value: $access_key
+            - name: AWS_SECRET_ACCESS_KEY
+              value: $secret_key
+            - name: AWS_REGION
+              value: us-east-1
+            - name: S3_ENDPOINT
+              value: $s3endpoint
+            - name: S3_FORCE_PATH_STYLE
+              value: "true"
+      volumes:
+        - name: kaniko-secret
+          secret:
+            secretName: regcred
+            items:
+              - key: .dockerconfigjson
+                path: config.json'''
 
 def get_instance_from_definition(instance):
     ret = None
@@ -32,10 +65,22 @@ def get_instance_from_definition(instance):
 
     return ret
 
+def build_definition(instance):
+
+    build_templ = Template(DEPLOY_DEFINITION_TEMPLATE)
+    job = build_templ.substitute(bucket=instance.bucket,
+                                 context=instance.filename,
+                                 name=instance.name,
+                                 image='{}.default.svc.cluster.local:5000/depdef-{}'.format(settings.REGISTRY_SVC, instance.name),
+                                 access_key=instance.project.project_key,
+                                 secret_key=instance.project.project_secret,
+                                 s3endpoint='http://{}-minio:9000'.format(instance.project.slug))
+    import yaml
+    from projects.jobs import start_job
+    job = yaml.safe_load(job)
+    start_job(job)
 
 def deploy_model(instance):
-
-    # print("deploying model with {}!".format(instance))
 
     model = instance.model
 
@@ -50,8 +95,9 @@ def deploy_model(instance):
     instance.endpoint = deployment_endpoint
     instance.save()
     context = instance.deployment
-    context_bucket = context.bucket
-    context_file = context.filename
+    context_image = '{}:5000/depdef-{}'.format(settings.REGISTRY_SVC, context.name)
+    # context_bucket = context.bucket
+    # context_file = context.filename
 
     project = context.project
     project_slug = project.slug
@@ -70,8 +116,7 @@ def deploy_model(instance):
                   'deployment.version': deployment_version,
                   'deployment.name': deployment_name,
                   'deployment.endpoint': deployment_endpoint,
-                  'context.bucket': context_bucket,
-                  'context.file': context_file,
+                  'context.image': context_image,
                   'model.bucket': model_bucket,
                   'model.file': model_file,
                   'minio.host': minio_host,
