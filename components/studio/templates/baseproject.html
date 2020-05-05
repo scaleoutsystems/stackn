@@ -68,7 +68,7 @@
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/diamond.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
-            <a class="nav-link side-bar-text" href="{% url 'models:index' request.user project.slug %}">
+            <a class="nav-link side-bar-text" href="{% url 'models:list' request.user project.slug %}">
                 Models
             </a>
         </li>

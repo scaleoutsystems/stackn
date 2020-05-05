@@ -19,22 +19,22 @@ from projects.views import auth
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('', include('deployments.urls', namespace="deployments")),
-    path('api/', include('api.urls', namespace='api')),
-    path('projects/', include('projects.urls', namespace='projects')),
-    path('projects/<user>/<project>/labs/', include('labs.urls', namespace='labs')),
-    path('projects/<user>/<project>/datasets/', include('datasets.urls', namespace='datasets')),
-    path('projects/<user>/<project>/models/', include('models.urls', namespace='models')),
-    path('projects/<user>/<project>/files/', include('files.urls', namespace='files')),
-    path('projects/<user>/<project>/reports/', include('reports.urls', namespace='reports')),
-    path('workflows/', include('workflows.urls', namespace='workflows')),
-    path('experiments/', include('experiments.urls', namespace='experiments')),
     path('auth/', auth, name='auth'),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('', include('models.urls', namespace='models')),
+    path('', include('deployments.urls', namespace="deployments")),
+    path('workflows/', include('workflows.urls', namespace='workflows')),
+    path('api/', include('api.urls', namespace='api')),
+    path('', include('projects.urls', namespace='projects')),
+    path('<user>/<project>/labs/', include('labs.urls', namespace='labs')),
+    path('<user>/<project>/datasets/', include('datasets.urls', namespace='datasets')),
+    path('<user>/<project>/files/', include('files.urls', namespace='files')),
+    path('<user>/<project>/reports/', include('reports.urls', namespace='reports')),
+    path('<user>/<project>/experiments/', include('experiments.urls', namespace='experiments')),
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
