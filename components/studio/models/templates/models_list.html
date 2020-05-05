@@ -46,7 +46,7 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="col-md-10">
+    <div class="col-md-9">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h2>Models</h2>
             <!--
@@ -73,9 +73,7 @@
                     <th>Name</th>
                     <th>Tag</th>
                     <th>Status</th>
-                    <th>Description</th>
                     <th>Created</th>
-                    <th>Url</th>
                     <th>User</th>
                     <th>Project</th>
                     <th>Actions</th>
@@ -90,11 +88,7 @@
                         <td>{{ model.tag }}</td>
                         <td>{% if model.status == 'CR' %} READY{% endif %} {% if model.status == 'DP' %}
                             DEPLOYED{% endif %}</td>
-                        <td>{{ model.description }}</td>
                         <td>{{ model.uploaded_at }}</td>
-                        <td>
-                            <a href="https://{{ model.url }}" target="_blank">{{ model.url }}</a>
-                        </td>
                         <td>{{ model.project.owner }}</td>
                         <td>{{ model.project.slug|slice:":-4" }}</td>
                         <td>

@@ -30,7 +30,9 @@
 
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
+                    <th>Model</th>
+                    <th>Tag</th>
+                    <th>Environment</th>
                     <th>Endpoint</th>
                     {% if authorized_as %}
                         <th>Definition</th>
@@ -46,7 +48,9 @@
                                 <a href="{% url 'deployments:deployment_edit' request.user project.slug deploy.id %}">{{ deploy.id }}</a>
                             {% endif %}
                         </td>
-                        <td>{{ deploy.name }}</td>
+                        <td>{{ deploy.model.name }}</td>
+                        <td>{{ deploy.model.tag }}</td>
+                        <td>{{ deploy.deployment.name }}</td>
                         <td>https://{{ deploy.endpoint }}/{{ deploy.deployment.path_predict }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>

@@ -9,7 +9,6 @@ from .models import DeploymentDefinition, DeploymentInstance
 from .forms import DeploymentDefinitionForm, DeploymentInstanceForm
 from models.models import Model
 from django.urls import reverse
-from .helpers import deploy_model, undeploy_model
 
 
 @login_required(login_url='/accounts/login')
@@ -21,15 +20,15 @@ def deploy(request, id):
         definition = DeploymentDefinition.objects.filter(name=deployment).first()
         instance = DeploymentInstance(model=model, deployment=definition)
 
-        status = None
-        try:
-            deploy_model(instance)
-        except Exception as e:
-            print(e)
-            status = '201'
+        # status = None
+        # try:
+        #     deploy_model(instance)
+        # except Exception as e:
+        #     print(e)
+        #     status = '201'
 
-        if status:
-            instance.save()
+        # if status:
+        instance.save()
 
         return JsonResponse({"code": "201"})
     return HttpResponseRedirect(reverse('deployments:deployment_index'))
@@ -37,16 +36,8 @@ def deploy(request, id):
 
 @login_required(login_url='/accounts/login')
 def undeploy(request, id):
-    # model = Model.objects.filter(id=id).first()
-    # messages.success(response, "Model deployed!")
-    instance = DeploymentInstance.objects.filter(id=id).first()
-
-    from .helpers import undeploy_model
-    try:
-        undeploy_model(instance)
-    except Exception as e:
-        print(e)
-
+    model = Model.objects.get(id=id)
+    instance = DeploymentInstance.objects.get(model=model)
     instance.delete()
     return JsonResponse({"code": "200"})
 

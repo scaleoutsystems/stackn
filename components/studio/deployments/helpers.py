@@ -83,102 +83,71 @@ def build_definition(instance):
     job = yaml.safe_load(job)
     start_job(job)
 
-def deploy_model(instance):
+# def deploy_model(instance):
 
-    model = instance.model
+#     model = instance.model
 
-    model_file = model.uid
-    model_bucket = 'models'
+#     model_file = model.uid
+#     model_bucket = 'models'
     
-    deployment_name = slugify(model.name)
-    deployment_version = model.tag
-    deployment_endpoint = '{}-{}.{}'.format(model.name,
-                                            model.tag,
-                                            settings.DOMAIN)
-    instance.endpoint = deployment_endpoint
+#     deployment_name = slugify(model.name)
+#     deployment_version = model.tag
+#     deployment_endpoint = '{}-{}.{}'.format(model.name,
+#                                             model.tag,
+#                                             settings.DOMAIN)
+#     instance.endpoint = deployment_endpoint
     
 
-    context = instance.deployment
-    context_image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, context.name)
+#     context = instance.deployment
+#     context_image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, context.name)
 
-    project = model.project
-    project_slug = project.slug
-    minio_access_key = project.project_key
-    minio_secret_key = project.project_secret
-    minio_host = project_slug+'-minio:9000'
+#     project = model.project
+#     project_slug = project.slug
+#     minio_access_key = project.project_key
+#     minio_secret_key = project.project_secret
+#     minio_host = project_slug+'-minio:9000'
 
-    global_domain = settings.DOMAIN
+#     global_domain = settings.DOMAIN
 
-    parameters = {'release': str(project_slug)+'-'
-                            +str(deployment_name)+'-'
-                            +str(deployment_version),
-                  'chart': 'deploy',
-                  'global.domain': global_domain,
-                  'project.slug': project_slug,
-                  'deployment.version': deployment_version,
-                  'deployment.name': deployment_name,
-                  'deployment.endpoint': deployment_endpoint,
-                  'context.image': context_image,
-                  'model.bucket': model_bucket,
-                  'model.file': model_file,
-                  'minio.host': minio_host,
-                  'minio.secret_key': minio_secret_key,
-                  'minio.access_key': minio_access_key}
-    print(parameters)
-    url = settings.CHART_CONTROLLER_URL + '/deploy'
-    retval = requests.get(url, parameters)
+#     parameters = {'release': str(project_slug)+'-'
+#                             +str(deployment_name)+'-'
+#                             +str(deployment_version),
+#                   'chart': 'deploy',
+#                   'global.domain': global_domain,
+#                   'project.slug': project_slug,
+#                   'deployment.version': deployment_version,
+#                   'deployment.name': deployment_name,
+#                   'deployment.endpoint': deployment_endpoint,
+#                   'context.image': context_image,
+#                   'model.bucket': model_bucket,
+#                   'model.file': model_file,
+#                   'minio.host': minio_host,
+#                   'minio.secret_key': minio_secret_key,
+#                   'minio.access_key': minio_access_key}
+
+#     url = settings.CHART_CONTROLLER_URL + '/deploy'
+#     retval = requests.get(url, parameters)
     
-    if retval.status_code >= 200 or retval.status_code < 205:
-        try:
-            instance.release = parameters['release']
-            instance.save()
-        except Exception as e:
-            print('Failed to save:')
-            print(instance)
-            print(type(instance))
-            print(DeploymentInstance._meta.get_fields())
-            print(e)
-            return False
-            # print(e)
-            # print(instance.get_fields())
+#     if retval.status_code >= 200 or retval.status_code < 205:
+#         instance.release = parameters['release']
+#         # try:
+#         #     instance.release = parameters['release']
+#         #     instance.save()
+#         # except Exception as e:
+#         #     print('Failed to save deployment instance.')
+#         #     print(e)
+#         #     return False
         
-        try:
-            model.status = 'DP'
-            model.save()
-        except Exception as e:
-            print('Failed to update model:')
-            print(model)
-            print(e)
-            return False
-        return True
-    else:
-        print('Failed to launch deploy job.')
-        return False
+#         try:
+#             model.status = 'DP'
+#             model.save()
+#         except Exception as e:
+#             print('Failed to update model object.')
+#             print(e)
+#             return False
+#         return True
+#     else:
+#         print('Failed to launch deploy job.')
+#         return False
 
-    raise ModelDeploymentException(__name__)
-
-def undeploy_model(instance):
-    #instance.model.status = instance.model.CREATED
-    #instance.model.url = ''
-    #instance.model.save()
-
-    from kubernetes import client, config
-    import yaml
-
-    if settings.EXTERNAL_KUBECONF:
-        config.load_kube_config('cluster.conf')
-    else:
-        config.load_incluster_config()
-
-    api = client.CustomObjectsApi()
-
-    api.delete_namespaced_custom_object(
-        group="openfaas.com",
-        version="v1",
-        name=str(instance.name),
-        namespace="stack-fn",
-        plural="functions",
-        body=client.V1DeleteOptions(),
-    )
-    print("Resource deleted")
-
+#     raise ModelDeploymentException(__name__)
