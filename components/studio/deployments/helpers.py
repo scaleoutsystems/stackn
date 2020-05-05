@@ -95,7 +95,7 @@ def deploy_model(instance):
     instance.endpoint = deployment_endpoint
     instance.save()
     context = instance.deployment
-    context_image = 'registry.{}:5000/depdef-{}'.format(settings.DOMAIN, context.name)
+    context_image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, context.name)
     # context_bucket = context.bucket
     # context_file = context.filename
 
