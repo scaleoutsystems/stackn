@@ -75,10 +75,10 @@
 
 <main role="main">
 
-    <div class="container-fluid" style="height:100%;">
-        <div class="row" style="height:100%;">
+    <div class="container-fluid" style="height: inherit;">
+        <div class="row" style="height: inherit;">
             {% block topnav %}
-            <div class="new-sidebar-1 d-flex justify-content-center" style="width:150px; background:#F3F3F3;">
+            <div class="col-md-1 d-flex justify-content-center" style="background:#F3F3F3;">
                 <ul class="list-group d-flex">
 
                     <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
@@ -87,7 +87,7 @@
                         </p>
                     </li>
                     <li class="list-inline">
-                        <a class="nav-link" href="{% url 'deployments:index' %}" style="text-decoration: none; color:inherit;">
+                        <a class="nav-link" href="{% url 'models:index' %}" style="text-decoration: none; color:inherit;">
                             <p class="d-flex justify-content-center"><img
                                     src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
                                     title=""></p>
