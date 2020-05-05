@@ -1,0 +1,49 @@
+{% extends is_authorized|yesno:"baseproject.html,base.html" %}
+{% block extra_head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Models</h2>
+            {% if is_authorized %}
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'models:create' request.user project.slug %}">
+                        <button id="create" class="btn btn-large btn-primary">Deploy</button>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info" role="alert">
+                    Message{{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% for model in models %}
+        <div class="col-sm-5">
+            <div class="card card-project">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <span>{{ model.name }}</span>
+                    </h5>
+                    <p class="card-text"> {{ model.description }}</p>
+                    <b>Resource</b>
+                    <p class="card-text"> {{ model.resource }}</p>
+                    <b>Project</b>
+                    <p class="card-text"> {{ model.project.name }}</p>
+                    <b>Sample Output</b>
+                    <p class="card-text"> {{ deploy.sample_output }}</p>
+                    <a href="#" class="btn mt-auto btn-secondary"
+                       style="width: fit-content;">Inspect</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        No publicly published services available.
+        {% endfor %}
+
+    </div>
+{% endblock %}
