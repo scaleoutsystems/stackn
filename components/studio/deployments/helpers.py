@@ -95,7 +95,7 @@ def deploy_model(instance):
     instance.endpoint = deployment_endpoint
     instance.save()
     context = instance.deployment
-    context_image = '{}:5000/depdef-{}'.format(settings.REGISTRY_SVC, context.name)
+    context_image = 'registry.{}:5000/depdef-{}'.format(settings.DOMAIN, context.name)
     # context_bucket = context.bucket
     # context_file = context.filename
 
@@ -122,6 +122,7 @@ def deploy_model(instance):
                   'minio.host': minio_host,
                   'minio.secret_key': minio_secret_key,
                   'minio.access_key': minio_access_key}
+    print(parameters)
     url = settings.CHART_CONTROLLER_URL + '/deploy'
     retval = requests.get(url, parameters)
     

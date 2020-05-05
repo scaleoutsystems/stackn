@@ -307,7 +307,12 @@ class StudioClient(Runtime):
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name}
+        print('starting build...')
+        print(url)
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
+        print(r.text)
+        print(r.status_code)
+        print('ok')
         if not _check_status(r, error_msg="Failed to start build process."):
             # Delete registered deployment instance from db
             return False
