@@ -163,14 +163,14 @@ class StudioClient(Runtime):
         status1 = _check_status(r, error_msg='Failed to create deployment definition')
         
         if not status1:
-            #repo.delete_artifact(filename, bucket)
+            repo.delete_artifact(filename, bucket)
             return False
 
         url_build = url+'build_definition/'
         r = requests.post(url_build, json={'name':name}, headers=self.auth_headers)
         status2 = _check_status(r, error_msg='Failed to start building of definition.')
         if not status2:
-            #repo.delete_artifact(filename, bucket)
+            repo.delete_artifact(filename, bucket)
             # TODO: Delete from database as well.
             return False
 
