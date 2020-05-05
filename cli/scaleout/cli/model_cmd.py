@@ -33,18 +33,6 @@ def show_cmd(ctx,model):
   print(x)
 
 
-# @model_cmd.command('publish')
-# @click.option('-m', '--model', required=True)
-# @click.option('-n', '--name', required=True)
-# @click.option('-t', '--tag', required=False,default="latest")
-# @click.option('-u', '--url', required=False,default=None)
-# @click.option('-d', '--description', required=False,default="")
-# @click.pass_context
-# def publish_cmd(ctx, model, name, tag, url, description):
-#   """ Publish a model to Studio. """
-#   client = ctx.obj['CLIENT']
-#   client.publish_model(model, name, tag, url, description)
-
 @model_cmd.command('predict')
 @click.option('-i', '--input_file', required=True)
 @click.option('-n', '--name', required=True)

@@ -17,7 +17,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="{% static 'css/studio.css' %}" rel="stylesheet">
@@ -75,101 +75,103 @@
 
 <main role="main">
 
-        <div class="container-fluid" style="height:100%;">
-            <div class="row" style="height:100%;">
-                {% block topnav %}
-                    <div class="col-md-1 new-sidebar-1" style="min-height:800px; height:100%;">
-                        <ul class="list-group d-flex">
-                            <li class="list-inline">
-                                <a href="/" style="padding-left: 35px;padding-right: 15px;">
-                                    <p class="d-flex justify-content-center"><img
-                                            src="{% static 'img/SOIconBlackish.png' %}" alt="Scaleout" width="50"></p>
-                                </a>
-                            </li>
-                            <li class="list-inline">
-                                <a class="nav-link" href="/projects">
-                                    <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
-                                                                                  src="{% static '/icons/folder.svg' %}"
-                                                                                  alt="" width="24" height="24"
-                                                                                  title=""></p>
-                                    <p class="d-flex justify-content-center">Projects</p>
-                                </a>
+    <div class="container-fluid" style="height:100%;">
+        <div class="row" style="height:100%;">
+            {% block topnav %}
+            <div class="new-sidebar-1 d-flex justify-content-center" style="width:150px; background:#F3F3F3;">
+                <ul class="list-group d-flex">
 
-                            </li>
-                            <li class="list-inline">
-                                <a class="nav-link" href="{% url 'deployments:index' %}">
-                                    <p class="d-flex justify-content-center"><img
-                                            src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
-                                            title=""></p>
-                                    <p class="d-flex justify-content-center">Deployments</p>
-                                </a>
-                            </li>
-                            <!-- Functionality not available with the first release!
+                    <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
+                        <p class="d-flex justify-content-center">
+                            <img src="{% static 'img/stackn.png' %}" width="108" height="44">
+                        </p>
+                    </li>
+                    <li class="list-inline">
+                        <a class="nav-link" href="{% url 'deployments:index' %}" style="text-decoration: none; color:inherit;">
+                            <p class="d-flex justify-content-center"><img
+                                    src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
+                                    title=""></p>
+                            <p class="d-flex justify-content-center">Models</p>
+                        </a>
+                    </li>
+                    <li class="list-inline">
+                        <a class="nav-link" href="/projects" style="text-decoration: none; color:inherit;">
+                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
+                                                                          src="{% static '/icons/folder.svg' %}"
+                                                                          alt="" width="24" height="24"
+                                                                          title=""></p>
+                            <p class="d-flex justify-content-center">Projects</p>
+                        </a>
 
-                            <li class="list-inline">
-                                <a class="nav-link" href="{% url 'deployments:index' %}">
-                                    <p class="d-flex justify-content-center"><img
-                                            src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24"
-                                            title=""></p>
-                                    <p class="d-flex justify-content-center">Environments</p>
-                                </a>
-                            </li>
-                            <li class="list-inline">
-                                <a class="nav-link" href="{% url 'workflows:workflows_definition_index' %}">
-                                    <p class="d-flex justify-content-center"><img
-                                            src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                            title=""></p>
-                                    <p class="d-flex justify-content-center" align="center">
-                                        Workflow Definitions</p>
-                                </a>
-                            </li>
-                            <li class="list-inline mb-auto">
-                                <a class="nav-link" href="{% url 'deployments:deployment_definition_index' %}">
-                                    <p class="d-flex justify-content-center"><img
-                                            src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                            title=""></p>
-                                    <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
-                                </a>
-                            </li>
-                            -->
-                            <li class="list-inline" style="position:absolute;bottom:0;width:100px;">
-                                {% if request.user.is_authenticated %}
-                                    <a class="dropdown-toggle" href="#" id="navbarDropdown2" role="button"
-                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                       style="padding-right: 20px;">
-                                        <p class="d-flex justify-content-center"><img
-                                                src="{% static '/icons/person-fill.svg' %}" alt="" width="24" height="24"
-                                                title=""></p>
-                                        <p class="d-flex justify-content-center">{{ request.user }}</p>
-                                    </a>
-                                    <div class="dropdown-menu"
-                                         aria-labelledby="navbarDropdown2">
-                                        {% if request.user.is_superuser %}
-                                            <a class="d-flex dropdown-item justify-content-center" href="/api"><b>API</b></a>
-                                            <a class="d-flex dropdown-item justify-content-center" href="{% url 'admin:index' %}"><b>Admin</b></a>
-                                            <div class="dropdown-divider"></div>
-                                        {% endif %}
-                                        <a class="dropdown-item d-flex justify-content-center" href="{% url 'logout' %}">Sign out</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item  d-flex justify-content-center" href="#">View as user</a>
-                                    </div>
-                                {% else %}
-                                    <p class="d-flex justify-content-center"><img src="{% static '/icons/person.svg' %}"
-                                                                                  alt="" width="24" height="24"
-                                                                                  title=""></p>
-                                    <p class="d-flex justify-content-center"><a class="nav-link text-nowrap"
-                                                                                href="{% url 'login' %}">Sign in</a></p>
-                                {% endif %}
-                            </li>
-                        </ul>
-                    </div>
-                {% endblock %}
-                {% block sidebar %} {% endblock %}
+                    </li>
 
-                {% block content %} {% endblock %}
+                    <!-- Functionality not available with the first release!
 
+                    <li class="list-inline">
+                        <a class="nav-link" href="{% url 'deployments:index' %}">
+                            <p class="d-flex justify-content-center"><img
+                                    src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24"
+                                    title=""></p>
+                            <p class="d-flex justify-content-center">Environments</p>
+                        </a>
+                    </li>
+                    <li class="list-inline">
+                        <a class="nav-link" href="{% url 'workflows:workflows_definition_index' %}">
+                            <p class="d-flex justify-content-center"><img
+                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
+                                    title=""></p>
+                            <p class="d-flex justify-content-center" align="center">
+                                Workflow Definitions</p>
+                        </a>
+                    </li>
+                    <li class="list-inline mb-auto">
+                        <a class="nav-link" href="{% url 'deployments:deployment_definition_index' %}">
+                            <p class="d-flex justify-content-center"><img
+                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
+                                    title=""></p>
+                            <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
+                        </a>
+                    </li>
+                    -->
+
+                    <li class="list-inline" style="margin-top: auto; margin-bottom: 25px; margin-left: auto; margin-right: auto;">
+
+                        <a> <img src="{% static '/icons/question-circle.svg' %}" alt="" width="24" height="24" title=""></a>
+                        {% if request.user.is_authenticated %}
+                        <a> <img src="{% static '/icons/inbox-fill.svg' %}" alt="" width="24" height="24" title=""></a>
+                        <a class="dropdown-toggle" href="#" id="navbarDropdown2" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img src="{% static '/icons/people-circle.svg' %}" alt="" width="24" height="24" title="">
+                        </a>
+
+                        <div class="dropdown-menu"
+                             aria-labelledby="navbarDropdown2">
+                            Logged in as <p class="d-flex justify-content-center">{{ request.user }}</p>
+                            {% if request.user.is_superuser %}
+                            <a class="d-flex dropdown-item justify-content-center" href="/api"><b>API</b></a>
+                            <a class="d-flex dropdown-item justify-content-center" href="{% url 'admin:index' %}"><b>Admin</b></a>
+                            <div class="dropdown-divider"></div>
+                            {% endif %}
+                            <a class="dropdown-item d-flex justify-content-center" href="{% url 'logout' %}">Sign
+                                out</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item  d-flex justify-content-center" href="#">View as user</a>
+                        </div>
+                        {% else %}
+                        <a class="" href="{% url 'login' %}">
+                            <img src="{% static '/icons/person.svg' %}" alt="" width="24" height="24" title="">
+                        </a>
+                        {% endif %}
+                    </li>
+                </ul>
             </div>
+            {% endblock %}
+            {% block sidebar %} {% endblock %}
+
+            {% block content %} {% endblock %}
+
         </div>
+    </div>
 
 </main>
 

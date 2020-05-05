@@ -38,8 +38,4 @@ def main(ctx, project_dir, login, endpoints):
         from scaleout.project import Project
         from scaleout.runtime.runtime import Runtime
         from scaleout.studioclient import StudioClient
-        project = Runtime(project_dir)
-        from scaleout.alliance.controller import Controller
-        controller = Controller(project)
-        ctx.obj['CONTROLLER'] = controller
         ctx.obj['CLIENT'] = StudioClient(login=login, endpoints=endpoints)

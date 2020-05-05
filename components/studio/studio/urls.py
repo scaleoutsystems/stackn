@@ -24,7 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('', include('ingress.urls')),
+    path('', include('deployments.urls', namespace="deployments")),
     path('api/', include('api.urls', namespace='api')),
     path('projects/', include('projects.urls', namespace='projects')),
     path('projects/<user>/<project>/labs/', include('labs.urls', namespace='labs')),
@@ -34,7 +34,6 @@ urlpatterns = [
     path('projects/<user>/<project>/reports/', include('reports.urls', namespace='reports')),
     path('workflows/', include('workflows.urls', namespace='workflows')),
     path('experiments/', include('experiments.urls', namespace='experiments')),
-    path('deployments/', include('deployments.urls', namespace='deployments')),
     path('auth/', auth, name='auth'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

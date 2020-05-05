@@ -48,11 +48,13 @@
 {% endblock %}
 
 {% block content %}
-    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-<div class="container">
-    <div class="row">
-    <div class="col-12" align="center" >
-            <form class="text-center" style="width:300px;" method="post" action="{% url 'login' %}">
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-5">
+
+    </div>
+    <div class="d-flex align-content-center">
+        <div class="col-md-3 container">
+               <form class="text-center" style="width:300px;" method="post" action="{% url 'login' %}">
                 <h1 class="h3 mb-3 font-weight-normal">Sign in</h1>
                 {% csrf_token %}
                 <table>
@@ -91,10 +93,7 @@
                 </div>
 
             </form>
-</div>
-            {# Assumes you setup the password_reset view in your URLconf #}
+        </div>
     </div>
 </div>
-</div>
-
 {% endblock %}

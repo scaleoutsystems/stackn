@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <main role="main">
-    <section class="jumbotron text-center">
-        <div class="container">
-          <h1 class="jumbotron-heading">Logged out</h1>
-          <p class="lead text-muted">Login again to get access to the Scaleout Platform.</p>
-          <p>
-            <a href="{% url 'login' %}" class="btn btn-primary my-2">Click here to login again.</a>
-          </p>
+
+<div class="col-md-10">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-5">
+
+    </div>
+    <div class="d-flex align-content-center">
+        <div class="col-md-3 container">
+            <h2>Logged out</h2>
+            <p class="lead text-muted">Login again to get access to the Scaleout Platform.</p>
+            <p>
+                <a href="{% url 'login' %}" class="btn btn-primary my-2">Click here to sign in again.</a>
+            </p>
         </div>
-      </section>
-
-
-    </main>
+    </div>
+</div>
 {% endblock %}
