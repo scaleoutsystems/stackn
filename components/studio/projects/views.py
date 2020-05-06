@@ -88,7 +88,7 @@ def create(request):
         if success:
             project.save()
 
-        next_page = request.POST.get('next', '/projects/{}/{}'.format(request.user, project.slug))
+        next_page = request.POST.get('next', '/{}/{}'.format(request.user, project.slug))
 
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
@@ -139,7 +139,7 @@ def delete(request, user, project_slug):
     retval = delete_project_resources(project)
 
     if not retval:
-        next_page = request.GET.get('next', '/projects/{}/{}'.format(request.user, project.slug))
+        next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
         print("could not delete!")
         return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
 
