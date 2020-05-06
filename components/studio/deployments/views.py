@@ -22,7 +22,7 @@ def deploy(request, id):
         instance.save()
         # return JsonResponse({"code": "201"})
 
-    return HttpResponseRedirect(reverse('deployments:deployment_index', kwargs={'user':request.user, 'project':model.project.slug}))
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
 
 
 @login_required(login_url='/accounts/login')

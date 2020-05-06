@@ -1,6 +1,7 @@
 import uuid
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from projects.models import Project
 from reports.models import Report, ReportGenerator
 from .models import Model
@@ -10,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,15 +73,12 @@ def details(request, user, project, id):
 def delete(request, user, project, id):
     template = 'model_confirm_delete.html'
 
-    project = Project.objects.filter(slug=project).first()
-    model = Model.objects.filter(id=id).first()
+    project = Project.objects.get(slug=project)
+    model = Model.objects.get(id=id)
 
     if request.method == "POST":
-        # TODO(desislava@scaleoutsystems.com): If the model has been deployed, remove the instance as well.
-
         model.delete()
-
-        return HttpResponseRedirect('/projects/{}/{}/models/'.format(user, project.slug))
+        return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())
 
