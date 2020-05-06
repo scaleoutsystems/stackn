@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 def index(request):
     template = 'index_projects.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+    request.session['next'] = '/projects/'
     return render(request, template, locals())
 
 
