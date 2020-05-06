@@ -69,13 +69,10 @@
                 <thead>
 
                 <tr>
-                    <th>#</th>
                     <th>Name</th>
                     <th>Tag</th>
                     <th>Status</th>
-                    <th>Description</th>
                     <th>Created</th>
-                    <th>Url</th>
                     <th>User</th>
                     <th>Project</th>
                     <th>Actions</th>
@@ -84,22 +81,17 @@
                 <tbody>
                 {% for model in models %}
                     <tr>
-                        <td>{{ model.id }}</td>
                         <td><a href="{% url 'models:details' request.user project.slug model.id %}">{{ model.name }}</a>
                         </td>
                         <td>{{ model.tag }}</td>
                         <td>{% if model.status == 'CR' %} READY{% endif %} {% if model.status == 'DP' %}
                             DEPLOYED{% endif %}</td>
-                        <td>{{ model.description }}</td>
                         <td>{{ model.uploaded_at }}</td>
-                        <td>
-                            <a href="https://{{ model.url }}" target="_blank">{{ model.url }}</a>
-                        </td>
                         <td>{{ model.project.owner }}</td>
                         <td>{{ model.project.slug|slice:":-4" }}</td>
                         <td>
                             <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                    data-target="#exampleModal">
+                                    data-target="#exampleModal{{model.id}}">
                                 Deployment
                             </button>
 
@@ -109,17 +101,17 @@
 
                             <!-- Button trigger modal -->
                             <button type="button" class="btn btn-sm btn-outline-warning" data-toggle="modal"
-                                    data-target="#deleteModal">
+                                    data-target="#deleteModal{{model.id}}">
                                 Delete
                             </button>
 
                             <!-- Modal -->
-                            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
-                                 aria-labelledby="deleteModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="deleteModal{{model.id}}" tabindex="-1" role="dialog"
+                                 aria-labelledby="deleteModalLabel{{model.id}}" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel">Confirm delete</h5>
+                                            <h5 class="modal-title" id="deleteModalLabel{{model.id}}">Confirm delete</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
@@ -131,7 +123,7 @@
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
                                             </button>
                                             <a href="{% url 'models:delete' request.user project.slug model.id %}">
-                                                <button id="delete" class="btn btn-sm btn-outline-warning">Delete
+                                                <button id="delete{{model.id}}" class="btn btn-sm btn-outline-warning">Delete
                                                 </button>
                                             </a>
                                         </div>
@@ -142,12 +134,12 @@
 
 
                             <!-- Modal -->
-                            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                                 aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="exampleModal{{model.id}}" tabindex="-1" role="dialog"
+                                 aria-labelledby="exampleModalLabel{{model.id}}" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Model Deployment</h5>
+                                            <h5 class="modal-title" id="exampleModalLabel{{model.id}}">Model Deployment</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
