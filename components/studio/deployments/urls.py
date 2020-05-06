@@ -11,6 +11,5 @@ urlpatterns = [
     path('deployments/definition/add', views.deployment_definition_add, name='deployment_definition_add'),
     path('deployments/definition/edit/<id>', views.deployment_definition_edit, name='deployment_definition_edit'),
     path('<user>/<project>/deployments/', views.deployment_index, name='deployment_index'),
-    path('<user>/<project>/deployments/add', views.deployment_add, name='deployment_add'),
     path('<user>/<project>/deployments/edit/<id>', views.deployment_edit, name='deployment_edit'),
 ]
