@@ -1,5 +1,7 @@
 from django.db import models
-
+from django.dispatch import receiver
+from django.db.models.signals import pre_delete
+from deployments.models import DeploymentInstance
 
 class Model(models.Model):
     CREATED = 'CR'
@@ -23,3 +25,10 @@ class Model(models.Model):
     def __str__(self): 
         return "{name}".format(name=self.name)
 
+@receiver(pre_delete, sender=Model, dispatch_uid='model_pre_delete_signal')
+def pre_delete_deployment(sender, instance, using, **kwargs):
+    # TODO: Also delete model from minio
+    # Check if model has been deployed, if so, delete deployment.
+    if instance.status == 'DP':
+        deployment = DeploymentInstance.objects.get(model=instance)
+        deployment.delete()
