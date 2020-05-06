@@ -2,14 +2,52 @@ import os
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from projects.models import Project
 from .models import DeploymentDefinition, DeploymentInstance
-from .forms import DeploymentDefinitionForm, DeploymentInstanceForm
+from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
 from models.models import Model
 from django.urls import reverse
 
+import json2html
+
+
+@login_required(login_url='/accounts/login')
+def predict(request, id, project):
+    template = 'deploy/predict.html'
+    if request.user.is_authenticated and request.user and project is not None:
+        is_authorized = True
+
+    project = Project.objects.get(slug=project)
+    deployment = DeploymentInstance.objects.get(id=id)
+    model = deployment.model
+
+    if request.method == 'POST':
+        form = PredictForm(request.POST, request.FILES)
+        if form.is_valid():
+            import requests
+            import json
+            
+            predict_url = 'https://{}/{}'.format(deployment.endpoint, deployment.deployment.path_predict)
+
+            # Get user token
+            from rest_framework.authtoken.models import Token
+
+            token = Token.objects.get_or_create(user=request.user)
+
+            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token[0].key}, verify=False)
+            try:
+                prediction = json.loads(res.text)
+                prediction = json.dumps(prediction, indent=4)
+                if len(prediction) > 3000:
+                    prediction = '{} ...(truncated remaining {} characters/'.format(prediction[0:300], len(prediction))
+            except:
+                prediction = res.text
+    else:
+        form = PredictForm()
+
+    return render(request, template, locals())
 
 @login_required(login_url='/accounts/login')
 def deploy(request, id):
