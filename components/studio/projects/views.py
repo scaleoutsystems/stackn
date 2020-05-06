@@ -47,19 +47,15 @@ def settings(request, user, project_slug):
 def change_environment(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
     environment = project.environment
+    from .models import Environment
 
     if request.method == 'POST':
-        dockerfile = request.POST.get('dockerfile', '')
-        teardown = request.POST.get('teardown', '')
-        setup = request.POST.get('setup', '')
-
-        if dockerfile is not '':
-            environment.dockerfile = dockerfile
-        if teardown is not '':
-            environment.teardown = teardown
-        if setup is not '':
-            environment.setup = setup
-        environment.save()
+        environment_name = request.POST.get('environment_name', '')
+        if environment_name is not '':
+            environment = Environment.objects.filter(name=environment_name).first()
+            if environment:
+                project.environment = environment
+                project.save()
         from .helpers import create_environment_image
         create_environment_image(project)
     return HttpResponseRedirect(
