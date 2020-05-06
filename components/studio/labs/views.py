@@ -14,7 +14,7 @@ def index(request, user, project):
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
     sessions = Session.objects.filter(project=project)
     flavors = Flavor.objects.all()
-    environments = Environment.objects.filter(project=project)
+    environments = Environment.objects.all()
     url = settings.DOMAIN
 
     return render(request, template, locals())

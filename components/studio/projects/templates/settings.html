@@ -1,6 +1,6 @@
 {% extends 'baseproject.html' %}
 {% block content %}
-<div class="col-md-10">
+<div class="col-md-9">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Settings</h2>
     </div>
@@ -57,32 +57,19 @@
     <div class="container-fluid" style="padding:15px;">
         <h5>Environment</h5>
         <h6>Settings for environment</h6>
-
+        Current default Environment:
+        <p> {{ project.environment.name}}</p>
         <form action="{% url 'projects:change_environment' request.user project.slug %}" method="POST">
             {% csrf_token %}
 
             <div class="form-group row">
-                <label for="id_dockerfile" class="col-form-label col-sm-2 pt-0">Dockerfile</label>
+                <label for="id_environment" class="col-form-label col-sm-2 pt-0">Environment</label>
                 <div class="col-sm-10">
-                    <textarea class="form-control" id="id_dockerfile" name="dockerfile" rows="3">
-                        {{ project.environment.dockerfile }}
-                    </textarea>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="id_startup" class="col-form-label col-sm-2 pt-0">Startup</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="id_startup" name="startup" rows="3">
-                        {{ project.environment.startup }}
-                    </textarea>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="id_teardown" class="col-form-label col-sm-2 pt-0">Teardown</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="id_teardown" name="teardown" rows="3">
-                        {{ project.environment.teardown }}
-                    </textarea>
+                    <select name="environment" class="form-control">
+                        {% for environment in environments %}
+                        <option value="{{ environment.slug }}">{{ environment.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 

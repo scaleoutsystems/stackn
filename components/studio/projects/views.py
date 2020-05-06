@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 def index(request):
     template = 'index_projects.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+    request.session['next'] = '/projects/'
     return render(request, template, locals())
 
 
@@ -46,19 +47,15 @@ def settings(request, user, project_slug):
 def change_environment(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
     environment = project.environment
+    from .models import Environment
 
     if request.method == 'POST':
-        dockerfile = request.POST.get('dockerfile', '')
-        teardown = request.POST.get('teardown', '')
-        setup = request.POST.get('setup', '')
-
-        if dockerfile is not '':
-            environment.dockerfile = dockerfile
-        if teardown is not '':
-            environment.teardown = teardown
-        if setup is not '':
-            environment.setup = setup
-        environment.save()
+        environment_name = request.POST.get('environment_name', '')
+        if environment_name is not '':
+            environment = Environment.objects.filter(name=environment_name).first()
+            if environment:
+                project.environment = environment
+                project.save()
         from .helpers import create_environment_image
         create_environment_image(project)
     return HttpResponseRedirect(
@@ -87,7 +84,7 @@ def create(request):
         if success:
             project.save()
 
-        next_page = request.POST.get('next', '/projects/{}/{}'.format(request.user, project.slug))
+        next_page = request.POST.get('next', '/{}/{}'.format(request.user, project.slug))
 
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
@@ -138,7 +135,7 @@ def delete(request, user, project_slug):
     retval = delete_project_resources(project)
 
     if not retval:
-        next_page = request.GET.get('next', '/projects/{}/{}'.format(request.user, project.slug))
+        next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
         print("could not delete!")
         return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
 
