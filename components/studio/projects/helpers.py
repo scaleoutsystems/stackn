@@ -19,9 +19,9 @@ def create_settings_file(project, username, token):
 
     return yaml.dump(proj_settings)
 
-def create_project_resources(project, repository=None):
+def create_project_resources(project, username, repository=None):
     create_environment_image(project, repository)
-    create_helm_resources(project, repository)
+    create_helm_resources(project, username, repository)
 
 
 def create_environment_image(project, repository=None):
@@ -31,14 +31,18 @@ def create_environment_image(project, repository=None):
         start_job(definition)
 
 
-def create_helm_resources(project, repository=None):
-
+def create_helm_resources(project, user, repository=None):
+    from rest_framework.authtoken.models import Token
+    token = Token.objects.get_or_create(user=user)
+    proj_settings = create_settings_file(project, user.username, token[0].key)
+    # proj_settings = proj_settings.translate(str.maketrans({"'":  r"\'", "]": r"\]", "[":r"\["}))
     parameters = {'release': str(project.slug),
                   'chart': 'project',
                   'minio.access_key': project.project_key,
                   'minio.secret_key': project.project_secret,
                   'global.domain': settings.DOMAIN,
-                  'storageClassName': settings.STORAGECLASS}
+                  'storageClassName': settings.STORAGECLASS,
+                  'settings_file': proj_settings}
     if repository:
         parameters.update({'labs.repository': repository})
 

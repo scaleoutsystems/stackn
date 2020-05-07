@@ -96,8 +96,17 @@ def save_default_files(path):
 
 
 def get_default_config_file_path():
-    return os.getcwd() + '/project.yaml'
-
+    # In order of priority:
+    # 1. Current folder/project.yaml
+    # 2. ~/.scaleout/project.yaml
+    config_file_path = os.getcwd() + '/project.yaml'
+    if os.path.exists(config_file_path):
+        return config_file_path
+    home = os.path.expanduser("~")
+    config_file_path = os.path.join(home, '.scaleout/project.yaml')
+    if os.path.exists(config_file_path):
+        return config_file_path
+    return None
 
 def save_default_config(path):
     entry_points = {
