@@ -20,5 +20,6 @@ python3 manage.py migrate
 echo "loading seed data..."
 python3 manage.py loaddata projects/fixtures/fixtures.json
 python3 manage.py loaddata projects/fixtures/data.json
+python3 manage.py loaddata deployments/fixtures/data.json
 echo "starting serving..."
 python3 manage.py runserver 0.0.0.0:8080

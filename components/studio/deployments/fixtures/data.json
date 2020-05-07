@@ -1,0 +1,12 @@
+[{
+  "model": "deployments.deploymentdefinition",
+  "pk": 1,
+  "fields": {
+    "access": "PU",
+    "name": "py37",
+    "image": "scaleoutsystems/pyenv:latest",
+    "path_predict": "predict",
+    "created_at": "2020-03-17T08:36:01.459Z",
+    "uploaded_at": "2020-03-16T12:01:51.999Z"
+  }
+}]
