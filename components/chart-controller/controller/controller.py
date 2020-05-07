@@ -60,18 +60,23 @@ class Controller:
         """
 
         for key in options:
+            print(key)
+            print(options[key])
             extras = extras + ' --set {}={}'.format(key, options[key])
 
         refresh_charts(self.branch)
 
-        args = 'helm install {release} charts-{branch}/scaleout/{chart}{extras}'.format(release=options['release'],
-                                                                                        branch=self.branch,
-                                                                                        chart=options['chart'],
-                                                                                        extras=extras).split(' ')
-        print(args, flush=True)
-        #return True
+        volume_root = "/"
+        if "TELEPRESENCE_ROOT" in os.environ:
+            volume_root = os.environ["TELEPRESENCE_ROOT"]
+        kubeconfig = os.path.join(volume_root, 'root/.kube/config')
+
+        args = ['helm', 'install', '--kubeconfig', kubeconfig, options['release'], 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])]
+        for key in options:
+            args.append('--set')
+            args.append('{}={}'.format(key, options[key]))
+
         status = subprocess.run(args, cwd=self.cwd)
-        #status = True
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):
