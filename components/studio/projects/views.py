@@ -86,7 +86,7 @@ def create(request):
 
         success = True
         try:
-            create_project_resources(project, repository=repository)
+            create_project_resources(project, request.user, repository=repository)
         except ProjectCreationException as e:
             print("ERROR: could not create project resources")
             success = False
