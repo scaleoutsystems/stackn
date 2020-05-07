@@ -4,8 +4,8 @@
   "fields": {
     "name": "Default",
     "slug": "default",
-    "image": "jupyter/minimal-notebook:latest",
-    "dockerfile": "FROM jupyter/minimal-notebook",
+    "image": "scaleoutsystems/jupyter-stackn:latest",
+    "dockerfile": "FROM scaleoutsystems/jupyter-stackn:latest",
     "startup": "",
     "teardown": "",
     "updated_at": "2020-03-17T08:36:01.459Z",
