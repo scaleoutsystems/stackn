@@ -37,14 +37,7 @@ class StudioClient(Runtime):
         self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
         self.api_url = self.auth_url.replace("/api-token-auth",'')
-
-        # Connect requests and sets an auth token (unique to this session)
-        self.login = login
-        if self.login:
-            self.connect()
-            self.auth_headers = {'Authorization': 'Token {}'.format(self.token)}
-        else:
-            self.auth_headers = None
+        self.auth_headers = {'Authorization': 'Token {}'.format(self.config['token'])}
 
         # Fetch and set all active API endpoints
         if endpoints:
@@ -107,8 +100,8 @@ class StudioClient(Runtime):
 
         # TODO: "studio" subdomain hardcoded here
         #url = "https://studio.{}/api/".format(self.config['so_domain_name'])
-        headers = {'Authorization': 'Token {}'.format(self.token)}
-        r = requests.get(self.api_url, headers=headers)
+    
+        r = requests.get(self.api_url, headers=self.auth_headers)
 
         if (r.status_code < 200 or r.status_code > 299):
             print("Endpoint list failed.")

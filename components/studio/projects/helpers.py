@@ -1,9 +1,23 @@
 from .exceptions import ProjectCreationException
 from django.conf import settings
 import requests as r
+import os
+import yaml
 from .models import Environment
 from .jobs import load_definition, start_job
 
+def create_settings_file(project, username, token):
+    proj_settings = dict()
+    proj_settings['auth_url'] = os.path.join('https://'+settings.DOMAIN, 'api/api-token-auth')
+    proj_settings['access_key'] = project.project_key
+    proj_settings['username'] = username
+    proj_settings['token'] = token
+    proj_settings['so_domain_name'] = settings.DOMAIN
+    
+    proj_settings['Project'] = dict()
+    proj_settings['Project']['project_name'] = project.name
+
+    return yaml.dump(proj_settings)
 
 def create_project_resources(project, repository=None):
     create_environment_image(project, repository)
