@@ -49,9 +49,9 @@ def create(request, user, project):
         if form.is_valid():
             obj = form.save()
 
-            url = '/projects/{}/{}/models/{}'.format(user, project.slug, obj.pk)
+            url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
         else:
-            url = '/projects/{}/{}/models/'.format(user, project.slug)
+            url = '/{}/{}/models/'.format(user, project.slug)
 
         return HttpResponseRedirect(url)
     else:
@@ -106,7 +106,7 @@ def details(request, user, project, id):
 
             run_job(instance)
 
-            return HttpResponseRedirect('/projects/{}/{}/models/'.format(user, project.slug))
+            return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
 
@@ -173,7 +173,7 @@ def model_reports(request, user, project, id):
 
             run_job(instance)
 
-            return HttpResponseRedirect('/projects/{}/{}/models/'.format(user, project.slug))
+            return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
 
