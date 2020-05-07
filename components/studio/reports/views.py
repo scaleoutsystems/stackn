@@ -47,9 +47,9 @@ def add(request, user, project):
 
             get_visualiser_file(project.pk, obj.visualiser)
 
-            url = '/projects/{}/{}/reports/{}'.format(request.user, project.slug, obj.pk)
+            url = '/{}/{}/reports/{}'.format(request.user, project.slug, obj.pk)
         else:
-            url = '/projects/{}/{}/reports/'.format(request.user, project.slug)
+            url = '/{}/{}/reports/'.format(request.user, project.slug)
 
         return HttpResponseRedirect(url)
     else:
@@ -95,7 +95,7 @@ def delete_generator(request, user, project, id):
             
         report.delete()
 
-        return HttpResponseRedirect('/projects/{}/{}/reports/'.format(request.user, project.slug))
+        return HttpResponseRedirect('/{}/{}/reports/'.format(request.user, project.slug))
 
     return render(request, 'report_confirm_delete.html', locals())
 
@@ -113,6 +113,6 @@ def delete_report(request, user, project, id):
 
         report.delete()
 
-        return HttpResponseRedirect('/projects/{}/{}/models/'.format(request.user, project.slug))
+        return HttpResponseRedirect('/{}/{}/models/'.format(request.user, project.slug))
 
     return render(request, 'report_confirm_delete.html', locals())
