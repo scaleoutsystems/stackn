@@ -16,7 +16,6 @@ from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer
 
-
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
@@ -29,6 +28,15 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
         """
         current_user = self.request.user
         return Model.objects.filter(project__owner__username=current_user)
+    
+    def destroy(self, request, *args, **kwargs):
+        model = self.get_object()
+        current_user = self.request.user
+        if current_user == model.project.owner:
+            model.delete()
+            return HttpResponse('ok', 200)
+        else:
+            return HttpResponse('Not Allowed', 400)
 
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
