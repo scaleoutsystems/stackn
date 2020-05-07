@@ -143,6 +143,14 @@
     </div>
 
     <div class="container-fluid" style="padding:15px;">
+      <h5>Project Settings</h5>
+      <h6 style="padding-bottom: 15px;">
+        You need a project settings file to use the CLI.
+      </h6>
+      <a href="{% url 'projects:download_settings' request.user project.slug %}" class="btn btn-sm btn-primary">Download project.yaml</a>
+    </div>
+
+    <div class="container-fluid" style="padding:15px;">
         <h5 style="padding-bottom: 15px;">Danger Zone</h5>
         <div>
             <h6 style="padding-bottom: 15px;">
