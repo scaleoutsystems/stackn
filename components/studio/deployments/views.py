@@ -10,8 +10,6 @@ from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
 from models.models import Model
 from django.urls import reverse
 
-import json2html
-
 
 @login_required(login_url='/accounts/login')
 def predict(request, id, project):
@@ -28,7 +26,7 @@ def predict(request, id, project):
         if form.is_valid():
             import requests
             import json
-            
+
             predict_url = 'https://{}/{}'.format(deployment.endpoint, deployment.deployment.path_predict)
 
             # Get user token
