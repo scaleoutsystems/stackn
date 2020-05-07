@@ -26,7 +26,7 @@ def _check_status(r,error_msg="Failed"):
 
 class StudioClient(Runtime):
 
-    def __init__(self, config=None, login=True, endpoints=True):
+    def __init__(self, config=None):
         super(StudioClient, self).__init__()
 
 
@@ -40,8 +40,7 @@ class StudioClient(Runtime):
         self.auth_headers = {'Authorization': 'Token {}'.format(self.config['token'])}
 
         # Fetch and set all active API endpoints
-        if endpoints:
-            self.get_endpoints()
+        self.get_endpoints()
 
         self.project = self.get_project(self.project_name)
         if not self.project:

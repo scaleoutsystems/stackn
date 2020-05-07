@@ -20,16 +20,9 @@ CONTEXT_SETTINGS = dict(
     ),
     type=click.Path(exists=False, dir_okay=True),
 )
-@click.option(
-    '--login/--no-login',
-    default=True
-)
-@click.option(
-    '--endpoints/--no-endpoints',
-    default=True
-)
+
 @click.pass_context
-def main(ctx, project_dir, login, endpoints):
+def main(ctx, project_dir):
     ctx.obj = dict()
     ctx.obj['PROJECT_DIR'] = project_dir
 
@@ -38,4 +31,4 @@ def main(ctx, project_dir, login, endpoints):
         from scaleout.project import Project
         from scaleout.runtime.runtime import Runtime
         from scaleout.studioclient import StudioClient
-        ctx.obj['CLIENT'] = StudioClient(login=login, endpoints=endpoints)
+        ctx.obj['CLIENT'] = StudioClient()
