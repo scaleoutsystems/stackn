@@ -212,38 +212,6 @@ class StudioClient(Runtime):
         print("No model found with id: ", model_id)
         return None
 
-    def get_model(self,name):
-        """ Return model object and model metadata. """
-        url = os.path.join(self.models_api, '?name={}'.format(name))
-        r = requests.get(url, headers=self.auth_headers)
-        if _check_status(r,error_msg="Get model failed."):
-            return json.loads(r.content)
-        else:
-            return r.status_code
-
-    def delete_model(self,model_name, tag=None):
-        """ Delete a model. If tag is none, all tags associated with model_name
-        are deleted. If a tag is given, only that tag is deleted.   """
-
-        # TODO: Implement delete in the Studio backend
-
-        # Get all model ids with correct name
-        models = self.list_models()
-        models_to_delete = []
-        for model in models:
-            if model["name"] == model_name and (model["tag"]==tag or tag==None):
-                models_to_delete.append(model)
-
-        for model in models_to_delete:
-            print(models)
-            url = self.models_api
-            #url = "https://{}/api/models/{}".format(self.config['so_domain_name'],model["id"])
-            model_uid = model["uid"]
-            r = requests.delete(url,headers=self.auth_headers)
-            if _check_status(r,"Failed to delete model: {}".format(model["uid"])):
-                # Delete the data in minio
-                repo.delete_artifact(model_uid)        
-
     def create_model(self, instance, model_name, tag='latest', model_description=None,is_file=True):
         """ Publish a model to Studio. """
 
@@ -274,29 +242,6 @@ class StudioClient(Runtime):
         return True
 
     def deploy_model(self, model_name, model_tag, deploy_context):
-        
-        # dd = self.get_deployment_definition(deploy_context)
-        # if dd and ('id' in dd[0]):
-        #     context_id = dd[0]['id']
-        # else:
-        #     print('Deployment definition {} does not exist.'.format(deploy_context))
-
-        # model_obj = self.get_model(model)
-        # model_id = model_obj[0]['id']
-
-        # url = self.deployment_instance_api
-        #endpoint = "http://{}-{}.default/v1/models/model:predict".format(model_name, version)
-        # endpoint = url+'predict/?name={}&version={}'.format(model_name, version)
-
-        # dp_data = {"deployment": context_id,
-        #            "model": model_id,
-        #            "name": model_name,
-        #            "endpoint": 'http://default.com',
-        #            "version": version}
-        
-        # r = requests.post(url, json=dp_data, headers=self.auth_headers)
-        # if not _check_status(r, error_msg="Failed to create deployment."):
-        #     return False
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name, "tag": model_tag, "depdef": deploy_context}
@@ -322,6 +267,22 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
+    def get_models(self, name, tag=None):
+        url = os.path.join(self.models_api, '?name={}'.format(name))
+        if tag:
+            url = url+'&tag='+str(tag)
+        r = requests.get(url, headers=self.auth_headers)
+        return json.loads(r.content)
+
+    def delete_model(self, name, tag=None):
+        models  = self.get_models(name, tag)
+        for model in models:
+            url = os.path.join(self.models_api, '{}'.format(model['id']))
+            r = requests.delete(url, headers=self.auth_headers)
+            if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, tag)):
+                pass
+            else:
+                print("Deleted model {}:{}.".format(model['name'], model['tag']))
 
 if __name__ == '__main__':
 
