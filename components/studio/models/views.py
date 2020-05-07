@@ -29,6 +29,7 @@ def list(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
     models = Model.objects.filter(project=project)
+    # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
