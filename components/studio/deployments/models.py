@@ -7,12 +7,22 @@ from django.utils.text import slugify
 import requests
 
 class DeploymentDefinition(models.Model):
+
+    PRIVATE = 'PR'
+    PUBLIC = 'PU'
+    ACCESS = [
+        (PRIVATE, 'Private'),
+        (PUBLIC, 'Public'),
+    ]
+
     project = models.ForeignKey('projects.Project',
                                 on_delete=models.DO_NOTHING,
-                                related_name='project_owner')
+                                related_name='project_owner', blank=True, null=True)
+    access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     name = models.CharField(max_length=512, unique=True)
-    bucket = models.CharField(max_length=512)
-    filename = models.CharField(max_length=512)
+    bucket = models.CharField(max_length=512, blank=True, null=True)
+    filename = models.CharField(max_length=512, blank=True, null=True)
+    image = models.CharField(max_length=512, blank=True, null=True)
     path_predict = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
@@ -75,7 +85,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     
 
     context = instance.deployment
-    context_image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, context.name)
+    context_image = context.image
 
     project = model.project
     project_slug = project.slug

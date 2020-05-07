@@ -12,3 +12,6 @@ class DeploymentInstanceForm(forms.ModelForm):
     class Meta:
         model = DeploymentInstance
         fields = ('model', 'access', 'deployment')
+
+class PredictForm(forms.Form):
+    file = forms.FileField()

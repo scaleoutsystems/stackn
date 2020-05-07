@@ -18,7 +18,7 @@ spec:
 DEPLOY_DEFINITION_TEMPLATE = '''apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-deploy-definition-$name-$jobid
+  name: bld-depdef-$name-$jobid
 spec:
   template:
     spec:
@@ -70,10 +70,11 @@ def get_instance_from_definition(instance):
 def build_definition(instance):
     import uuid
     build_templ = Template(DEPLOY_DEFINITION_TEMPLATE)
+    image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, instance.name)
     job = build_templ.substitute(bucket=instance.bucket,
                                  context=instance.filename,
                                  name=instance.name,
-                                 jobid=uuid.uuid1().hex,
+                                 jobid=uuid.uuid1().hex[0:5],
                                  image='{}.default.svc.cluster.local:5000/depdef-{}'.format(settings.REGISTRY_SVC, instance.name),
                                  access_key=instance.project.project_key,
                                  secret_key=instance.project.project_secret,
@@ -82,3 +83,5 @@ def build_definition(instance):
     from projects.jobs import start_job
     job = yaml.safe_load(job)
     start_job(job)
+    instance.image = image
+    instance.save()

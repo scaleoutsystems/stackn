@@ -30,6 +30,7 @@
                         <th>Definition</th>
                         <th>Actions</th>
                     {% endif %}
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -52,6 +53,7 @@
                                 Callrate: 5 calls/sec
                             </td>
                         {% endif %}
+                        <td><a href="{% url 'deployments:predict' project.slug deploy.id %}" class="btn btn-sm btn-primary">Predict</a></td>
                     </tr>
                     {% if is_authorized %}
                         <script>
@@ -64,6 +66,7 @@
                             });
                         </script>
                     {% endif %}
+                    
                 {% endfor %}
                 </tbody>
             </table>
