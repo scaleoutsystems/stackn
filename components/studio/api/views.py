@@ -101,7 +101,7 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
           instance = DeploymentInstance.objects.get(endpoint=endpoint)
       except:
           return HttpResponse(status=500)
-      if instance.access == 'PU' or instance.deployment.project.owner == request.user:
+      if instance.access == 'PU' or instance.model.project.owner == request.user:
           return HttpResponse('Ok', status=200)
       else:
           return HttpResponse(status=401)
