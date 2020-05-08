@@ -1,0 +1,11 @@
+
+* @morganekmefjord
+cli/* @stefanhellander
+components/chart-controller/* @morganekmefjord
+components/file-controller/* @dstoyanova
+components/s3-sync/* @morganekmefjord
+components/studio/api/* @dstoyanova
+components/studio/controller/* @dstoyanova
+components/studio/projects/* @dstoyanova
+components/studio/reports/* @dstoyanova
+components/studio/templates/* @dstoyanova
