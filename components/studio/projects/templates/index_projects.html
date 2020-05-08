@@ -1,18 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="col-md-11">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h2>Projects</h2>
-            {% if is_authorized %}
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="{% url 'deployments:deployment_add' request.user project.slug %}">
-                        <button id="create" class="btn btn-large btn-primary">Deploy</button>
-                    </a>
-                </div>
-            {% endif %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Projects</h2>
+        {% if is_authorized %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'deployments:deployment_add' request.user project.slug %}">
+                <button id="create" class="btn btn-large btn-primary">Deploy</button>
+            </a>
         </div>
+        {% endif %}
+    </div>
     <div class="row">
-    {% for project in projects %}
+        {% if not request.user.is_authenticated %}
+        <p class="col-md-12" style="margin-left: 15px;">
+            You need to be logged in to be able to create a project.
+        </p>
+        {% endif %}
+        {% for project in projects %}
         <div class="col-sm-6">
             <div class="card card-project">
                 <div class="card-body d-flex flex-column">
@@ -22,7 +27,11 @@
                     <p class="card-text"> {{ project.description }}</p>
                     <p class="card-text">Project started: {{ project.created_at }}</p>
                     <p class="card-text">Owner {{ project.owner }}</p>
-                    <p class="card-text">Members {{ project.authorized }}</p>
+                    <p class="card-text">Members
+                        {% for user in project.authorized.all %}
+                        {{ user.username }} ,
+                        {% endfor %}
+                    </p>
                     <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
                        style="width: fit-content;">Open project</a>
                 </div>
@@ -56,10 +65,16 @@
                                        placeholder="Import from...">
                             </div>
                         </div>
-
+                        {% if request.user.is_authenticated %}
                         <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;">
                             Create project
                         </button>
+                        {% else %}
+                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;"
+                                disabled>
+                            Create project
+                        </button>
+                        {% endif %}
                     </form>
                 </div>
             </div>
