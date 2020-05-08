@@ -64,18 +64,23 @@ class Controller:
             print(options[key])
             extras = extras + ' --set {}={}'.format(key, options[key])
 
-        refresh_charts(self.branch)
-
         volume_root = "/"
         if "TELEPRESENCE_ROOT" in os.environ:
             volume_root = os.environ["TELEPRESENCE_ROOT"]
         kubeconfig = os.path.join(volume_root, 'root/.kube/config')
 
-        args = ['helm', 'install', '--kubeconfig', kubeconfig, options['release'], 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])]
+        if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
+            chart = 'charts/scaleout/'+options['chart']
+        else:
+            refresh_charts(self.branch)
+            chart = 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])
+
+        args = ['helm', 'install', '--kubeconfig', kubeconfig, options['release'], chart]
         for key in options:
             args.append('--set')
             args.append('{}={}'.format(key, options[key]))
 
+        print(args)
         status = subprocess.run(args, cwd=self.cwd)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
