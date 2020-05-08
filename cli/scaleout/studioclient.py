@@ -297,13 +297,17 @@ class StudioClient(Runtime):
 
     
 
-    def get_deployment(self, model):
-        url = os.path.join(self.deployment_instance_api, '?model={}'.format(model['id']))
-        r = requests.get(url, headers=self.auth_headers)
+    def get_deployment(self, params):
+        url = os.path.join(self.deployment_instance_api)
+        r = requests.get(url, params=params, headers=self.auth_headers)
         return json.loads(r.content)
 
     def delete_model(self, name, tag=None):
-        models  = self.get_models({'name': name, 'tag': tag})
+        if tag:
+            params = {'name': name, 'tag': tag}
+        else:
+            params = {'name': name}
+        models  = self.get_models(params)
         for model in models:
             url = os.path.join(self.models_api, '{}'.format(model['id']))
             r = requests.delete(url, headers=self.auth_headers)
@@ -313,16 +317,22 @@ class StudioClient(Runtime):
                 print("Deleted model {}:{}.".format(name, tag))
 
     def delete_deployment(self, name, tag=None):
-        models  = self.get_models({'name': name, 'tag': tag})
+        if tag:
+            params = {'name': name, 'tag': tag}
+        else:
+            params = {'name': name}
+        models  = self.get_models(params)
         for model in models:
-            deployment = self.get_deployment(model)[0]
-            print(deployment)
-            url = os.path.join(self.deployment_instance_api, '{}'.format(deployment['id']))
-            r = requests.delete(url, headers=self.auth_headers)
-            if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
-                pass
-            else:
-                print("Deleted deployent {}:{}.".format(model['name'], model['tag']))
+            deployment = self.get_deployment({'model':model['id']})
+            # print(deployment)
+            if deployment:
+                deployment = deployment[0]
+                url = os.path.join(self.deployment_instance_api, '{}'.format(deployment['id']))
+                r = requests.delete(url, headers=self.auth_headers)
+                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
+                    pass
+                else:
+                    print("Deleted deployment {}:{}.".format(model['name'], model['tag']))
 
 if __name__ == '__main__':
 

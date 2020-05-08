@@ -20,7 +20,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name']
+    filterset_fields = ['id','name', 'tag']
 
     def get_queryset(self):
         """
@@ -66,6 +66,7 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
 class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentInstanceSerializer
+    filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id', 'model']
     def get_queryset(self):
         """
@@ -73,6 +74,7 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         for the currently authenticated user.
         """
         current_user = self.request.user
+        print(self.request.query_params)
         return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
     
     def destroy(self, request, *args, **kwargs):
