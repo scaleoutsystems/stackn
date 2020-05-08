@@ -26,6 +26,15 @@ def delete_model_cmd(ctx, name, tag=None):
     client = ctx.obj['CLIENT']
     client.delete_model(name, tag)
 
+@delete_cmd.command('deployment')
+@click.option('-n', '--name', required=True)
+@click.option('-t', '--tag')
+@click.pass_context
+def delete_model_cmd(ctx, name, tag=None):
+    """ Delete a model """
+    client = ctx.obj['CLIENT']
+    client.delete_deployment(name, tag)
+
 # @delete_cmd.command('deployments')
 # @click.pass_context
 # def delete_deployment_cmd(ctx):

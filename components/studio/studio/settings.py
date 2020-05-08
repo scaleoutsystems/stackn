@@ -20,7 +20,7 @@ AUTHENTICATION_BACKENDS = [
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DOMAIN = 'platform.stackn.akkelis.com'
+DOMAIN = 'platform.stacken.akkelis.com'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -200,7 +200,7 @@ CELERY_ENABLE_UTC = True
 
 EXTERNAL_KUBECONF = True
 NAMESPACE = 'default'
-STORAGECLASS = 'aws-efs'
+STORAGECLASS = 'microk8s-hostpath'
 
 try:
     from .settings_local import *
