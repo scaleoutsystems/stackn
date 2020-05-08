@@ -17,11 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    template = 'models_cards.html'
+    models = Model.objects.filter(access='PU')
 
-    models = Model.objects.all()
+    return render(request, 'models_cards.html', locals())
 
-    return render(request, template, locals())
 
 @login_required(login_url='/accounts/login')
 def list(request, user, project):
@@ -111,6 +110,23 @@ def details(request, user, project, id):
         form = GenerateReportForm()
 
     return render(request, 'models_details.html', locals())
+
+
+def details_public(request, id):
+    model = Model.objects.filter(pk=id).first()
+    deployments = DeploymentInstance.objects.filter(model=model)
+
+    reports = Report.objects.filter(model__pk=id, status='C').order_by('-created_at')
+    report_dtos = []
+    for report in reports:
+        report_dtos.append({
+            'id': report.id,
+            'description': report.description,
+            'created_at': report.created_at,
+            'filename': get_download_link(model.project.pk, 'report_{}.json'.format(report.id))
+        })
+
+    return render(request, 'models_details_public.html', locals())
 
 
 @login_required(login_url='/accounts/login')
