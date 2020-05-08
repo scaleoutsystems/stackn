@@ -47,9 +47,12 @@ class ProjectManager(models.Manager):
 
     def create_project(self, name, owner, description, repository):
         letters = string.ascii_lowercase
+        slug = name.replace(" ","-").replace("_","-")
+        from .helpers import urlify
+        slug = urlify(slug)
         slug_extension = ''.join(random.choice(letters) for i in range(3))
 
-        slug = '{}-{}'.format(slugify(name), slug_extension)
+        slug = '{}-{}'.format(slugify(slug), slug_extension)
         key = self.generate_passkey()
         secret = self.generate_passkey(40)
 
