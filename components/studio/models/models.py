@@ -4,6 +4,16 @@ from django.db.models.signals import pre_delete
 from deployments.models import DeploymentInstance
 
 class Model(models.Model):
+
+    PRIVATE = 'PR'
+    LIMITED = 'LI'
+    PUBLIC = 'PU'
+    ACCESS = [
+        (PRIVATE, 'Private'),
+        (LIMITED, 'Limited'),
+        (PUBLIC, 'Public'),
+    ]
+
     CREATED = 'CR'
     DEPLOYED = 'DP'
     STATUS = [
@@ -13,6 +23,7 @@ class Model(models.Model):
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
+    access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
