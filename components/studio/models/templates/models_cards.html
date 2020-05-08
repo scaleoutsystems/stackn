@@ -1,20 +1,9 @@
-{% extends is_authorized|yesno:"baseproject.html,base.html" %}
-
-{% block extra_head %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="{% if is_authorized %} col-md-9 {% else %} col-md-11 {% endif %}">
+<div class="col-md-11">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Models</h2>
-        {% if is_authorized %}
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'models:create' request.user project.slug %}">
-                <button id="create" class="btn btn-large btn-primary">Deploy</button>
-            </a>
-        </div>
-        {% endif %}
     </div>
     <div class="row">
         {% for model in models %}
@@ -23,17 +12,30 @@
                 <h5 class="card-title">{{ model.name }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{{ model.project.name }}</h6>
                 <p class="card-text" style="margin-bottom: 30px;">{{ model.description }}</p>
-                <a href="#" class="card-link">Deployments</a>
-                <a href="{% url 'models:details' request.user model.project.slug model.id %}" class="card-link">
+                {% if request.user.is_authenticated %}
+                    {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
+                    <a href="{% url 'models:details' request.user model.project.slug model.id %}" class="card-link">
+                        Model Card
+                    </a>
+                    {% else %}
+                    <a href="{% url 'models:details_public' model.id %}" class="card-link">
+                        Model Card
+                    </a>
+                    {% endif%}
+                {% else %}
+                <a href="{% url 'models:details_public' model.id %}" class="card-link">
                     Model Card
                 </a>
+                {% endif%}
                 <p class="card-text" style="margin-top: 10px;">
                     <small class="text-muted">Uploaded at {{ model.uploaded_at }}</small>
                 </p>
             </div>
         </div>
         {% empty %}
-        No publicly published services available.
+        <p style="margin-left: 15px;">
+            No publicly published services available.
+        </p>
         {% endfor %}
     </div>
 </div>
