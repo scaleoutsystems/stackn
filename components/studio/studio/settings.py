@@ -20,7 +20,7 @@ AUTHENTICATION_BACKENDS = [
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DOMAIN = 'platform.stackn.akkelis.com'
+DOMAIN = 'platform.local'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -33,7 +33,7 @@ DEBUG = True
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = ['platform.scaleoutsystems.com']
+    ALLOWED_HOSTS = ['platform.local']
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
