@@ -20,6 +20,7 @@ If you want to get started please see the documentation "Getting started" sectio
 Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Our main maintainers are
+**Scaleout Systems AB** is the main contributing organization behind this project.
 - morganekmefjord
 - dstoyanova
 - stefanhellander
