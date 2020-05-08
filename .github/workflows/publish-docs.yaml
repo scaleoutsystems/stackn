@@ -1,0 +1,17 @@
+name: docs
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - 'docs/**.md'
+    paths-ignore:
+    - 'docs/**.html'
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: tool3/docsify-action@master
+      with:
+        github_token: ${{ secrets.DOCS_TOKEN }}
