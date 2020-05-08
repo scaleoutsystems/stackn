@@ -5,8 +5,7 @@ on:
     branches: [ master ]
     paths:
     - 'docs/**.md'
-    paths-ignore:
-    - 'docs/**.html'
+
 jobs:
   docs:
     runs-on: ubuntu-latest
