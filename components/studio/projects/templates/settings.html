@@ -7,11 +7,12 @@
 
     <div class="container-fluid" style="padding:15px;">
         <h5>General</h5>
-        <form>
+        <form action="{% url 'projects:change_description' request.user project.slug %}" method="POST">
+            {% csrf_token %}
             <div class="form-group row">
                 <label for="name" class="col-sm-2 col-form-label">Name</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="name" name="name" placeholder="{{ project.name }}">
+                    <input type="text" class="form-control" id="name" name="name" readonly placeholder="{{ project.name }}">
                 </div>
             </div>
             <div class="form-group row">
@@ -23,7 +24,6 @@
             </div>
 
             <button type="submit" class="btn btn-primary" name="save">Save</button>
-            <button type="submit" class="btn btn-danger" name="delete">Delete</button>
         </form>
     </div>
 
