@@ -28,8 +28,10 @@ def get_models_cmd(ctx):
 @get_cmd.command('deployments')
 @click.pass_context
 def get_deployments_cmd(ctx):
-    names = ["Name","Model","Version"]
-    keys = ["name", "model", "version"]
+    # client = ctx.obj['CLIENT']
+    # client.list_deployments()
+    names = ["Name","Tag", "Endpoint"]
+    keys = ["name", "tag", "endpoint"]
     create_table(ctx, 'deploymentInstances', names, keys)
 
 @get_cmd.command('deploymentdefinitions')

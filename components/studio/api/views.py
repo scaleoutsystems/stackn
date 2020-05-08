@@ -20,7 +20,8 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
+    filterset_fields = ['id','name', 'tag']
+
     def get_queryset(self):
         """
         This view should return a list of all the models
@@ -46,9 +47,7 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def build_definition(self, request):
-        print('Starting building of definition...')
         instance = DeploymentDefinition.objects.get(name=request.data['name'])
-        print(instance)
         build_definition(instance)
         return HttpResponse('ok', 200)
 
@@ -61,10 +60,12 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
         current_user = self.request.user
         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
 
+
 class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentInstanceSerializer
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'model']
     def get_queryset(self):
         """
         This view should return a list of all the deployments
@@ -72,6 +73,15 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         """
         current_user = self.request.user
         return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        current_user = self.request.user
+        if current_user == instance.model.project.owner:
+            instance.delete()
+            return HttpResponse('ok', 200)
+        else:
+            return HttpResponse('Not Allowed', 400)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def build_instance(self, request):

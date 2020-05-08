@@ -259,6 +259,9 @@ class StudioClient(Runtime):
 
     
     def create_list(self, resource):
+        if resource == 'deploymentInstances':
+            return self.list_deployments()
+
         url = self.endpoints[resource]
         r = requests.get(url, headers=self.auth_headers)
         if not _check_status(r, error_msg="Failed to list {}.".format(resource)):
@@ -266,22 +269,70 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def get_models(self, name, tag=None):
-        url = os.path.join(self.models_api, '?name={}'.format(name))
-        if tag:
-            url = url+'&tag='+str(tag)
+    def get_models(self, params):
+        r = requests.get(self.endpoints['models'], params=params, headers=self.auth_headers)
+        models = json.loads(r.content)
+        return models
+
+    def list_deployments(self):
+        url = self.endpoints['deploymentInstances']
         r = requests.get(url, headers=self.auth_headers)
+        if not _check_status(r, error_msg="Failed to fetch deployments"):
+            return False
+        deployments = json.loads(r.content)
+        # print(deployments)
+        depjson = []
+        for deployment in deployments:
+            model = self.get_models({'id': deployment['model']})[0]
+            # print(model)
+            # print(deployment)
+            dep = {'name': model['name'],
+                   'tag': model['tag'],
+                   'endpoint': deployment['endpoint'],
+                   'created_at': deployment['created_at']}
+            depjson.append(dep)
+        return depjson
+
+        
+
+    
+
+    def get_deployment(self, params):
+        url = os.path.join(self.deployment_instance_api)
+        r = requests.get(url, params=params, headers=self.auth_headers)
         return json.loads(r.content)
 
     def delete_model(self, name, tag=None):
-        models  = self.get_models(name, tag)
+        if tag:
+            params = {'name': name, 'tag': tag}
+        else:
+            params = {'name': name}
+        models  = self.get_models(params)
         for model in models:
             url = os.path.join(self.models_api, '{}'.format(model['id']))
             r = requests.delete(url, headers=self.auth_headers)
             if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, tag)):
                 pass
             else:
-                print("Deleted model {}:{}.".format(model['name'], model['tag']))
+                print("Deleted model {}:{}.".format(name, tag))
+
+    def delete_deployment(self, name, tag=None):
+        if tag:
+            params = {'name': name, 'tag': tag}
+        else:
+            params = {'name': name}
+        models  = self.get_models(params)
+        for model in models:
+            deployment = self.get_deployment({'model':model['id']})
+            # print(deployment)
+            if deployment:
+                deployment = deployment[0]
+                url = os.path.join(self.deployment_instance_api, '{}'.format(deployment['id']))
+                r = requests.delete(url, headers=self.auth_headers)
+                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
+                    pass
+                else:
+                    print("Deleted deployment {}:{}.".format(model['name'], model['tag']))
 
 if __name__ == '__main__':
 

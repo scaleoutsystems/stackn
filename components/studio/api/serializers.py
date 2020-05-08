@@ -22,7 +22,7 @@ class DeploymentDefinitionSerializer(ModelSerializer):
 class DeploymentInstanceSerializer(ModelSerializer):
     class Meta:
         model = DeploymentInstance
-        fields = ('deployment', 'model', 'access', 'endpoint')
+        fields = ('id','deployment', 'model', 'access', 'endpoint', 'created_at')
 
 
 class ReportSerializer(ModelSerializer):
