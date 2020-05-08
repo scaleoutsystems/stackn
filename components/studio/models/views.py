@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
+import markdown
 
 
 logger = logging.getLogger(__name__)
@@ -109,6 +110,22 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
 
+    filename = None
+    readme = None
+    import requests as r
+    url = 'http://{}-file-controller/models/{}/readme'.format(project.slug, model.name)
+    try:
+        response = r.get(url)
+        if response.status_code == 200 or response.status_code == 203:
+            payload = response.json()
+            if payload['status'] == 'OK':
+                filename = payload['filename']
+
+                md = markdown.Markdown(extensions=['extra'])
+                readme = md.convert(payload['readme'])
+    except Exception as e:
+        logger.error("Failed to get response from {} with error: {}".format(url, e))
+
     return render(request, 'models_details.html', locals())
 
 
@@ -125,6 +142,22 @@ def details_public(request, id):
             'created_at': report.created_at,
             'filename': get_download_link(model.project.pk, 'report_{}.json'.format(report.id))
         })
+
+    filename = None
+    readme = None
+    import requests as r
+    url = 'http://{}-file-controller/models/{}/readme'.format(model.project.slug, model.name)
+    try:
+        response = r.get(url)
+        if response.status_code == 200 or response.status_code == 203:
+            payload = response.json()
+            if payload['status'] == 'OK':
+                filename = payload['filename']
+
+                md = markdown.Markdown(extensions=['extra'])
+                readme = md.convert(payload['readme'])
+    except Exception as e:
+        logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return render(request, 'models_details_public.html', locals())
 
