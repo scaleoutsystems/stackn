@@ -122,7 +122,7 @@
                     <td>{{ report.description }}</td>
                     <td>{{ report.created_at }}</td>
                     <td>
-                        <a href="{% url 'reports:visualize' request.user project.slug report.id %}">
+                        <a href="{% url 'reports:visualize_public' report.id %}">
                             <button id="report" class="btn btn-sm btn-outline-secondary">View</button>
                         </a>
                         <a href="{{ report.filename }}" download="">
