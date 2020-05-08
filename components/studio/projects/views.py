@@ -14,10 +14,15 @@ from django.db.models import Q
 logger = logging.getLogger(__name__)
 
 
-@login_required(login_url='/accounts/login')
 def index(request):
     template = 'index_projects.html'
-    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     request.session['next'] = '/projects/'
     return render(request, template, locals())
 
