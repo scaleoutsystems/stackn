@@ -95,10 +95,6 @@
                                 Deployment
                             </button>
 
-                            <a href="{% url 'models:model_reports' request.user project.slug model.id %}">
-                                <button id="model_reports" class="btn btn-sm btn-outline-secondary">Reports</button>
-                            </a>
-
                             <!-- Button trigger modal -->
                             <button type="button" class="btn btn-sm btn-outline-warning" data-toggle="modal"
                                     data-target="#deleteModal{{model.id}}">

@@ -17,9 +17,6 @@
             <li class="breadcrumb-item">
                 <a href="{% url 'models:details' user project.slug report.model.id %}">{{ report.model.name }}</a>
             </li>
-            <li class="breadcrumb-item">
-                <a href="{% url 'models:model_reports' user project.slug report.model.id %}">Reports</a>
-            </li>
             <li class="breadcrumb-item active" aria-current="page">Report #{{ report.id }}</li>
         </ol>
     </nav>

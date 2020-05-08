@@ -8,8 +8,7 @@ urlpatterns = [
 
     path('', views.index, name='index'),
     path('<user>/<project>/models', views.list, name='list'),
-    path('<user>/<project>/models/create', views.create, name='create'),
+    # path('<user>/<project>/models/create', views.create, name='create'),
     path('<user>/<project>/models/<int:id>', views.details, name='details'),
     path('<user>/<project>/models/<int:id>/delete', views.delete, name='delete'),
-    path('<user>/<project>/models/<int:id>/reports', views.model_reports, name='model_reports'),
 ]
