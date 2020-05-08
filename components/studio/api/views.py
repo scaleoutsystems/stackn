@@ -47,9 +47,7 @@ class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMi
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def build_definition(self, request):
-        print('Starting building of definition...')
         instance = DeploymentDefinition.objects.get(name=request.data['name'])
-        print(instance)
         build_definition(instance)
         return HttpResponse('ok', 200)
 
@@ -74,7 +72,6 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         for the currently authenticated user.
         """
         current_user = self.request.user
-        print(self.request.query_params)
         return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
     
     def destroy(self, request, *args, **kwargs):
