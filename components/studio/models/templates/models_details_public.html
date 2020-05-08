@@ -140,7 +140,20 @@
             {% endif %}
         </div>
         <div class="tab-pane fade" id="readme" role="tabpanel" aria-labelledby="readme-tab">
-            README.md
+            {% if not readme %}
+            <div class="col-md-12 d-flex justify-content-center">
+                No README.md file available for this model.
+            </div>
+            {% else %}
+            <div class="col-sm-10">
+                <h4>
+                    {{ filename }}
+                </h4>
+                <div class="readme-box">
+                    {{ readme | safe }}
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
