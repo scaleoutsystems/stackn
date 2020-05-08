@@ -57,8 +57,6 @@
     <div class="container-fluid" style="padding:15px;">
         <h5>Environment</h5>
         <h6>Settings for environment</h6>
-        Current default Environment:
-        <p> {{ project.environment.name}}</p>
         <form action="{% url 'projects:change_environment' request.user project.slug %}" method="POST">
             {% csrf_token %}
 
@@ -67,7 +65,9 @@
                 <div class="col-sm-10">
                     <select name="environment" class="form-control">
                         {% for environment in environments %}
-                        <option value="{{ environment.slug }}">{{ environment.name }}</option>
+                        <option value="{{ environment.slug }}"
+                                {% if environment.id == project.environment.id %} selected="selected" {% endif %}
+                        > {{ environment.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
