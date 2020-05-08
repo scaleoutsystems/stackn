@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+<div class="col-md-11">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>{{ report.model.name }} - Classification Report</h2>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'models:details_public' report.model.id %}">{{ report.model.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Report #{{ report.id }}</li>
+        </ol>
+    </nav>
+    <div class="row">
+        <div class="col-md-6 text-center" style="padding-top: 31px;">
+            <img src="reports/{{ filename }}" alt="classification_report">
+        </div>
+        <div class="col-md-6 text-center">
+            <div class="row">
+                <label class="col-md-2" style="margin-bottom: 0px; padding-top: 4px;">
+                    Compare to:
+                </label>
+                <select class="col-md-10 form-control form-control-sm">
+                    <option>--</option>
+                    {% for r in reports_compare %}
+                    <option value="report_{{ r.id }}.png">Model {{ r.model.name }} - Report# {{ r.id }}
+                        - {{ r.created_at }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div id="report_holder">
+                    <div id="report_image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrascripts %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("select").change(function() {
+            $('#report_image').remove();
+            $('#report_holder').html('<div id="report_image"><img src="/static/reports/' + $(this).val() +'" alt="classification_report"></div>');
+        });
+    });
+</script>
+{% endblock %}
