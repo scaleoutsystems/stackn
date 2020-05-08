@@ -89,7 +89,9 @@
                 <tr>
                     <th scope="row">{{ d.pk }}</th>
                     <td>{{ d.model.name }}:{{ d.model.tag }}</td>
-                    <td>{{ d.endpoint }}</td>
+                    <td>
+                        <a href="{{ d.endpoint }}" target="_blank">{{ d.endpoint }}</a>
+                    </td>
                     <td>{{ d.created_at }}</td>
                 </tr>
                 {% endfor %}
