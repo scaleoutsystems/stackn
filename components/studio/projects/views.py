@@ -1,5 +1,5 @@
 from django.shortcuts import render, reverse
-from .models import Project
+from .models import Project, Environment
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from .exceptions import ProjectCreationException
@@ -33,6 +33,7 @@ def settings(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
+    environments = Environment.objects.all()
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -65,14 +66,15 @@ def change_environment(request, user, project_slug):
     from .models import Environment
 
     if request.method == 'POST':
-        environment_name = request.POST.get('environment_name', '')
-        if environment_name is not '':
-            environment = Environment.objects.filter(name=environment_name).first()
+        environment_slug = request.POST.get('environment', '')
+        if environment_slug is not '':
+            environment = Environment.objects.filter(slug=environment_slug).first()
             if environment:
                 project.environment = environment
                 project.save()
-        from .helpers import create_environment_image
-        create_environment_image(project)
+        # TODO fix the create_environment_image creation
+        #from .helpers import create_environment_image
+        #create_environment_image(project)
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
