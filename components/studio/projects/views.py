@@ -78,6 +78,20 @@ def change_environment(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
+@login_required(login_url='/accounts/login')
+def change_description(request, user, project_slug):
+    project = Project.objects.filter(slug=project_slug).first()
+
+    if request.method == 'POST':
+        description = request.POST.get('description', '')
+        if description is not '':
+            project.description = description
+            project.save()
+        # TODO fix the create_environment_image creation
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
+
 
 @login_required(login_url='/accounts/login')
 def create(request):
