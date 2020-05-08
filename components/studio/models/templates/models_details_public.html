@@ -1,6 +1,7 @@
-{% extends 'baseproject.html' %}
+{% extends 'base.html' %}
+
 {% block content %}
-<div class="col-md-9">
+<div class="col-md-11">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
         <h2>{{ model.name }}</h2>
     </div>
@@ -104,21 +105,6 @@
             {% endif %}
         </div>
         <div class="tab-pane fade" id="reports" role="tabpanel" aria-labelledby="reports-tab">
-            <form method="POST" class="row col-md-7" style="float: right;padding-right: 0px;margin-bottom: 30px;">
-                {% csrf_token %}
-
-                <select class="col-md-8 form-control" type="text" name="generator_file" maxlength="100" required=""
-                        id="id_generator_file">
-                    <option value="">--</option>
-                    {% for g in report_generators %}
-                    <option value="{{ g.id }}">{{ g.generator }} - {{ g.created_at }}</option>
-                    {% endfor %}
-                </select>
-
-                <button type="submit" class="btn btn-outline-primary col-md-3" style="margin-left: 10px;">
-                    Generate new
-                </button>
-            </form>
             {% if report_dtos %}
             <table class="table table-borderless">
                 <thead>
@@ -136,14 +122,11 @@
                     <td>{{ report.description }}</td>
                     <td>{{ report.created_at }}</td>
                     <td>
-                        <a href="{% url 'reports:visualize' request.user project.slug report.id %}">
+                        <a href="{% url 'reports:visualize_public' report.id %}">
                             <button id="report" class="btn btn-sm btn-outline-secondary">View</button>
                         </a>
                         <a href="{{ report.filename }}" download="">
                             <button id="download" class="btn btn-sm btn-outline-secondary">Download</button>
-                        </a>
-                        <a href="{% url 'reports:delete_report' request.user project.slug report.id %}">
-                            <button id="delete" class="btn btn-sm btn-outline-warning">Delete</button>
                         </a>
                     </td>
                 </tr>

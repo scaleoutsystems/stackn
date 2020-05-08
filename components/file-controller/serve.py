@@ -62,6 +62,34 @@ def readme():
     return json.dumps({'status': 'OK', 'filename': filename, 'readme': readme})
 
 
+@app.route('/models/<model_name>/readme')
+def model_readme(model_name):
+    cwd = "/app/work/models/{}".format(model_name)
+
+    filename = None
+    readme = None
+    try:
+        if os.path.isfile(os.path.join(cwd, 'README.md')):
+            filename = 'README.md'
+            with open(os.path.join(cwd, 'README.md')) as f:
+                readme = f.read()
+
+        elif os.path.isfile(os.path.join(cwd, 'README.rst')):
+            filename = 'README.rst'
+            with open(os.path.join(cwd, 'README.rst')) as f:
+                readme = f.read()
+
+        elif os.path.isfile(os.path.join(cwd, 'README')):
+            filename = 'README'
+            with open(os.path.join(cwd, 'README')) as f:
+                readme = f.read()
+
+    except Exception as e:
+        print(e)
+
+    return json.dumps({'status': 'OK', 'filename': filename, 'readme': readme})
+
+
 @app.route('/reports')
 def get_report_generators():
     generators = []

@@ -82,6 +82,18 @@ def visualize_report(request, user, project, id):
     return render(request, template, locals())
 
 
+def visualize_report_public(request, id):
+    template = 'reports_details_public.html'
+
+    report = Report.objects.filter(pk=id).first()
+
+    filename = 'report_{}.png'.format(id)
+
+    reports_compare = Report.objects.filter(~Q(id=id))
+
+    return render(request, template, locals())
+
+
 @login_required(login_url='/accounts/login')
 def delete_generator(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
