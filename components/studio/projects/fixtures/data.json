@@ -4,8 +4,8 @@
   "fields": {
     "name": "Default",
     "slug": "default",
-    "image": "scaleoutsystems/jupyter-stackn:latest",
-    "dockerfile": "FROM scaleoutsystems/jupyter-stackn:latest",
+    "image": "scaleoutsystems/jupyter-stackn:master",
+    "dockerfile": "FROM scaleoutsystems/jupyter-stackn:master",
     "startup": "",
     "teardown": "",
     "updated_at": "2020-03-17T08:36:01.459Z",
