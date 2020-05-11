@@ -53,7 +53,7 @@ class Session(models.Model):
         (FINISHED, 'Finished'),
         (ABORTED, 'Aborted'),
     ]
-    project = models.ForeignKey('projects.Project', on_delete=models.DO_NOTHING, related_name='session')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='session')
 
     session_key = models.CharField(max_length=512)
     session_secret = models.CharField(max_length=512)

@@ -27,7 +27,7 @@ class Model(models.Model):
     resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey('projects.Project', on_delete=models.DO_NOTHING, related_name='model_owner')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='model_owner')
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     tag = models.CharField(max_length=10, default='latest')
     
