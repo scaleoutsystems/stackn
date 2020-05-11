@@ -133,3 +133,5 @@ repos/
 media/datasets/
 media/generators/
 media/visualisers/
+
+tele_settings.py
