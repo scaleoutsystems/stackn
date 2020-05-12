@@ -28,6 +28,7 @@ def create_settings_file(project, username, token):
     
     proj_settings['Project'] = dict()
     proj_settings['Project']['project_name'] = project.name
+    proj_settings['Project']['project_slug'] = project.slug
 
     return yaml.dump(proj_settings)
 
