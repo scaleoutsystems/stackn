@@ -16,7 +16,7 @@ class DeploymentDefinition(models.Model):
     ]
 
     project = models.ForeignKey('projects.Project',
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 related_name='project_owner', blank=True, null=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     name = models.CharField(max_length=512, unique=True)
@@ -41,9 +41,9 @@ class DeploymentInstance(models.Model):
         (PUBLIC, 'Public'),
     ]
 
-    deployment = models.ForeignKey('deployments.DeploymentDefinition', on_delete=models.DO_NOTHING)
+    deployment = models.ForeignKey('deployments.DeploymentDefinition', on_delete=models.CASCADE)
 
-    model = models.OneToOneField('models.Model', on_delete=models.DO_NOTHING, related_name='deployed_model', unique=True)
+    model = models.OneToOneField('models.Model', on_delete=models.CASCADE, related_name='deployed_model', unique=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     endpoint = models.CharField(max_length=512)
     release = models.CharField(max_length=512)

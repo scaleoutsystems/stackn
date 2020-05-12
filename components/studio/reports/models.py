@@ -21,5 +21,5 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     report = models.TextField(blank=True)
     job_id = models.CharField(max_length=256)
-    generator = models.ForeignKey('reports.ReportGenerator', on_delete=models.CASCADE)
+    generator = models.ForeignKey('reports.ReportGenerator', on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=1, choices=REPORT_STATUS, default='I')

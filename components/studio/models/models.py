@@ -16,9 +16,11 @@ class Model(models.Model):
 
     CREATED = 'CR'
     DEPLOYED = 'DP'
+    ARCHIVED = 'AR'
     STATUS = [
         (CREATED, 'Created'),
         (DEPLOYED, 'Deployed'),
+        (ARCHIVED, 'Archived'),
     ]
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -27,7 +29,11 @@ class Model(models.Model):
     resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey('projects.Project', on_delete=models.DO_NOTHING, related_name='model_owner')
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.SET_NULL,
+        related_name='model_owner',
+        null=True)
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     tag = models.CharField(max_length=10, default='latest')
     

@@ -25,10 +25,10 @@ class WorkflowInstance(models.Model):
         (FINISHED, 'Finished'),
         (ABORTED, 'Aborted'),
     ]
-    project = models.ForeignKey('projects.Project', on_delete=models.DO_NOTHING, related_name='project')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='project')
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
 
-    workflow = models.ForeignKey('workflows.WorkflowDefinition', on_delete=models.DO_NOTHING,
+    workflow = models.ForeignKey('workflows.WorkflowDefinition', on_delete=models.CASCADE,
                                  related_name='workflow_definition')
     name = models.CharField(max_length=512, unique=False)
     created_at = models.DateTimeField(auto_now_add=True)
