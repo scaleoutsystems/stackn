@@ -32,7 +32,8 @@ class StudioClient(Runtime):
 
         self.username = self.config['username']
         self.password = self.config['password']
-        self.project_name = self.config['Project']['project_name']
+        # self.project_name = self.config['Project']['project_name']
+        self.project_slug = self.config['Project']['project_slug']
         self.auth_url = self.config['auth_url']
         self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
@@ -42,14 +43,13 @@ class StudioClient(Runtime):
         # Fetch and set all active API endpoints
         self.get_endpoints()
 
-        self.project = self.get_project(self.project_name)
+        self.project = self.get_project(self.project_slug)
         if not self.project:
-            print('Did not find project: {}'.format(self.project_name))
+            print('Did not find project: {}'.format(self.project_slug))
             self.project_id = None
         else:
             self.project_id = self.project['id']
             self.project_slug = self.project['slug']
-            self.project_id = self.project['id']
 
     def get_endpoints(self):
         endpoints = self.list_endpoints()
@@ -76,11 +76,11 @@ class StudioClient(Runtime):
         #TODO: If we have multiple repositories configured, studio, minio, s3, etc, we 
         # neet to supply repository name.
 
-        project = self.get_project(self.project_name)
+        project = self.get_project(self.project_slug)
 
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
-            'minio_host': '{}-minio.{}'.format(slugify(self.project_slug),self.config['so_domain_name']),
+            'minio_host': '{}-minio.{}'.format(self.project_slug,self.config['so_domain_name']),
             'minio_port': 9000,
             'minio_access_key': project['project_key'],
             'minio_secret_key': project['project_secret'],
@@ -125,12 +125,12 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def get_project(self, project_name):
+    def get_project(self, project_slug):
         projects = self.list_projects()
         if not projects:
             return None
         for p in projects:
-            if p['name'] == project_name:
+            if p['slug'] == project_slug:
                 return p
 
     def create_deployment_definition(self, name, filepath, path_predict=''):
