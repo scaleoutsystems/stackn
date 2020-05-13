@@ -5,14 +5,14 @@
 {% block content %}
 <div class="col-md-11">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>{{ report.model.name }} - Classification Report</h2>
+        <h2>{{ report.model.name }} - Metrics</h2>
     </div>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a href="{% url 'models:details_public' report.model.id %}">{{ report.model.name }}</a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Report #{{ report.id }}</li>
+            <li class="breadcrumb-item active" aria-current="page">Metrics #{{ report.id }}</li>
         </ol>
     </nav>
     <div class="row">
@@ -27,7 +27,7 @@
                 <select class="col-md-10 form-control form-control-sm">
                     <option>--</option>
                     {% for r in reports_compare %}
-                    <option value="report_{{ r.id }}.png">Model {{ r.model.name }} - Report# {{ r.id }}
+                    <option value="report_{{ r.id }}.png">Model {{ r.model.name }} - Metrics# {{ r.id }}
                         - {{ r.created_at }}
                     </option>
                     {% endfor %}
