@@ -22,7 +22,7 @@ class Project:
         try:
             self._load_config()
         except Exception:
-            raise InvalidConfigurationError("Missing configuration file").
+            raise InvalidConfigurationError("Missing configuration file")
 
         try:
             self.api_endpoint = os.path.join(self.config['so_domain_name'], '/api')
