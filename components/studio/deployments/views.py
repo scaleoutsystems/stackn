@@ -89,7 +89,7 @@ def deployment_index(request, user, project):
     from projects.models import Project
     project = Project.objects.filter(slug=project).first()
 
-    deployments = DeploymentInstance.objects.all()
+    deployments = DeploymentInstance.objects.filter(model__project=project)
 
     return render(request, temp, locals())
 
