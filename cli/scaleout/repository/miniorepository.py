@@ -46,7 +46,7 @@ class MINIORepository(Repository):
                 secure=self.secure_mode)
 
         self.create_bucket(self.bucket)
-    
+
     def create_bucket(self, bucket_name):
         try:
             response = self.client.make_bucket(bucket_name)
@@ -59,7 +59,7 @@ class MINIORepository(Repository):
 
     def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
-        if bucket is '':
+        if not bucket:
             bucket = self.bucket
         if is_file==True:
             self.client.fput_object(bucket, instance_name, instance)
@@ -68,7 +68,7 @@ class MINIORepository(Repository):
                 self.client.put_object(bucket, instance_name, io.BytesIO(instance), len(instance))
             except Exception as e:
                 raise Exception("Could not load data into bytes {}".format(e))
-        
+
         return True
 
     def get_artifact(self, instance_name):
@@ -78,7 +78,7 @@ class MINIORepository(Repository):
             return data.read()
         except Exception as e:
             raise Exception("Could not fetch data from bucket, {}".format(e))
-        
+
 
     def list_artifacts(self):
         try:
