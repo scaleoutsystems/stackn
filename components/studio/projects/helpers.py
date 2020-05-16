@@ -18,6 +18,29 @@ def urlify(s):
 
     return s
 
+# def get_labs_memory_requests(project_slug):
+#     query = 'sum(kube_pod_container_resource_requests_memory * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'"})'
+#     # query = 'kube_pod_container_resource_requests_cpu_cores'
+    
+#     response = r.get('http://prometheus-server/api/v1/query', params={'query':query})
+#     print(response.json())
+#     result = response.json()['data']['result']
+#     if result:
+#         num_cpus = result[0]['value'][1]
+#         return num_cpus
+#     return 0
+
+def get_labs_cpu_requests(project_slug):
+    query = 'sum(kube_pod_container_resource_requests_cpu_cores * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'"})'
+
+    response = r.get('http://prometheus-server/api/v1/query', params={'query':query})
+    print(response.json())
+    result = response.json()['data']['result']
+    if result:
+        num_cpus = result[0]['value'][1]
+        return num_cpus
+    return 0
+
 def create_settings_file(project, username, token):
     proj_settings = dict()
     proj_settings['auth_url'] = os.path.join('https://'+settings.DOMAIN, 'api/api-token-auth')
@@ -48,7 +71,6 @@ def create_helm_resources(project, user, repository=None):
     from rest_framework.authtoken.models import Token
     token = Token.objects.get_or_create(user=user)
     proj_settings = create_settings_file(project, user.username, token[0].key)
-    # proj_settings = proj_settings.translate(str.maketrans({"'":  r"\'", "]": r"\]", "[":r"\["}))
     parameters = {'release': str(project.slug),
                   'chart': 'project',
                   'minio.access_key': project.project_key,
