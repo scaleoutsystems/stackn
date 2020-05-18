@@ -73,6 +73,6 @@ STACKn CLI
 Now that you are familiar with the base functionality of STACKn, a good next step is to work through the example Projects available here: 
 
 * [Classification of hand-written digits (MNIST)](https://github.com/scaleoutsystems/digits-example-project)
-* [Classfication of malignant blood cells (AML)] (https://github.com/scaleoutsystems/aml-example-project)
+* [Classfication of malignant blood cells (AML)](https://github.com/scaleoutsystems/aml-example-project)
 
 These examples will teach you how to build a ML-model from scratch and how to serve it for private or public use. 
