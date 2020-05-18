@@ -1,23 +1,22 @@
 # Getting started
 
 ## Create a Project
-The best way to start using STACKn is by creating a new Project. To do so, 
-follow the steps below:
+To get up and running with STACKn, start by creating a new Project 
+following the steps below:
 
-1. Click `Projects` in the side menu to the left.
+1. Click `Projects` in the left side menu.
 2. Type in a name and description for your Project.
 3. If you have an existing GitHub repository that you want to use as a base
-for your Project, include a URL to it in the `Import from...` field.
+for your Project, include a URL to it in the `Import from...` field. This will import the repository in your Project file area.
 
 ## Project Overview
 Once you have created a Project, you will see another side menu that gives you
-access to the different components of STACKn. In the `Overview` page, you will see
-a README.md file content which is taken from the GitHub repository that you have 
-imported when creating the project. Otherwise, you will see a __Getting Started__ 
+access to the different components of STACKn. On the `Overview` page, you will see
+a README.md file that serves as an introduction to the project. It's content is taken from a README file in the root of your working directory. If no such file is present, you will see a __Getting Started__ 
 guide similar to this one.
 
 ## Create a new Lab Session
-Lab Sessions take important part in your Projects. To set one up, follow the steps below:
+Lab Sessions let you spawn Jupyter Labs instances backed by resources of a given flavor. Labs are the hub for experimentation in your Projects. To set one up, follow the steps below:
 
 1. Go to `Labs` from the side menu to the left.
 2. Choose an `Image` and a `Flavor` for you Lab Session.
@@ -28,13 +27,13 @@ You will see a list of your Lab Sessions below the submit form.
 ![Lab Sessions](https://github.com/scaleoutsystems/stackn/tree/master/docs/images/labs.png)
 
 ## Datasets
-When you create a Project, you automatically get an S3 storage created for your datasets, 
-reports, models etc. You can control what is available in your `datasets` bucket 
-directly from STACKn in the `Datasets` page.
+When you create a Project, you automatically get an S3-compatible object storage (MinIO) for your datasets, 
+reports, models etc. You can see what is available in your `datasets` bucket 
+directly from STACKn on the `Datasets` page.
 
-On top of the page, you can find a link to your MinIO instance together with the login
+On top of the page, you find a link to your MinIO instance together with the login
 credentials. Once you are logged in, you can upload files and manage your buckets, but 
-do not delete or rename the already existing buckets.
+do not delete or rename the already existing buckets since they fill specific functions.
 
 ![Datasets](https://github.com/scaleoutsystems/stackn/tree/master/docs/images/datasets.png)
 
@@ -70,3 +69,10 @@ STACKn CLI
 - Transfer ownership of your Project to another user
 - Delete permanently your Project
 
+## Next steps
+Now that you are familiar with the base functionality of STACKn, a good next step is to work through the example Projects available here: 
+
+* [Classification of hand-written digits (MNIST)](https://github.com/scaleoutsystems/digits-example-project)
+* [Classfication of malignant blood cells (AML)] (https://github.com/scaleoutsystems/aml-example-project)
+
+These examples will teach you how to build a ML-model from scratch and how to serve it for private or public use. 
