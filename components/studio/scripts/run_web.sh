@@ -16,9 +16,9 @@ find . -path "*/migrations/*.pyc"  -delete
 echo "done!"
 echo "Installing all migrations"
 python3 manage.py makemigrations
-python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows
+python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows alliance_admin
 python3 manage.py migrate
-python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows
+python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows alliance_admin
 python3 manage.py migrate
 echo "loading seed data..."
 python3 manage.py loaddata projects/fixtures/fixtures.json
