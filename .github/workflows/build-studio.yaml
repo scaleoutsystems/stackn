@@ -35,6 +35,7 @@ jobs:
         VERSION=${GITHUB_REF##*-}
         IMAGE_NAME="studio"
         IMAGE_TAG="$BRANCH"
+        if [ $IMAGE_TAG = 'merge' ]; then IMAGE_TAG='master'; fi
         echo ::set-output name=IMAGE_NAME::$IMAGE_NAME
         echo ::set-output name=IMAGE_TAG::$IMAGE_TAG
   
