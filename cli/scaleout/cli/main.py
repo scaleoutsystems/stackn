@@ -28,7 +28,11 @@ def main(ctx, project_dir):
 
     if ctx.invoked_subcommand not in ('init',):
         # TODO add support for cwd change, config-file specification
+        from scaleout.errors import InvalidConfigurationError
         from scaleout.project import Project
         from scaleout.runtime.runtime import Runtime
-        from scaleout.studioclient import StudioClient
-        ctx.obj['CLIENT'] = StudioClient()
+        try:
+            from scaleout.studioclient import StudioClient
+            ctx.obj['CLIENT'] = StudioClient()
+        except InvalidConfigurationError:
+            pass

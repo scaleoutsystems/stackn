@@ -85,7 +85,11 @@ class Controller:
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):
-        args = 'helm delete {release}'.format(release=options['release']).split(' ')
+        volume_root = "/"
+        if "TELEPRESENCE_ROOT" in os.environ:
+            volume_root = os.environ["TELEPRESENCE_ROOT"]
+        kubeconfig = os.path.join(volume_root, 'root/.kube/config')
+        args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']).split(' ')
         status = subprocess.run(args, cwd=self.cwd)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 

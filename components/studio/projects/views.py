@@ -3,7 +3,7 @@ from .models import Project, Environment
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from .exceptions import ProjectCreationException
-from .helpers import create_project_resources, delete_project_resources, create_settings_file, get_labs_cpu_requests
+from .helpers import create_project_resources, delete_project_resources, create_settings_file
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
@@ -137,8 +137,6 @@ def details(request, user, project_slug):
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'No project found'
-
-    labs_cpu_requests = get_labs_cpu_requests(project.slug)
 
     filename = None
     readme = None

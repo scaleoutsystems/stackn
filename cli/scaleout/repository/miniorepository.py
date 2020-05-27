@@ -40,13 +40,13 @@ class MINIORepository(Repository):
             print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
 
 
-        self.client = Minio(str(config['minio_host']),
+        self.client = Minio("{0}:{1}".format(config['minio_host'],config['minio_port']),
                 access_key=access_key,
                 secret_key=secret_key,
                 secure=self.secure_mode)
 
         self.create_bucket(self.bucket)
-    
+
     def create_bucket(self, bucket_name):
         try:
             response = self.client.make_bucket(bucket_name)
@@ -59,15 +59,15 @@ class MINIORepository(Repository):
 
     def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
-        if bucket is '':
+        if not bucket:
             bucket = self.bucket
-        if not is_file:
+        if is_file==True:
+            self.client.fput_object(bucket, instance_name, instance)
+        else:
             try:
                 self.client.put_object(bucket, instance_name, io.BytesIO(instance), len(instance))
             except Exception as e:
                 raise Exception("Could not load data into bytes {}".format(e))
-        else:
-            self.client.fput_object(bucket, instance_name, instance)
 
         return True
 
@@ -78,7 +78,7 @@ class MINIORepository(Repository):
             return data.read()
         except Exception as e:
             raise Exception("Could not fetch data from bucket, {}".format(e))
-        
+
 
     def list_artifacts(self):
         try:
