@@ -59,7 +59,7 @@ def run(request, user, project):
             from .helpers import create_session_resources
 
             print("trying to create resources")
-            retval = create_session_resources(session, prefs, project)
+            retval = create_session_resources(request, user, session, prefs, project)
             if retval:
                 print("saving session!")
                 project.save()

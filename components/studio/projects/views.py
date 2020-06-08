@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     template = 'index_projects.html'
-
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
     except TypeError as err:
@@ -184,7 +183,10 @@ def delete(request, user, project_slug):
 
 
 def auth(request):
+    print(dir(request))
+    print(request.user)
     if request.user.is_authenticated:
-        return HttpResponse(status=200)
+        return HttpResponse('Ok', status=200)
+        # return HttpResponse(status=200)
     else:
         return HttpResponse(status=403)

@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('auth/', auth, name='auth'),
+    path('oidc/', include('mozilla_django_oidc.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('', include('models.urls', namespace='models')),
     path('', include('deployments.urls', namespace="deployments")),
