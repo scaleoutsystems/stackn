@@ -1,7 +1,7 @@
 minio
 certifi==2019.9.11
 chardet==3.0.4
-Django==2.2.10
+Django==2.2.13
 django-appconf==1.0.3
 django-compressor==2.3
 django-cors-middleware==1.4.0
