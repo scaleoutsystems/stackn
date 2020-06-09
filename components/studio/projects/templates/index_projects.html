@@ -3,13 +3,6 @@
 <div class="col-md-11">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Projects</h2>
-        {% if is_authorized %}
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'deployments:deployment_add' request.user project.slug %}">
-                <button id="create" class="btn btn-large btn-primary">Deploy</button>
-            </a>
-        </div>
-        {% endif %}
     </div>
     <div class="row">
         {% if not request.user.is_authenticated %}
@@ -38,6 +31,7 @@
             </div>
         </div>
         {% endfor %}
+        {% if request.user.is_authenticated %}
         <div class="col-sm-6">
             <div class="card card-add-project">
                 <div class="card-body d-flex flex-column">
@@ -79,7 +73,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
 
     </div>
 </div>
