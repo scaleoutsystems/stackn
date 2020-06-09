@@ -34,7 +34,7 @@ def get_instance_from_definition(instance):
     repository = "registry.demo.scaleout.se"
     image = "testar"
     tag = "latest"
-    ret = example.format(name=instance.project.name, id=instance.id, command=str(instance.command.split(' ')), tag=tag,
+    ret = example.format(name=instance.project.slug, id=instance.id, command=str(instance.command.split(' ')), tag=tag,
                          image=image,
                          repository=repository,namespace=settings.NAMESPACE)
     ret = yaml.safe_load(ret)
