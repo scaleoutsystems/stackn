@@ -166,4 +166,4 @@ Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 ## License
-> See [LICENSE](LICENCE)
+> See [LICENSE](LICENCE.md)
