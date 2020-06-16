@@ -11,11 +11,11 @@
             <div class="card-body">
                 <h5 class="card-title">{{ model.name }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{{ model.project.name }}</h6>
+                {% if model.description %}
                 <p class="card-text" style="margin-bottom: 30px;">
-                    {% if model.description %}
-                        {{ model.description }}
-                    {% endif %}
+                    {{ model.description }}
                 </p>
+                {% endif %}
                 {% if request.user.is_authenticated %}
                     {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
                     <a href="{% url 'models:details' request.user model.project.slug model.id %}" class="card-link">
