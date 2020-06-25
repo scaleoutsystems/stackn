@@ -1,0 +1,83 @@
+{% extends 'baseproject.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.10.0.min.js"></script>
+
+
+<div class="col-md-9">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Monitor</h2>
+    </div>
+    <div>
+      
+      <h3>Total requests</h3>
+      CPU:<br>
+      Memory:
+      
+      <h3>Lab sessions</h3>
+        
+        <h4>Resources</h4>
+          <div>
+            <p class="mb-0">
+              Labs requests CPU: {{ labs_cpu_requests }} cores<br>
+              Labs requests memory: {{ labs_memory_requests }} Gi <br>
+            </p>
+            <div style="height:250; width:400">
+              <canvas id="labsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'lab' %}"></canvas>
+            </div>
+            
+          </div>
+
+      <h3>Deployments</h3>
+      <div style="height:250; width:400">
+        <canvas id="deploymentsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'deployment' %}"></canvas>
+      </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+<script>
+
+  function cpuchart(chart_id) {
+
+    var $labsCPUChart = $(chart_id);
+    $.ajax({
+      url: $labsCPUChart.data("url"),
+      success: function (data) {
+
+        var ctx = $labsCPUChart[0].getContext("2d");
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Total CPU usage',
+              backgroundColor: 'blue',
+              data: data.data
+            }]          
+          },
+          options: {
+            responsive: true,
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Total CPU usage'
+            }
+          }
+        });
+
+      }
+    });
+
+  };
+
+  cpuchart('#labsCPUChart');
+  cpuchart('#deploymentsCPUChart');
+
+</script>
+{% endblock %}
+
+
