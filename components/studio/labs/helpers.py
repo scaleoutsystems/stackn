@@ -41,7 +41,7 @@ def create_keycloak_client(request, req_user, session):
 
     URL = 'https://'+RELEASE_NAME+'.'+HOST
 
-    admin_url = 'http://keycloak-http/auth'
+    admin_url = settings.KC_ADMIN_URL
     realm = settings.KC_REALM
 
     user = settings.KC_USERNAME
@@ -67,7 +67,10 @@ def create_keycloak_client(request, req_user, session):
                   'baseUrl': URL,
                   'rootUrl': URL,
                   'redirectUris': [URL+'/*']}
+    print(client_rep)
+    print(create_client_url)
     res = r.post(create_client_url, json=client_rep, headers={'Authorization': 'bearer '+token})
+    print(res.text)
     # print(dir(res))
 
     # Fetch client info
