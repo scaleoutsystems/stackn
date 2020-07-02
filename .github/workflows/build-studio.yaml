@@ -6,11 +6,6 @@ on:
     branches: '*'
     paths:
     - 'components/studio/**'
-  pull_request:
-    branches: '*'
-    paths:
-    - 'components/studio/**'
-
 
 jobs:
  
