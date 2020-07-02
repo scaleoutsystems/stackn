@@ -60,7 +60,7 @@ def run(request, user, project):
                      'labs.resources.limits.gpu': str(flavor.gpu),
                      'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
                      'labs.image': environment.image,
-                     'labs.ingress.secretName': ingress_secret_name,
+                     'ingress.secretName': ingress_secret_name,
                      # 'labs.setup': environment.setup,
                      'minio.access_key': project.project_key,
                      'minio.secret_key': project.project_secret,
