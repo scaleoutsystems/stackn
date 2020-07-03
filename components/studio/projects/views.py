@@ -12,6 +12,7 @@ from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
 from models.models import Model
 import requests as r
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -183,19 +184,23 @@ def delete(request, user, project_slug):
 
 
 @login_required(login_url='/accounts/login')
-def publish_project(request, project_slug):
-    owner = User.objects.filter(username=request.user).first()
+def publish_project(request, user, project_slug):
+    owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
 
     if request.method == 'POST':
-        form = PublishProjectToGitHub(request.POST)
+        gh_form = PublishProjectToGitHub(request.POST)
 
-        if form.is_valid():
-            user_name = form.cleaned_data['user_name']
-            user_password = form.cleaned_data['user_password']
+        if gh_form.is_valid():
+            user_name = gh_form.cleaned_data['user_name']
+            user_password = gh_form.cleaned_data['user_password']
+
+            user_password_bytes = user_password.encode('ascii')
+            base64_bytes = base64.b64encode(user_password_bytes)
+            user_password_encoded = base64_bytes.decode('ascii')
 
             url = 'http://{}-file-controller/project/{}/push/{}/{}'.format(
-                project_slug, project_slug[:-4], user_name, user_password)
+                project_slug, project_slug[:-4], user_name, user_password_encoded)
             try:
                 response = r.get(url)
 
@@ -211,7 +216,7 @@ def publish_project(request, project_slug):
                 logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return HttpResponseRedirect(
-        reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project_slug}))
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
 
 def auth(request):

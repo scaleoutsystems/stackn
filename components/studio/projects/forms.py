@@ -7,4 +7,4 @@ class TransferProjectOwnershipForm(forms.Form):
 
 class PublishProjectToGitHub(forms.Form):
     user_name = forms.CharField(label='GitHub username', max_length=256)
-    user_password = forms.CharField(label='GitHub password', max_length=256)
+    user_password = forms.CharField(label='GitHub password', widget=forms.PasswordInput(), max_length=256)
