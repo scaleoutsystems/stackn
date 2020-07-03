@@ -40,9 +40,18 @@ def run(request, user, project):
         else:
             environment = Environment.objects.filter.all().first()
 
-        print("dispatching with {}  ".format(flavor, name))
+        print("dispatching with {}  {}".format(flavor, name))
         import base64
         if name != '' and flavor is not None:
+            # Default values here, because otherwise an old deployment can stop working
+            # if the deployment configuration files are not compatible with the latest
+            # studio image.
+            ingress_secret_name = 'prod-ingress'
+            try:
+                ingress_secret_name = settings.LABS['ingress']['secretName']
+            except:
+                pass
+                
             prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
                      'labs.resources.limits.cpu': str(flavor.cpu),
                      'labs.resources.requests.memory': str(flavor.mem),
@@ -51,6 +60,7 @@ def run(request, user, project):
                      'labs.resources.limits.gpu': str(flavor.gpu),
                      'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
                      'labs.image': environment.image,
+                     'ingress.secretName': ingress_secret_name,
                      # 'labs.setup': environment.setup,
                      'minio.access_key': project.project_key,
                      'minio.secret_key': project.project_secret,
