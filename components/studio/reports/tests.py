@@ -10,8 +10,8 @@ from .helpers import upload_report_json, get_download_link
 from studio.minio import MinioRepository, ResponseError
 
 minio_repository = MinioRepository(url='play.min.io',
-                                   access_key='Q3AM3UQ867SPQQA43P2F',
-                                   secret_key='zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG')
+                                   access_key='',
+                                   secret_key='')
 minioClient = minio_repository.client
 
 
