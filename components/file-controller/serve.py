@@ -7,6 +7,7 @@ import json
 from subprocess import run
 import datetime
 from pathlib import Path
+import base64
 app = Flask(__name__)
 
 
@@ -129,7 +130,11 @@ def get_file_content(filename):
 
 @app.route('project/<project_name>/push/<user_name>/<user_password>')
 def push_project_to_github(project_name, user_name, user_password):
-    g = Github(user_name, user_password)
+    base64_bytes = user_password.encode('ascii')
+    user_password_bytes = base64.b64decode(base64_bytes)
+    decoded_user_password = user_password_bytes.decode('ascii')
+
+    g = Github(user_name, decoded_user_password)
     user = g.get_user()
     repo = user.create_repo(project_name)
 
@@ -150,7 +155,7 @@ def push_project_to_github(project_name, user_name, user_password):
                             [repoClone.head.target])
 
     remote = repoClone.remotes['origin']
-    credentials = pygit2.UserPass(user_name, user_password)
+    credentials = pygit2.UserPass(user_name, decoded_user_password)
     remote.credentials = credentials
 
     callbacks = pygit2.RemoteCallbacks(credentials)

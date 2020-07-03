@@ -158,24 +158,23 @@
             Fill in GitHub account's credentials to publish project:
         </h6>
 
-        <form action="{% url 'projects:publish_project' project.slug %}" method="POST">
+        <form action="{% url 'projects:publish_project' request.user project.slug %}" method="POST">
             {% csrf_token %}
 
             <div class="form-group row">
-                <label for="id_user_name" class="col-sm-2 col-form-label">Username</label>
+                <label for="id_user_name" class="col-sm-2 col-form-label">GitHub username</label>
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="id_user_name" name="user_name" maxlength="256"
                            required="">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="id_user_password" class="col-sm-2 col-form-label">Password</label>
+                <label for="id_user_password" class="col-sm-2 col-form-label">GitHub password</label>
                 <div class="col-sm-10">
-                    <input type="password" class="form-control" id="id_user_password" name="user_name" maxlength="256"
-                           required="">
+                    <input type="password" class="form-control" id="id_user_password" name="user_password"
+                           maxlength="256" required="">
                 </div>
             </div>
-
             <button type="submit" class="btn btn-primary">Publish</button>
         </form>
         {% else %}
