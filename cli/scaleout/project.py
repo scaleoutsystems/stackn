@@ -1,7 +1,8 @@
 import os
+
 from scaleout.config.config import load_config as load_conf, get_default_config_file_path
-from scaleout.repository.miniorepository import MINIORepository
 from scaleout.errors import InvalidConfigurationError
+
 
 class Project:
     project_dir = None
@@ -22,8 +23,7 @@ class Project:
         try:
             self._load_config()
         except Exception:
-            raise InvalidConfigurationError("Missing configuration file")
-
+            raise InvalidConfigurationError("Missing config file")
         try:
             self.api_endpoint = os.path.join(self.config['so_domain_name'], '/api')
             self.auth_url = self.config["auth_url"]
@@ -34,6 +34,7 @@ class Project:
 
     def _load_config(self, ):
         self.config = load_conf(self.config_file_path)
+
 
 def init_project(project_dir):
     directory = None
