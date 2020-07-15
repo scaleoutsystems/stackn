@@ -86,3 +86,4 @@ class Project(models.Model):
         return "Name: {} Description: {}".format(self.name, self.description)
 
     environment = models.ForeignKey('projects.Environment', on_delete=models.DO_NOTHING, default=DEFAULT_ENVIRONMENT_ID)
+    clone_url = models.CharField(max_length=512, null=True, blank=True)
