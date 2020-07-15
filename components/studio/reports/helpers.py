@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def upload_report_json(report_id):
+def upload_report_json(report_id, client=None):
     report = Report.objects.filter(pk=report_id).first()
     project = report.model.project
 
@@ -29,13 +29,16 @@ def upload_report_json(report_id):
         json.dump(report_json, json_file)
 
     try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                           project.project_secret)
+        if not client:
+            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
+                                               project.project_secret)
+
+            client = minio_repository.client
 
         with open(filename, 'rb') as file_data:
             file_stat = os.stat(filename)
-            minio_repository.client.put_object('reports', filename.replace('reports/', ''), file_data,
-                                               file_stat.st_size, content_type='application/json')
+            client.put_object('reports', filename.replace('reports/', ''), file_data,
+                              file_stat.st_size, content_type='application/json')
 
     except ResponseError as err:
         print(err)
@@ -83,15 +86,18 @@ def get_visualiser_file(project_id, filename):
             new_file.write(content)
 
 
-def get_download_link(project_id, filename):
+def get_download_link(project_id, filename, client=None):
     project = Project.objects.filter(pk=project_id).first()
 
     download_link = None
     try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                           project.project_secret)
+        if not client:
+            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
+                                               project.project_secret)
 
-        download_link = minio_repository.client.presigned_get_object('reports', filename, expires=timedelta(days=2))
+            client = minio_repository.client
+
+        download_link = client.presigned_get_object('reports', filename, expires=timedelta(days=2))
     except ResponseError as err:
         print(err)
 
