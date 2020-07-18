@@ -1,15 +1,10 @@
-import os
-import requests
-from scaleout.repository.base import Repository
+import io
+import logging
+
 from minio import Minio
 from minio.error import (ResponseError, BucketAlreadyOwnedByYou,
                          BucketAlreadyExists)
-
-import io
-import logging
-from urllib.parse import urlparse
-import uuid
-import json
+from scaleout.repository.base import Repository
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +13,7 @@ class MINIORepository(Repository):
     client = None
 
     def __init__(self, config):
-        super(Repository, self).__init__()
+        super().__init__()
         try:
             access_key = config['minio_access_key']
         except Exception:
@@ -39,11 +34,18 @@ class MINIORepository(Repository):
         if not self.secure_mode:
             print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
 
-
-        self.client = Minio("{0}:{1}".format(config['minio_host'],config['minio_port']),
-                access_key=access_key,
-                secret_key=secret_key,
-                secure=self.secure_mode)
+        if self.secure_mode:
+            from urllib3.poolmanager import PoolManager
+            manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
+            self.client = Minio("{0}:{1}".format(config['minio_host'], config['minio_port']),
+                                access_key=access_key,
+                                secret_key=secret_key,
+                                secure=self.secure_mode, http_client=manager)
+        else:
+            self.client = Minio("{0}:{1}".format(config['minio_host'], config['minio_port']),
+                                access_key=access_key,
+                                secret_key=secret_key,
+                                secure=self.secure_mode)
 
         self.create_bucket(self.bucket)
 
@@ -59,9 +61,9 @@ class MINIORepository(Repository):
 
     def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
-        if not bucket:
+        if bucket is '':
             bucket = self.bucket
-        if is_file==True:
+        if is_file == True:
             self.client.fput_object(bucket, instance_name, instance)
         else:
             try:
@@ -78,7 +80,6 @@ class MINIORepository(Repository):
             return data.read()
         except Exception as e:
             raise Exception("Could not fetch data from bucket, {}".format(e))
-
 
     def list_artifacts(self):
         try:
