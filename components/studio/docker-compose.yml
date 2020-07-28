@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  studio-db:
+  stack-studio-db:
     image: postgres
     environment:
       - GET_HOSTS_FROM=dns
@@ -13,23 +13,21 @@ services:
 
   studio:
     build: .
-    image: registry.demo.scaleout.se/studio:latest #docker.pkg.github.com/scaleoutsystems/registry/studio:latest
+    image: scaleoutsystems/studio:master
     command: sh scripts/run_web.sh
     environment:
       - GET_HOSTS_FROM=dns
     volumes:
       - .:/app:cached
-    #ports:
-    #  - 8080:8080
     depends_on:
-      - studio-db
+      - stack-studio-db
     links:
-      - "studio-db:studio-db.default.svc.cluster.local"
+      - "stack-studio-db:stack-studio-db.default.svc.cluster.local"
     networks:
       - internal_network
 
   chart-controller:
-    image: registry.demo.scaleout.se/chart-controller:latest
+    image: scaleoutsystems/chart-controller:master
     ports:
       - 80:80
     networks:
@@ -39,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    image: registry.demo.scaleout.se/ingress:latest
+    image: scaleoutsystems/ingress:master
     environment:
       - GET_HOSTS_FROM=dns
     container_name: ingress
@@ -48,7 +46,6 @@ services:
       - ./repos:/var/www/html/git/repos
     ports:
       - 8080:80
-    #  - 443:4430
     depends_on:
       - studio
     networks:
@@ -76,17 +73,17 @@ services:
 
   celery-worker:
     build: .
-    image: registry.demo.scaleout.se/studio:latest
+    image: scaleoutsystems/studio:master
     command: sh ./scripts/run_worker.sh
     volumes:
       - .:/app:cached
     links:
-      - studio-db
+      - stack-studio-db
       - studio
       - rabbit
       - redis
     depends_on:
-      - studio-db
+      - stack-studio-db
       - studio
       - rabbit
       - redis
