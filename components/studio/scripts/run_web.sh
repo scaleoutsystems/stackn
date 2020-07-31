@@ -8,11 +8,11 @@ for d in */ ; do
 done
 cd ..
 # If we are running telepresence, use the correct settings.
-[[ ! -z "${TELEPRESENCE_ROOT}" ]] &&  echo "Copy settings from Telepresence root directory" && \
+[ ! -z "${TELEPRESENCE_ROOT}" ] &&  echo "Copy settings from Telepresence root directory" && \
     cp $TELEPRESENCE_ROOT/app/studio/settings.py studio/tele_settings.py && \
     export DJANGO_SETTINGS_MODULE=studio.tele_settings
 # If we have set a local, custom settings.py, then use that.
-[[ -f studio/local_settings.py ]] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
+[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
 echo "deleting all existing migrations..."
 find . -path "*/migrations/*.py" -not -name "__init__.py" -delete

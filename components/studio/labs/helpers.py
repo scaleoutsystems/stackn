@@ -4,6 +4,15 @@ import requests as r
 
 logger = logging.getLogger(__file__)
 
+def keycloak_auth(client_id, client_secret, token_url):
+    payload = 'grant_type=client_credentials'
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    response = r.request('POST', token_url, headers=headers, data=payload,
+                                auth=r.auth.HTTPBasicAuth(client_id, client_secret))
+
+    token =response.json()['access_token']
+    return token
+
 def delete_keycloak_client(client_id):
     realm = settings.KC_REALM
     user = settings.KC_USERNAME
@@ -13,15 +22,16 @@ def delete_keycloak_client(client_id):
 
     token_url = '{}/realms/{}/protocol/openid-connect/token'.format(admin_url, realm)
 
-    req = {'client_id': 'admin-cli',
-          'grant_type': 'password',
-          'username': user,
-          'password': password}
+    # req = {'client_id': 'admin-cli',
+    #       'grant_type': 'password',
+    #       'username': user,
+    #       'password': password}
 
-    res = r.post(token_url, data=req)
+    # res = r.post(token_url, data=req)
 
-    token =res.json()['access_token']
-    
+    # token =res.json()['access_token']
+    token = keycloak_auth(settings.OIDC_RP_CLIENT_ID, settings.OIDC_RP_CLIENT_SECRET, token_url)
+
     get_clients_url = '{}/admin/realms/{}/clients'.format(admin_url, realm)
     res = r.get(get_clients_url, headers={'Authorization': 'bearer '+token})
     clients = res.json()
@@ -44,21 +54,22 @@ def create_keycloak_client(request, req_user, session):
     admin_url = settings.KC_ADMIN_URL
     realm = settings.KC_REALM
 
-    user = settings.KC_USERNAME
-    password = settings.KC_PASS
+    # user = settings.KC_USERNAME
+    # password = settings.KC_PASS
 
     # Get Token
-
+    
     token_url = '{}/realms/{}/protocol/openid-connect/token'.format(admin_url, realm)
 
-    req = {'client_id': 'admin-cli',
-          'grant_type': 'password',
-          'username': user,
-          'password': password}
+    # req = {'client_id': 'admin-cli',
+    #       'grant_type': 'password',
+    #       'username': user,
+    #       'password': password}
 
-    res = r.post(token_url, data=req)
+    # res = r.post(token_url, data=req)
 
-    token =res.json()['access_token']
+    # token =res.json()['access_token']
+    token = keycloak_auth(settings.OIDC_RP_CLIENT_ID, settings.OIDC_RP_CLIENT_SECRET, token_url)
 
     # Create client
     create_client_url = '{}/admin/realms/{}/clients'.format(admin_url, realm)
@@ -185,7 +196,8 @@ def create_session_resources(request, user, session, prefs, project):
                   'project.name': project.slug,
                   'gatekeeper.realm': settings.KC_REALM,
                   'gatekeeper.client_secret': client_secret,
-                  'gatekeeper.client_id': client_id
+                  'gatekeeper.client_id': client_id,
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH
                   }
     parameters.update(prefs)
 
