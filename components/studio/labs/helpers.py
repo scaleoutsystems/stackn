@@ -15,9 +15,9 @@ def keycloak_auth(client_id, client_secret, token_url):
 
 def delete_keycloak_client(client_id):
     realm = settings.KC_REALM
-    user = settings.KC_USERNAME
-    password = settings.KC_PASS
-    admin_url = 'http://keycloak-http/auth'
+    # user = settings.KC_USERNAME
+    # password = settings.KC_PASS
+    admin_url = settings.KC_ADMIN_URL
     # Get Token
 
     token_url = '{}/realms/{}/protocol/openid-connect/token'.format(admin_url, realm)
