@@ -8,9 +8,11 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
-from .forms import TransferProjectOwnershipForm
+from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
 from models.models import Model
+import requests as r
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +141,6 @@ def details(request, user, project_slug):
 
     filename = None
     readme = None
-    import requests as r
     url = 'http://{}-file-controller/readme'.format(project.slug)
     try:
         response = r.get(url)
@@ -176,10 +177,45 @@ def delete(request, user, project_slug):
     for model in models:
         model.status = 'AR'
         model.save()
-        
     project.delete()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
+
+
+@login_required(login_url='/accounts/login')
+def publish_project(request, user, project_slug):
+    owner = User.objects.filter(username=user).first()
+    project = Project.objects.filter(owner=owner, slug=project_slug).first()
+
+    if request.method == 'POST':
+        gh_form = PublishProjectToGitHub(request.POST)
+
+        if gh_form.is_valid():
+            user_name = gh_form.cleaned_data['user_name']
+            user_password = gh_form.cleaned_data['user_password']
+
+            user_password_bytes = user_password.encode('ascii')
+            base64_bytes = base64.b64encode(user_password_bytes)
+            user_password_encoded = base64_bytes.decode('ascii')
+
+            url = 'http://{}-file-controller/project/{}/push/{}/{}'.format(
+                project_slug, project_slug[:-4], user_name, user_password_encoded)
+            try:
+                response = r.get(url)
+
+                if response.status_code == 200 or response.status_code == 203:
+                    payload = response.json()
+
+                    if payload['status'] == 'OK':
+                        clone_url = payload['clone_url']
+                        if clone_url:
+                            project.clone_url = clone_url
+                            project.save()
+            except Exception as e:
+                logger.error("Failed to get response from {} with error: {}".format(url, e))
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
 
 def auth(request):
