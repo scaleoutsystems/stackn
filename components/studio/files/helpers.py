@@ -19,7 +19,7 @@ def _create_userdir(user):
     path = os.path.join(base_dir, user)
 
     try:
-        os.mkdir(path)
+        os.makedirs(path)
     except OSError as e:
         if e.errno == 17:
             logger.warning("User already created")
@@ -41,11 +41,10 @@ def _safe_to_create(path):
 
 def create_repository(user, repository, git_init=True):
     _create_userdir(user)
-    repo_name = repository + '.git'
-    path = os.path.join(base_dir, user, repo_name)
+    path = os.path.join(base_dir, user, repository, ".git")
 
     try:
-        os.mkdir(path)
+        os.makedirs(path)
     except OSError as e:
         if e.errno == 17:
             logger.warning("Directory already exist")
