@@ -2,6 +2,13 @@
 
 {% block content %}
 <div class="col-md-9">
+    <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
+        <ol class="breadcrumb project-breadcrumb-ol">
+            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+        </ol>
+    </nav>
+
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Metrics</h2>
         <div class="btn-toolbar mb-2 mb-md-0">

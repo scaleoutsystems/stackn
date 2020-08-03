@@ -9,6 +9,13 @@
 {% endblock %}
 {% block content %}
     <div class="col-md-9">
+        <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
+            <ol class="breadcrumb project-breadcrumb-ol">
+                <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+            </ol>
+        </nav>
+
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h3>Labs</h3>
         </div>
@@ -17,8 +24,8 @@
             <form action="{% url 'labs:run' request.user project.slug %}" method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="runExperiment">Start a labs session</label>
-                    <label for="runExperiment">Image</label>
+                    <label>Start a labs session</label>
+                    <label>Image</label>
                     <select name="environment" class="form-control">
                         {% for environment in environments %}
                             <option value="{{ environment.slug }}">{{ environment.name }}</option>
@@ -30,7 +37,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group col-sm-6">
-                        <label for="Flavor">Flavor</label>
+                        <label>Flavor</label>
                         <select name="flavor" class="form-control">
                         {% for flavor in flavors %}
                            <option value="{{flavor.slug }}">{{ flavor.name}}</option>
