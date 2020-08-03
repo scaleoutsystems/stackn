@@ -81,3 +81,16 @@ ul.timeline > li:before {
     height: 20px;
     z-index: 400;
 }
+
+/* Breadcrumbs */
+
+.project-breadcrumb-nav {
+    margin-top: 10px;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.project-breadcrumb-ol {
+    padding-left: 5px;
+    background-color: #FBFCFC;
+}

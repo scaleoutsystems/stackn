@@ -5,6 +5,14 @@
 
 {% block content %}
     <div class="{% if is_authorized %} col-md-9 {% else %} col-md-11 {% endif %}">
+        {% if is_authorized %}
+        <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
+            <ol class="breadcrumb project-breadcrumb-ol">
+                <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+            </ol>
+        </nav>
+        {% endif %}
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h2>Deployments</h2>
         </div>
@@ -44,7 +52,7 @@
                             <td>{{ deploy.definition }}</td>
                             <td>
                                 <button class="btn btn-sm btn-secondary" id="monitor{{ deploy.id }}">Monitor</button>
-                                <button class="btn btn-sm btn-secondary" id="monitor{{ deploy.id }}">Log</button>
+                                <button class="btn btn-sm btn-secondary" id="log{{ deploy.id }}">Log</button>
                                 <button class="btn btn-sm btn-warning" id="undeploy{{ deploy.id }}">Undeploy</button>
                                 CPU: 3%
                                 MEMORY: 100Mb
@@ -66,7 +74,7 @@
                             });
                         </script>
                     {% endif %}
-                    
+
                 {% endfor %}
                 </tbody>
             </table>
