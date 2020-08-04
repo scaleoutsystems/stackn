@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 import uuid
 from django.conf import settings
 from django.db.models import Q
+from projects.helpers import get_minio_keys
 
 
 @login_required(login_url='/accounts/login')
@@ -51,7 +52,11 @@ def run(request, user, project):
                 ingress_secret_name = settings.LABS['ingress']['secretName']
             except:
                 pass
-                
+
+            minio_keys = get_minio_keys(project)
+            decrypted_key = minio_keys['project_key']
+            decrypted_secret = minio_keys['project_secret']
+
             prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
                      'labs.resources.limits.cpu': str(flavor.cpu),
                      'labs.resources.requests.memory': str(flavor.mem),
@@ -62,8 +67,8 @@ def run(request, user, project):
                      'labs.image': environment.image,
                      'ingress.secretName': ingress_secret_name,
                      # 'labs.setup': environment.setup,
-                     'minio.access_key': project.project_key,
-                     'minio.secret_key': project.project_secret,
+                     'minio.access_key': decrypted_key,
+                     'minio.secret_key': decrypted_secret,
                      }
             session = Session.objects.create_session(name=name, project=project, chart='lab', settings=prefs)
             from .helpers import create_session_resources

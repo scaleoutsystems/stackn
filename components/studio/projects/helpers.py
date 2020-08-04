@@ -1,3 +1,5 @@
+import base64
+
 from .exceptions import ProjectCreationException
 from django.conf import settings
 import requests as r
@@ -21,7 +23,7 @@ def urlify(s):
 def create_settings_file(project, username, token):
     proj_settings = dict()
     proj_settings['auth_url'] = os.path.join('https://'+settings.DOMAIN, 'api/api-token-auth')
-    proj_settings['access_key'] = project.project_key
+    proj_settings['access_key'] = decrypt_key(project.project_key)
     proj_settings['username'] = username
     proj_settings['token'] = token
     proj_settings['so_domain_name'] = settings.DOMAIN
@@ -51,8 +53,8 @@ def create_helm_resources(project, user, repository=None):
     # proj_settings = proj_settings.translate(str.maketrans({"'":  r"\'", "]": r"\]", "[":r"\["}))
     parameters = {'release': str(project.slug),
                   'chart': 'project',
-                  'minio.access_key': project.project_key,
-                  'minio.secret_key': project.project_secret,
+                  'minio.access_key': decrypt_key(project.project_key),
+                  'minio.secret_key': decrypt_key(project.project_secret),
                   'global.domain': settings.DOMAIN,
                   'storageClassName': settings.STORAGECLASS,
                   'settings_file': proj_settings}
@@ -78,3 +80,15 @@ def delete_project_resources(project):
 
     return False
 
+
+def get_minio_keys(project):
+    return {
+        'project_key': decrypt_key(project.project_key),
+        'project_secret': decrypt_key(project.project_secret)
+    }
+
+
+def decrypt_key(key):
+    base64_bytes = key.encode('ascii')
+    result = base64.b64decode(base64_bytes)
+    return result.decode('ascii')

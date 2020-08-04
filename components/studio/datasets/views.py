@@ -3,6 +3,7 @@ from django.shortcuts import render
 from projects.models import Project
 from studio.minio import MinioRepository, ResponseError
 from django.conf import settings as sett
+from projects.helpers import get_minio_keys
 
 
 @login_required(login_url='/accounts/login')
@@ -11,10 +12,14 @@ def page(request, user, project, page_index):
     project = Project.objects.filter(slug=project).first()
     url_domain = sett.DOMAIN
 
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+
     datasets = []
     try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                           project.project_secret)
+        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
+                                           decrypted_secret)
 
         objects = minio_repository.client.list_objects_v2('dataset')
         for obj in objects:
@@ -48,10 +53,14 @@ def path_page(request, user, project, path_name, page_index):
     project = Project.objects.filter(slug=project).first()
     url_domain = sett.DOMAIN
 
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+
     datasets = []
     try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                           project.project_secret)
+        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
+                                           decrypted_secret)
 
         objects = minio_repository.client.list_objects_v2('dataset', recursive=True)
         for obj in objects:

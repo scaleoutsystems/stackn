@@ -8,6 +8,7 @@ import subprocess
 from studio.minio import MinioRepository, ResponseError
 from projects.models import Project
 import logging
+from projects.helpers import get_minio_keys
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,10 @@ logger = logging.getLogger(__name__)
 def upload_report_json(report_id, client=None):
     report = Report.objects.filter(pk=report_id).first()
     project = report.model.project
+
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
 
     report_json = {
         'project_id': project.id,
@@ -30,8 +35,8 @@ def upload_report_json(report_id, client=None):
 
     try:
         if not client:
-            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                               project.project_secret)
+            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
+                                               decrypted_secret)
 
             client = minio_repository.client
 
@@ -89,11 +94,15 @@ def get_visualiser_file(project_id, filename):
 def get_download_link(project_id, filename, client=None):
     project = Project.objects.filter(pk=project_id).first()
 
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+
     download_link = None
     try:
         if not client:
-            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), project.project_key,
-                                               project.project_secret)
+            minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
+                                               decrypted_secret)
 
             client = minio_repository.client
 

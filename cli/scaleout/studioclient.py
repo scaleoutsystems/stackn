@@ -82,11 +82,18 @@ class StudioClient(Runtime):
         data = {
             'minio_host': '{}-minio.{}'.format(self.project_slug,self.config['so_domain_name']),
             'minio_port': 9000,
-            'minio_access_key': project['project_key'],
-            'minio_secret_key': project['project_secret'],
+            'minio_access_key': self.decrypt_key(project['project_key']),
+            'minio_secret_key': self.decrypt_key(project['project_secret']),
             'minio_secure_mode': True,
         }
         return data
+
+    def decrypt_key(self, encrypted_key):
+        import base64
+
+        base64_bytes = encrypted_key.encode('ascii')
+        result = base64.b64decode(base64_bytes)
+        return result.decode('ascii')
 
     def get_repository(self):
         from scaleout.repository.helpers import get_repository as gr

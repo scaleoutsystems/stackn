@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import Environment, Project
 import os
 from django.conf import settings
-from .helpers import create_settings_file
+from .helpers import create_settings_file, decrypt_key
 import yaml
 
 
@@ -18,8 +18,8 @@ class ProjectTestCase(TestCase):
             name="test-project",
             slug="test-project",
             owner=user,
-            project_key="key",
-            project_secret="secret",
+            project_key="a2V5",
+            project_secret="c2VjcmV0",
             environment=environment
         )
 
@@ -28,7 +28,7 @@ class ProjectTestCase(TestCase):
 
         proj_settings = dict()
         proj_settings['auth_url'] = os.path.join('https://' + settings.DOMAIN, 'api/api-token-auth')
-        proj_settings['access_key'] = project.project_key
+        proj_settings['access_key'] = decrypt_key(project.project_key)
         proj_settings['username'] = "admin"
         proj_settings['token'] = "api_token"
         proj_settings['so_domain_name'] = settings.DOMAIN
@@ -38,3 +38,9 @@ class ProjectTestCase(TestCase):
         proj_settings['Project']['project_slug'] = project.slug
 
         self.assertEqual(create_settings_file(project, "admin", "api_token"), yaml.dump(proj_settings))
+
+    def test_decrypt_key(self):
+        project = Project.objects.filter(name="test-project").first()
+
+        self.assertEqual(decrypt_key(project.project_key), "key")
+        self.assertEqual(decrypt_key(project.project_secret), "secret")
