@@ -13,6 +13,7 @@ from django.db.models import Q
 from models.models import Model
 import requests as r
 import base64
+from projects.helpers import get_minio_keys
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,10 @@ def settings(request, user, project_slug):
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.all()
+
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)

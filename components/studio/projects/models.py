@@ -1,3 +1,5 @@
+import base64
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
@@ -42,7 +44,12 @@ class ProjectManager(models.Manager):
         import secrets
         import string
         alphabet = string.ascii_letters + string.digits
-        password = ''.join(secrets.choice(alphabet) for i in range(length))
+        password = ''.join(secrets.choice(alphabet) for _ in range(length))
+        # Encrypt the key
+        password = password.encode('ascii')
+        base64_bytes = base64.b64encode(password)
+        password = base64_bytes.decode('ascii')
+
         return password
 
     def create_project(self, name, owner, description, repository):
