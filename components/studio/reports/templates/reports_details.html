@@ -15,6 +15,10 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
+                <a href="{% url 'projects:index' %}">Projects</a>
+            </li>
+            <li class="breadcrumb-item">{{ project.name }}</li>
+            <li class="breadcrumb-item">
                 <a href="{% url 'models:details' user project.slug report.model.id %}">{{ report.model.name }}</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Metrics #{{ report.id }}</li>

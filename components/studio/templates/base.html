@@ -146,7 +146,7 @@
 
                         <div class="dropdown-menu"
                              aria-labelledby="navbarDropdown2">
-                            Logged in as <p class="d-flex justify-content-center">{{ request.user }}</p>
+                            <p class="d-flex justify-content-center">{{ request.user }}</p>
                             {% if request.user.is_superuser %}
                             <a class="d-flex dropdown-item justify-content-center" href="/api"><b>API</b></a>
                             <a class="d-flex dropdown-item justify-content-center" href="{% url 'admin:index' %}"><b>Admin</b></a>
