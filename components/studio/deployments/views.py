@@ -33,8 +33,9 @@ def predict(request, id, project):
             from rest_framework.authtoken.models import Token
 
             token = Token.objects.get_or_create(user=request.user)
-
-            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token[0].key}, verify=False)
+            print('requesting: '+predict_url)
+            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token[0].key})
+            print(res.text)
             try:
                 prediction = json.loads(res.text)
                 prediction = json.dumps(prediction, indent=4)

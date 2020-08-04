@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('auth/', auth, name='auth'),
+    path('oidc/', include('mozilla_django_oidc.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('', include('models.urls', namespace='models')),
     path('', include('deployments.urls', namespace="deployments")),
@@ -34,6 +35,7 @@ urlpatterns = [
     path('<user>/<project>/files/', include('files.urls', namespace='files')),
     path('<user>/<project>/reports/', include('reports.urls', namespace='reports')),
     path('<user>/<project>/experiments/', include('experiments.urls', namespace='experiments')),
+    path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor'))
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

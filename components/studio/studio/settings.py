@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'ingress',
     'api',
+    'monitor',
     'projects',
     'labs',
     'models',

@@ -32,3 +32,4 @@ PyYAML
 django-bootstrap-modal-forms==1.5.0
 django-yamlfield==1.0.3
 Markdown==3.2.1
+mozilla-django-oidc
