@@ -2,14 +2,14 @@
 
 # What is STACKn?
 
-STACKn is an open source collaborative AI platform. 
+STACKn is an open source collaborative ML platform. 
 
 We aim to provide organizations and institutions with a complete end-to-end toolbox solution evolved by community feedback and adoption.
 
 # Why use STACKn?
-The STACKn solution provides an end-to-end solution for working on collaborative machine learning projects. With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks. 
+The aim of the STACKn solution is to provide an end-to-end solution for working on collaborative machine learning projects. With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks. 
 
-Deploying is a breeze with a cloud-native, vendor-agnostic approach, able to deploy on any solution that provides and implements the kubernetes api. 
+STACKn is cloud-native and can be deployed on any solution that implements the Kubernetes api. 
 
 # Core features
 
@@ -23,7 +23,7 @@ Deploying is a breeze with a cloud-native, vendor-agnostic approach, able to dep
 - Deploy anywhere where there is a Kubernetes compliant API.
 
 ## Integration and customization
-- STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
+- The STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
 - On the backend side Helm charts can easily be extended to include additional services with the inclusion of additional resources to the Helm chart. 
  - A third way to extend resources includes complementing existing bundling with additional Helm charts with bundled resources to allow for custom resources to be deployed and managed either by the chart controller or by manual deployment. 
 
@@ -33,21 +33,23 @@ For additional details please see the technical documentation.
 
 # Setup
 ## Getting started
-This guide lets you quickly get started with STACKn. If you are already familiar with installing Helm charts you may skip ahead to Setup a user.
+This guide lets you quickly get started with STACKn.
 
 1. Check prerequisites
-2. Download charts
-3. Install STACKn
-4. Setup a user
-5. Create a project
+2. Create an SSL certificate
+3. Download charts
+4. Install STACKn
+5. Setup a user
+<!-- 5. Create a project -->
 
 ### 1. Check prerequisites
 
 - Ensure you have a Kubernetes compliant cluster.
 - Your user must have a KUBECONFIG in env configured such that you can access kubectl.
 - Helm 3 client installed.
+- You need a domain name with a wildcard SSL certificate. If your domain is your-domain.com, you will need a certificate for *.your-domain.com and *.studio.your-domain.com.
 
-#### Kubernetes prereqs
+#### Kubernetes prerequisites
 Your kubernetes setup is expected to have (unless you configure other options):
 - Working Ingress controller (ingress-nginx)
 - Working Dynamic Storage Provider.
@@ -74,62 +76,60 @@ subjects:
   namespace: default
 EOF
 ```
-- Utilize hardware capabilities?
+
 As we are using fusemounting for some of the s3 overlay mounts to allow for easy s3 access through filesystem you are required to configure so pods allow privileged mode.
 If you don't want this feature you can remove this by configuration.
 
-Also if you intend to deploy labs sessions that will utilize hardware capabilities such as GPU make sure the service account used or configured for the services have the right permissions. 
+Also if you intend to deploy lab sessions that will utilize hardware capabilities such as GPU, make sure the service account used or configured for the services have the right permissions. 
 
-Example if you are deploying to microk8s you are required to allow for privilege escalation for docker with `--allow-privileged=true` (https://gist.github.com/antonfisher/d4cb83ff204b196058d79f513fd135a6)[reference]
+For example, if you are deploying to microk8s you are required to allow for privilege escalation for docker with `--allow-privileged=true` in `kube-apiserver`.
 
-### 2. Download charts
-Navigate to the official chart repository and either download the repo or clone the repository to your local device. 
+### 2. Create an SSL certificate
+
+You need a domain name with a wildcard SSL certificate. If your domain is your-domain.com, you will need a certificate for *.your-domain.com and *.studio.your-domain.com. Assuming that your certificate is fullchain.pem and your private key privkey.pem, you can create a secret `prod-ingress` containing the certificate with the command:
+```
+ kubectl create secret tls prod-ingress --cert fullchain.pem --key privkey.pem
+```
+An alternative is to deploy STACKn without a certificate, but you will then receive warnings from your browser, and the command-line tool will not work properly.
+
+### 3. Download charts
+Navigate to the official chart repository and either download or clone the repository. 
 
 > https://github.com/scaleoutsystems/charts
 
-```bash
-$wget https://github.com/scaleoutsystems/charts/archive/master.zip
-```
-Or 
+The ability to add helm chart as a source will be configured soon.
 
-```bash
-$ git clone git@github.com:scaleoutsystems/charts.git
-```
+### 4. Install STACKn
+<!-- Copy the example file best matching your intended deployment. There exist examples for some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates.  -->
 
-Soon the ability to add helm chart as a source will be configured.
+Copy `values.yaml` and make appropriate edits. For more information on how to configure the deployment, see  https://github.com/scaleoutsystems/charts/tree/master/scaleout/stackn. Some of the values are mandatory to update for a working deployment.
 
-### 3. Install STACKn
-Copy the example file best matching your intended deployment. There exist examples for Some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates. 
-
-```bash
-$ cp example/microk8s/values.yaml testdeploy/values.yaml
-```
-Now edit the configuration file appropriately.
-
-Hint : lint or check deployment with —dry-run —debug flags to ensure correct value replacement. 
+Assuming that your configuration file is `testdeploy/values.yaml`, you can now deploy STACKn with
 ```bash
 $ helm install stackn /path/to/charts/stackn -f testdeploy/values.yaml
 ```
+You can lint or check the deployment with the flags —dry-run —debug.
+
 Make sure to assign the chart to the right namespace with —namespace yournamespace (when deploying to the default namespace this can be omitted.)
 
-### 4. Setup a user
+### 5. Setup a user
 
 You will need to create a user to login into Studio. Click the login button in the lower left corner, and click register. By default, Keycloak is configured not to require email verification, but this can be changed by logging into the Keycloak admin console and updating the STACKn realm login settings.
 
-To access the admin page of Studio, you will need to create a Django user with admin rights. First find out the pod name to the studio deployment:
+To access the admin page of Studio, you will need to create a Django user with admin rights. First find the pod name to the Studio deployment:
 ```bash
 $ kubectl get pods -n yournamespace
 ```
-and get the pod id that correspond to the studio pod running. Replace the "pod-Id" in the command below.
+and get the pod id that correspond to the studio pod running. Replace `pod-Id` in the command below.
 ```bash
 $ kubectl exec -it pod-Id python manage.py createsuperuser
 ```
 
 ### Additional - Upgrading STACKn
 
-Similar to how you install a chart you may also upgrade a chart if some parameters have changed.
+Similar to how you install a chart you may also upgrade a chart.
 
-An example for upgrading STACKn with a values file as per above:
+An example of how to upgrade STACKn with a values file as per above:
 ```bash
 $ helm upgrade stackn scaleout/stackn --values=testdeploy/values.yaml --debug --dry-run
 ```
