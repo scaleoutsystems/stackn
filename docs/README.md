@@ -4,27 +4,26 @@
 
 STACKn is an open source collaborative AI platform. 
 
-Some solutions exist out there but none with both an open source and an end to end approach. 
-We aim to provide organizations and institutions with a complete end to end toolbox solution evolved by community feedback and adoption.
+We aim to provide organizations and institutions with a complete end-to-end toolbox solution evolved by community feedback and adoption.
 
 # Why use STACKn?
-Stackn solution provides an end to end solution for working on collaborative machine learning projects and assignments. With the vendor agnostic approach no framework is preselected and it is entirely up to the machine learning engineers to select their preferred frameworks. 
+The STACKn solution provides an end-to-end solution for working on collaborative machine learning projects. With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks. 
 
-Deploying is a breeze with a cloud native vendor agnostic approach able to deploy on any solution that provides and implements the kubernetes api. 
+Deploying is a breeze with a cloud-native, vendor-agnostic approach, able to deploy on any solution that provides and implements the kubernetes api. 
 
 # Core features
 
 ## Custom Resource management
-- Ability to lifecycle control resources. Out of the box stackn provides model, dataset, files and project lifecycle management including user management 
+- Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management, out of the box.
 
 ## Model Management
 - Ability to track models from cradle to grave with version control, inference auto scaling and control as well as audit trails and scheduled rollouts and/or decommissions. 
 
 ## Platform support
-- Deploy anywhere where there is a kubernetes compliant api.
+- Deploy anywhere where there is a Kubernetes compliant API.
 
 ## Integration and customization
-- Stackn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
+- STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
 - On the backend side helm charts can easily be extended to include additional services with the inclusion of additional resources to the helm chart. 
  - A third way to extend resources includes complementing existing bundling with additional helm charts with bundled resources to allow for custom resources to be deployed and managed either by the chart controller or by manual deployment. 
 
