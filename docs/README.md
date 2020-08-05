@@ -99,14 +99,22 @@ Navigate to the official chart repository and either download or clone the repos
 
 The ability to add helm chart as a source will be configured soon.
 
+The chart for STACKn is in `charts/scaleout/stackn`.
+
 ### 4. Install STACKn
 <!-- Copy the example file best matching your intended deployment. There exist examples for some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates.  -->
 
-Copy `values.yaml` and make appropriate edits. For more information on how to configure the deployment, see  https://github.com/scaleoutsystems/charts/tree/master/scaleout/stackn. Some of the values are mandatory to update for a working deployment.
+Copy `charts/scaleout/stackn/values.yaml` and make appropriate edits. For more information on how to configure the deployment, see  https://github.com/scaleoutsystems/charts/tree/master/scaleout/stackn. Some of the values are mandatory to update for a working deployment, specifically:
+
+`your-domain.com` should be replaced with your actual domain name everywhere.
+
+`cluster_config` should be updated with the config file for your cluster. You need to have admin access to the namespace in which STACKn is to be deployed.
+
+You might have to update `storageClassName`, `storageClass`, and `namespace`, depending on your cluster setup.
 
 Assuming that your configuration file is `testdeploy/values.yaml`, you can now deploy STACKn with
 ```bash
-$ helm install stackn /path/to/charts/stackn -f testdeploy/values.yaml
+$ helm install stackn charts/scaleout/stackn -f testdeploy/values.yaml
 ```
 You can lint or check the deployment with the flags —dry-run —debug.
 
