@@ -69,6 +69,12 @@ def get_instance_from_definition(instance):
 
 def build_definition(instance):
     import uuid
+    from projects.helpers import get_minio_keys
+
+    minio_keys = get_minio_keys(instance.project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+
     build_templ = Template(DEPLOY_DEFINITION_TEMPLATE)
     image = 'registry.{}/depdef-{}'.format(settings.DOMAIN, instance.name)
     job = build_templ.substitute(bucket=instance.bucket,
@@ -76,8 +82,8 @@ def build_definition(instance):
                                  name=instance.name,
                                  jobid=uuid.uuid1().hex[0:5],
                                  image='{}.default.svc.cluster.local:5000/depdef-{}'.format(settings.REGISTRY_SVC, instance.name),
-                                 access_key=instance.project.project_key,
-                                 secret_key=instance.project.project_secret,
+                                 access_key=decrypted_key,
+                                 secret_key=decrypted_secret,
                                  s3endpoint='http://{}-minio:9000'.format(instance.project.slug))
     import yaml
     from projects.jobs import start_job

@@ -3,7 +3,7 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
-
+from projects.helpers import get_minio_keys
 import requests
 
 class DeploymentDefinition(models.Model):
@@ -89,8 +89,13 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     project = model.project
     project_slug = project.slug
-    minio_access_key = project.project_key
-    minio_secret_key = project.project_secret
+
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+    minio_access_key = decrypted_key
+    minio_secret_key = decrypted_secret
+
     minio_host = project_slug+'-minio:9000'
 
     global_domain = settings.DOMAIN

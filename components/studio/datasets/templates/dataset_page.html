@@ -15,10 +15,10 @@
             going to <a href="https://{{ project.slug }}-minio.{{ url_domain }}/" target="_blank">MiniO</a>
             and use the following login credentials: </p>
         <p>
-            Access Key: <b>{{ project.project_key }}</b>
+            Access Key: <b>{{ decrypted_key }}</b>
         </p>
         <p>
-            Secret Key: <b>{{ project.project_secret }}</b>
+            Secret Key: <b>{{ decrypted_secret }}</b>
         </p>
     </div>
     <nav aria-label="breadcrumb" style="margin-bottom: 25px;">

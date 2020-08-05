@@ -49,14 +49,14 @@
             <label for="access_key" class="col-sm-2 col-form-label">Access Key</label>
             <div class="col-sm-10">
                 <input type="url" readonly class="form-control-plaintext" id="access_key"
-                       value="{{ project.project_key }}">
+                       value="{{ decrypted_key }}">
             </div>
         </div>
         <div class="form-group row">
             <label for="secret_key" class="col-sm-2 col-form-label">Secret Key</label>
             <div class="col-sm-10">
                 <input type="url" readonly class="form-control-plaintext" id="secret_key"
-                       value="{{ project.project_secret }}">
+                       value="{{ decrypted_secret }}">
             </div>
         </div>
     </div>
