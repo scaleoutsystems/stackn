@@ -14,7 +14,7 @@ Deploying is a breeze with a cloud-native, vendor-agnostic approach, able to dep
 # Core features
 
 ## Custom Resource management
-- Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management, out of the box.
+- Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management.
 
 ## Model Management
 - Ability to track models from cradle to grave with version control, inference auto scaling and control as well as audit trails and scheduled rollouts and/or decommissions. 
@@ -24,16 +24,16 @@ Deploying is a breeze with a cloud-native, vendor-agnostic approach, able to dep
 
 ## Integration and customization
 - STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
-- On the backend side helm charts can easily be extended to include additional services with the inclusion of additional resources to the helm chart. 
- - A third way to extend resources includes complementing existing bundling with additional helm charts with bundled resources to allow for custom resources to be deployed and managed either by the chart controller or by manual deployment. 
+- On the backend side Helm charts can easily be extended to include additional services with the inclusion of additional resources to the Helm chart. 
+ - A third way to extend resources includes complementing existing bundling with additional Helm charts with bundled resources to allow for custom resources to be deployed and managed either by the chart controller or by manual deployment. 
 
 ## Components
-STACKn is a composition of multiple components required to run the STACKn. The overview can give you a high level introduction to the project and its components.
+STACKn is a composition of multiple required components. The overview can give you a high level introduction to the project and its components.
 For additional details please see the technical documentation.
 
 # Setup
 ## Getting started
-This guide lets you quickly get started with STACKn. If you are already familiar with installing helm charts you may skip ahead to Setup a user.
+This guide lets you quickly get started with STACKn. If you are already familiar with installing Helm charts you may skip ahead to Setup a user.
 
 1. Check prerequisites
 2. Download charts
@@ -43,20 +43,20 @@ This guide lets you quickly get started with STACKn. If you are already familiar
 
 ### 1. Check prerequisites
 
-- Ensure you have a kubernetes compliant cluster.
+- Ensure you have a Kubernetes compliant cluster.
 - Your user must have a KUBECONFIG in env configured such that you can access kubectl.
 - Helm 3 client installed.
 
 #### Kubernetes prereqs
 Your kubernetes setup is expected to have (unless you configure other options):
 - Working Ingress controller (ingress-nginx)
-- Working Dynamic Storage Provider
-to configure you must know your storage class name and storage provisioner.
+- Working Dynamic Storage Provider.
+To configure STACKn you must know your storage class name and storage provisioner.
 
 #### Kubernetes configuration
 - Setup a desired namespace (or default)
 - Setup a service account (or rolebind to admin)
-Ensure your service account user have a rolebinding to administrator permissions for deployment.
+Ensure your service account user has a rolebinding to administrator permissions for deployment.
 ```bash
 cat <<EOF | kubectl apply -f - 
 kind: RoleBinding
@@ -76,7 +76,7 @@ EOF
 ```
 - Utilize hardware capabilities?
 As we are using fusemounting for some of the s3 overlay mounts to allow for easy s3 access through filesystem you are required to configure so pods allow privileged mode.
-If you dont want this feature you can remove this by configuration.
+If you don't want this feature you can remove this by configuration.
 
 Also if you intend to deploy labs sessions that will utilize hardware capabilities such as GPU make sure the service account used or configured for the services have the right permissions. 
 
@@ -99,40 +99,33 @@ $ git clone git@github.com:scaleoutsystems/charts.git
 Soon the ability to add helm chart as a source will be configured.
 
 ### 3. Install STACKn
-Copy one of the example files most redeeming your intended deployment. There exist examples for Some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates. 
+Copy the example file best matching your intended deployment. There exist examples for Some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates. 
 
-Copy the most resembling values.yaml file and name it according to your choice. Make sure to read thoroughly as any malconfiguration will prevent or make for an erroneous deployment. 
 ```bash
 $ cp example/microk8s/values.yaml testdeploy/values.yaml
 ```
-Edit the configuration file appropriately
-```bash 
-$ vi testdeploy/values.yaml
-```
-Hint : lint or check deployment with —dry-run —debut flags to ensure correct value replacement. 
+Now edit the configuration file appropriately.
+
+Hint : lint or check deployment with —dry-run —debug flags to ensure correct value replacement. 
 ```bash
-$ helm install stackn 
+$ helm install stackn /path/to/charts/stackn -f testdeploy/values.yaml
 ```
-Make sure to assign the chart to the right namespace with —namespace yournamespace
+Make sure to assign the chart to the right namespace with —namespace yournamespace (when deploying to the default namespace this can be omitted.)
 
 ### 4. Setup a user
-Either find out the pod name to the studio deployment
+
+You will need to create a user to login into Studio. Click the login button in the lower left corner, and click register. By default, Keycloak is configured not to require email verification, but this can be changed by logging into the Keycloak admin console and updating the STACKn realm login settings.
+
+To access the admin page of Studio, you will need to create a Django user with admin rights. First find out the pod name to the studio deployment:
 ```bash
 $ kubectl get pods -n yournamespace
 ```
-get the pod id that correspond to the studio pod running. Replace the "pod-Id" in the command below.
+and get the pod id that correspond to the studio pod running. Replace the "pod-Id" in the command below.
 ```bash
 $ kubectl exec -it pod-Id python manage.py createsuperuser
 ```
-Helm chart deployment also allow to pre loaded with seed data on deployment such as initial users. Mole on that can be found in the advanced section. 
-
-### 5. Create a project
-1. Navigate to your configured ingress for studio.
-2. Login with your newly added credentials.
-3. Create a project either blank or by selecting a public repository to import and start with.
 
 ### Additional - Upgrading STACKn
-Describe how to upgrade stack with the helm chart. Changing different parameters or similar.
 
 Similar to how you install a chart you may also upgrade a chart if some parameters have changed.
 
@@ -144,7 +137,6 @@ To perform the upgrade
 ```bash
 $ helm upgrade stackn scaleout/stackn --values=testdeploy/values.yaml
 ```
-
 
 ## Tutorial projects
 
