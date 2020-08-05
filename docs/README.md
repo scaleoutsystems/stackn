@@ -1,4 +1,7 @@
-
+<a href="#what-is-stackn">What is STACKn</a><br>
+<a href="#why-use-stackn">Why use STACKn</a><br>
+<a href="#core-features">Core features</a><br>
+<a href="#setup">Setup</a>
 
 # What is STACKn?
 
@@ -146,18 +149,18 @@ To perform the upgrade
 $ helm upgrade stackn scaleout/stackn --values=testdeploy/values.yaml
 ```
 
-## Tutorial projects
+# Tutorial projects
 
-### Digits MNIST Project
+## Digits MNIST Project
 https://github.com/scaleoutsystems/digits-example-project
 
-### AML Example project
+## AML Example project
 https://github.com/scaleoutsystems/aml-example-project
 
 
 Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Our main maintainers are
+# Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.
 - morganekmefjord
 - dstoyanova
