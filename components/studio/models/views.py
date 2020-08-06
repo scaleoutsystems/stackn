@@ -61,9 +61,25 @@ def create(request, user, project):
 
 
 @login_required(login_url='/accounts/login')
+def change_access(request, user, project, id):
+    model = Model.objects.filter(pk=id).first()
+
+    if request.method == 'POST':
+        visibility = request.POST.get('access', '')
+        if visibility != model.access:
+            model.access = visibility
+            model.save()
+
+    return HttpResponseRedirect(
+        reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
+
+
+@login_required(login_url='/accounts/login')
 def details(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
+    model_access_choices = ['PU', 'PR', 'LI']
+    model_access_choices.remove(model.access)
     deployments = DeploymentInstance.objects.filter(model=model)
 
     report_generators = ReportGenerator.objects.filter(project=project)
