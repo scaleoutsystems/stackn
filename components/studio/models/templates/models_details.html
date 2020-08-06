@@ -124,7 +124,7 @@
                     <th scope="row">{{ d.pk }}</th>
                     <td>{{ d.model.name }}:{{ d.model.tag }}</td>
                     <td>
-                        <a href="{{ d.endpoint }}" target="_blank">{{ d.endpoint }}</a>
+                        <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}" target="_blank">{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}</a>
                     </td>
                     <td>{{ d.created_at }}</td>
                 </tr>

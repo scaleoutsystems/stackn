@@ -27,7 +27,7 @@ def predict(request, id, project):
             import requests
             import json
 
-            predict_url = 'https://{}/{}'.format(deployment.endpoint, deployment.deployment.path_predict)
+            predict_url = 'https://{}{}/{}'.format(deployment.endpoint, deployment.path, deployment.deployment.path_predict)
 
             # Get user token
             from rest_framework.authtoken.models import Token
