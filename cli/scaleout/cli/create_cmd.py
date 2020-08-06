@@ -35,7 +35,7 @@ def create_model_cmd(ctx, model, name, tag, description):
 @click.option('-p', '--path_predict')
 @click.pass_context
 def create_deployment_definition(ctx, name, filepath, path_predict=''):
-    """ Create a depliyment definition. """
+    """ Create a deployment definition. """
     client = ctx.obj['CLIENT']
     client.create_deployment_definition(name, filepath, path_predict)
 

@@ -46,6 +46,7 @@ class DeploymentInstance(models.Model):
     model = models.OneToOneField('models.Model', on_delete=models.CASCADE, related_name='deployed_model', unique=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     endpoint = models.CharField(max_length=512)
+    path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     # sample_input = models.TextField(blank=True, null=True)
     # sample_output = models.TextField(blank=True, null=True)
@@ -81,8 +82,14 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     deployment_endpoint = '{}-{}.{}'.format(model.name,
                                             model.tag,
                                             settings.DOMAIN)
-    instance.endpoint = deployment_endpoint
     
+    deployment_endpoint = settings.DOMAIN
+    deployment_path = '/{}/serve/{}/{}'.format(model.project.slug,
+                                               model.name,
+                                               model.tag)
+
+    instance.endpoint = deployment_endpoint
+    instance.path = deployment_path
 
     context = instance.deployment
     context_image = context.image
@@ -109,6 +116,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'deployment.version': deployment_version,
                   'deployment.name': deployment_name,
                   'deployment.endpoint': deployment_endpoint,
+                  'deployment.path': deployment_path,
                   'context.image': context_image,
                   'model.bucket': model_bucket,
                   'model.file': model_file,

@@ -47,7 +47,7 @@
                         <td>{{ deploy.model.name }}</td>
                         <td>{{ deploy.model.tag }}</td>
                         <td>{{ deploy.deployment.name }}</td>
-                        <td>https://{{ deploy.endpoint }}/{{ deploy.deployment.path_predict }}</td>
+                        <td>https://{{ deploy.endpoint }}{{ deploy.path }}/{{ deploy.deployment.path_predict }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>
                             <td>
