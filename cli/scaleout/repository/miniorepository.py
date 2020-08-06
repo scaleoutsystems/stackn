@@ -34,24 +34,23 @@ class MINIORepository(Repository):
         if not self.secure_mode:
             print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
 
-        if self.secure_mode:
+        if not self.secure_mode:
             from urllib3.poolmanager import PoolManager
             manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
-            self.client = Minio("{0}:{1}".format(config['minio_host'], config['minio_port']),
+            self.client = Minio("{}".format(config['minio_host']),
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 secure=self.secure_mode, http_client=manager)
         else:
-            self.client = Minio("{0}:{1}".format(config['minio_host'], config['minio_port']),
+            self.client = Minio("{}".format(config['minio_host']),
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 secure=self.secure_mode)
-
         self.create_bucket(self.bucket)
 
     def create_bucket(self, bucket_name):
         try:
-            response = self.client.make_bucket(bucket_name)
+            self.client.make_bucket(bucket_name)
         except BucketAlreadyOwnedByYou as err:
             pass
         except BucketAlreadyExists as err:

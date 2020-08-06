@@ -227,7 +227,6 @@ class StudioClient(Runtime):
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
-
         repo.set_artifact(model_uid, instance, is_file)
  
         model_data = {"uid": model_uid,
