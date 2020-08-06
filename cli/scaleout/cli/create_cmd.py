@@ -26,7 +26,6 @@ def create_cmd(ctx, daemon):
 @click.pass_context
 def create_model_cmd(ctx, model, name, tag, description):
   """ Publish a model. """
-  print('creating model')
   client = ctx.obj['CLIENT']
   client.create_model(model, name, tag, description)
 
