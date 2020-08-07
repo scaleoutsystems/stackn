@@ -84,7 +84,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                                             settings.DOMAIN)
     
     deployment_endpoint = settings.DOMAIN
-    deployment_path = '/{}/serve/{}/{}'.format(model.project.slug,
+    deployment_path = '/{}/serve/{}/{}/'.format(model.project.slug,
                                                model.name,
                                                model.tag)
 

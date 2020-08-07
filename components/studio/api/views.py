@@ -111,12 +111,11 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def auth(self, request):
-      orig_url = request.headers['X-Original-Url']
-      auth_req_red = request.headers['X-Auth-Request-Redirect']
-      scheme = request.headers['X-Scheme']+'://' 
-      endpoint = orig_url.replace(auth_req_red, '').replace(scheme, '') 
+      auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
+      subs = auth_req_red.split('/')
+      release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
       try:
-          instance = DeploymentInstance.objects.get(endpoint=endpoint)
+          instance = DeploymentInstance.objects.get(release=release)
       except:
           return HttpResponse(status=500)
       if instance.access == 'PU' or instance.model.project.owner == request.user:
