@@ -72,7 +72,7 @@ def keycloak_get_clients(kc, payload):
         return clients
     else:
         print('Failed to fetch clients.')
-        print('Request returned status: '+res.status_code)
+        print('Request returned status: '+str(res.status_code))
         print(res.text)
 
 def keycloak_delete_client(kc, client_id):
@@ -86,7 +86,7 @@ def keycloak_delete_client(kc, client_id):
         return True
     else:
         print('Failed to delete client: '+client_id)
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
 
 def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]):
@@ -105,7 +105,7 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
         return True
     else:
         print('Failed to create new client.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -117,7 +117,7 @@ def keycloak_get_client_secret(kc, client_nid):
         if 'value' in res:
             return res['value']
     print('Failed to get client secret for client: '+client_nid)
-    print('Status code: '+res.status_code)
+    print('Status code: '+str(res.status_code))
     print(res.text)
 
 def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect', 
@@ -127,12 +127,12 @@ def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect',
     client_scope_body = {'name': scope_name,
                         'protocol': 'openid-connect',
                         'attributes': {'include.in.token.scope': 'true', 'display.on.consent.screen': 'true'}}
-    res = r.post(client_scope_url, client_scope_body)
+    res = r.post(client_scope_url, json=client_scope_body, headers={'Authorization': 'bearer '+kc.token})
     if res:
         return True
     else:
         print('Failed to create client scope '+scope_name)
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -148,7 +148,7 @@ def keycloak_get_client_scope_id(kc, scope_name):
         return scope_id
     else:
         print('Failed to get client scopes.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -169,7 +169,7 @@ def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
         return True
     else:
         print('Failed to create scope mapper.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -180,7 +180,7 @@ def keycloak_add_scope_to_client(kc, client_id, scope_id):
         return True
     else:
         print('Failed to add scope to client.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False        
 
@@ -192,7 +192,7 @@ def keycloak_create_client_role(kc, client_nid, role_name):
         return True
     else:
         print('Failed to create client role.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -201,7 +201,7 @@ def keycloak_get_user_id(kc, username):
     res = r.get(get_users_url, params={'username': username}, headers={'Authorization': 'bearer '+kc.token}).json()
     if not res:
         print('Failed to get user id.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
     if len(res) != 1:
@@ -220,7 +220,7 @@ def keycloak_get_client_role_id(kc, role_name, client_nid):
                 return role['id']
     else:
         print('Failed to get client role id.')
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
@@ -240,7 +240,7 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name):
         return True
     else:
         print('Failed to add user {} to client role {}.'.format(username, role_name))
-        print('Status code: '+res.status_code)
+        print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
