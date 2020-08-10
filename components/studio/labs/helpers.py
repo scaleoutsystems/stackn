@@ -152,6 +152,18 @@ def keycloak_get_client_scope_id(kc, scope_name):
         print(res.text)
         return False
 
+def keycloak_delete_client_scope(kc, scope_id):
+    # /{realm}/client-scopes/{id}
+    client_scope_url = '{}/admin/realms/{}/client-scopes/{}'.format(kc.admin_url, kc.realm, scope_id)
+    res = r.delete(client_scope_url, headers={'Authorization': 'bearer '+kc.token})
+    if res:
+        return True
+    else:
+        print('Failed to delete client scope '+scope_id)
+        print('Status code: '+str(res.status_code))
+        print(res.text)
+        return False
+
 def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
     create_client_scope_mapper_url = '{}/admin/realms/{}/client-scopes/{}/protocol-mappers/models'.format(kc.admin_url, kc.realm, scope_id)
     scope_mapper = {'name': mapper_name,
@@ -316,8 +328,13 @@ def delete_session_resources(session):
     print("trying to delete {}".format(session.slug))
     parameters = {'release': str(session.slug)}
     retval = r.get(settings.CHART_CONTROLLER_URL + '/delete', parameters)
+    
     kc = keycloak_init()
     keycloak_delete_client(kc, str(session.slug))
+    
+    scope_id = keycloak_get_client_scope_id(kc, str(session.slug)+'-scope')
+    keycloak_delete_client_scope(kc, scope_id)
+
     if retval:
         print('delete success!')
         return True
