@@ -128,7 +128,7 @@ def get_file_content(filename):
     return json.dumps({'status': 'OK', 'filename': filename, 'content': content})
 
 
-@app.route('project/<project_name>/push/<user_name>/<user_password>')
+@app.route('/project/<project_name>/push/<user_name>/<user_password>')
 def push_project_to_github(project_name, user_name, user_password):
     base64_bytes = user_password.encode('ascii')
     user_password_bytes = base64.b64decode(base64_bytes)
