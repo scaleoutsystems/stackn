@@ -1,4 +1,6 @@
 from django.conf import settings
+import os
+from pathlib import Path
 
 job_template = '''apiVersion: batch/v1
 kind: Job
@@ -70,10 +72,26 @@ def __generate_and_apply_configmaps(project):
     from kubernetes.client.rest import ApiException
     from pprint import pprint
 
+    
+
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
     else:
-        config.load_incluster_config()
+        # adjust k8s service account paths if running inside telepresence
+        if 'TELEPRESENCE_ROOT' in os.environ:
+            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+                                                      SERVICE_TOKEN_FILENAME,
+                                                      InClusterConfigLoader)
+            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+
+            InClusterConfigLoader(
+                token_filename=token_filename, cert_filename=cert_filename
+            ).load_and_set()
+        else:
+            config.load_incluster_config()
 
     api = client.CoreV1Api()
 
@@ -131,7 +149,20 @@ def start_job(definition):
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
     else:
-        config.load_incluster_config()
+        if 'TELEPRESENCE_ROOT' in os.environ:
+            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+                                                      SERVICE_TOKEN_FILENAME,
+                                                      InClusterConfigLoader)
+            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+
+            InClusterConfigLoader(
+                token_filename=token_filename, cert_filename=cert_filename
+            ).load_and_set()
+        else:
+            config.load_incluster_config()
 
     api = client.BatchV1Api()
 
