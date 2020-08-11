@@ -4,8 +4,9 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
 from projects.helpers import get_minio_keys
+import os
 import requests
-
+import modules.keycloak_lib as keylib
 class DeploymentDefinition(models.Model):
 
     PRIVATE = 'PR'
@@ -50,6 +51,7 @@ class DeploymentInstance(models.Model):
     release = models.CharField(max_length=512)
     # sample_input = models.TextField(blank=True, null=True)
     # sample_output = models.TextField(blank=True, null=True)
+    created_by = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -62,10 +64,16 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
     parameters = {'release': instance.release}
     url = settings.CHART_CONTROLLER_URL + '/delete'
     retval = requests.get(url, parameters)
-    if retval.status_code >= 200 or retval.status_code < 205:
+    if retval.status_code >= 200 or retval.status_code < 205:        
         model = instance.model
         model.status = 'CR'
         model.save()
+
+        # Clean up in Keycloak
+        kc = keylib.keycloak_init()
+        keylib.keycloak_delete_client(kc, instance.release) 
+        scope_id = keylib.keycloak_get_client_scope_id(kc, instance.release+'-scope')
+        keylib.keycloak_delete_client_scope(kc, scope_id)
 
 @receiver(pre_save, sender=DeploymentInstance, dispatch_uid='deployment_pre_save_signal')
 def pre_save_deployment(sender, instance, using, **kwargs):
@@ -107,9 +115,17 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     global_domain = settings.DOMAIN
 
-    parameters = {'release': str(project_slug)+'-'
-                            +str(deployment_name)+'-'
-                            +str(deployment_version),
+    # Create Keycloak client corresponding to this deployment
+    HOST = settings.DOMAIN
+    RELEASE_NAME = str(project_slug)+'-'+str(deployment_name)+'-'+str(deployment_version)
+    burl = os.path.join('https://', HOST)
+    print(burl)
+    eurl = os.path.join(deployment_endpoint, deployment_path)
+    print(eurl)
+    URL = burl+eurl
+    print('CLIENT URL: '+URL)
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username)
+    parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
                   'global.domain': global_domain,
                   'project.slug': project_slug,
@@ -122,15 +138,24 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'model.file': model_file,
                   'minio.host': minio_host,
                   'minio.secret_key': minio_secret_key,
-                  'minio.access_key': minio_access_key}
+                  'minio.access_key': minio_access_key,
+                  'gatekeeper.realm': settings.KC_REALM,
+                  'gatekeeper.client_secret': client_secret,
+                  'gatekeeper.client_id': client_id,
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH}
 
     url = settings.CHART_CONTROLLER_URL + '/deploy'
     retval = requests.get(url, parameters)
     
     if retval.status_code >= 200 or retval.status_code < 205:
-        instance.release = parameters['release']
+        instance.release = RELEASE_NAME
         model.status = 'DP'
         model.save()
     else:
+        # If fail, clean up in Keycloak
+        kc = keylib.keycloak_init()
+        keylib.keycloak_delete_client(kc, RELEASE_NAME) 
+        scope_id = keylib.keycloak_get_client_scope_id(kc, RELEASE_NAME+'-scope')
+        keylib.keycloak_delete_client_scope(kc, scope_id)
         raise Exception('Failed to launch deploy job.')
 
