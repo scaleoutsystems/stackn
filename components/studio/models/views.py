@@ -25,6 +25,7 @@ def index(request):
 
 @login_required(login_url='/accounts/login')
 def list(request, user, project):
+    print(dir(request))
     template = 'models_list.html'
     project = Project.objects.filter(slug=project).first()
 
