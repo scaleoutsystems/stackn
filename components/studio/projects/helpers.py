@@ -10,6 +10,8 @@ from .jobs import load_definition, start_job
 
 import re
 
+import modules.keycloak_lib as keylib
+
 def urlify(s):
 
     # Remove all non-word characters (everything except numbers and letters)
@@ -37,6 +39,12 @@ def create_settings_file(project, username, token):
 def create_project_resources(project, username, repository=None):
     create_environment_image(project, repository)
     create_helm_resources(project, username, repository)
+    
+    # Create Keycloak client for project with default project role.
+    HOST = settings.DOMAIN
+    RELEASE_NAME = str(project.slug)   
+    URL = 'https://{}/{}/{}'.format(HOST, username.username, RELEASE_NAME)
+    keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username.username)
 
 
 def create_environment_image(project, repository=None):
@@ -75,6 +83,12 @@ def delete_project_resources(project):
     retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
 
     if retval:
+        # Delete Keycloak project client
+        kc = keylib.keycloak_init()
+        keylib.keycloak_delete_client(kc, project.slug)
+        
+        scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+        keylib.keycloak_delete_client_scope(kc, scope_id)
         return True
 
     return False
