@@ -47,6 +47,25 @@ def keycloak_client_auth(client_id, client_secret, admin_url, realm):
         print('Failed to authenticate as client: '+client_id)
         return False
 
+def keycloak_token_exchange_studio(kc, user_id):
+    token_url = '{}/realms/{}/protocol/openid-connect/token'.format(kc.admin_url, kc.realm)
+    req = {'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
+           'client_id': 'studio-api',
+           'requested_subject': user_id,
+           'subject_token': kc.token}
+    res = r.post(token_url, data=req)
+    token = res.json()['access_token']
+    refresh_token = res.json()['refresh_token']
+    discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
+    res = r.get(discovery_url)
+    if res:
+        realm_info = res.json()
+        public_key = '-----BEGIN PUBLIC KEY-----\n'+realm_info['public_key']+'\n-----END PUBLIC KEY-----'
+    else:
+        print('Failed to discover realm settings: '+settings.KC_REALM)
+        return False
+    return token, refresh_token, token_url, public_key
+
 def keycloak_init():
     admin_url = settings.KC_ADMIN_URL
     realm = settings.KC_REALM
