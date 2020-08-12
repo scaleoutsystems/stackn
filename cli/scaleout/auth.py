@@ -9,8 +9,8 @@ from getpass import getpass
 from scaleout.utils.file import dump_to_file, load_from_file
 
 
-def keycloak_user_auth(username, password, host_url, client_id='studio-api', realm='STACKn'):
-    discovery_url = '{}/auth/realms/{}'.format(host_url, realm)
+def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn'):
+    discovery_url = '{}/auth/realms/{}'.format(keycloak_url, realm)
     res = requests.get(discovery_url)
     if res:
         realm_info = res.json()
@@ -19,7 +19,7 @@ def keycloak_user_auth(username, password, host_url, client_id='studio-api', rea
         print('Failed to discover realm settings: '+realm)
         return None
     
-    token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(host_url, realm)
+    token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(keycloak_url, realm)
     req = {'client_id': client_id,
            'grant_type': 'password',
            'username': username,
@@ -53,14 +53,15 @@ def write_stackn_config(updated_values):
 
     
 
-def write_tokens(deployment, token, refresh_token, public_key, host_url):
+def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, studio_host):
     dirpath = os.path.expanduser('~/.scaleout/'+deployment)
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
     dep_config = {'access_token': token,
                   'refresh_token': refresh_token,
                   'public_key': public_key,
-                  'host_url': host_url}
+                  'keycloak_url': keycloak_host,
+                  'studio_url': studio_host}
     dump_to_file(dep_config, 'user', dirpath)
 
 def get_token(client_id='studio-api', realm='STACKn'):
@@ -87,7 +88,7 @@ def get_token(client_id='studio-api', realm='STACKn'):
     except:
         # Try to refresh token
         print('Refreshing token...')
-        token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(token_config['host_url'], realm)
+        token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(token_config['keycloak_url'], realm)
         req = {'grant_type': 'refresh_token',
                'client_id': client_id,
                'refresh_token': token_config['refresh_token']}
@@ -100,44 +101,34 @@ def get_token(client_id='studio-api', realm='STACKn'):
                          access_token,
                          refresh_token,
                          token_config['public_key'],
-                         token_config['host_url'])
+                         token_config['keycloak_url'],
+                         token_config['studio_url'])
             # return res['access_token'], res['refresh_token'], public_key
         else:
             print('Failed to authenticate with token, please login again.')
             print(res.text)
             access_token = login()
 
-
-    return access_token
-
+    return access_token, token_config
 
 
-def login():
+
+def login(client_id='studio-api', realm='STACKn'):
     """ Login to Studio services. """
     deployment = input('Name: ')
-    host = input('Host: ')
+    keycloak_host = input('Keycloak host: ')
+    studio_host = input('Studio host: ')
     username = input('Username: ')
     password = getpass()
-    access_token, refresh_token, public_key = keycloak_user_auth(username, password, host)
+    access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host)
     # dirname = base64.urlsafe_b64encode(host.encode("utf-8")).decode("utf-8")
     dirpath = os.path.expanduser('~/.scaleout/'+deployment)
     if not os.path.exists(dirpath):
         os.mkdir(dirpath)
-    write_tokens(deployment, access_token, refresh_token, public_key, host)
-    write_stackn_config({'active': deployment})
+    write_tokens(deployment, access_token, refresh_token, public_key, keycloak_host, studio_host)
+    write_stackn_config({'active': deployment, 'client_id': client_id, 'realm': realm})
     return access_token
-    # token_file = open(dirpath+'/token', 'w')
-    # refresh_token_file = open(dirpath+'/refresh_token', 'w')
-    # public_key_file = open(dirpath+'/public_key', 'w')
-    # active_host = open(os.path.expanduser('~/.scaleout/active'), 'w')
-    # token_file.write(token)
-    # token_file.close()
-    # refresh_token_file.write(refresh_token)
-    # refresh_token_file.close()
-    # active_host.write(deployment)
-    # active_host.close()
-    # public_key_file.write(public_key)
-    # public_key_file.close()
+
 
 def get_bearer_token(url, username, password):
     """ Exchange username,password for an auth token.

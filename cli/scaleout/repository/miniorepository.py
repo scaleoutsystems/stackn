@@ -42,16 +42,13 @@ class MINIORepository(Repository):
                                 secret_key=secret_key,
                                 secure=self.secure_mode, http_client=manager)
         else:
-            print('creating client')
-            print("{}".format(config['minio_host']))
-            print(self.secure_mode)
             self.client = Minio("{}".format(config['minio_host']),
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 secure=self.secure_mode)
-        print('creating bucket')
+
         self.create_bucket(self.bucket)
-        print('done')
+
 
     def create_bucket(self, bucket_name):
         try:

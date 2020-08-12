@@ -13,6 +13,7 @@ import json
 import pickle
 from slugify import slugify
 import uuid
+from urllib.parse import urljoin
 
 
 def _check_status(r,error_msg="Failed"):
@@ -36,14 +37,14 @@ class StudioClient(Runtime):
         self.password = self.config['password']
         # self.project_name = self.config['Project']['project_name']
         self.project_slug = self.config['Project']['project_slug']
-        self.auth_url = self.config['auth_url']
+        # self.auth_url = self.config['auth_url']
         self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
-        self.api_url = self.auth_url.replace("/api-token-auth",'')
-
-        token = sauth.get_token()
-
-        self.auth_headers = {'Authorization': 'Token {}'.format(token)}
+        # self.api_url = self.auth_url.replace("/api-token-auth",'')
+        
+        self.access_token, self.token_config = sauth.get_token()
+        self.api_url = urljoin(self.token_config['studio_url'], '/api')
+        self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
 
         # Fetch and set all active API endpoints
         self.get_endpoints()
@@ -66,16 +67,6 @@ class StudioClient(Runtime):
         self.deployment_instance_api = endpoints['deploymentInstances']
         self.deployment_definition_api = endpoints['deploymentDefinitions']
 
-
-    def connect(self):
-        """ Fetch and set an API bearer token """ 
-        url = self.config['auth_url']
-        try:
-            self.token = get_bearer_token(url, self.username, self.password)
-        except AuthenticationError:
-            self.token=None
-            raise
-
     def _get_repository_conf(self):
         """ Return the project minio keys. """
         #TODO: If we have multiple repositories configured, studio, minio, s3, etc, we 
@@ -85,7 +76,8 @@ class StudioClient(Runtime):
 
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
-            'minio_host': '{}-minio.{}'.format(self.project_slug,self.config['so_domain_name']),
+            'minio_host': '{}-minio.{}'.format(self.project_slug,
+                                               self.token_config['studio_url'].replace('https://', '').replace('http://', '')),
             'minio_port': 9000,
             'minio_access_key': self.decrypt_key(project['project_key']),
             'minio_secret_key': self.decrypt_key(project['project_secret']),

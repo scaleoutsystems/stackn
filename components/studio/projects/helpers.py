@@ -24,20 +24,7 @@ def urlify(s):
 
 def create_settings_file(project, username, token):
     proj_settings = dict()
-    proj_settings['auth_url'] = os.path.join('https://'+settings.DOMAIN, 'api/api-token-auth')
-    proj_settings['access_key'] = decrypt_key(project.project_key)
-    proj_settings['username'] = username
-
-    kc = keylib.keycloak_init()
-    user_id = keylib.keycloak_get_user_id(kc, username)
-    token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, user_id)
-
-    proj_settings['token'] = token
-    proj_settings['refresh_token'] = refresh_token
-    proj_settings['token_url'] = token_url
-    proj_settings['token_public_key'] = public_key
-    proj_settings['so_domain_name'] = settings.DOMAIN
-    
+       
     proj_settings['Project'] = dict()
     proj_settings['Project']['project_name'] = project.name
     proj_settings['Project']['project_slug'] = project.slug
