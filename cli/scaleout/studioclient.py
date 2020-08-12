@@ -6,6 +6,7 @@ from scaleout.runtime.runtime import Runtime
 import scaleout.auth as sauth
 from scaleout.auth import get_bearer_token
 from scaleout.errors import AuthenticationError
+from scaleout.utils.file import dump_to_file, load_from_file
 
 import requests
 import json
@@ -40,32 +41,7 @@ class StudioClient(Runtime):
         # TODO: This assumes a certain url-schema
         self.api_url = self.auth_url.replace("/api-token-auth",'')
 
-        # 1. Verify token locally
-        # 2. If expired, refresh against client studio-api
-        # (Need to add client studio-api to default config)
-        # (Need to add token-exchange option to default values.yaml)
-        file_active = open(os.path.expanduser('~/.scaleout/active'), 'r')
-        active_remote = file_active.read()
-        file_active.close()
-        active_dir = os.path.expanduser('~/.scaleout/'+active_remote)
-        file_token = open(active_dir+'/token', 'r')
-        file_refresh_token = open(active_dir+'/refresh_token', 'r')
-        file_public_key = open(active_dir+'/public_key', 'r')
-        file_host_url = open(active_dir+'/host', 'r')
-        access_token = file_token.read()
-        refresh_token = file_refresh_token.read()
-        public_key = file_public_key.read()
-        host_url = file_host_url.read()
-        file_token.close()
-        file_refresh_token.close()
-        file_public_key.close()
-        file_host_url.close()
-
-        token = sauth.verify_or_refresh_jwt_token(active_remote,
-                                                 access_token,
-                                                 refresh_token,
-                                                 public_key,
-                                                 host_url)
+        token = sauth.get_token()
 
         self.auth_headers = {'Authorization': 'Token {}'.format(token)}
 

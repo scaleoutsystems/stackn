@@ -11,13 +11,8 @@ from .helpers import create_table
               )
               )
 
-@main.group('login')
+@main.command('login')
 @click.pass_context
 def login_cmd(ctx, daemon):
-    pass
-
-@login_cmd.command('login')
-@click.pass_context
-def login_cmd(ctx):
     login()
 
