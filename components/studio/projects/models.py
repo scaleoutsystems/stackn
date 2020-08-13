@@ -73,7 +73,7 @@ class ProjectManager(models.Manager):
 class Project(models.Model):
     objects = ProjectManager()
 
-    name = models.CharField(max_length=512)
+    name = models.CharField(max_length=512, unique=True)
     description = models.TextField(null=True, blank=True)
     slug = models.CharField(max_length=512, unique=True)
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='owner')
@@ -94,3 +94,4 @@ class Project(models.Model):
 
     environment = models.ForeignKey('projects.Environment', on_delete=models.DO_NOTHING, default=DEFAULT_ENVIRONMENT_ID)
     clone_url = models.CharField(max_length=512, null=True, blank=True)
+
