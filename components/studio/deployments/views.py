@@ -55,7 +55,7 @@ def deploy(request, id):
     if request.method == 'POST':
         deployment = request.POST.get('deployment', None)
         definition = DeploymentDefinition.objects.get(name=deployment)
-        instance = DeploymentInstance(model=model, deployment=definition)
+        instance = DeploymentInstance(model=model, deployment=definition, created_by=request.user)
         instance.save()
         # return JsonResponse({"code": "201"})
 

@@ -46,7 +46,9 @@ class MINIORepository(Repository):
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 secure=self.secure_mode)
+
         self.create_bucket(self.bucket)
+
 
     def create_bucket(self, bucket_name):
         try:

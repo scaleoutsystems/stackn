@@ -26,7 +26,7 @@ def main(ctx, project_dir):
     ctx.obj = dict()
     ctx.obj['PROJECT_DIR'] = project_dir
 
-    if ctx.invoked_subcommand not in ('init',):
+    if ctx.invoked_subcommand not in ('init','login',):
         # TODO add support for cwd change, config-file specification
         from scaleout.project import Project
         from scaleout.runtime.runtime import Runtime
