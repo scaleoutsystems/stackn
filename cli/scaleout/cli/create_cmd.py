@@ -50,5 +50,13 @@ def create_deployment_cmd(ctx, model, deploymentdefinition, model_tag='latest'):
 
 
 # Create project
+@create_cmd.command('project')
+@click.option('-n', '--name', required=True)
+@click.option('-d', '--description', required=False)
+@click.option('-r', '--repository', required=False)
+@click.pass_context
+def create_project_cmd(ctx, name, description='', repository=''):
+    client = ctx.obj['CLIENT']
+    client.create_project(name, description, repository)
 
 # Create dataset
