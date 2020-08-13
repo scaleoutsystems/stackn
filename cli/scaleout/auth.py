@@ -65,7 +65,7 @@ def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, st
     dump_to_file(dep_config, 'user', dirpath)
 
 def get_stackn_config():
-    stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
+    stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
     if not load_status:
         print('Failed to load stackn config file.')
         return None
