@@ -41,7 +41,7 @@ class StudioClient():
         # self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
         # self.api_url = self.auth_url.replace("/api-token-auth",'')
-        
+        self.found_project = False
         self.access_token, self.token_config = sauth.get_token()
         self.api_url = urljoin(self.token_config['studio_url'], '/api')
         self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
@@ -58,12 +58,19 @@ class StudioClient():
         active_dir = self.stackn_config['active']
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
-            self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
-            self.project_slug = self.project['slug']
+            if os.path.exists(project_dir+'/'+self.stackn_config['active_project']+'.json'):
+                self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+                if load_status:
+                    self.found_project = True
+                    self.project_slug = self.project['slug']
+                else:
+                    print('Could not load project config for '+self.stackn_config['active_project'])
+            else:
+                print('You must set an active valid project.')
         # self.project = self.get_projects({'slug': self.project_slug})
         if not self.project:
             print('Did not find existing config')
-            self.project_id = None
+            self.project_id = -1
         else:
             self.project_id = self.project['id']
             self.project_slug = self.project['slug']
@@ -304,9 +311,16 @@ class StudioClient():
     
     def create_list(self, resource):
         if resource == 'deploymentInstances':
-            return self.list_deployments()
+            if self.found_project:
+                return self.list_deployments()
+            else:
+                return []
         if resource == 'models':
-            return self.get_models({'project': self.project['id']})
+            if self.found_project:
+                models = self.get_models({'project': self.project['id']})
+                return models
+            else:
+                return []
 
         url = self.endpoints[resource]
         r = requests.get(url, headers=self.auth_headers)
@@ -319,7 +333,7 @@ class StudioClient():
         r = requests.get(self.endpoints['models'], params=params, headers=self.auth_headers)
         models = json.loads(r.content)
         return models
-
+        
     def list_deployments(self):
         url = self.endpoints['deploymentInstances']
         r = requests.get(url, headers=self.auth_headers)
