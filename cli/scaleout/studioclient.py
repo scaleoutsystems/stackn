@@ -15,7 +15,6 @@ from slugify import slugify
 import uuid
 from urllib.parse import urljoin
 
-
 def _check_status(r,error_msg="Failed"):
     if (r.status_code < 200 or r.status_code > 299):
         print(error_msg)
@@ -27,18 +26,19 @@ def _check_status(r,error_msg="Failed"):
         return True 
 
 
-class StudioClient(Runtime):
+
+class StudioClient():
 
     def __init__(self, config=None):
-        super(StudioClient, self).__init__()
+        # super(StudioClient, self).__init__()
 
 
-        self.username = self.config['username']
-        self.password = self.config['password']
+        # self.username = self.config['username']
+        # self.password = self.config['password']
         # self.project_name = self.config['Project']['project_name']
-        self.project_slug = self.config['Project']['project_slug']
+        # self.project_slug = self.config['Project']['project_slug']
         # self.auth_url = self.config['auth_url']
-        self.global_domain = self.config['so_domain_name']
+        # self.global_domain = self.config['so_domain_name']
         # TODO: This assumes a certain url-schema
         # self.api_url = self.auth_url.replace("/api-token-auth",'')
         
@@ -49,9 +49,20 @@ class StudioClient(Runtime):
         # Fetch and set all active API endpoints
         self.get_endpoints()
 
-        self.project = self.get_project(self.project_slug)
+        self.stackn_config, load_status = sauth.get_stackn_config()
+        if not load_status:
+            print('Failed to load stackn config')
+
+        self.project = []
+        self.project_slug = []
+        active_dir = self.stackn_config['active']
+        if 'active_project' in self.stackn_config:
+            project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
+            self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            self.project_slug = self.project['slug']
+        # self.project = self.get_projects({'slug': self.project_slug})
         if not self.project:
-            print('Did not find project: {}'.format(self.project_slug))
+            print('Did not find existing config')
             self.project_id = None
         else:
             self.project_id = self.project['id']
@@ -72,7 +83,7 @@ class StudioClient(Runtime):
         #TODO: If we have multiple repositories configured, studio, minio, s3, etc, we 
         # neet to supply repository name.
 
-        project = self.get_project(self.project_slug)
+        project = self.get_projects({'slug': self.project_slug})
 
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
@@ -129,13 +140,43 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def get_project(self, project_slug):
-        projects = self.list_projects()
-        if not projects:
+    def get_projects(self, params=[]):
+        url = self.projects_api
+        if params:
+            r = requests.get(url, headers=self.auth_headers, params=params)
+        else:
+            r = requests.get(url, headers=self.auth_headers)
+        if r:
+            projects = json.loads(r.content)
+            if len(projects) == 1:
+                projects = projects[0]
+            return projects
+        else:
+            print("Fetching projects failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
             return None
-        for p in projects:
-            if p['slug'] == project_slug:
-                return p
+
+    def set_project(self, project_name):
+        # Set active project
+        stackn_config, load_status = sauth.get_stackn_config()
+        if not load_status:
+            print('Failed to load STACKn config.')
+            return False
+        active_dir = stackn_config['active']
+        project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
+        proj_path = project_dir+'/'+project_name+'.json'
+        # Update STACKN config
+        stackn_config['active_project'] = project_name
+        sauth.write_stackn_config(stackn_config)
+        if not os.path.exists(proj_path):
+            if not os.path.exists(project_dir):
+                os.makedirs(project_dir)
+            # Fetch and write project settings file
+            print('Writing new project config file.')
+            project = self.get_projects({'name': project_name})
+            dump_to_file(project, project_name, project_dir)
+            
 
     def create_deployment_definition(self, name, filepath, path_predict=''):
 
@@ -264,6 +305,8 @@ class StudioClient(Runtime):
     def create_list(self, resource):
         if resource == 'deploymentInstances':
             return self.list_deployments()
+        if resource == 'models':
+            return self.get_models({'project': self.project['id']})
 
         url = self.endpoints[resource]
         r = requests.get(url, headers=self.auth_headers)
@@ -340,7 +383,7 @@ class StudioClient(Runtime):
 if __name__ == '__main__':
 
     client = StudioClient()
-    p = client.get_project("Test")
+    p = client.get_projects({'slug': 'Test'})
     print("Project:", p)
     e = client.list_endpoints()
     print("Endpoints: ", e)

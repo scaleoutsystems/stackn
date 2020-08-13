@@ -64,11 +64,35 @@ def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, st
                   'studio_url': studio_host}
     dump_to_file(dep_config, 'user', dirpath)
 
-def get_token(client_id='studio-api', realm='STACKn'):
+def get_stackn_config():
     stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
     if not load_status:
         print('Failed to load stackn config file.')
         return None
+
+    return stackn_config, load_status
+
+def get_remote_config():
+    stackn_config, load_status = get_stackn_config()
+    if not load_status:
+        print('Failed to load STACKn config.')
+        return []
+
+    active_dir = stackn_config['active']
+    if 'active_project' in stackn_config:
+        active_path = os.path.expanduser('~/.scaleout/'+active_dir)
+        remote_config, load_status = load_from_file('user', active_path)
+        return remote_config, load_status
+    else:
+        print('Failed to load remote config.')
+        return []
+
+def get_token(client_id='studio-api', realm='STACKn'):
+    # stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
+    # if not load_status:
+    #     print('Failed to load stackn config file.')
+    #     return None
+    stackn_config, load_status = get_stackn_config()
 
     active_dir = os.path.expanduser('~/.scaleout/')+stackn_config['active']
     token_config, load_status = load_from_file('user', active_dir)
@@ -113,18 +137,21 @@ def get_token(client_id='studio-api', realm='STACKn'):
 
 
 
-def login(client_id='studio-api', realm='STACKn'):
+def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[], studio_host=[]):
     """ Login to Studio services. """
-    deployment = input('Name: ')
-    keycloak_host = input('Keycloak host: ')
-    studio_host = input('Studio host: ')
+    if not deployment:
+        deployment = input('Name: ')
+    if not keycloak_host:
+        keycloak_host = input('Keycloak host: ')
+    if not studio_host:
+        studio_host = input('Studio host: ')
     username = input('Username: ')
     password = getpass()
     access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host)
     # dirname = base64.urlsafe_b64encode(host.encode("utf-8")).decode("utf-8")
     dirpath = os.path.expanduser('~/.scaleout/'+deployment)
     if not os.path.exists(dirpath):
-        os.mkdir(dirpath)
+        os.makedirs(dirpath)
     write_tokens(deployment, access_token, refresh_token, public_key, keycloak_host, studio_host)
     write_stackn_config({'active': deployment, 'client_id': client_id, 'realm': realm})
     return access_token

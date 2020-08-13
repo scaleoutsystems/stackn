@@ -20,7 +20,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'tag']
+    filterset_fields = ['id','name', 'tag', 'project']
 
     def get_queryset(self):
         """
@@ -154,7 +154,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
+    filterset_fields = ['name', 'slug']
 
     def get_queryset(self):
         """
