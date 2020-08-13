@@ -111,7 +111,6 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
     if not redirectUris:
         redirectUris = [base_url+'/*']
     create_client_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
-
     client_rep = {'clientId': client_id,
                   'baseUrl': base_url,
                   'rootUrl': root_url,
@@ -216,6 +215,7 @@ def keycloak_create_client_role(kc, client_nid, role_name):
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
     role_rep = {'name': role_name}
     res = r.post(client_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+    print(res)
     if res:
         return True
     else:
@@ -273,36 +273,29 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name):
         return False
 
 def keycloak_setup_base_client(base_url, client_id, username):
-
+    print(type(username))
     kc = keycloak_init()
-
+    client_status = keycloak_create_client(kc, client_id, base_url)
     # Create client
-    if not keycloak_create_client(kc, client_id, base_url):
+    if not client_status:
         return False
-
     # Fetch client info
     clients = keycloak_get_clients(kc, {'clientId': client_id})
     client_nid = clients[0]['id']
     client_secret = keycloak_get_client_secret(kc, client_nid)
-
     # Create client scope
     if not keycloak_create_client_scope(kc, client_id+'-scope'):
         return False
-
     # __Create mapper__
     # Get scope id
     scope_id = keycloak_get_client_scope_id(kc, client_id+'-scope')
     #Create mapper
     keycloak_create_scope_mapper(kc, scope_id, client_id+'-audience', client_id)
     # _________________
-
     # Add the scope to the client
     keycloak_add_scope_to_client(kc, client_nid, scope_id)
-    
     # Create client role
     keycloak_create_client_role(kc, client_nid, client_id+'-role')
-
     # Add user to client role
     keycloak_add_user_to_client_role(kc, client_nid, username, client_id+'-role')
-
     return client_id, client_secret
