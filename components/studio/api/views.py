@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from deployments.helpers import build_definition
-
+from projects.helpers import create_project_resources
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -72,7 +72,8 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         for the currently authenticated user.
         """
         current_user = self.request.user
-        return DeploymentInstance.objects.filter(model__project__owner__username=current_user)
+        project = self.request.query_params['project'][0]
+        return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -163,3 +164,24 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         """
         current_user = self.request.user
         return Project.objects.filter(owner__username=current_user)
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def create_project(self, request):
+        name = request.data['name']
+        description = request.data['description']
+        repository = request.data['repository']
+        project = Project.objects.create_project(name=name,
+                                                 owner=request.user,
+                                                 description=description,
+                                                 repository=repository)
+        success = True
+        try:
+            create_project_resources(project, request.user, repository=repository)
+        except:
+            print("ERROR: could not create project resources")
+            success = False
+            return HttpResponse('Ok', status=400)
+
+        if success:
+            project.save()
+            return HttpResponse('Ok', status=200)
