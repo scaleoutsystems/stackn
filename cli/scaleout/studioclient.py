@@ -134,6 +134,20 @@ class StudioClient():
 
 
     ### Projects api  ####
+    
+    def create_project(self, name, description, repository):
+        url = self.projects_api+'create_project/'
+        data = {'name': name, 'description': description, 'repository': repository}
+        res = requests.post(url, headers=self.auth_headers, json=data)
+        if res:
+            print('Created project: '+name)
+            print('Setting {} as the active project.')
+            self.set_project(name)
+        else:
+            print('Failed to create project.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
 
     def list_projects(self):
         """ List all projects a user has access to. """
@@ -295,12 +309,7 @@ class StudioClient():
 
         url = self.deployment_instance_api+'build_instance/'
         bd_data = {"name": model_name, "tag": model_tag, "depdef": deploy_context}
-        print('starting build...')
-        print(url)
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
-        print(r.text)
-        print(r.status_code)
-        print('ok')
         if not _check_status(r, error_msg="Failed to create deployment."):
             # Delete registered deployment instance from db
             return False
@@ -336,7 +345,7 @@ class StudioClient():
         
     def list_deployments(self):
         url = self.endpoints['deploymentInstances']
-        r = requests.get(url, headers=self.auth_headers)
+        r = requests.get(url, headers=self.auth_headers, params={'project':self.project['id']})
         if not _check_status(r, error_msg="Failed to fetch deployments"):
             return False
         deployments = json.loads(r.content)
