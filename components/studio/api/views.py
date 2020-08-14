@@ -65,21 +65,33 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentInstanceSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'model']
+    filterset_fields = ['id']
     def get_queryset(self):
         """
         This view should return a list of all the deployments
         for the currently authenticated user.
         """
         current_user = self.request.user
-        project = self.request.query_params['project'][0]
-        return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
+        print(self.request.query_params)
+        project = self.request.query_params.get('project', [])
+        model = self.request.query_params.get('model', [])
+        if model:
+            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
+        else:
+            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
     
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
         current_user = self.request.user
+        name = self.request.query_params.get('name', [])
+        tag = self.request.query_params.get('tag', [])
+        if name and tag:
+            instance = DeploymentInstance.objects.get(model__name=name, model__tag=tag)
+            print('instance name: '+instance.model.name)
+        else:
+            return HttpResponse('Takes model and tag as parameters.', 400)
         if current_user == instance.model.project.owner:
-            instance.delete()
+            resource = instance.helmchart
+            resource.delete()
             return HttpResponse('ok', 200)
         else:
             return HttpResponse('Not Allowed', 400)
