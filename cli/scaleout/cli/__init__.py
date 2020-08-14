@@ -6,3 +6,4 @@ from .get_cmd import get_cmd
 from .delete_cmd import delete_cmd
 from .login_cmd import setup_cmd, status_cmd
 from .set_cmd import set_cmd
+from .update_cmd import update_cmd

@@ -27,6 +27,13 @@ def deploy():
 
     return c.deploy(request.args)
 
+@app.route('/upgrade')
+def update():
+    path = os.getcwd()
+    c = Controller(path)
+
+    return c.deploy(request.args, 'upgrade')
+
 
 @app.route('/delete')
 def delete():

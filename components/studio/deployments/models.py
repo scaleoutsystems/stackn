@@ -23,11 +23,12 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     update = HelmResource.objects.filter(name=instance.name)
     action = 'deploy'
     if update:
-        action = 'update'
+        action = 'upgrade'
     url = settings.CHART_CONTROLLER_URL + '/'+action
     retval = requests.get(url, instance.params)
     if retval:
-        print('Deployed resource: '+instance.name)
+        print('Resource: '+instance.name)
+        print('Action: '+action)
         instance.status = 'OK'
     else:
         print('Failed to deploy resource: '+instance.name)
@@ -162,6 +163,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
+                  'replicas': '1',
                   'global.domain': global_domain,
                   'project.slug': project_slug,
                   'deployment.version': deployment_version,

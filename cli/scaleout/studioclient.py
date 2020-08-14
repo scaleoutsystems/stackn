@@ -306,6 +306,18 @@ class StudioClient():
         print('Created deployment: {}'.format(model_name))
         return True
 
+    def update_deployment(self, name, tag, params):
+        url = self.deployment_instance_api+'update_instance/'
+        params['name'] = name
+        params['tag'] = tag
+        r = requests.post(url, headers=self.auth_headers, json=params)
+        if r:
+            print('Updated deployment: ')
+            print(params)
+        else:
+            print('Failed to update deployment.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
     
     def create_list(self, resource):
         if resource == 'deploymentInstances':

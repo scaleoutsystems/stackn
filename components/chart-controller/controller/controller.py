@@ -25,7 +25,7 @@ class Controller:
         self.default_args = ['helm']
         pass
 
-    def deploy(self, options):
+    def deploy(self, options, action='install'):
         extras = ''
         """
         try:
@@ -75,7 +75,7 @@ class Controller:
             refresh_charts(self.branch)
             chart = 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])
 
-        args = ['helm', 'install', '--kubeconfig', kubeconfig, options['release'], chart]
+        args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
         for key in options:
             args.append('--set')
             args.append('{}={}'.format(key, options[key]))
