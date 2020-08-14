@@ -1,8 +1,7 @@
-import os
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
+from kubernetes.client.rest import ApiException
 
 from projects.models import Project
 from .models import Experiment
@@ -53,6 +52,11 @@ def details(request, user, project, id):
     experiment = Experiment.objects.filter(id=id).first()
 
     from .jobs import get_logs
-    logs = get_logs(experiment)
+    try:
+        logs = get_logs(experiment)
+    except ApiException as e:
+        print(e)
+        return HttpResponseRedirect(
+            reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
     return render(request, temp, locals())
