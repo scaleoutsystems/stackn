@@ -15,3 +15,6 @@ class DeploymentInstanceForm(forms.ModelForm):
 
 class PredictForm(forms.Form):
     file = forms.FileField()
+
+class SettingsForm(forms.Form):
+    replicas = forms.IntegerField(min_value=1, max_value=25, label="Replicas")
