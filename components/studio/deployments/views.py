@@ -96,7 +96,7 @@ def serve_settings(request, id, project):
 def undeploy(request, id):
     model = Model.objects.get(id=id)
     instance = DeploymentInstance.objects.get(model=model)
-    instance.delete()
+    instance.helmchart.delete()
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
 
 
