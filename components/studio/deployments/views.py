@@ -1,12 +1,12 @@
 import os
-
+from ast import literal_eval
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 from projects.models import Project
 from .models import DeploymentDefinition, DeploymentInstance
-from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
+from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm, SettingsForm
 from models.models import Model
 from django.urls import reverse
 
@@ -15,13 +15,15 @@ from django.urls import reverse
 def predict(request, id, project):
     template = 'deploy/predict.html'
     if request.user.is_authenticated and request.user and project is not None:
-        is_authorized = True
+        proj_obj = Project.objects.get(slug=project)
+        if proj_obj.owner == request.user:
+            is_authorized = True
 
-    project = Project.objects.get(slug=project)
+    project = proj_obj #Project.objects.get(slug=project)
     deployment = DeploymentInstance.objects.get(id=id)
     model = deployment.model
 
-    if request.method == 'POST':
+    if request.method == 'POST' and is_authorized:
         form = PredictForm(request.POST, request.FILES)
         if form.is_valid():
             import requests
@@ -60,6 +62,34 @@ def deploy(request, id):
         # return JsonResponse({"code": "201"})
 
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
+
+@login_required(login_url='/accounts/login')
+def serve_settings(request, id, project):
+    # model = Model.objects.get(id=id)
+    # print(request.user)
+    template = 'deploy/settings.html'
+    if request.user.is_authenticated and request.user and project is not None:
+        proj_obj = Project.objects.get(slug=project)
+        if proj_obj.owner == request.user:
+            is_authorized = True
+
+
+    project = proj_obj #Project.objects.get(slug=project)
+    deployment = DeploymentInstance.objects.get(id=id)
+    chart = deployment.helmchart
+    params = literal_eval(chart.params)
+    model = deployment.model
+    if request.method == 'POST' and is_authorized:
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            params['replicas'] = request.POST.get('replicas', 1)
+            print(params)
+            deployment.helmchart.params = params
+            deployment.helmchart.save()
+    form = SettingsForm(initial={'replicas': params['replicas']})
+
+    return render(request, template, locals())
+
 
 
 @login_required(login_url='/accounts/login')
