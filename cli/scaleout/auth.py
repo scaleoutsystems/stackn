@@ -105,9 +105,9 @@ def get_token(client_id='studio-api', realm='STACKn'):
     try:
         public_key_full = '-----BEGIN PUBLIC KEY-----\n'+token_config['public_key']+'\n-----END PUBLIC KEY-----'
         access_token_json = jwt.decode(access_token,
-                                       public_key_full,
-                                       algorithms='RS256',
-                                       audience='account')
+                                    public_key_full,
+                                    algorithms='RS256',
+                                    audience='studio-api')
         # print('Token valid for user '+access_token_json['preferred_username'])
     except:
         # Try to refresh token

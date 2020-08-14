@@ -20,7 +20,7 @@ class KeycloakAuthentication(authentication.BaseAuthentication):
             print('Failed to discover realm settings: '+settings.KC_REALM)
             return None
         try:
-            access_token_json = jwt.decode(access_token, public_key, algorithms='RS256', audience='account')
+            access_token_json = jwt.decode(access_token, public_key, algorithms='RS256', audience='studio-api')
         except:
             print('Failed to authenticate.')
             return None
