@@ -1,5 +1,6 @@
 import requests
 import json
+from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
@@ -65,21 +66,33 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentInstanceSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'model']
+    filterset_fields = ['id']
     def get_queryset(self):
         """
         This view should return a list of all the deployments
         for the currently authenticated user.
         """
         current_user = self.request.user
-        project = self.request.query_params['project'][0]
-        return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
+        print(self.request.query_params)
+        project = self.request.query_params.get('project', [])
+        model = self.request.query_params.get('model', [])
+        if model:
+            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
+        else:
+            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
     
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
         current_user = self.request.user
+        name = self.request.query_params.get('name', [])
+        tag = self.request.query_params.get('tag', [])
+        if name and tag:
+            instance = DeploymentInstance.objects.get(model__name=name, model__tag=tag)
+            print('instance name: '+instance.model.name)
+        else:
+            return HttpResponse('Takes model and tag as parameters.', 400)
         if current_user == instance.model.project.owner:
-            instance.delete()
+            resource = instance.helmchart
+            resource.delete()
             return HttpResponse('ok', 200)
         else:
             return HttpResponse('Not Allowed', 400)
@@ -110,6 +123,41 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         
         return HttpResponse('ok', status=200)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def update_instance(self, request):
+        # This implementation is a proof-of-concept, and is used to test
+        # the chart controller upgrade functionality
+        current_user = request.user
+        name = request.data['name']
+        tag = request.data['tag']
+        # Currently only allows updating of the number of replicas.
+        # This code can be improved and generalized later on. We cannot
+        # allow general helm upgrades though, as this can cause STACKn-wide
+        # problems.
+        try:
+            replicas = int(self.request.data['replicas'])
+        except:
+            return HttpResponse('Replicas parameter should be an integer.', 400)
+        print(replicas)
+        if replicas < 0 or (isinstance(replicas, int) == False):
+            return HttpResponse('Replicas parameter should be positive integer.', 400)
+
+        if name and tag:
+            instance = DeploymentInstance.objects.get(model__name=name, model__tag=tag)
+            print('instance name: '+instance.model.name)
+        else:
+            return HttpResponse('Requires model name and tag as parameters.', 400)
+        # Who should be allowed to update the model? Currently only the owner.
+        if current_user == instance.model.project.owner:
+            params = instance.helmchart.params
+            params = literal_eval(params)
+            params['replicas'] = str(replicas)
+            print(params)
+            instance.helmchart.params = params
+            instance.helmchart.save()
+            return HttpResponse('Ok', status=200)
+
+        
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def auth(self, request):
       auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')

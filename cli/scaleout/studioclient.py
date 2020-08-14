@@ -30,17 +30,6 @@ def _check_status(r,error_msg="Failed"):
 class StudioClient():
 
     def __init__(self, config=None):
-        # super(StudioClient, self).__init__()
-
-
-        # self.username = self.config['username']
-        # self.password = self.config['password']
-        # self.project_name = self.config['Project']['project_name']
-        # self.project_slug = self.config['Project']['project_slug']
-        # self.auth_url = self.config['auth_url']
-        # self.global_domain = self.config['so_domain_name']
-        # TODO: This assumes a certain url-schema
-        # self.api_url = self.auth_url.replace("/api-token-auth",'')
         self.found_project = False
         self.access_token, self.token_config = sauth.get_token()
         self.api_url = urljoin(self.token_config['studio_url'], '/api')
@@ -89,9 +78,9 @@ class StudioClient():
         """ Return the project minio keys. """
         #TODO: If we have multiple repositories configured, studio, minio, s3, etc, we 
         # neet to supply repository name.
-
-        project = self.get_projects({'slug': self.project_slug})
-
+        project = self.project
+        # project = self.get_projects({'slug': self.project_slug})
+        # print(project)
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
             'minio_host': '{}-minio.{}'.format(self.project_slug,
@@ -317,6 +306,18 @@ class StudioClient():
         print('Created deployment: {}'.format(model_name))
         return True
 
+    def update_deployment(self, name, tag, params):
+        url = self.deployment_instance_api+'update_instance/'
+        params['name'] = name
+        params['tag'] = tag
+        r = requests.post(url, headers=self.auth_headers, json=params)
+        if r:
+            print('Updated deployment: ')
+            print(params)
+        else:
+            print('Failed to update deployment.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
     
     def create_list(self, resource):
         if resource == 'deploymentInstances':
@@ -367,7 +368,7 @@ class StudioClient():
     
 
     def get_deployment(self, params):
-        url = os.path.join(self.deployment_instance_api)
+        url = self.deployment_instance_api
         r = requests.get(url, params=params, headers=self.auth_headers)
         return json.loads(r.content)
 
@@ -392,12 +393,11 @@ class StudioClient():
             params = {'name': name}
         models  = self.get_models(params)
         for model in models:
-            deployment = self.get_deployment({'model':model['id']})
-            # print(deployment)
+            deployment = self.get_deployment({'model':model['id'],'project':self.project['id']})
             if deployment:
                 deployment = deployment[0]
-                url = os.path.join(self.deployment_instance_api, '{}'.format(deployment['id']))
-                r = requests.delete(url, headers=self.auth_headers)
+                url = self.deployment_instance_api+'destroy'
+                r = requests.delete(url, headers=self.auth_headers, params=params)
                 if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
                     pass
                 else:
