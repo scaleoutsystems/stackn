@@ -266,24 +266,23 @@ class StudioClient():
         print("No model found with id: ", model_id)
         return None
 
-    def create_model(self, instance, model_name, tag='latest', model_description=None,is_file=True):
+    def create_model(self, model_file, model_name, release_type='', model_description=None,is_file=True):
         """ Publish a model to Studio. """
 
-        # TODO: Support model tagging, default to 'latest'
         import uuid
         model_uid = str(uuid.uuid1().hex)
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
-        repo.set_artifact(model_uid, instance, is_file)
+        repo.set_artifact(model_uid, model_file, is_file)
  
         model_data = {"uid": model_uid,
                       "name": model_name,
-                      "tag": tag,
+                      "release_type": release_type,
                       "description": model_description,
                       "project": str(self.project_id)}
 
-        url = self.models_api
+        url = self.models_api+'release/'
         url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers)
@@ -291,13 +290,13 @@ class StudioClient():
             repo.delete_artifact(model_uid)
             return False
 
-        print('Created model: {}, tag: {}'.format(model_name, tag))
+        print('Released model: {}, release_type: {}'.format(model_name, release_type))
         return True
 
-    def deploy_model(self, model_name, model_tag, deploy_context):
+    def deploy_model(self, model_name, model_version, deploy_context):
 
         url = self.deployment_instance_api+'build_instance/'
-        bd_data = {"name": model_name, "tag": model_tag, "depdef": deploy_context}
+        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context}
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
         if not _check_status(r, error_msg="Failed to create deployment."):
             # Delete registered deployment instance from db
@@ -306,10 +305,10 @@ class StudioClient():
         print('Created deployment: {}'.format(model_name))
         return True
 
-    def update_deployment(self, name, tag, params):
+    def update_deployment(self, name, version, params):
         url = self.deployment_instance_api+'update_instance/'
         params['name'] = name
-        params['tag'] = tag
+        params['version'] = version
         r = requests.post(url, headers=self.auth_headers, json=params)
         if r:
             print('Updated deployment: ')
@@ -357,7 +356,7 @@ class StudioClient():
             # print(model)
             # print(deployment)
             dep = {'name': model['name'],
-                   'tag': model['tag'],
+                   'version': model['version'],
                    'endpoint': deployment['endpoint'],
                    'created_at': deployment['created_at']}
             depjson.append(dep)
@@ -372,23 +371,23 @@ class StudioClient():
         r = requests.get(url, params=params, headers=self.auth_headers)
         return json.loads(r.content)
 
-    def delete_model(self, name, tag=None):
-        if tag:
-            params = {'name': name, 'tag': tag}
+    def delete_model(self, name, version=None):
+        if version:
+            params = {'name': name, 'version': version}
         else:
             params = {'name': name}
         models  = self.get_models(params)
         for model in models:
             url = os.path.join(self.models_api, '{}'.format(model['id']))
             r = requests.delete(url, headers=self.auth_headers)
-            if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, tag)):
+            if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, version)):
                 pass
             else:
-                print("Deleted model {}:{}.".format(name, tag))
+                print("Deleted model {}:{}.".format(name, version))
 
-    def delete_deployment(self, name, tag=None):
-        if tag:
-            params = {'name': name, 'tag': tag}
+    def delete_deployment(self, name, version=None):
+        if version:
+            params = {'name': name, 'version': version}
         else:
             params = {'name': name}
         models  = self.get_models(params)
@@ -398,10 +397,10 @@ class StudioClient():
                 deployment = deployment[0]
                 url = self.deployment_instance_api+'destroy'
                 r = requests.delete(url, headers=self.auth_headers, params=params)
-                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
+                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['version'])):
                     pass
                 else:
-                    print("Deleted deployment {}:{}.".format(model['name'], model['tag']))
+                    print("Deleted deployment {}:{}.".format(model['name'], model['version']))
 
 if __name__ == '__main__':
 
@@ -414,17 +413,4 @@ if __name__ == '__main__':
     print("Minio settings: ", data)
 
     print(client.token)
-    #objs = client.list_datasets()
-    #for obj in objs:
-    #    print(obj)
 
-    #import pickle
-    #model = "jhfjkshfks"*1000
-    #data = pickle.dumps(model)
-    #client.publish_model(data,"testmodel",tag="v0.0.1",model_description="A test to check client API functionality.", is_file=False)
-
-    #data = client.list_models()
-    #print(data)
-
-    #data = client.show_model(model_id="167d8f0070c611ea96fcf218982f8078")
-    #print(data)

@@ -19,15 +19,15 @@ def create_cmd(ctx, daemon):
       print('{} NYI should run as daemon...'.format(__file__))
 
 @create_cmd.command('model')
-@click.option('-m', '--model', required=True)
-@click.option('-n', '--name', required=True)
-@click.option('-t', '--tag', required=False,default="latest")
+@click.option('-f', '--model-file', required=True)
+@click.option('-n', '--model-name', required=True)
+@click.option('-r', '--release-type', required=False)
 @click.option('-d', '--description', required=False,default="")
 @click.pass_context
-def create_model_cmd(ctx, model, name, tag, description):
+def create_model_cmd(ctx, model_file, model_name, release_type, description):
   """ Publish a model. """
   client = ctx.obj['CLIENT']
-  client.create_model(model, name, tag, description)
+  client.create_model(model_file, model_name, release_type, description)
 
 @create_cmd.command('deploymentdefinition')
 @click.option('-n', '--name', required=True)
@@ -41,12 +41,12 @@ def create_deployment_definition(ctx, name, filepath, path_predict=''):
 
 @create_cmd.command('deployment')
 @click.option('-m', '--model', required=True)
-@click.option('-t', '--model-tag', default='latest')
+@click.option('-v', '--model-version', default='latest')
 @click.option('-d', '--deploymentdefinition', required=True)
 @click.pass_context
-def create_deployment_cmd(ctx, model, deploymentdefinition, model_tag='latest'):
+def create_deployment_cmd(ctx, model, deploymentdefinition, model_version=[]):
     client = ctx.obj['CLIENT']
-    client.deploy_model(model, model_tag, deploymentdefinition)
+    client.deploy_model(model, model_version, deploymentdefinition)
 
 
 # Create project

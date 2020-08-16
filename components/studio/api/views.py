@@ -21,7 +21,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
     permission_classes = (IsAuthenticated,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'tag', 'project']
+    filterset_fields = ['id','name', 'version', 'project']
 
     def get_queryset(self):
         """
@@ -30,7 +30,31 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
         """
         current_user = self.request.user
         return Model.objects.filter(project__owner__username=current_user)
-    
+
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def release(self, request):
+        # Could we get the token here for authorization?
+        # We should check that the authenticated user also has
+        # the correct role in Keycloak.
+        project = Project.objects.get(id=request.data['project'])
+        current_user = self.request.user
+        if current_user == project.owner:
+            # project = model.project
+            model_name = request.data['name']
+            release_type = request.data['release_type']
+            description = request.data['description']
+            model_uid = request.data['uid']
+            # project_id = request.data['project']
+            new_model = Model(name=model_name,
+                              release_type=release_type,
+                              description=description,
+                              uid=model_uid,
+                              project=project)
+            new_model.save()
+            return HttpResponse('ok', 200)
+
+
     def destroy(self, request, *args, **kwargs):
         model = self.get_object()
         current_user = self.request.user
@@ -84,10 +108,10 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
     def destroy(self, request, *args, **kwargs):
         current_user = self.request.user
         name = self.request.query_params.get('name', [])
-        tag = self.request.query_params.get('tag', [])
-        if name and tag:
-            instance = DeploymentInstance.objects.get(model__name=name, model__tag=tag)
-            print('instance name: '+instance.model.name)
+        version = self.request.query_params.get('version', [])
+        if name and version:
+            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
+            print('Deleting deployment of model {}-{}.'.format(name, version))
         else:
             return HttpResponse('Takes model and tag as parameters.', 400)
         if current_user == instance.model.project.owner:
@@ -101,16 +125,22 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
     def build_instance(self, request):
 
         model_name = request.data['name']
-        model_tag = request.data['tag']
-        environment = request.data['depdef']    
-
+        model_version = request.data['version']
+        environment = request.data['depdef']
+        project_id = request.data['project']
+        project = Project.objects.get(pk=project_id)
+        print(model_name+':'+model_version)
         try:
+            print('Check model')
             # TODO: Check that we have permission to access the model.
-            mod = Model.objects.get(name=model_name, tag=model_tag)
+            if model_version=='latest':
+                mod = Model.objects_version.latest(model_name, project)
+            else:
+                mod = Model.objects.get(name=model_name, version=model_version, project=project)
             if mod.status == 'DP':
-                return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_tag), status=400)
+                return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
         except:
-            return HttpResponse('Model {}:{} not found.'.format(model_name, model_tag), status=400)
+            return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
         
         try:
             # TODO: Check that we have permission to access the deployment definition.
@@ -129,7 +159,7 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         # the chart controller upgrade functionality
         current_user = request.user
         name = request.data['name']
-        tag = request.data['tag']
+        version = request.data['version']
         # Currently only allows updating of the number of replicas.
         # This code can be improved and generalized later on. We cannot
         # allow general helm upgrades though, as this can cause STACKn-wide
@@ -142,11 +172,11 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
         if replicas < 0 or (isinstance(replicas, int) == False):
             return HttpResponse('Replicas parameter should be positive integer.', 400)
 
-        if name and tag:
-            instance = DeploymentInstance.objects.get(model__name=name, model__tag=tag)
+        if name and version:
+            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
             print('instance name: '+instance.model.name)
         else:
-            return HttpResponse('Requires model name and tag as parameters.', 400)
+            return HttpResponse('Requires model name and version as parameters.', 400)
         # Who should be allowed to update the model? Currently only the owner.
         if current_user == instance.model.project.owner:
             params = instance.helmchart.params

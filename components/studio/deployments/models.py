@@ -96,7 +96,7 @@ class DeploymentInstance(models.Model):
     uploaded_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "{}:{}".format(self.model.name, self.model.tag)
+        return "{}:{}".format(self.model.name, self.model.version)
 
 @receiver(pre_delete, sender=DeploymentInstance, dispatch_uid='deployment_pre_delete_signal')
 def pre_delete_deployment(sender, instance, using, **kwargs):
@@ -104,6 +104,9 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
     model = instance.model
     model.status = 'CR'
     model.save()
+    # Uninstall resources
+    # chart = instance.helmchart
+    # chart.delete()
     # Clean up in Keycloak
     print('Cleaning up in Keycloak...')
     kc = keylib.keycloak_init()
@@ -123,15 +126,15 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     model_bucket = 'models'
     
     deployment_name = slugify(model.name)
-    deployment_version = model.tag
+    deployment_version = slugify(model.version)
     deployment_endpoint = '{}-{}.{}'.format(model.name,
-                                            model.tag,
-                                            settings.DOMAIN)
+                                            model.version,
+                                            settings.DOMAIN) 
     
     deployment_endpoint = settings.DOMAIN
     deployment_path = '/{}/serve/{}/{}/'.format(model.project.slug,
-                                               model.name,
-                                               model.tag)
+                                               slugify(model.name),
+                                               slugify(model.version))
 
     instance.endpoint = deployment_endpoint
     instance.path = deployment_path
@@ -154,7 +157,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     # Create Keycloak client corresponding to this deployment
     HOST = settings.DOMAIN
-    RELEASE_NAME = str(project_slug)+'-'+str(deployment_name)+'-'+str(deployment_version)
+    RELEASE_NAME = slugify(str(project_slug)+'-'+str(deployment_name)+'-'+str(deployment_version))
     burl = os.path.join('https://', HOST)
     eurl = os.path.join(deployment_endpoint, deployment_path)
     URL = burl+eurl
@@ -181,20 +184,15 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.client_id': client_id,
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH}
 
-    # url = settings.CHART_CONTROLLER_URL + '/deploy'
-    # retval = requests.get(url, parameters)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
-                                      namespace='Default',
-                                      chart='deploy',
-                                      params=parameters,
-                                      username=instance.created_by.username)
+                             namespace='Default',
+                             chart='deploy',
+                             params=parameters,
+                             username=instance.created_by.username)
     helmchart.save()
     instance.helmchart = helmchart
-    # if retval:
-    #     instance.release = RELEASE_NAME
-    #     model.status = 'DP'
-    #     model.save()
+
     if helmchart.status == 'Failed':
         # If fail, clean up in Keycloak
         kc = keylib.keycloak_init()

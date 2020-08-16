@@ -21,10 +21,10 @@ def update_cmd(ctx, daemon):
 
 @update_cmd.command('deployment')
 @click.option('-n', '--name', required=True)
-@click.option('-t', '--tag')
+@click.option('-v', '--version')
 @click.option('-r', '--replicas', required=False)
 @click.pass_context
-def update_deployment_cmd(ctx, name, tag='latest', replicas=[]):
+def update_deployment_cmd(ctx, name, version='latest', replicas=[]):
     if replicas:
         client = ctx.obj['CLIENT']
-        client.update_deployment(name, tag, params={'replicas': replicas})
+        client.update_deployment(name, version, params={'replicas': replicas})
