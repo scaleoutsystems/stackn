@@ -21,8 +21,8 @@ def get_cmd(ctx, daemon):
 @click.pass_context
 def get_models_cmd(ctx):
     """ List all models and show their status and endpoints """
-    names = ["Name","Tag","Created"]
-    keys = ['name', 'tag', 'uploaded_at']
+    names = ["Name","Version","Created"]
+    keys = ['name', 'version', 'uploaded_at']
     create_table(ctx, 'models', names, keys)
 
 @get_cmd.command('deployments')
@@ -30,8 +30,8 @@ def get_models_cmd(ctx):
 def get_deployments_cmd(ctx):
     # client = ctx.obj['CLIENT']
     # client.list_deployments()
-    names = ["Name","Tag", "Endpoint"]
-    keys = ["name", "tag", "endpoint"]
+    names = ["Name","Version", "Endpoint"]
+    keys = ["name", "version", "endpoint"]
     create_table(ctx, 'deploymentInstances', names, keys)
 
 @get_cmd.command('deploymentdefinitions')

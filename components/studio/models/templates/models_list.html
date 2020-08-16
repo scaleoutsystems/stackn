@@ -78,7 +78,7 @@
 
             <tr>
                 <th>Name</th>
-                <th>Tag</th>
+                <th>Version</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>User</th>
@@ -91,7 +91,7 @@
             <tr>
                 <td><a href="{% url 'models:details' request.user project.slug model.id %}">{{ model.name }}</a>
                 </td>
-                <td>{{ model.tag }}</td>
+                <td>{{ model.version }}</td>
                 <td>{% if model.status == 'CR' %} READY{% endif %} {% if model.status == 'DP' %}
                     DEPLOYED{% endif %}
                 </td>
