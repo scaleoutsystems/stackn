@@ -3,17 +3,46 @@ import requests as r
 
 
 def pod_up(app_name):
-    query_up = 'sum(up{app="'+app_name+'"})'
-    query_count = 'count(up{app="'+app_name+'"})'
-    # print(query)
-    response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query_up})
-    result_up = response.json()['data']['result']
-    response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query_count})
-    result_count = response.json()['data']['result']
-    num_pods_up = result_up[0]['value'][1]
-    num_pods_count = result_count[0]['value'][1]
+    num_pods_up = 0
+    num_pods_count = 0
+    try:
+        query_up = 'sum(up{app="'+app_name+'"})'
+        query_count = 'count(up{app="'+app_name+'"})'
+        response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query_up})
+        num_pods_up = 0
+        num_pods_count = 0
+        if response:
+            result_up_json = response.json()
+            result_up = result_up_json['data']['result']
+
+        response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query_count})
+        if response:
+            result_count_json = response.json()
+            result_count = result_count_json['data']['result']
+        num_pods_up = result_up[0]['value'][1]
+        num_pods_count = result_count[0]['value'][1]
+    except:
+        print('Failed to fetch status of app '+app_name)
+        pass
     return num_pods_up, num_pods_count
-    # print(num_pods_up)
+
+
+def get_count_over_time(name, app_name, path, status_code, time_span):
+    total_count = -1
+    # Strip path of potential /
+    path = path.replace('/', '')
+    try:
+        query = 'sum(max_over_time('+name+'{app="'+app_name+'", path="/'+path+'/", status_code="'+status_code+'"}['+time_span+']))'
+        print(query)
+        response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query': query})
+        if response:
+            total_count = response.json()['data']['result'][0]['value'][1]
+    except:
+        print('Failed to get total count for: {}, {}, {}.'.format(app_name, path, status_code))
+    
+    return total_count
+
+
 
 def get_total_labs_cpu_usage_60s(project_slug):
     query = 'sum(sum (rate (container_cpu_usage_seconds_total{image!=""}[60s])) by (pod) * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="lab"})'
