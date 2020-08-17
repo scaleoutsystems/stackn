@@ -10,7 +10,7 @@ from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
 from models.models import Model
 from django.urls import reverse
 from django.utils.text import slugify
-from monitor.helpers import pod_up
+from monitor.helpers import pod_up, get_count_over_time
 
 @login_required(login_url='/accounts/login')
 def predict(request, id, project):
@@ -123,10 +123,15 @@ def deployment_index(request, user, project):
 
     deployments = DeploymentInstance.objects.filter(model__project=project)
     deployment_status = []
+    invocations = []
     for deployment in deployments:
         pods_up, pods_count = pod_up(deployment.appname)
+        invocations.append(get_count_over_time('serve_predict_total',
+                                               deployment.appname,
+                                               deployment.deployment.path_predict,
+                                               "200", "200y"))
         deployment_status.append([pods_up, pods_count])
-    deploy_status = zip(deployments, deployment_status)
+    deploy_status = zip(deployments, deployment_status, invocations)
 
     return render(request, temp, locals())
 

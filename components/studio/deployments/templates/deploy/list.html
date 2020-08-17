@@ -34,6 +34,7 @@
                     <th>Status</th>
                     <th>Environment</th>
                     <th>Endpoint</th>
+                    <th>Invocations</th>
                     {% if authorized_as %}
                         <th>Definition</th>
                         <th>Actions</th>
@@ -42,12 +43,13 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for deploy, status in deploy_status %}
+                {% for deploy, status, invocations in deploy_status %}
                     <tr>
                         <td>{{ deploy.model.name }}</td>
                         <td>{{ status.0 }}/{{ status.1 }}</td>
                         <td>{{ deploy.deployment.name }}</td>
                         <td>https://{{ deploy.endpoint }}{{ deploy.path }}{{ deploy.deployment.path_predict }}</td>
+                        <td>{{ invocations }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>
                             <td>
