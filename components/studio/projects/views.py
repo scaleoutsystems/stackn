@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
-from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
+from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub, GrantAccessForm
 from django.db.models import Q
 from models.models import Model
 import requests as r
@@ -98,6 +98,21 @@ def change_description(request, user, project_slug):
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
+
+
+@login_required(login_url='/accounts/login')
+def grant_access_to_project(request, user, project_slug):
+    project = Project.objects.filter(slug=project_slug).first()
+
+    if request.method == 'POST':
+        form = GrantAccessForm(request.POST)
+        if form.is_valid():
+            selected_users = form.cleaned_data.get('selected_users')
+            project.authorized.set(selected_users)
+            project.save()
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 
 @login_required(login_url='/accounts/login')
