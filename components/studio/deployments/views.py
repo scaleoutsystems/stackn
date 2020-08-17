@@ -124,14 +124,10 @@ def deployment_index(request, user, project):
     deployments = DeploymentInstance.objects.filter(model__project=project)
     deployment_status = []
     for deployment in deployments:
-        app_name = '{}-{}'.format(deployment.model.name, slugify(deployment.model.version))
-        pods_up, pods_count = pod_up(app_name)
+        pods_up, pods_count = pod_up(deployment.appname)
         deployment_status.append([pods_up, pods_count])
-        print('Up: {}/{}'.format(pods_up, pods_count))
     deploy_status = zip(deployments, deployment_status)
-    # for deploy, status in deploy_status:
-    #     print(deploy.model.name)
-    #     print(status)
+
     return render(request, temp, locals())
 
 @login_required(login_url='/accounts/login')
