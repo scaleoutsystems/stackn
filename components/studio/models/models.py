@@ -7,6 +7,8 @@ from django.utils.module_loading import import_string
 from deployments.models import DeploymentInstance
 from ast import literal_eval
 from functools import cmp_to_key
+from projects.helpers import get_minio_keys
+from minio import Minio
 
 VERSION_CLASS = import_string(settings.VERSION_BACKEND)
 
@@ -111,6 +113,17 @@ def pre_save_model(sender, instance, using, **kwargs):
 @receiver(pre_delete, sender=Model, dispatch_uid='model_pre_delete_signal')
 def pre_delete_deployment(sender, instance, using, **kwargs):
     # TODO: Also delete model from minio
+    # Model is saved in bucket 'model' with filename 'instance.uid'
+    minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
+    minio_keys = get_minio_keys(instance.project)
+    try:
+        client = Minio(minio_url,
+                      access_key=minio_keys['project_key'],
+                      secret_key=minio_keys['project_secret'],
+                      secure=True)
+        client.remove_object('models', instance.uid)
+    except:
+        print('Failed to delete model object {} from minio store.'.format(instance.uid))
     # Check if model has been deployed, if so, delete deployment.
     if instance.status == 'DP':
         deployment = DeploymentInstance.objects.get(model=instance)
