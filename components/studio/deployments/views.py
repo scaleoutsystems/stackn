@@ -9,7 +9,8 @@ from .models import DeploymentDefinition, DeploymentInstance
 from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm, SettingsForm
 from models.models import Model
 from django.urls import reverse
-
+from django.utils.text import slugify
+from monitor.helpers import pod_up
 
 @login_required(login_url='/accounts/login')
 def predict(request, id, project):
@@ -121,6 +122,11 @@ def deployment_index(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
     deployments = DeploymentInstance.objects.filter(model__project=project)
+    deployment_status = []
+    for deployment in deployments:
+        pods_up, pods_count = pod_up(deployment.appname)
+        deployment_status.append([pods_up, pods_count])
+    deploy_status = zip(deployments, deployment_status)
 
     return render(request, temp, locals())
 

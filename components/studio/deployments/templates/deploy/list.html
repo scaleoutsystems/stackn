@@ -31,7 +31,7 @@
 
                 <tr>
                     <th>Model</th>
-                    <th>Tag</th>
+                    <th>Status</th>
                     <th>Environment</th>
                     <th>Endpoint</th>
                     {% if authorized_as %}
@@ -42,10 +42,10 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for deploy in deployments %}
+                {% for deploy, status in deploy_status %}
                     <tr>
                         <td>{{ deploy.model.name }}</td>
-                        <td>{{ deploy.model.tag }}</td>
+                        <td>{{ status.0 }}/{{ status.1 }}</td>
                         <td>{{ deploy.deployment.name }}</td>
                         <td>https://{{ deploy.endpoint }}{{ deploy.path }}{{ deploy.deployment.path_predict }}</td>
                         {% if authorized_as %}

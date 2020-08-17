@@ -70,8 +70,9 @@ class DeploymentDefinition(models.Model):
     def __str__(self):
         return "{}".format(self.name)
 
-
 class DeploymentInstance(models.Model):
+
+
     PRIVATE = 'PR'
     LIMITED = 'LI'
     PUBLIC = 'PU'
@@ -82,7 +83,7 @@ class DeploymentInstance(models.Model):
     ]
 
     deployment = models.ForeignKey('deployments.DeploymentDefinition', on_delete=models.CASCADE)
-
+    appname = models.CharField(max_length=512)
     model = models.OneToOneField('models.Model', on_delete=models.CASCADE, related_name='deployed_model', unique=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     endpoint = models.CharField(max_length=512)
@@ -155,17 +156,22 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     global_domain = settings.DOMAIN
 
-    # Create Keycloak client corresponding to this deployment
+    
     HOST = settings.DOMAIN
     RELEASE_NAME = slugify(str(project_slug)+'-'+str(deployment_name)+'-'+str(deployment_version))
     burl = os.path.join('https://', HOST)
     eurl = os.path.join(deployment_endpoint, deployment_path)
     URL = burl+eurl
+ 
+    
+    instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
+    
+    # Create Keycloak client corresponding to this deployment
     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username)
-    
-    
+
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
+                  'appname': instance.appname,
                   'replicas': '1',
                   'global.domain': global_domain,
                   'project.slug': project_slug,
@@ -184,6 +190,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.client_id': client_id,
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH}
 
+    
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
