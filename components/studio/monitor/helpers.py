@@ -1,5 +1,6 @@
 from django.conf import settings
 import requests as r
+import logging
 
 
 def pod_up(app_name):
@@ -8,10 +9,14 @@ def pod_up(app_name):
     try:
         query_up = 'sum(up{app="'+app_name+'"})'
         query_count = 'count(up{app="'+app_name+'"})'
+        print(query_up)
+        print(query_count)
+        print(settings.PROMETHEUS_SVC+'/api/v1/query')
         response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query_up})
         num_pods_up = 0
         num_pods_count = 0
         if response:
+            print(response.text)
             result_up_json = response.json()
             result_up = result_up_json['data']['result']
 
@@ -22,8 +27,9 @@ def pod_up(app_name):
         num_pods_up = result_up[0]['value'][1]
         num_pods_count = result_count[0]['value'][1]
     except:
-        print('Failed to fetch status of app '+app_name)
+        logging.warning('Failed to fetch status of app '+app_name)
         pass
+
     return num_pods_up, num_pods_count
 
 
@@ -33,7 +39,6 @@ def get_count_over_time(name, app_name, path, status_code, time_span):
     path = path.replace('/', '')
     try:
         query = 'sum(max_over_time('+name+'{app="'+app_name+'", path="/'+path+'/", status_code="'+status_code+'"}['+time_span+']))'
-        print(query)
         response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query': query})
         if response:
             total_count = response.json()['data']['result'][0]['value'][1]

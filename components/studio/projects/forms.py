@@ -12,7 +12,11 @@ class PublishProjectToGitHub(forms.Form):
 
 
 class GrantAccessForm(forms.Form):
-    platform_users = User.objects.all()
+    platform_users = []
+    
+    def __init__(self, *args, **kwargs):
+        super(GrantAccessForm, self).__init__(*args, **kwargs)
+        self.platform_users = User.objects.all()
 
     OPTIONS = []
     for user in platform_users:

@@ -65,6 +65,10 @@ def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, st
     dump_to_file(dep_config, 'user', dirpath)
 
 def get_stackn_config():
+    if not os.path.exists(os.path.expanduser('~/.scaleout/stackn.json')):
+        print('You need to setup STACKn first.')
+        login()
+
     stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
     if not load_status:
         print('Failed to load stackn config file.')
@@ -76,7 +80,7 @@ def get_remote_config():
     stackn_config, load_status = get_stackn_config()
     if not load_status:
         print('Failed to load STACKn config.')
-        return []
+        return [], False
 
     active_dir = stackn_config['active']
     if 'active_project' in stackn_config:
@@ -84,8 +88,8 @@ def get_remote_config():
         remote_config, load_status = load_from_file('user', active_path)
         return remote_config, load_status
     else:
-        print('Failed to load remote config.')
-        return []
+        print('No active project: Create a new project or set an existing project.')
+        return [], False
 
 def get_token(client_id='studio-api', realm='STACKn'):
     # stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))

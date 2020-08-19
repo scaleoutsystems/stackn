@@ -38,4 +38,7 @@ def status_cmd(ctx):
         print('Failed to load STACKn config.')
     else:
         print('Context: '+stackn_config['active'])
-        print('Project: '+stackn_config['active_project'])
+        if 'active_project' in stackn_config:
+            print('Project: '+stackn_config['active_project'])
+        else:
+            print('No active project; create a new project or set an existing project.')

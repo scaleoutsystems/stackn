@@ -130,7 +130,7 @@ class StudioClient():
         res = requests.post(url, headers=self.auth_headers, json=data)
         if res:
             print('Created project: '+name)
-            print('Setting {} as the active project.')
+            print('Setting {} as the active project.'.format(name))
             self.set_project(name)
         else:
             print('Failed to create project.')
