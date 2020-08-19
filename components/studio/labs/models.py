@@ -54,6 +54,7 @@ class Session(models.Model):
         (ABORTED, 'Aborted'),
     ]
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='session')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
 
     session_key = models.CharField(max_length=512)
     session_secret = models.CharField(max_length=512)

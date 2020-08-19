@@ -13,7 +13,7 @@ from projects.helpers import get_minio_keys
 def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    sessions = Session.objects.filter(project=project)
+    sessions = Session.objects.filter(Q(project=project), Q(owner=request.user))
     flavors = Flavor.objects.all()
     environments = Environment.objects.all()
     url = settings.DOMAIN
@@ -88,9 +88,8 @@ def run(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):
-    template = 'labs/index.html'
-    project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    session = Session.objects.filter(id=id, project=project).first()
+    project = Project.objects.filter(Q(slug=project), Q(owner=user) | Q(authorized=user)).first()
+    session = Session.objects.filter(Q(id=id), Q(project=project), Q(owner=user)).first()
 
     if session:
         from .helpers import delete_session_resources
