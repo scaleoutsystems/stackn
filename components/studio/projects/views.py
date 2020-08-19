@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
-from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub, GrantAccessForm
+from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub #, GrantAccessForm
 from django.db.models import Q
 from models.models import Model
 import requests as r
@@ -105,6 +105,7 @@ def grant_access_to_project(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
     if request.method == 'POST':
+        print('temp test')
         form = GrantAccessForm(request.POST)
         if form.is_valid():
             selected_users = form.cleaned_data.get('selected_users')
@@ -238,11 +239,11 @@ def publish_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
 
-def auth(request):
-    print(dir(request))
-    print(request.user)
-    if request.user.is_authenticated:
-        return HttpResponse('Ok', status=200)
-        # return HttpResponse(status=200)
-    else:
-        return HttpResponse(status=403)
+# def auth(request):
+#     print(dir(request))
+#     print(request.user)
+#     if request.user.is_authenticated:
+#         return HttpResponse('Ok', status=200)
+#         # return HttpResponse(status=200)
+#     else:
+#         return HttpResponse(status=403)
