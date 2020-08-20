@@ -10,34 +10,38 @@ from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
 from models.models import Model
 from django.urls import reverse
 from django.utils.text import slugify
+import modules.keycloak_lib as keylib
 from monitor.helpers import pod_up, get_count_over_time
 
 @login_required(login_url='/accounts/login')
 def predict(request, id, project):
     template = 'deploy/predict.html'
+    is_authorized = False
     if request.user.is_authenticated and request.user and project is not None:
         proj_obj = Project.objects.get(slug=project)
         if proj_obj.owner == request.user:
             is_authorized = True
-
-    project = proj_obj #Project.objects.get(slug=project)
+    print('Authorized: {}'.format(is_authorized))
+    project = proj_obj
     deployment = DeploymentInstance.objects.get(id=id)
     model = deployment.model
 
-    if request.method == 'POST' and is_authorized:
+    if request.method == 'POST': # and is_authorized:
         form = PredictForm(request.POST, request.FILES)
         if form.is_valid():
             import requests
             import json
 
-            predict_url = 'https://{}{}/{}'.format(deployment.endpoint, deployment.path, deployment.deployment.path_predict)
-
+            predict_url = 'https://{}{}{}/'.format(deployment.endpoint, deployment.path, deployment.deployment.path_predict)
+            # print(predict_url)
             # Get user token
-            from rest_framework.authtoken.models import Token
+            # from rest_framework.authtoken.models import Token
 
-            token = Token.objects.get_or_create(user=request.user)
+            # token = Token.objects.get_or_create(user=request.user)
+            kc = keylib.keycloak_init()
+            token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, request.user.username)
             print('requesting: '+predict_url)
-            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token[0].key})
+            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token})
             print(res.text)
             try:
                 prediction = json.loads(res.text)
