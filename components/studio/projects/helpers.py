@@ -25,9 +25,10 @@ def urlify(s):
 def create_settings_file(project, username, token):
     proj_settings = dict()
        
-    proj_settings['Project'] = dict()
-    proj_settings['Project']['project_name'] = project.name
-    proj_settings['Project']['project_slug'] = project.slug
+    proj_settings['active'] = 'stackn'
+    proj_settings['client_id'] = 'studio-api'
+    proj_settings['realm'] = settings.KC_REALM
+    proj_settings['active_project'] = 'project'
 
     return yaml.dump(proj_settings)
 
