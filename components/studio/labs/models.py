@@ -15,7 +15,7 @@ class SessionManager(models.Manager):
         password = ''.join(secrets.choice(alphabet) for i in range(length))
         return password
 
-    def create_session(self, name, project, chart, settings, helm_repo=None):
+    def create_session(self, name, project, lab_session_owner, chart, settings, helm_repo=None):
         slug = slugify(name)
         key = self.generate_passkey()
         secret = self.generate_passkey(40)
@@ -23,6 +23,7 @@ class SessionManager(models.Manager):
         status = 'CR'
         session = self.create(name=name,
                               project=project,
+                              lab_session_owner=lab_session_owner,
                               status=status,
                               slug=slug,
                               session_key=key,
@@ -54,6 +55,7 @@ class Session(models.Model):
         (ABORTED, 'Aborted'),
     ]
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='session')
+    lab_session_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lab_session_owner')
 
     session_key = models.CharField(max_length=512)
     session_secret = models.CharField(max_length=512)

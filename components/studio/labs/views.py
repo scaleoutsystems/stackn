@@ -13,7 +13,7 @@ from projects.helpers import get_minio_keys
 def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    sessions = Session.objects.filter(project=project)
+    sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user))
     flavors = Flavor.objects.all()
     environments = Environment.objects.all()
     url = settings.DOMAIN
@@ -70,7 +70,8 @@ def run(request, user, project):
                      'minio.access_key': decrypted_key,
                      'minio.secret_key': decrypted_secret,
                      }
-            session = Session.objects.create_session(name=name, project=project, chart='lab', settings=prefs)
+            session = Session.objects.create_session(name=name, project=project, lab_session_owner=request.user,
+                                                     chart='lab', settings=prefs)
             from .helpers import create_session_resources
 
             print("trying to create resources")
@@ -88,9 +89,8 @@ def run(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):
-    template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    session = Session.objects.filter(id=id, project=project).first()
+    session = Session.objects.filter(Q(id=id), Q(project=project), Q(lab_session_owner=request.user)).first()
 
     if session:
         from .helpers import delete_session_resources
