@@ -1,0 +1,24 @@
+{% extends is_authorized|yesno:"baseproject.html,base.html" %}
+{% block extra_head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="{% if is_authorized %} col-md-9 {% else %} col-md-11 {% endif %}">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Settings &mdash; {{ deployment.model.name }}:{{ deployment.model.tag }}</h2>
+        </div>
+
+        <form enctype="multipart/form-data" action="{% url 'deployments:serve_settings' project.slug deployment.id %}" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            {{ form }}
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+
+       
+    </div>
+{% endblock %}

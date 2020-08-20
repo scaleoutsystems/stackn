@@ -1,8 +1,10 @@
 import subprocess
 import json
+import yaml
+import shlex
 
 import os
-
+import uuid
 
 def refresh_charts(branch='master'):
 
@@ -25,8 +27,8 @@ class Controller:
         self.default_args = ['helm']
         pass
 
-    def deploy(self, options):
-        extras = ''
+    def deploy(self, options, action='install'):
+        # extras = ''
         """
         try:
             minio = ' --set service.minio=' + str(options['minio_port'])
@@ -59,10 +61,10 @@ class Controller:
             pass
         """
 
-        for key in options:
-            print(key)
-            print(options[key])
-            extras = extras + ' --set {}={}'.format(key, options[key])
+        # for key in options:
+        #     print(key)
+        #     print(options[key])
+        #     extras = extras + ' --set {}={}'.format(key, options[key])
 
         volume_root = "/"
         if "TELEPRESENCE_ROOT" in os.environ:
@@ -75,13 +77,21 @@ class Controller:
             refresh_charts(self.branch)
             chart = 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])
 
-        args = ['helm', 'install', '--kubeconfig', kubeconfig, options['release'], chart]
+        args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
+        # tmp_file_name = uuid.uuid1().hex+'.yaml'
+        # tmp_file = open(tmp_file_name, 'w')
+        # yaml.dump(options, tmp_file, allow_unicode=True)
+        # tmp_file.close()
+        # args.append('-f')
+        # args.append(tmp_file_name)
         for key in options:
             args.append('--set')
-            args.append('{}={}'.format(key, options[key]))
+            # args.append('{}={}'.format(key, options[key]))
+            args.append(key+"="+options[key])
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
+        # os.remove(tmp_file_name)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):

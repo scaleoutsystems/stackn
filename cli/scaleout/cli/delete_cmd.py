@@ -19,21 +19,21 @@ def delete_cmd(ctx, daemon):
 
 @delete_cmd.command('model')
 @click.option('-n', '--name', required=True)
-@click.option('-t', '--tag')
+@click.option('-v', '--version')
 @click.pass_context
-def delete_model_cmd(ctx, name, tag=None):
+def delete_model_cmd(ctx, name, version=None):
     """ Delete a model """
     client = ctx.obj['CLIENT']
-    client.delete_model(name, tag)
+    client.delete_model(name, version)
 
 @delete_cmd.command('deployment')
 @click.option('-n', '--name', required=True)
-@click.option('-t', '--tag')
+@click.option('-v', '--version')
 @click.pass_context
-def delete_model_cmd(ctx, name, tag=None):
+def delete_deployment_cmd(ctx, name, version=None):
     """ Delete a model """
     client = ctx.obj['CLIENT']
-    client.delete_deployment(name, tag)
+    client.delete_deployment(name, version)
 
 # @delete_cmd.command('deployments')
 # @click.pass_context

@@ -3,15 +3,17 @@ from scaleout.config.config import load_config as load_conf, get_default_config_
 
 from scaleout.runtime.runtime import Runtime
 
+import scaleout.auth as sauth
 from scaleout.auth import get_bearer_token
 from scaleout.errors import AuthenticationError
+from scaleout.utils.file import dump_to_file, load_from_file
 
 import requests
 import json
 import pickle
 from slugify import slugify
 import uuid
-
+from urllib.parse import urljoin
 
 def _check_status(r,error_msg="Failed"):
     if (r.status_code < 200 or r.status_code > 299):
@@ -24,29 +26,39 @@ def _check_status(r,error_msg="Failed"):
         return True 
 
 
-class StudioClient(Runtime):
+
+class StudioClient():
 
     def __init__(self, config=None):
-        super(StudioClient, self).__init__()
-
-
-        self.username = self.config['username']
-        self.password = self.config['password']
-        # self.project_name = self.config['Project']['project_name']
-        self.project_slug = self.config['Project']['project_slug']
-        self.auth_url = self.config['auth_url']
-        self.global_domain = self.config['so_domain_name']
-        # TODO: This assumes a certain url-schema
-        self.api_url = self.auth_url.replace("/api-token-auth",'')
-        self.auth_headers = {'Authorization': 'Token {}'.format(self.config['token'])}
+        self.found_project = False
+        self.access_token, self.token_config = sauth.get_token()
+        self.api_url = urljoin(self.token_config['studio_url'], '/api')
+        self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
 
         # Fetch and set all active API endpoints
         self.get_endpoints()
 
-        self.project = self.get_project(self.project_slug)
+        self.stackn_config, load_status = sauth.get_stackn_config()
+        if not load_status:
+            print('Failed to load stackn config')
+
+        self.project = []
+        self.project_slug = []
+        active_dir = self.stackn_config['active']
+        if 'active_project' in self.stackn_config:
+            project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
+            self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            if load_status:
+                self.found_project = True
+                self.project_slug = self.project['slug']
+                # else:
+                #     print('Could not load project config for '+self.stackn_config['active_project'])
+            else:
+                print('You must set an active valid project.')
+        # self.project = self.get_projects({'slug': self.project_slug})
         if not self.project:
-            print('Did not find project: {}'.format(self.project_slug))
-            self.project_id = None
+            print('Did not find existing config')
+            self.project_id = -1
         else:
             self.project_id = self.project['id']
             self.project_slug = self.project['slug']
@@ -61,26 +73,17 @@ class StudioClient(Runtime):
         self.deployment_instance_api = endpoints['deploymentInstances']
         self.deployment_definition_api = endpoints['deploymentDefinitions']
 
-
-    def connect(self):
-        """ Fetch and set an API bearer token """ 
-        url = self.config['auth_url']
-        try:
-            self.token = get_bearer_token(url, self.username, self.password)
-        except AuthenticationError:
-            self.token=None
-            raise
-
     def _get_repository_conf(self):
         """ Return the project minio keys. """
         #TODO: If we have multiple repositories configured, studio, minio, s3, etc, we 
         # neet to supply repository name.
-
-        project = self.get_project(self.project_slug)
-
+        project = self.project
+        # project = self.get_projects({'slug': self.project_slug})
+        # print(project)
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
-            'minio_host': '{}-minio.{}'.format(self.project_slug,self.config['so_domain_name']),
+            'minio_host': '{}-minio.{}'.format(self.project_slug,
+                                               self.token_config['studio_url'].replace('https://', '').replace('http://', '')),
             'minio_port': 9000,
             'minio_access_key': self.decrypt_key(project['project_key']),
             'minio_secret_key': self.decrypt_key(project['project_secret']),
@@ -119,6 +122,20 @@ class StudioClient(Runtime):
 
 
     ### Projects api  ####
+    
+    def create_project(self, name, description, repository):
+        url = self.projects_api+'create_project/'
+        data = {'name': name, 'description': description, 'repository': repository}
+        res = requests.post(url, headers=self.auth_headers, json=data)
+        if res:
+            print('Created project: '+name)
+            print('Setting {} as the active project.'.format(name))
+            self.set_project(name)
+        else:
+            print('Failed to create project.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
 
     def list_projects(self):
         """ List all projects a user has access to. """
@@ -132,13 +149,45 @@ class StudioClient(Runtime):
         else:
             return json.loads(r.content)
 
-    def get_project(self, project_slug):
-        projects = self.list_projects()
-        if not projects:
+    def get_projects(self, params=[]):
+        url = self.projects_api
+        if params:
+            r = requests.get(url, headers=self.auth_headers, params=params)
+        else:
+            r = requests.get(url, headers=self.auth_headers)
+        if r:
+            projects = json.loads(r.content)
+            if len(projects) == 1:
+                projects = projects[0]
+            return projects
+        else:
+            print("Fetching projects failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
             return None
-        for p in projects:
-            if p['slug'] == project_slug:
-                return p
+
+    def set_project(self, project_name):
+        # Set active project
+        stackn_config, load_status = sauth.get_stackn_config()
+        if not load_status:
+            print('Failed to load STACKn config.')
+            return False
+        active_dir = stackn_config['active']
+        project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
+        proj_path = project_dir+'/'+project_name+'.json'
+        # Update STACKN config
+        stackn_config['active_project'] = project_name
+        sauth.write_stackn_config(stackn_config)
+        if not os.path.exists(proj_path):
+            if not os.path.exists(project_dir):
+                os.makedirs(project_dir)
+            # Fetch and write project settings file
+            print('Writing new project config file.')
+            project = self.get_projects({'name': project_name})
+            status = dump_to_file(project, project_name, project_dir)
+            if not status:
+                print('Failed to set project -- could not write to config.')
+            
 
     def create_deployment_definition(self, name, filepath, path_predict=''):
 
@@ -218,24 +267,23 @@ class StudioClient(Runtime):
         print("No model found with id: ", model_id)
         return None
 
-    def create_model(self, instance, model_name, tag='latest', model_description=None,is_file=True):
+    def create_model(self, model_file, model_name, release_type='', model_description=None,is_file=True):
         """ Publish a model to Studio. """
 
-        # TODO: Support model tagging, default to 'latest'
         import uuid
         model_uid = str(uuid.uuid1().hex)
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
-        repo.set_artifact(model_uid, instance, is_file)
+        repo.set_artifact(model_uid, model_file, is_file)
  
         model_data = {"uid": model_uid,
                       "name": model_name,
-                      "tag": tag,
+                      "release_type": release_type,
                       "description": model_description,
                       "project": str(self.project_id)}
 
-        url = self.models_api
+        url = self.models_api+'release/'
         url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers)
@@ -243,19 +291,14 @@ class StudioClient(Runtime):
             repo.delete_artifact(model_uid)
             return False
 
-        print('Created model: {}, tag: {}'.format(model_name, tag))
+        print('Released model: {}, release_type: {}'.format(model_name, release_type))
         return True
 
-    def deploy_model(self, model_name, model_tag, deploy_context):
+    def deploy_model(self, model_name, model_version, deploy_context):
 
         url = self.deployment_instance_api+'build_instance/'
-        bd_data = {"name": model_name, "tag": model_tag, "depdef": deploy_context}
-        print('starting build...')
-        print(url)
+        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context}
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
-        print(r.text)
-        print(r.status_code)
-        print('ok')
         if not _check_status(r, error_msg="Failed to create deployment."):
             # Delete registered deployment instance from db
             return False
@@ -263,10 +306,31 @@ class StudioClient(Runtime):
         print('Created deployment: {}'.format(model_name))
         return True
 
+    def update_deployment(self, name, version, params):
+        url = self.deployment_instance_api+'update_instance/'
+        params['name'] = name
+        params['version'] = version
+        r = requests.post(url, headers=self.auth_headers, json=params)
+        if r:
+            print('Updated deployment: ')
+            print(params)
+        else:
+            print('Failed to update deployment.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
     
     def create_list(self, resource):
         if resource == 'deploymentInstances':
-            return self.list_deployments()
+            if self.found_project:
+                return self.list_deployments()
+            else:
+                return []
+        if resource == 'models':
+            if self.found_project:
+                models = self.get_models({'project': self.project['id']})
+                return models
+            else:
+                return []
 
         url = self.endpoints[resource]
         r = requests.get(url, headers=self.auth_headers)
@@ -279,10 +343,10 @@ class StudioClient(Runtime):
         r = requests.get(self.endpoints['models'], params=params, headers=self.auth_headers)
         models = json.loads(r.content)
         return models
-
+        
     def list_deployments(self):
         url = self.endpoints['deploymentInstances']
-        r = requests.get(url, headers=self.auth_headers)
+        r = requests.get(url, headers=self.auth_headers, params={'project':self.project['id']})
         if not _check_status(r, error_msg="Failed to fetch deployments"):
             return False
         deployments = json.loads(r.content)
@@ -293,7 +357,7 @@ class StudioClient(Runtime):
             # print(model)
             # print(deployment)
             dep = {'name': model['name'],
-                   'tag': model['tag'],
+                   'version': model['version'],
                    'endpoint': deployment['endpoint'],
                    'created_at': deployment['created_at']}
             depjson.append(dep)
@@ -304,46 +368,45 @@ class StudioClient(Runtime):
     
 
     def get_deployment(self, params):
-        url = os.path.join(self.deployment_instance_api)
+        url = self.deployment_instance_api
         r = requests.get(url, params=params, headers=self.auth_headers)
         return json.loads(r.content)
 
-    def delete_model(self, name, tag=None):
-        if tag:
-            params = {'name': name, 'tag': tag}
+    def delete_model(self, name, version=None):
+        if version:
+            params = {'name': name, 'version': version}
         else:
             params = {'name': name}
         models  = self.get_models(params)
         for model in models:
             url = os.path.join(self.models_api, '{}'.format(model['id']))
             r = requests.delete(url, headers=self.auth_headers)
-            if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, tag)):
+            if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, version)):
                 pass
             else:
-                print("Deleted model {}:{}.".format(name, tag))
+                print("Deleted model {}:{}.".format(name, version))
 
-    def delete_deployment(self, name, tag=None):
-        if tag:
-            params = {'name': name, 'tag': tag}
+    def delete_deployment(self, name, version=None):
+        if version:
+            params = {'name': name, 'version': version}
         else:
             params = {'name': name}
         models  = self.get_models(params)
         for model in models:
-            deployment = self.get_deployment({'model':model['id']})
-            # print(deployment)
+            deployment = self.get_deployment({'model':model['id'],'project':self.project['id']})
             if deployment:
                 deployment = deployment[0]
-                url = os.path.join(self.deployment_instance_api, '{}'.format(deployment['id']))
-                r = requests.delete(url, headers=self.auth_headers)
-                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['tag'])):
+                url = self.deployment_instance_api+'destroy'
+                r = requests.delete(url, headers=self.auth_headers, params=params)
+                if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['version'])):
                     pass
                 else:
-                    print("Deleted deployment {}:{}.".format(model['name'], model['tag']))
+                    print("Deleted deployment {}:{}.".format(model['name'], model['version']))
 
 if __name__ == '__main__':
 
     client = StudioClient()
-    p = client.get_project("Test")
+    p = client.get_projects({'slug': 'Test'})
     print("Project:", p)
     e = client.list_endpoints()
     print("Endpoints: ", e)
@@ -351,17 +414,4 @@ if __name__ == '__main__':
     print("Minio settings: ", data)
 
     print(client.token)
-    #objs = client.list_datasets()
-    #for obj in objs:
-    #    print(obj)
 
-    #import pickle
-    #model = "jhfjkshfks"*1000
-    #data = pickle.dumps(model)
-    #client.publish_model(data,"testmodel",tag="v0.0.1",model_description="A test to check client API functionality.", is_file=False)
-
-    #data = client.list_models()
-    #print(data)
-
-    #data = client.show_model(model_id="167d8f0070c611ea96fcf218982f8078")
-    #print(data)

@@ -1,40 +1,47 @@
 import os
-
+from ast import literal_eval
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 from projects.models import Project
 from .models import DeploymentDefinition, DeploymentInstance
-from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm
+from .forms import DeploymentDefinitionForm, DeploymentInstanceForm, PredictForm, SettingsForm
 from models.models import Model
 from django.urls import reverse
-
+from django.utils.text import slugify
+import modules.keycloak_lib as keylib
+from monitor.helpers import pod_up, get_count_over_time
 
 @login_required(login_url='/accounts/login')
 def predict(request, id, project):
     template = 'deploy/predict.html'
+    is_authorized = False
     if request.user.is_authenticated and request.user and project is not None:
-        is_authorized = True
-
-    project = Project.objects.get(slug=project)
+        proj_obj = Project.objects.get(slug=project)
+        if proj_obj.owner == request.user:
+            is_authorized = True
+    print('Authorized: {}'.format(is_authorized))
+    project = proj_obj
     deployment = DeploymentInstance.objects.get(id=id)
     model = deployment.model
 
-    if request.method == 'POST':
+    if request.method == 'POST': # and is_authorized:
         form = PredictForm(request.POST, request.FILES)
         if form.is_valid():
             import requests
             import json
 
-            predict_url = 'https://{}{}/{}'.format(deployment.endpoint, deployment.path, deployment.deployment.path_predict)
-
+            predict_url = 'https://{}{}{}/'.format(deployment.endpoint, deployment.path, deployment.deployment.path_predict)
+            # print(predict_url)
             # Get user token
-            from rest_framework.authtoken.models import Token
+            # from rest_framework.authtoken.models import Token
 
-            token = Token.objects.get_or_create(user=request.user)
+            # token = Token.objects.get_or_create(user=request.user)
+            kc = keylib.keycloak_init()
+            token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, request.user.username)
             print('requesting: '+predict_url)
-            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token[0].key})
+            res = requests.post(predict_url, files=form.files, headers={'Authorization':'Token '+token})
             print(res.text)
             try:
                 prediction = json.loads(res.text)
@@ -55,18 +62,46 @@ def deploy(request, id):
     if request.method == 'POST':
         deployment = request.POST.get('deployment', None)
         definition = DeploymentDefinition.objects.get(name=deployment)
-        instance = DeploymentInstance(model=model, deployment=definition)
+        instance = DeploymentInstance(model=model, deployment=definition, created_by=request.user)
         instance.save()
         # return JsonResponse({"code": "201"})
 
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
+
+@login_required(login_url='/accounts/login')
+def serve_settings(request, id, project):
+    # model = Model.objects.get(id=id)
+    # print(request.user)
+    template = 'deploy/settings.html'
+    if request.user.is_authenticated and request.user and project is not None:
+        proj_obj = Project.objects.get(slug=project)
+        if proj_obj.owner == request.user:
+            is_authorized = True
+
+
+    project = proj_obj #Project.objects.get(slug=project)
+    deployment = DeploymentInstance.objects.get(id=id)
+    chart = deployment.helmchart
+    params = literal_eval(chart.params)
+    model = deployment.model
+    if request.method == 'POST' and is_authorized:
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            params['replicas'] = request.POST.get('replicas', 1)
+            print(params)
+            deployment.helmchart.params = params
+            deployment.helmchart.save()
+    form = SettingsForm(initial={'replicas': params['replicas']})
+
+    return render(request, template, locals())
+
 
 
 @login_required(login_url='/accounts/login')
 def undeploy(request, id):
     model = Model.objects.get(id=id)
     instance = DeploymentInstance.objects.get(model=model)
-    instance.delete()
+    instance.helmchart.delete()
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
 
 
@@ -91,6 +126,16 @@ def deployment_index(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
     deployments = DeploymentInstance.objects.filter(model__project=project)
+    deployment_status = []
+    invocations = []
+    for deployment in deployments:
+        pods_up, pods_count = pod_up(deployment.appname)
+        invocations.append(get_count_over_time('serve_predict_total',
+                                               deployment.appname,
+                                               deployment.deployment.path_predict,
+                                               "200", "200y"))
+        deployment_status.append([pods_up, pods_count])
+    deploy_status = zip(deployments, deployment_status, invocations)
 
     return render(request, temp, locals())
 

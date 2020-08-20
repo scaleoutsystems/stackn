@@ -31,9 +31,10 @@
 
                 <tr>
                     <th>Model</th>
-                    <th>Tag</th>
+                    <th>Status</th>
                     <th>Environment</th>
                     <th>Endpoint</th>
+                    <th>Invocations</th>
                     {% if authorized_as %}
                         <th>Definition</th>
                         <th>Actions</th>
@@ -42,12 +43,13 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for deploy in deployments %}
+                {% for deploy, status, invocations in deploy_status %}
                     <tr>
                         <td>{{ deploy.model.name }}</td>
-                        <td>{{ deploy.model.tag }}</td>
+                        <td>{{ status.0 }}/{{ status.1 }}</td>
                         <td>{{ deploy.deployment.name }}</td>
-                        <td>https://{{ deploy.endpoint }}{{ deploy.path }}/{{ deploy.deployment.path_predict }}</td>
+                        <td>https://{{ deploy.endpoint }}{{ deploy.path }}{{ deploy.deployment.path_predict }}</td>
+                        <td>{{ invocations }}</td>
                         {% if authorized_as %}
                             <td>{{ deploy.definition }}</td>
                             <td>
@@ -61,7 +63,8 @@
                                 Callrate: 5 calls/sec
                             </td>
                         {% endif %}
-                        <td><a href="{% url 'deployments:predict' project.slug deploy.id %}" class="btn btn-sm btn-primary">Predict</a></td>
+                        <td><a href="{% url 'deployments:serve_settings' project.slug deploy.id %}">Settings</a></td>
+                        <td><a href="{% url 'deployments:predict' project.slug deploy.id %}">Predict</a></td>
                     </tr>
                     {% if is_authorized %}
                         <script>

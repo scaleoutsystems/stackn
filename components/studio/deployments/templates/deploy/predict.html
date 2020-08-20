@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block content %}
+{% if is_authorized %}
     <div class="{% if is_authorized %} col-md-9 {% else %} col-md-11 {% endif %}">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h2>Predict &mdash; {{ deployment.model.name }}:{{ deployment.model.tag }}</h2>
@@ -33,4 +34,5 @@
         </pre>
         {% endif %}        
     </div>
+{% endif %}
 {% endblock %}

@@ -51,8 +51,11 @@
                 <tbody>
                 {% for experiment in experiments %}
                 <tr>
-                    <td><a href="{% url 'experiments:details' request.user project.slug experiment.id|slugify %}">{{
-                        experiment.id }}</a></td>
+                    <td>
+                        <a href="{% url 'experiments:details' request.user project.slug experiment.id|slugify %}">
+                            {{ experiment.id }}
+                        </a>
+                    </td>
                     <td>{{ experiment.command }}</td>
                     <td>{{ experiment.environment }}</td>
                     <td>{{ experiment.created_at }}</td>

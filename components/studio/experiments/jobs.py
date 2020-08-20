@@ -1,4 +1,6 @@
 from django.conf import settings
+import os
+from pathlib import Path
 from pprint import pprint
 
 example = """apiVersion: batch/v1
@@ -9,16 +11,13 @@ metadata:
 spec:
   template:
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
-      - name: pi
-        image: {repository}/{image}:{tag}
+      - name: experiment
+        image: python
         command: {command}
         volumeMounts:
         - name: jobstorage
-          mountPath: /home/jovyan/
-        #command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+          mountPath: /home/app/
       restartPolicy: Never
       volumes:
       - name: jobstorage
@@ -31,13 +30,14 @@ spec:
 def get_instance_from_definition(instance):
     import yaml
 
-    repository = "registry.demo.scaleout.se"
-    image = "testar"
-    tag = "latest"
-    ret = example.format(name=instance.project.slug, id=instance.id, command=str(instance.command.split(' ')), tag=tag,
-                         image=image,
-                         repository=repository,namespace=settings.NAMESPACE)
+    ret = example.format(
+        name=instance.project.slug,
+        id=instance.id,
+        command=str(instance.command.split(' ')),
+        namespace=settings.NAMESPACE
+    )
     ret = yaml.safe_load(ret)
+
     return ret
 
 
@@ -49,7 +49,20 @@ def run_job(instance):
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
     else:
-        config.load_incluster_config()
+        if 'TELEPRESENCE_ROOT' in os.environ:
+            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+                                                      SERVICE_TOKEN_FILENAME,
+                                                      InClusterConfigLoader)
+            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+
+            InClusterConfigLoader(
+                token_filename=token_filename, cert_filename=cert_filename
+            ).load_and_set()
+        else:
+            config.load_incluster_config()
 
     api = client.BatchV1Api()
 
@@ -78,7 +91,6 @@ def run_job(instance):
 
 def delete_job(instance):
     from kubernetes import client, config
-    import yaml
 
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
@@ -97,13 +109,24 @@ def delete_job(instance):
 
 def get_logs(experiment):
     from kubernetes import client, config
-    import yaml
-    from pprint import pprint
 
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
     else:
-        config.load_incluster_config()
+        if 'TELEPRESENCE_ROOT' in os.environ:
+            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+                                                      SERVICE_TOKEN_FILENAME,
+                                                      InClusterConfigLoader)
+            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+
+            InClusterConfigLoader(
+                token_filename=token_filename, cert_filename=cert_filename
+            ).load_and_set()
+        else:
+            config.load_incluster_config()
 
     api = client.BatchV1Api()
 

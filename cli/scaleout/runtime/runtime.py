@@ -8,4 +8,3 @@ class Runtime(Project):
         # The config file is read by the Project constructor
         super(Runtime, self).__init__(cwd, config_file)
 
-        self.client = self.config['access_key']

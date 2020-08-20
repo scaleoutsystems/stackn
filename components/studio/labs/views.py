@@ -7,7 +7,12 @@ import uuid
 from django.conf import settings
 from django.db.models import Q
 from projects.helpers import get_minio_keys
-
+from django.core import serializers
+from .helpers import create_user_settings
+from api.serializers import ProjectSerializer
+from rest_framework.renderers import JSONRenderer
+import json
+import yaml
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
@@ -57,6 +62,21 @@ def run(request, user, project):
             decrypted_key = minio_keys['project_key']
             decrypted_secret = minio_keys['project_secret']
 
+            settings_file = ProjectSerializer(project)
+
+            settings_file = JSONRenderer().render(settings_file.data)
+            settings_file = settings_file.decode('utf-8')
+            print(settings_file)
+            # settings_file = yaml.load(settings_file, Loader=yaml.FullLoader)
+            settings_file = json.loads(settings_file)
+            settings_file = yaml.dump(settings_file)
+            print(settings_file)
+            # settings_file = json.dumps(json.loads(settings_file))
+
+            # settings_file = yaml.dump(settings_file)
+            user_config_file = create_user_settings(user)
+            user_config_file = yaml.dump(json.loads(user_config_file))
+
             prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
                      'labs.resources.limits.cpu': str(flavor.cpu),
                      'labs.resources.requests.memory': str(flavor.mem),
@@ -69,6 +89,9 @@ def run(request, user, project):
                      # 'labs.setup': environment.setup,
                      'minio.access_key': decrypted_key,
                      'minio.secret_key': decrypted_secret,
+                     'settings_file': settings_file,
+                     'user_settings_file': user_config_file,
+                     'project.slug': project.slug
                      }
             session = Session.objects.create_session(name=name, project=project, chart='lab', settings=prefs)
             from .helpers import create_session_resources
