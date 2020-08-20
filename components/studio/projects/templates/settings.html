@@ -149,6 +149,7 @@
         </form>
     </div>
 
+    {% if project.owner == request.user %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>Grant access</h5>
         <p>For granting access to this project, select one or more users from the list below.</p>
@@ -169,6 +170,7 @@
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
+    {% endif %}
 
     <div class="container-fluid" style="padding:15px;">
       <h5>Project Settings</h5>
