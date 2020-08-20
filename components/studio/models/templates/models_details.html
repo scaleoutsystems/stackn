@@ -44,9 +44,9 @@
             </div>
             <div class="d-flex bd-highlight mb-3 col-md-6">
                 <div class="p-2 bd-highlight" style="font-weight: bold;">
-                    Tag
+                    version
                 </div>
-                <div class="ml-auto p-2 bd-highlight">{{ model.tag }}</div>
+                <div class="ml-auto p-2 bd-highlight">{{ model.version }}</div>
             </div>
             <div class="d-flex bd-highlight mb-3 col-md-6">
                 <div class="p-2 bd-highlight" style="font-weight: bold;">
@@ -122,7 +122,7 @@
                 {% for d in deployments %}
                 <tr>
                     <th scope="row">{{ d.pk }}</th>
-                    <td>{{ d.model.name }}:{{ d.model.tag }}</td>
+                    <td>{{ d.model.name }}:{{ d.model.version }}</td>
                     <td>
                         <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}" target="_blank">{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}</a>
                     </td>
