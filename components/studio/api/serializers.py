@@ -10,7 +10,7 @@ class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
         fields = (
-            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'tag')
+            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version')
 
 class DeploymentDefinitionSerializer(ModelSerializer):
     class Meta:
