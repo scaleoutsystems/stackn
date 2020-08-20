@@ -47,13 +47,12 @@ class StudioClient():
         active_dir = self.stackn_config['active']
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
-            if os.path.exists(project_dir+'/'+self.stackn_config['active_project']+'.json'):
-                self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
-                if load_status:
-                    self.found_project = True
-                    self.project_slug = self.project['slug']
-                else:
-                    print('Could not load project config for '+self.stackn_config['active_project'])
+            self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            if load_status:
+                self.found_project = True
+                self.project_slug = self.project['slug']
+                # else:
+                #     print('Could not load project config for '+self.stackn_config['active_project'])
             else:
                 print('You must set an active valid project.')
         # self.project = self.get_projects({'slug': self.project_slug})
@@ -185,7 +184,9 @@ class StudioClient():
             # Fetch and write project settings file
             print('Writing new project config file.')
             project = self.get_projects({'name': project_name})
-            dump_to_file(project, project_name, project_dir)
+            status = dump_to_file(project, project_name, project_dir)
+            if not status:
+                print('Failed to set project -- could not write to config.')
             
 
     def create_deployment_definition(self, name, filepath, path_predict=''):

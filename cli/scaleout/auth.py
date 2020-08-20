@@ -7,7 +7,9 @@ import jwt
 import base64
 from getpass import getpass
 from scaleout.utils.file import dump_to_file, load_from_file
+import logging
 
+logger = logging.getLogger('cli')
 
 def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn'):
     discovery_url = '{}/auth/realms/{}'.format(keycloak_url, realm)
@@ -49,7 +51,9 @@ def write_stackn_config(updated_values):
     for key, value in updated_values.items():
         stackn_config[key] = value
     
-    dump_to_file(stackn_config, 'stackn', dirpath)
+    status = dump_to_file(stackn_config, 'stackn', dirpath)
+    if not status:
+        logger.info('Failed to update config -- could not write to file.')
 
     
 
@@ -62,17 +66,22 @@ def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, st
                   'public_key': public_key,
                   'keycloak_url': keycloak_host,
                   'studio_url': studio_host}
-    dump_to_file(dep_config, 'user', dirpath)
+    status = dump_to_file(dep_config, 'user', dirpath)
+    if not status:
+        logger.info('Could not write tokens -- failed to write to file.')
 
 def get_stackn_config():
-    if not os.path.exists(os.path.expanduser('~/.scaleout/stackn.json')):
-        print('You need to setup STACKn first.')
-        login()
+    # if not os.path.exists(os.path.expanduser('~/.scaleout/stackn.json')):
+    #     print('You need to setup STACKn first.')
+    #     login()
 
     stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
     if not load_status:
         print('Failed to load stackn config file.')
-        return None
+        print('You need to setup STACKn first.')
+        login()
+        stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
+        # return None
 
     return stackn_config, load_status
 
@@ -115,7 +124,6 @@ def get_token(client_id='studio-api', realm='STACKn'):
         # print('Token valid for user '+access_token_json['preferred_username'])
     except:
         # Try to refresh token
-        print('Refreshing token...')
         token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(token_config['keycloak_url'], realm)
         req = {'grant_type': 'refresh_token',
                'client_id': client_id,

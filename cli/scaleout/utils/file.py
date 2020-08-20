@@ -1,4 +1,5 @@
 import json
+import yaml
 
 
 def dump_to_file(data, name, path):
@@ -6,7 +7,7 @@ def dump_to_file(data, name, path):
     try:
         with open(path + '/' + name + '.json', 'w') as outfile:
             json.dump(data, outfile)
-    except ValueError as e:
+    except:
         success = False
 
     if not success:
@@ -14,7 +15,8 @@ def dump_to_file(data, name, path):
         try:
             with open(path + name + '.pkl', 'wb') as outfile:
                 pickle.dump(data, outfile)
-        except ValueError as e:
+            success = True
+        except:
             success = False
 
     return success
@@ -26,15 +28,28 @@ def load_from_file(name, path):
     try:
         with open(path + '/' + name + '.json', 'r') as infile:
             data = json.load(infile)
-    except ValueError as e:
+    except:
         success = False
+        pass
+
+    if not success:
+        try:
+            with open(path + '/' + name + '.yaml', 'r') as infile:
+                tmp = infile.read()
+                data = yaml.load(tmp, Loader=yaml.FullLoader)
+            success = True
+        except:
+            success = False
+            pass
 
     if not success:
         import pickle
         try:
             with open(path + '/' + name + '.pkl', 'rb') as infile:
                 data = pickle.load(infile)
-        except ValueError as e:
+            success = True
+        except:
             success = False
+            pass
 
     return data, success
