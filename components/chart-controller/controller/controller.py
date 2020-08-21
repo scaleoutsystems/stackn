@@ -104,6 +104,12 @@ class Controller:
         # args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']) #.split(' ')
         args = ['helm', '--kubeconfig', str(kubeconfig), 'delete', options['release']]
         status = subprocess.run(args, cwd=self.cwd)
+
+        # Delete k8s job used to allocate project resources
+        k8s_job_cmd = "kubectl get jobs | awk '/" + options['release'] +"-/{print $1}' | xargs kubectl delete job"
+        k8s_job_status = subprocess.run(k8s_job_cmd, shell=True, cwd=self.cwd)
+        print(k8s_job_status)
+
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def update(self, options, chart):

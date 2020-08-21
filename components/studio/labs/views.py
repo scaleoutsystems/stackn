@@ -18,7 +18,7 @@ import yaml
 def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user))
+    sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user)).order_by('-created_at')
     flavors = Flavor.objects.all()
     environments = Environment.objects.all()
     url = settings.DOMAIN
