@@ -25,7 +25,7 @@ def create_session_resources(request, user, session, prefs, project):
     RELEASE_NAME = str(session.slug)
     
     URL = 'https://'+RELEASE_NAME+'.'+HOST
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user)
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
 
     parameters = {'release': str(session.slug),
                   'chart': session.chart,

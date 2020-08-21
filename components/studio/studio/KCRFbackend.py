@@ -27,5 +27,6 @@ class KeycloakAuthentication(authentication.BaseAuthentication):
         
         username = access_token_json['preferred_username']
         user = User.objects.get(username=username)
-
+        request.session['oidc_access_token'] = access_token
+        request.session.save()
         return (user, None)

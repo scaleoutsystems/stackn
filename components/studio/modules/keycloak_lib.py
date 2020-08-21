@@ -90,7 +90,8 @@ def keycloak_init():
 def keycloak_get_detailed_user_info(request):
     if not ('oidc_access_token' in request.session):
         logger.warn('No access token in request session -- unable to authorize user.')
-    
+        return []
+        
     access_token = request.session['oidc_access_token']
 
     user_json = []
