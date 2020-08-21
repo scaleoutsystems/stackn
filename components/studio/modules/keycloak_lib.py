@@ -1,5 +1,10 @@
 from django.conf import settings
 import requests as r
+import logging
+import jwt
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class KeycloakInit:
     admin_url: str
@@ -9,6 +14,8 @@ class KeycloakInit:
         self.admin_url = admin_url
         self.realm = realm
         self.token = token
+
+
 
 def keycloak_user_auth(username, password, client_id, admin_url, realm):
     token_url = '{}/realms/{}/protocol/openid-connect/token'.format(admin_url, realm)
@@ -80,6 +87,45 @@ def keycloak_init():
         print('Failed to init Keycloak auth')
         return False
 
+def keycloak_get_detailed_user_info(request):
+    if not ('oidc_access_token' in request.session):
+        logger.warn('No access token in request session -- unable to authorize user.')
+    
+    access_token = request.session['oidc_access_token']
+
+    user_json = []
+    discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
+    res = r.get(discovery_url)
+    if res:
+        realm_info = res.json()
+        public_key = '-----BEGIN PUBLIC KEY-----\n'+realm_info['public_key']+'\n-----END PUBLIC KEY-----'
+    else:
+        print('Failed to discover realm settings: '+settings.KC_REALM)
+        return None
+    try:
+        user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience='account')
+    except:
+        logger.info('Failed to authenticate user.')
+    return user_json
+
+def keycloak_verify_user_role(request, resource, role):
+    user_info = keycloak_get_detailed_user_info(request)
+    print(user_info)
+    if user_info:
+        try:
+            resource_info = user_info['resource_access'][resource]
+        except:
+            logger.info('User not authorized to access resource {}'.format(resource))
+            return False
+
+        resource_roles = resource_info['roles']
+        print(resource_roles)
+        if role in resource_roles:
+            return True
+    
+    return False
+
+
 def keycloak_get_clients(kc, payload):
     get_clients_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
     res = r.get(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, params=payload)
@@ -111,12 +157,17 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
     if not redirectUris:
         redirectUris = [base_url+'/*']
     create_client_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
+    logger.debug("Create client endpoint: "+create_client_url)
     client_rep = {'clientId': client_id,
                   'baseUrl': base_url,
                   'rootUrl': root_url,
                   'redirectUris': redirectUris}
+    logger.debug("Client rep: ")
+    logger.debug(client_rep)
     res = r.post(create_client_url, json=client_rep, headers={'Authorization': 'bearer '+kc.token})
     if res:
+        logger.debug('Created new client with clientId {}'.format(client_id))
+        logger.debug('Status code returned: {}'.format(res.status_code))
         return True
     else:
         print('Failed to create new client.')
@@ -211,11 +262,10 @@ def keycloak_add_scope_to_client(kc, client_id, scope_id):
         print(res.text)
         return False        
 
-def keycloak_create_client_role(kc, client_nid, role_name):
+def keycloak_create_client_role(kc, client_nid, role_name, session):
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
     role_rep = {'name': role_name}
-    res = r.post(client_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
-    print(res)
+    res = session.post(client_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token, })
     if res:
         return True
     else:
@@ -238,7 +288,9 @@ def keycloak_get_user_id(kc, username):
     res = res[0]
     return res['id']
 
-def keycloak_get_client_role_id(kc, role_name, client_nid):
+def keycloak_get_client_role_id(kc, role_name, client_nid, session=[]):
+    if not session:
+        session = r.session()
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
     res = r.get(client_role_url, headers={'Authorization': 'bearer '+kc.token})
     if res:
@@ -252,7 +304,9 @@ def keycloak_get_client_role_id(kc, role_name, client_nid):
         print(res.text)
         return False
 
-def keycloak_add_user_to_client_role(kc, client_nid, username, role_name):
+def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, session=[]):
+    if not session:
+        session = r.session()
     user_id = keycloak_get_user_id(kc, username)
     add_user_to_role_url = '{}/admin/realms/{}/users/{}/role-mappings/clients/{}'.format(kc.admin_url,
                                                                                          kc.realm,
@@ -260,10 +314,10 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name):
                                                                                          client_nid)
     
     # Get role id
-    role_id = keycloak_get_client_role_id(kc, role_name, client_nid)
+    role_id = keycloak_get_client_role_id(kc, role_name, client_nid, session)
 
     role_rep = [{'name': role_name, 'id': role_id}]
-    res = r.post(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+    res = session.post(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
     if res:
         return True
     else:
@@ -272,8 +326,16 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name):
         print(res.text)
         return False
 
-def keycloak_setup_base_client(base_url, client_id, username):
-    print(type(username))
+def keycloak_add_role_to_user(clientId, username, role):
+    logger.info('Adding role {} to user {}. Client is {}.'.format(role, username, clientId))
+    kc = keycloak_init()
+    # Get client id
+    clients = keycloak_get_clients(kc, {'clientId': clientId})
+    client_nid = clients[0]['id']
+    # Add role to user
+    keycloak_add_user_to_client_role(kc, client_nid, username, role)
+
+def keycloak_setup_base_client(base_url, client_id, username, roles=['default'], default_user_role=['default']):
     kc = keycloak_init()
     client_status = keycloak_create_client(kc, client_id, base_url)
     # Create client
@@ -294,8 +356,20 @@ def keycloak_setup_base_client(base_url, client_id, username):
     # _________________
     # Add the scope to the client
     keycloak_add_scope_to_client(kc, client_nid, scope_id)
-    # Create client role
-    keycloak_create_client_role(kc, client_nid, client_id+'-role')
-    # Add user to client role
-    keycloak_add_user_to_client_role(kc, client_nid, username, client_id+'-role')
+    # Create client roles
+    session = r.session()
+    for role in roles:
+        res = keycloak_create_client_role(kc, client_nid, role, session)
+        if res:
+            print(role)
+    
+
+    # Give user default roles
+    for default_role in default_user_role:
+        res = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session)
+        if res:
+            print(default_role)
+    
+    session.close()
+
     return client_id, client_secret
