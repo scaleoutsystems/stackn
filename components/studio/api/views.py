@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
+import modules.keycloak_lib as keylib
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -37,7 +38,10 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
         # Could we get the token here for authorization?
         # We should check that the authenticated user also has
         # the correct role in Keycloak.
+        
         project = Project.objects.get(id=request.data['project'])
+        is_authorized = keylib.keycloak_verify_user_role(request, project.slug, 'member')
+        print(is_authorized)
         current_user = self.request.user
         if current_user == project.owner:
             # project = model.project
