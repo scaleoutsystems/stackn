@@ -164,7 +164,7 @@ def create(request):
 @login_required(login_url='/accounts/login')
 def details(request, user, project_slug):
 
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, 'member')
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
     
     template = 'project.html'
 
