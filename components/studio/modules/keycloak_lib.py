@@ -91,7 +91,7 @@ def keycloak_get_detailed_user_info(request):
     if not ('oidc_access_token' in request.session):
         logger.warn('No access token in request session -- unable to authorize user.')
         return []
-        
+
     access_token = request.session['oidc_access_token']
 
     user_json = []
@@ -109,7 +109,11 @@ def keycloak_get_detailed_user_info(request):
         logger.info('Failed to authenticate user.')
     return user_json
 
-def keycloak_verify_user_role(request, resource, role):
+def keycloak_verify_user_role(request, resource, roles):
+    ''' 
+    Checks if user has on of the roles in 'role' for resource given by 'resource'
+    Variable 'role' has to be iterable.
+    '''
     user_info = keycloak_get_detailed_user_info(request)
     print(user_info)
     if user_info:
@@ -120,9 +124,9 @@ def keycloak_verify_user_role(request, resource, role):
             return False
 
         resource_roles = resource_info['roles']
-        print(resource_roles)
-        if role in resource_roles:
-            return True
+        for role in roles:
+          if role in resource_roles:
+              return True
     
     return False
 
