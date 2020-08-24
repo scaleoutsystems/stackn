@@ -15,19 +15,19 @@ class ProjectPermission(BasePermission):
         """
 
         project = Project.objects.get(pk=view.kwargs['project_pk'])
-        print(request.method)
-        if request.method == 'GET':
-            is_authorized = keylib.keycloak_verify_user_role(request, project.slug, ['guest', 'member', 'admin'])
-            print('Is authorized: {}'.format(is_authorized))
-            return is_authorized
-        if request.method in ['POST', 'PUT']:
-            is_authorized = keylib.keycloak_verify_user_role(request, project.slug, ['member', 'admin'])
-            print('Is authorized: {}'.format(is_authorized))
-            return is_authorized
-        if request.method in ['DELETE']:
-            is_authorized = keylib.keycloak_verify_user_role(request, project.slug, ['admin'])
-            print('Is authorized: {}'.format(is_authorized))
-            return is_authorized
 
-        return False
+        project_rules = {
+            'GET': ['guest', 'member', 'admin'],
+            'POST': ['member', 'admin'],
+            'PUT': ['member', 'admin'],
+            'DELETE': ['admin']
+        }
+
+        is_authorized = False
+        if request.method in project_rules:
+            is_authorized = keylib.keycloak_verify_user_role(request, project.slug, project_rules[request.method])
+
+        print('Is authorized: {}'.format(is_authorized))
+        return is_authorized
+
 
