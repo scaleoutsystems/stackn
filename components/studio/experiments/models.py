@@ -21,12 +21,16 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     print('creating cronjob chart')
     job_id = uuid.uuid1().hex[0:5]
     release_name = '{}-{}-{}'.format(instance.project.slug, 'cronjob', job_id)
+    is_cron = 1
+    if instance.schedule == "None":
+        is_cron = 0
     parameters = {
         "release": release_name,
         "chart": "cronjob",
         "project.slug": instance.project.slug,
         "image": instance.environment.image,
         "command": str(instance.command.split(' ')),
+        "iscron": str(is_cron),
         "cronjob.schedule": instance.schedule,
         "cronjob.port": "8786",
         "resources.limits.cpu": "500m",

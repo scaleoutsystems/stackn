@@ -28,13 +28,15 @@ def run(request, user, project):
 
     deployment = None
     if request.method == "POST":
-        print(request.POST)
         form = ExperimentForm(request.POST)
         if form.is_valid():
             print("valid form! Saving")
             instance = Experiment()
             instance.username = user
-            instance.schedule = form.cleaned_data['schedule']
+            if not form.cleaned_data['schedule']:
+                instance.schedule = "None"
+            else:
+                instance.schedule = form.cleaned_data['schedule']
             instance.command = form.cleaned_data['command']
             # environment = Environment.objects.get(pk=request.POST['environment'])
             instance.environment = form.cleaned_data['environment']
