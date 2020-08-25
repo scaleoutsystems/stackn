@@ -5,6 +5,8 @@ from django.conf import settings
 import requests as r
 import yaml
 
+from .tasks import create_keycloak_client_task
+
 import re
 
 import modules.keycloak_lib as keylib
@@ -29,15 +31,18 @@ def create_settings_file(project, username, token):
 
     return yaml.dump(proj_settings)
 
-def create_project_resources(project, username, repository=None):
-    create_helm_resources(project, username, repository)
-    
-    # Create Keycloak client for project with default project role.
-    HOST = settings.DOMAIN
-    RELEASE_NAME = str(project.slug)   
-    URL = 'https://{}/{}/{}'.format(HOST, username.username, RELEASE_NAME)
-    keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username.username)
 
+
+
+def create_project_resources(project, username, repository=None):
+
+    # Create Keycloak client for project with default project role.
+    # The creator of the project assumes all roles by default.
+    create_keycloak_client_task.delay(project.slug, username.username, [])
+
+    create_helm_resources(project, username, repository)
+
+    
 
 def create_helm_resources(project, user, repository=None):
     from rest_framework.authtoken.models import Token
