@@ -104,6 +104,7 @@ class Controller:
         # args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']) #.split(' ')
         args = ['helm', '--kubeconfig', str(kubeconfig), 'delete', options['release']]
         status = subprocess.run(args, cwd=self.cwd)
+
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def update(self, options, chart):

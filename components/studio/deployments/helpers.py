@@ -1,10 +1,8 @@
 from django.conf import settings
-from django.utils.text import slugify
-from .exceptions import ModelDeploymentException
-from pprint import pprint
 from string import Template
-import requests
-from .models import DeploymentDefinition, DeploymentInstance
+import os
+from pathlib import Path
+
 
 DEPLOY_DEFAULT_TEMPLATE = """apiVersion: openfaas.com/v1
 kind: Function
@@ -67,6 +65,42 @@ def get_instance_from_definition(instance):
 
     return ret
 
+
+def start_job(definition):
+    print("deploying build baseimage job!".format())
+
+    from kubernetes import client, config
+
+    if settings.EXTERNAL_KUBECONF:
+        config.load_kube_config('cluster.conf')
+    else:
+        if 'TELEPRESENCE_ROOT' in os.environ:
+            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+                                                      SERVICE_TOKEN_FILENAME,
+                                                      InClusterConfigLoader)
+
+            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+
+            InClusterConfigLoader(
+                token_filename=token_filename, cert_filename=cert_filename
+            ).load_and_set()
+        else:
+            config.load_incluster_config()
+
+    api = client.BatchV1Api()
+
+    # create the resource
+    api.create_namespaced_job(
+        namespace=settings.NAMESPACE,
+        body=definition,
+    )
+
+    print("Resource created")
+
+
 def build_definition(instance):
     import uuid
     from projects.helpers import get_minio_keys
@@ -86,7 +120,6 @@ def build_definition(instance):
                                  secret_key=decrypted_secret,
                                  s3endpoint='http://{}-minio:9000'.format(instance.project.slug))
     import yaml
-    from projects.jobs import start_job
     job = yaml.safe_load(job)
     start_job(job)
     instance.image = image
