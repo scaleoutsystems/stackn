@@ -3,11 +3,10 @@ import base64
 from .exceptions import ProjectCreationException
 from django.conf import settings
 import requests as r
-import os
 import yaml
-from .models import Environment
-from .jobs import load_definition, start_job
+
 from .tasks import create_keycloak_client_task
+
 import re
 
 import modules.keycloak_lib as keylib
@@ -36,22 +35,14 @@ def create_settings_file(project, username, token):
 
 
 def create_project_resources(project, username, repository=None):
+
     # Create Keycloak client for project with default project role.
     # The creator of the project assumes all roles by default.
-    
     create_keycloak_client_task.delay(project.slug, username.username, [])
 
-    create_environment_image(project, repository)
     create_helm_resources(project, username, repository)
 
     
-
-def create_environment_image(project, repository=None):
-
-    if project.environment:
-        definition = load_definition(project)
-        start_job(definition)
-
 
 def create_helm_resources(project, user, repository=None):
     from rest_framework.authtoken.models import Token
