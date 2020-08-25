@@ -145,7 +145,11 @@ def keycloak_get_clients(kc, payload):
 def keycloak_delete_client(kc, client_id):
     # Get id (not clientId)
     clients = keycloak_get_clients(kc, {'clientId': client_id})
-    client_nid = clients[0]['id']
+    try:
+        client_nid = clients[0]['id']
+    except:
+        print('Cannot find client with clientId: {}'.format(client_id))
+        return False
     # Delete client
     delete_client_url = '{}/admin/realms/{}/clients/{}'.format(kc.admin_url, kc.realm, client_nid)
     res = r.delete(delete_client_url, headers={'Authorization': 'bearer '+kc.token})
@@ -230,7 +234,7 @@ def keycloak_delete_client_scope(kc, scope_id):
     if res:
         return True
     else:
-        print('Failed to delete client scope '+scope_id)
+        print('Failed to delete client scope '.format(scope_id))
         print('Status code: '+str(res.status_code))
         print(res.text)
         return False

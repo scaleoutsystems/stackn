@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.conf import settings
 from kubernetes.client.rest import ApiException
-
+import requests
+import time
 from projects.models import Project
 from .models import Experiment
 from projects.models import Environment
@@ -59,15 +61,32 @@ def details(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     experiment = Experiment.objects.filter(id=id).first()
 
-    from .jobs import get_logs
     try:
-        logs = get_logs(experiment)
+        url = settings.LOKI_SVC+'/loki/api/v1/query_range'
+        query = {
+          'query': '{type="cronjob", project="demo-vqo", app="'+experiment.helmchart.name+'"}',
+          'limit': 50,
+          'start': 0,
+        }
+        res = requests.get(url, params=query)
+        res_json = res.json()['data']['result']
+        logs = []
+        for item in res_json:
+            logline = ''
+            for iline in item['values']:
+                logs.append(iline[1])
+            logs.append('--------------------')
     except ApiException as e:
         print(e)
         return HttpResponseRedirect(
             reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
     return render(request, temp, locals())
+
+# @login_required(login_url='/accounts/login')
+# def settings(request, user, project, id):
+#     a=1
+
 
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):

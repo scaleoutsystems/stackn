@@ -42,7 +42,7 @@
                 <thead>
 
                 <tr>
-                    <!-- <th>#</th> -->
+                    <th></th>
                     <th>Command</th>
                     <th>Schedule</th>
                     <th>Environment</th>
@@ -55,11 +55,11 @@
                 <tbody>
                 {% for experiment in experiments %}
                 <tr>
-                    <!-- <td>
+                    <td>
                         <a href="{% url 'experiments:details' request.user project.slug experiment.id|slugify %}">
-                            {{ experiment.id }}
+                            Logs
                         </a>
-                    </td> -->
+                    </td>
                     <td>{{ experiment.command }}</td>
                     <td>{{ experiment.schedule }}</td>
                     <td>{{ experiment.environment }}</td>
