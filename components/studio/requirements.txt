@@ -34,3 +34,4 @@ django-yamlfield==1.0.3
 Markdown==3.2.1
 mozilla-django-oidc
 pyjwt
+drf-nested-routers

@@ -8,12 +8,16 @@ from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
 import markdown
-from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub #, GrantAccessForm
+import time
+from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub, GrantAccessForm
 from django.db.models import Q
 from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
+import modules.keycloak_lib as kc
+from multiprocessing import Process
+from .tasks import create_keycloak_client_task
 
 logger = logging.getLogger(__name__)
 
@@ -105,16 +109,24 @@ def grant_access_to_project(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
     if request.method == 'POST':
-        print('temp test')
-        form = GrantAccessForm(request.POST)
-        if form.is_valid():
-            selected_users = form.cleaned_data.get('selected_users')
-            project.authorized.set(selected_users)
-            project.save()
+        # form = GrantAccessForm(request.POST)
+        print(request.POST)
+        # if form.is_valid():
+        selected_users = request.POST['selected_users'] #form.cleaned_data.get('selected_users')
+        project.authorized.set(selected_users)
+        project.save()
+
+        if len(selected_users) == 1:
+            selected_users = list(selected_users)
+
+        for selected_user in selected_users:
+            user_tmp = User.objects.get(pk=selected_user)
+            username_tmp = user_tmp.username
+            logger.info('Trying to add user {} to project.'.format(username_tmp))
+            kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
-
 
 @login_required(login_url='/accounts/login')
 def create(request):
@@ -125,18 +137,22 @@ def create(request):
         access = request.POST.get('access', 'org')
         description = request.POST.get('description', '')
         repository = request.POST.get('repository', '')
-        project = Project.objects.create_project(name=name, owner=request.user, description=description,
+        project = Project.objects.create_project(name=name,
+                                                 owner=request.user,
+                                                 description=description,
                                                  repository=repository)
 
         success = True
         try:
             create_project_resources(project, request.user, repository=repository)
+            request.session['oidc_id_token_expiration'] = time.time()-100
+            request.session.save()
         except ProjectCreationException as e:
             print("ERROR: could not create project resources")
             success = False
 
-        if success:
-            project.save()
+        if not success:
+            project.delete()
 
         next_page = request.POST.get('next', '/{}/{}'.format(request.user, project.slug))
 
@@ -147,15 +163,18 @@ def create(request):
 
 @login_required(login_url='/accounts/login')
 def details(request, user, project_slug):
+
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    
     template = 'project.html'
 
     url_domain = sett.DOMAIN
 
     project = None
     message = None
-
+    username = request.user.username
     try:
-        owner = User.objects.filter(username=user).first()
+        owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'No project found'

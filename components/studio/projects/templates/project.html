@@ -1,8 +1,10 @@
+
 {% extends 'baseproject.html' %}
 
 {% load staticfiles %}
 
 {% block content %}
+{% if is_authorized %}
 <div class="col-md-9">
     <div class="d-flex flex-column pt-3 pb-3 mb-5 border-bottom">
         <h3>{{ project.name }}</h3>
@@ -115,4 +117,8 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
+
+
+
