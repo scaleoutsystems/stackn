@@ -38,16 +38,9 @@ def create_settings_file(project, username, token):
 def create_project_resources(project, username, repository=None):
     # Create Keycloak client for project with default project role.
     # The creator of the project assumes all roles by default.
-    print('Creating Keycloak resources.')
-    HOST = settings.DOMAIN
-    print('host: '+HOST)
-    RELEASE_NAME = str(project.slug)
-    print('release: '+RELEASE_NAME)
-    URL = 'https://{}/{}/{}'.format(HOST, username, RELEASE_NAME)
-    print(URL)
     
     create_keycloak_client_task.delay(project.slug, username.username, [])
-    
+
     create_environment_image(project, repository)
     create_helm_resources(project, username, repository)
 
