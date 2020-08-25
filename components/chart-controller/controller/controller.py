@@ -87,7 +87,7 @@ class Controller:
         for key in options:
             args.append('--set')
             # args.append('{}={}'.format(key, options[key]))
-            args.append(key+"="+options[key])
+            args.append(key+"="+options[key].replace(',', '\,'))
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)

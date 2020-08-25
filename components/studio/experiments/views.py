@@ -28,12 +28,19 @@ def run(request, user, project):
 
     deployment = None
     if request.method == "POST":
+        print(request.POST)
         form = ExperimentForm(request.POST)
         if form.is_valid():
             print("valid form! Saving")
-            instance = form.save()
-            from .jobs import run_job
-            run_job(instance)
+            instance = Experiment()
+            instance.username = user
+            instance.schedule = form.cleaned_data['schedule']
+            instance.command = form.cleaned_data['command']
+            # environment = Environment.objects.get(pk=request.POST['environment'])
+            instance.environment = form.cleaned_data['environment']
+            instance.project = project
+            instance.save()
+
             return HttpResponseRedirect(
                 reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
         else:
@@ -42,7 +49,6 @@ def run(request, user, project):
         form = ExperimentForm()
 
     return render(request, temp, locals())
-
 
 @login_required(login_url='/accounts/login')
 def details(request, user, project, id):
@@ -60,3 +66,11 @@ def details(request, user, project, id):
             reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
     return render(request, temp, locals())
+
+@login_required(login_url='/accounts/login')
+def delete(request, user, project, id):
+    temp = 'experiments/index.html'
+    instance = Experiment.objects.get(id=id)
+    instance.helmchart.delete()
+    return HttpResponseRedirect(
+                reverse('experiments:index', kwargs={'user': user, 'project': project}))

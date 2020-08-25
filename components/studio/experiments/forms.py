@@ -5,4 +5,4 @@ from .models import Experiment
 class ExperimentForm(forms.ModelForm):
     class Meta:
         model = Experiment
-        fields = ('command', 'environment', 'project')
+        fields = ('command', 'environment', 'schedule')

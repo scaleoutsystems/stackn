@@ -41,52 +41,52 @@ def get_instance_from_definition(instance):
     return ret
 
 
-def run_job(instance):
-    print("deploying job with {}!".format(instance))
+# def run_job(instance):
+#     print("deploying job with {}!".format(instance))
 
-    from kubernetes import client, config
+    # from kubernetes import client, config
 
-    if settings.EXTERNAL_KUBECONF:
-        config.load_kube_config('cluster.conf')
-    else:
-        if 'TELEPRESENCE_ROOT' in os.environ:
-            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
-                                                      SERVICE_TOKEN_FILENAME,
-                                                      InClusterConfigLoader)
-            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
-                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
-            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
-                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
+    # if settings.EXTERNAL_KUBECONF:
+    #     config.load_kube_config('cluster.conf')
+    # else:
+    #     if 'TELEPRESENCE_ROOT' in os.environ:
+    #         from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
+    #                                                   SERVICE_TOKEN_FILENAME,
+    #                                                   InClusterConfigLoader)
+    #         token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+    #                               ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
+    #         cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
+    #                             ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
 
-            InClusterConfigLoader(
-                token_filename=token_filename, cert_filename=cert_filename
-            ).load_and_set()
-        else:
-            config.load_incluster_config()
+    #         InClusterConfigLoader(
+    #             token_filename=token_filename, cert_filename=cert_filename
+    #         ).load_and_set()
+    #     else:
+    #         config.load_incluster_config()
 
-    api = client.BatchV1Api()
+    # api = client.BatchV1Api()
 
-    yaml_definition = get_instance_from_definition(instance)
+    # yaml_definition = get_instance_from_definition(instance)
 
-    # create the resource
-    api.create_namespaced_job(
-        namespace=settings.NAMESPACE,
-        body=yaml_definition,
-    )
-    print("Resource created")
-
-    # get the resource and print out data
-    print("getting logs:")
-    resource = api.read_namespaced_job(
-        name=str(instance.id),
-        namespace=settings.NAMESPACE,
-    )
-    print("got logs?")
-    # resource = api.list_namespaced_job(
-    #   namespace="stack-fn",
+    # # create the resource
+    # api.create_namespaced_job(
+    #     namespace=settings.NAMESPACE,
+    #     body=yaml_definition,
     # )
-    print("Resources details:")
-    pprint(resource)
+    # print("Resource created")
+
+    # # get the resource and print out data
+    # print("getting logs:")
+    # resource = api.read_namespaced_job(
+    #     name=str(instance.id),
+    #     namespace=settings.NAMESPACE,
+    # )
+    # print("got logs?")
+    # # resource = api.list_namespaced_job(
+    # #   namespace="stack-fn",
+    # # )
+    # print("Resources details:")
+    # pprint(resource)
 
 
 def delete_job(instance):
