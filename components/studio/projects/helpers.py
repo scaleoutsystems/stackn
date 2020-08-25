@@ -3,10 +3,7 @@ import base64
 from .exceptions import ProjectCreationException
 from django.conf import settings
 import requests as r
-import os
 import yaml
-from .models import Environment
-from .jobs import load_definition, start_job
 
 import re
 
@@ -33,7 +30,6 @@ def create_settings_file(project, username, token):
     return yaml.dump(proj_settings)
 
 def create_project_resources(project, username, repository=None):
-    create_environment_image(project, repository)
     create_helm_resources(project, username, repository)
     
     # Create Keycloak client for project with default project role.
@@ -41,13 +37,6 @@ def create_project_resources(project, username, repository=None):
     RELEASE_NAME = str(project.slug)   
     URL = 'https://{}/{}/{}'.format(HOST, username.username, RELEASE_NAME)
     keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username.username)
-
-
-def create_environment_image(project, repository=None):
-
-    if project.environment:
-        definition = load_definition(project)
-        start_job(definition)
 
 
 def create_helm_resources(project, user, repository=None):
