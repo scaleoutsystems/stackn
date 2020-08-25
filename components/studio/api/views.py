@@ -6,11 +6,13 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
+from .APIpermissions import ProjectPermission
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
+import modules.keycloak_lib as keylib
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -18,51 +20,41 @@ from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     DeploymentDefinitionSerializer
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'version', 'project']
+    filterset_fields = ['id','name', 'version']
 
     def get_queryset(self):
         """
         This view should return a list of all the models
         for the currently authenticated user.
         """
-        current_user = self.request.user
-        return Model.objects.filter(project__owner__username=current_user)
+        return Model.objects.filter(project__pk=self.kwargs['project_pk'])
 
+    def destroy(self, request, *args, **kwargs):
+        model = self.get_object()
+        model.delete()
+        return HttpResponse('ok', 200)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def release(self, request):
-        # Could we get the token here for authorization?
-        # We should check that the authenticated user also has
-        # the correct role in Keycloak.
-        project = Project.objects.get(id=request.data['project'])
-        current_user = self.request.user
-        if current_user == project.owner:
-            # project = model.project
+    def create(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+
+        try:
             model_name = request.data['name']
             release_type = request.data['release_type']
             description = request.data['description']
             model_uid = request.data['uid']
-            # project_id = request.data['project']
-            new_model = Model(name=model_name,
-                              release_type=release_type,
-                              description=description,
-                              uid=model_uid,
-                              project=project)
-            new_model.save()
-            return HttpResponse('ok', 200)
+        except:
+            return HttpResponse('Failed to create model.', 400)
 
-
-    def destroy(self, request, *args, **kwargs):
-        model = self.get_object()
-        current_user = self.request.user
-        if current_user == model.project.owner:
-            model.delete()
-            return HttpResponse('ok', 200)
-        else:
-            return HttpResponse('Not Allowed', 400)
+        new_model = Model(name=model_name,
+                          release_type=release_type,
+                          description=description,
+                          uid=model_uid,
+                          project=project)
+        new_model.save()
+        return HttpResponse('ok', 200)
 
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
