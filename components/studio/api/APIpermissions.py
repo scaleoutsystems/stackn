@@ -29,5 +29,3 @@ class ProjectPermission(BasePermission):
 
         print('Is authorized: {}'.format(is_authorized))
         return is_authorized
-
-
