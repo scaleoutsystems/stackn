@@ -16,7 +16,7 @@ def refresh_charts(branch='master'):
 
     status = subprocess.run('rm -rf charts-{}'.format(branch).split(' '), cwd=cwd)
     status = subprocess.run('wget -O {}.zip {}'.format(branch, charts_url).split(' '), cwd=cwd)
-    status = subprocess.run('unzip {}.zip'.format(branch).split(' '),cwd=cwd)
+    status = subprocess.run('unzip {}.zip'.format(branch.replace('/', '-')).split(' '),cwd=cwd)
 
 
 class Controller:

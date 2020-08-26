@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
+from django.conf import settings
 from deployments.models import HelmResource
 from django.dispatch import receiver
 import uuid
@@ -27,6 +28,7 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     parameters = {
         "release": release_name,
         "chart": "cronjob",
+        "namespace": settings.NAMESPACE,
         "project.slug": instance.project.slug,
         "image": instance.environment.image,
         "command": str(instance.command.split(' ')),

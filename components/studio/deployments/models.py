@@ -170,10 +170,11 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
     
     # Create Keycloak client corresponding to this deployment
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username)
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
+                  'namespace': settings.NAMESPACE,
                   'appname': instance.appname,
                   'replicas': '1',
                   'global.domain': global_domain,
