@@ -63,8 +63,16 @@
                     <td>{{ experiment.command }}</td>
                     <td>{{ experiment.schedule }}</td>
                     <td>{{ experiment.environment }}</td>
+                    {% if user_permissions.update %}
                     <td><a href="">Settings</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    {% if user_permissions.delete %}
                     <td><a href="{% url 'experiments:delete' request.user project.slug experiment.id|slugify %}">Delete</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                     <td>{{ experiment.created_at }}</td>
                     <td>{{ experiment.updated_at }}</td>
                 </tr>

@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.conf import settings
 from kubernetes.client.rest import ApiException
@@ -10,10 +10,16 @@ from .models import Experiment
 from projects.models import Environment
 from .forms import ExperimentForm
 from django.urls import reverse
+import modules.keycloak_lib as keylib
+from .experimentsauth import get_permissions
 
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['view']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/index.html'
 
     project = Project.objects.filter(slug=project).first()
@@ -22,9 +28,15 @@ def index(request, user, project):
 
     return render(request, temp, locals())
 
+        
+
 
 @login_required(login_url='/accounts/login')
 def run(request, user, project):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['create']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/run.html'
     project = Project.objects.filter(slug=project).first()
 
@@ -56,6 +68,10 @@ def run(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def details(request, user, project, id):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['view']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/details.html'
 
     project = Project.objects.filter(slug=project).first()
@@ -83,13 +99,12 @@ def details(request, user, project, id):
 
     return render(request, temp, locals())
 
-# @login_required(login_url='/accounts/login')
-# def settings(request, user, project, id):
-#     a=1
-
 
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['delete']:
+        return HttpResponse('Not authorized', status=401)
     temp = 'experiments/index.html'
     instance = Experiment.objects.get(id=id)
     instance.helmchart.delete()

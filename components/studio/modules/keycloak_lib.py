@@ -87,13 +87,12 @@ def keycloak_init():
         print('Failed to init Keycloak auth')
         return False
 
-def keycloak_get_detailed_user_info(request):
+def keycloak_get_detailed_user_info(request, aud='account'):
     if not ('oidc_access_token' in request.session):
         logger.warn('No access token in request session -- unable to authorize user.')
         return []
 
     access_token = request.session['oidc_access_token']
-
     user_json = []
     discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
     res = r.get(discovery_url)
@@ -104,18 +103,34 @@ def keycloak_get_detailed_user_info(request):
         print('Failed to discover realm settings: '+settings.KC_REALM)
         return None
     try:
-        user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience='account')
+        user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
     except:
         logger.info('Failed to authenticate user.')
     return user_json
 
-def keycloak_verify_user_role(request, resource, roles):
+def keycloak_get_user_roles(request, resource, aud='account'):
     ''' 
     Checks if user has on of the roles in 'role' for resource given by 'resource'
     Variable 'role' has to be iterable.
     '''
-    user_info = keycloak_get_detailed_user_info(request)
-    print(user_info)
+    user_info = keycloak_get_detailed_user_info(request, aud)
+    if user_info:
+        try:
+            resource_info = user_info['resource_access'][resource]
+        except:
+            logger.info('User not authorized to access resource {}'.format(resource))
+            return False
+
+        return resource_info['roles']
+
+    return []
+
+def keycloak_verify_user_role(request, resource, roles, aud='account'):
+    ''' 
+    Checks if user has on of the roles in 'role' for resource given by 'resource'
+    Variable 'role' has to be iterable.
+    '''
+    user_info = keycloak_get_detailed_user_info(request, aud)
     if user_info:
         try:
             resource_info = user_info['resource_access'][resource]
