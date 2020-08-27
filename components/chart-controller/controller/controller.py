@@ -76,7 +76,6 @@ class Controller:
         else:
             refresh_charts(self.branch)
             fname = self.branch.replace('/', '-')
-            print(fname)
             chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
