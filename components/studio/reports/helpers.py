@@ -6,7 +6,7 @@ from .models import Report
 import json
 import subprocess
 from studio.minio import MinioRepository, ResponseError
-from projects.models import Project
+from projects.models import Project, ProjectLog
 import logging
 from projects.helpers import get_minio_keys
 
@@ -44,6 +44,11 @@ def upload_report_json(report_id, client=None):
             file_stat = os.stat(filename)
             client.put_object('reports', filename.replace('reports/', ''), file_data,
                               file_stat.st_size, content_type='application/json')
+
+            l = ProjectLog(project=project, module='RE', headline='Metrics',
+                           description='JSON file {filename} has been uploaded to MinIO'.format(
+                               filename=filename.replace('reports/', '')))
+            l.save()
 
     except ResponseError as err:
         print(err)

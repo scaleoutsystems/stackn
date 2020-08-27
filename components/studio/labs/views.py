@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
-from projects.models import Project
+from projects.models import Project, ProjectLog
 from .models import Session
 from projects.models import Environment, Flavor
 from django.contrib.auth.decorators import login_required
@@ -103,6 +103,11 @@ def run(request, user, project):
                 print("saving session!")
                 project.save()
                 session.save()
+
+                l = ProjectLog(project=project, module='LA', headline='Lab Session',
+                               description='A new Lab Session {name} has been created'.format(name=name))
+                l.save()
+
                 return HttpResponseRedirect(
                     reverse('labs:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
@@ -118,6 +123,11 @@ def delete(request, user, project, id):
     if session:
         from .helpers import delete_session_resources
         delete_session_resources(session)
+
+        l = ProjectLog(project=project, module='LA', headline='Lab Session',
+                       description='Lab Session {name} has been removed'.format(name=session.name))
+        l.save()
+
         session.delete()
 
     return HttpResponseRedirect(

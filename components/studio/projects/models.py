@@ -93,3 +93,21 @@ class Project(models.Model):
     environment = models.ForeignKey('projects.Environment', on_delete=models.DO_NOTHING, default=DEFAULT_ENVIRONMENT_ID)
     clone_url = models.CharField(max_length=512, null=True, blank=True)
 
+
+class ProjectLog(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    MODULE_CHOICES = [
+        ('DE', 'deployments'),
+        ('LA', 'labs'),
+        ('MO', 'models'),
+        ('PR', 'projects'),
+        ('RE', 'reports'),
+        ('UN', 'undefined'),
+    ]
+    module = models.CharField(max_length=2, choices=MODULE_CHOICES, default='UN')
+
+    headline = models.CharField(max_length=256)
+    description = models.CharField(max_length=512)
+    created_at = models.DateTimeField(auto_now_add=True)
+
