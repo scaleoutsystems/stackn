@@ -1,5 +1,5 @@
 from django.shortcuts import render, reverse
-from .models import Project, Environment
+from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from .exceptions import ProjectCreationException
@@ -9,15 +9,14 @@ from django.conf import settings as sett
 import logging
 import markdown
 import time
-from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub, GrantAccessForm
+from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
 from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as kc
-from multiprocessing import Process
-from .tasks import create_keycloak_client_task
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +52,11 @@ def settings(request, user, project_slug):
             new_owner = User.objects.filter(pk=new_owner_id).first()
             project.owner = new_owner
             project.save()
+
+            l = ProjectLog(project=project, module='PR', headline='Project owner',
+                           description='Transferred Project ownership to {owner}'.format(owner=project.owner.username))
+            l.save()
+
             return HttpResponseRedirect('/projects/')
     else:
         form = TransferProjectOwnershipForm()
@@ -83,6 +87,11 @@ def change_environment(request, user, project_slug):
             if environment:
                 project.environment = environment
                 project.save()
+
+                l = ProjectLog(project=project, module='PR', headline='New environment',
+                               description='Project environment has been changed to {name}'. project.environment.name)
+                l.save()
+
         # TODO fix the create_environment_image creation
         #from .helpers import create_environment_image
         #create_environment_image(project)
@@ -98,6 +107,10 @@ def change_description(request, user, project_slug):
         if description is not '':
             project.description = description
             project.save()
+
+            l = ProjectLog(project=project, module='PR', headline='Project description',
+                           description='Changed description for project')
+            l.save()
         # TODO fix the create_environment_image creation
 
     return HttpResponseRedirect(
@@ -115,6 +128,11 @@ def grant_access_to_project(request, user, project_slug):
         selected_users = request.POST['selected_users'] #form.cleaned_data.get('selected_users')
         project.authorized.set(selected_users)
         project.save()
+
+        l = ProjectLog(project=project, module='PR', headline='New members',
+                       description='{number} new members have been added to the Project'.format(
+                           number=len(selected_users)))
+        l.save()
 
         if len(selected_users) == 1:
             selected_users = list(selected_users)
@@ -153,6 +171,14 @@ def create(request):
 
         if not success:
             project.delete()
+        else:
+            l1 = ProjectLog(project=project, module='PR', headline='Project created',
+                            description='Created project {}'.format(project.name))
+            l1.save()
+
+            l2 = ProjectLog(project=project, module='PR', headline='Getting started',
+                            description='Getting started with project {}'.format(project.name))
+            l2.save()
 
         next_page = request.POST.get('next', '/{}/{}'.format(request.user, project.slug))
 
@@ -193,6 +219,8 @@ def details(request, user, project_slug):
                 readme = md.convert(payload['readme'])
     except Exception as e:
         logger.error("Failed to get response from {} with error: {}".format(url, e))
+
+    project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
 
     return render(request, template, locals())
 
@@ -251,6 +279,11 @@ def publish_project(request, user, project_slug):
                         if clone_url:
                             project.clone_url = clone_url
                             project.save()
+
+                            l = ProjectLog(project=project, module='PR', headline='GitHub repository',
+                                           description='Published project files to a GitHub repository {url}'.format(
+                                               url=project.clone_url))
+                            l.save()
             except Exception as e:
                 logger.error("Failed to get response from {} with error: {}".format(url, e))
 
@@ -258,11 +291,20 @@ def publish_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
 
-# def auth(request):
-#     print(dir(request))
-#     print(request.user)
-#     if request.user.is_authenticated:
-#         return HttpResponse('Ok', status=200)
-#         # return HttpResponse(status=200)
-#     else:
-#         return HttpResponse(status=403)
+@login_required(login_url='/accounts/login')
+def load_project_activity(request, user, project_slug):
+    template = 'project_activity.html'
+
+    time_period = request.GET.get('period')
+    if time_period == 'week':
+        last_week = datetime.today() - timedelta(days=7)
+        project_logs = ProjectLog.objects.filter(created_at__gte=last_week).order_by('-created_at')
+    elif time_period == 'month':
+        last_month = datetime.today() - timedelta(days=30)
+        project_logs = ProjectLog.objects.filter(created_at__gte=last_month).order_by('-created_at')
+    else:
+        project_logs = ProjectLog.objects.all().order_by('-created_at')
+
+    return render(request, template, {'project_logs': project_logs})
+
+
