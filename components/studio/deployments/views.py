@@ -88,6 +88,10 @@ def serve_settings(request, id, project):
         form = SettingsForm(request.POST)
         if form.is_valid():
             params['replicas'] = request.POST.get('replicas', 1)
+            params['resources.limits.cpu'] = request.POST.get('limits_cpu', 1000)
+            params['resources.limits.memory'] = request.POST.get('limits_memory', 2048)
+            params['resources.requests.cpu'] = request.POST.get('requests_cpu', 300)
+            params['resources.requests.memory'] = request.POST.get('requests_memory', 1024)
             print(params)
             deployment.helmchart.params = params
             deployment.helmchart.save()
