@@ -1,17 +1,25 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
+from django.conf import settings
 from kubernetes.client.rest import ApiException
-
+import requests
+import time
 from projects.models import Project
 from .models import Experiment
 from projects.models import Environment
 from .forms import ExperimentForm
 from django.urls import reverse
+import modules.keycloak_lib as keylib
+from .experimentsauth import get_permissions
 
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['view']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/index.html'
 
     project = Project.objects.filter(slug=project).first()
@@ -20,9 +28,15 @@ def index(request, user, project):
 
     return render(request, temp, locals())
 
+        
+
 
 @login_required(login_url='/accounts/login')
 def run(request, user, project):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['create']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/run.html'
     project = Project.objects.filter(slug=project).first()
 
@@ -31,9 +45,18 @@ def run(request, user, project):
         form = ExperimentForm(request.POST)
         if form.is_valid():
             print("valid form! Saving")
-            instance = form.save()
-            from .jobs import run_job
-            run_job(instance)
+            instance = Experiment()
+            instance.username = user
+            if not form.cleaned_data['schedule']:
+                instance.schedule = "None"
+            else:
+                instance.schedule = form.cleaned_data['schedule']
+            instance.command = form.cleaned_data['command']
+            # environment = Environment.objects.get(pk=request.POST['environment'])
+            instance.environment = form.cleaned_data['environment']
+            instance.project = project
+            instance.save()
+
             return HttpResponseRedirect(
                 reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
         else:
@@ -43,20 +66,47 @@ def run(request, user, project):
 
     return render(request, temp, locals())
 
-
 @login_required(login_url='/accounts/login')
 def details(request, user, project, id):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['view']:
+        return HttpResponse('Not authorized', status=401)
+
     temp = 'experiments/details.html'
 
     project = Project.objects.filter(slug=project).first()
     experiment = Experiment.objects.filter(id=id).first()
 
-    from .jobs import get_logs
     try:
-        logs = get_logs(experiment)
+        url = settings.LOKI_SVC+'/loki/api/v1/query_range'
+        query = {
+          'query': '{type="cronjob", project="demo-vqo", app="'+experiment.helmchart.name+'"}',
+          'limit': 50,
+          'start': 0,
+        }
+        res = requests.get(url, params=query)
+        res_json = res.json()['data']['result']
+        logs = []
+        for item in res_json:
+            logline = ''
+            for iline in item['values']:
+                logs.append(iline[1])
+            logs.append('--------------------')
     except ApiException as e:
         print(e)
         return HttpResponseRedirect(
             reverse('experiments:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
     return render(request, temp, locals())
+
+
+@login_required(login_url='/accounts/login')
+def delete(request, user, project, id):
+    user_permissions = get_permissions(request, project)
+    if not user_permissions['delete']:
+        return HttpResponse('Not authorized', status=401)
+    temp = 'experiments/index.html'
+    instance = Experiment.objects.get(id=id)
+    instance.helmchart.delete()
+    return HttpResponseRedirect(
+                reverse('experiments:index', kwargs={'user': user, 'project': project}))

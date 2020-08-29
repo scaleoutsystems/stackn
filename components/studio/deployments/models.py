@@ -25,6 +25,7 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     if update:
         action = 'upgrade'
     url = settings.CHART_CONTROLLER_URL + '/'+action
+    print(instance.params)
     retval = requests.get(url, instance.params)
     if retval:
         print('Resource: '+instance.name)
@@ -32,6 +33,8 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
         instance.status = 'OK'
     else:
         print('Failed to deploy resource: '+instance.name)
+        print('Reason: {}'.format(retval.text))
+        print('Status code: {}'.format(retval.status_code))
         instance.status = 'Failed'
 
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
@@ -167,10 +170,11 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
     
     # Create Keycloak client corresponding to this deployment
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username)
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
+                  'namespace': settings.NAMESPACE,
                   'appname': instance.appname,
                   'replicas': '1',
                   'global.domain': global_domain,

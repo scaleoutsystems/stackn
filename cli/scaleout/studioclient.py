@@ -332,6 +332,7 @@ class StudioClient():
                 return []
 
         url = self.endpoints[resource]
+
         r = requests.get(url, headers=self.auth_headers)
         if not _check_status(r, error_msg="Failed to list {}.".format(resource)):
             return False

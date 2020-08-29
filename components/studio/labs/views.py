@@ -66,18 +66,15 @@ def run(request, user, project):
 
             settings_file = JSONRenderer().render(settings_file.data)
             settings_file = settings_file.decode('utf-8')
-            print(settings_file)
-            # settings_file = yaml.load(settings_file, Loader=yaml.FullLoader)
+
             settings_file = json.loads(settings_file)
             settings_file = yaml.dump(settings_file)
-            print(settings_file)
-            # settings_file = json.dumps(json.loads(settings_file))
 
-            # settings_file = yaml.dump(settings_file)
             user_config_file = create_user_settings(user)
             user_config_file = yaml.dump(json.loads(user_config_file))
 
-            prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
+            prefs = {'namespace': settings.NAMESPACE,
+                     'labs.resources.requests.cpu': str(flavor.cpu),
                      'labs.resources.limits.cpu': str(flavor.cpu),
                      'labs.resources.requests.memory': str(flavor.mem),
                      'labs.resources.limits.memory': str(flavor.mem),

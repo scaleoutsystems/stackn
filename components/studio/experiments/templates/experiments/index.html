@@ -21,7 +21,7 @@
                        placeholder="Enter command to run">
                 <small id="runExperiment" class="form-text text-muted">Enter a command to run</small>
             </div>
-            <input type="hidden" value="{{ project.id }}" name="project">
+            
             <div class="form-group">
                 <select name="environment" class="form-control">
                     {% for environment in environments %}
@@ -29,6 +29,7 @@
                     {% endfor %}
                 </select>
             </div>
+            <input type="text" value="" name="schedule" placeholder="Enter cron schedule">
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
@@ -41,9 +42,12 @@
                 <thead>
 
                 <tr>
-                    <th>#</th>
+                    <th></th>
                     <th>Command</th>
+                    <th>Schedule</th>
                     <th>Environment</th>
+                    <th></th>
+                    <th></th>
                     <th>Created</th>
                     <th>Updated</th>
                 </tr>
@@ -53,11 +57,22 @@
                 <tr>
                     <td>
                         <a href="{% url 'experiments:details' request.user project.slug experiment.id|slugify %}">
-                            {{ experiment.id }}
+                            Logs
                         </a>
                     </td>
                     <td>{{ experiment.command }}</td>
+                    <td>{{ experiment.schedule }}</td>
                     <td>{{ experiment.environment }}</td>
+                    {% if user_permissions.update %}
+                    <td><a href="">Settings</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    {% if user_permissions.delete %}
+                    <td><a href="{% url 'experiments:delete' request.user project.slug experiment.id|slugify %}">Delete</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                     <td>{{ experiment.created_at }}</td>
                     <td>{{ experiment.updated_at }}</td>
                 </tr>
