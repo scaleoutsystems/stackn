@@ -87,38 +87,45 @@
             {% endif %}
         </div>
         <div class="col-sm-6">
-            <h4>
-                Project activity
-                <button class="btn btn-light dropdown-toggle" type="button" id="project_activity" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" style="margin-bottom: 4px;">
-                    This week
-                </button>
-            </h4>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="timeline">
-                            <li>
-                                <a target="_blank" href="#">Getting started</a>
-                                <a href="#" class="float-right">{{ project.created_at }}</a>
-                                <p>Getting started with project {{ project.name }}</p>
-                            </li>
-                            <li>
-                                <a target="_blank" href="{% url 'projects:details' request.user project.slug %}">
-                                    Project created
-                                </a>
-                                <a href="#" class="float-right">{{ project.created_at }}</a>
-                                <p>Created project {{ project.name }}</p>
-                            </li>
-                        </ul>
-                    </div>
+            <form method="POST" id="project_activity"
+                  project-activity-url="{% url 'projects:project_activity' request.user project.slug %}" novalidate>
+                {% csrf_token %}
+
+                <h4 class="d-flex justify-content-start">
+                    <span style="padding-top: 3px; padding-right: 15px;">
+                        Project activity
+                    </span>
+                    <select id="id_time_period" class="form-control" style="width: 30%;">
+                        <option value="always">--</option>
+                        <option value="always">Always</option>
+                        <option value="month">Last month</option>
+                        <option value="week">Last week</option>
+                    </select>
+                </h4>
+                <div id="project_logs">
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 {% endif %}
 {% endblock %}
 
+{% block extrascripts %}
+<script>
+    $("#id_time_period").change(function () {
+      var url = $("#project_activity").attr("project-activity-url");
+      var period = $(this).val();
 
-
+      $.ajax({
+        url: url,
+        data: {
+          'period': period
+        },
+        success: function (data) {
+          $("#project_logs").html(data);
+        }
+      });
+    });
+</script>
+{% endblock %}
