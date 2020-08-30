@@ -9,16 +9,59 @@
             <h2>Settings &mdash; {{ deployment.model.name }}:{{ deployment.model.tag }}</h2>
         </div>
 
-        <form enctype="multipart/form-data" action="{% url 'deployments:serve_settings' project.slug deployment.id %}" method="POST">
-          {% csrf_token %}
-          <div class="form-group">
-            {{ form }}
-          </div>
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">Save</button>
-          </div>
-        </form>
+        <form style="width: 800px;" enctype="multipart/form-data"
+              action="{% url 'deployments:serve_settings' project.slug deployment.id %}" method="POST">
+            {% csrf_token %}
 
-       
+            <div class="form-group row">
+                <label for="id_replicas" class="col-sm-2 col-form-label">Replicas:</label>
+                <div class="col-sm-3">
+                    <input class="form-control" type="number" name="replicas" required="" id="id_replicas"
+                           placeholder="1">
+                </div>
+            </div>
+
+            <fieldset class="form-group fieldset-custom">
+                <legend class="fieldset-legend-custom">Limits</legend>
+                <div class="form-group row">
+                    <label for="id_limits_cpu" class="col-sm-2 col-form-label">CPU:</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" type="number" name="limits_cpu" required="" id="id_limits_cpu"
+                               placeholder="m">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="id_limits_memory" class="col-sm-2 col-form-label">Memory:</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" type="number" name="limits_memory" required="" id="id_limits_memory"
+                               placeholder="Mi">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-group fieldset-custom">
+                <legend class="fieldset-legend-custom">Requests</legend>
+                <div class="form-group row">
+                    <label for="id_requests_cpu" class="col-sm-2 col-form-label">CPU:</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" type="number" name="requests_cpu" required="" id="id_requests_cpu"
+                               placeholder="m">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="id_requests_memory" class="col-sm-2 col-form-label">Memory:</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" type="number" name="requests_memory" required=""
+                               id="id_requests_memory" placeholder="Mi">
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
     </div>
 {% endblock %}
