@@ -1,5 +1,4 @@
 # Byte-compiled / optimized / DLL files
-migrations/
 .idea/
 .DS_Store
 __pycache__/
