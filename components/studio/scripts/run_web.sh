@@ -15,7 +15,6 @@ cd ..
 [ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
 echo "Installing all migrations"
-python3 manage.py makemigrations
 python3 manage.py migrate
 
 echo "loading seed data..."
