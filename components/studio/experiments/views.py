@@ -12,11 +12,15 @@ from .forms import ExperimentForm
 from django.urls import reverse
 import modules.keycloak_lib as keylib
 from .experimentsauth import get_permissions
+import logging
 
+logger = logging.getLogger(__name__)
 
 @login_required(login_url='/accounts/login')
 def index(request, user, project):
+    print('User: {}'.format(user))
     user_permissions = get_permissions(request, project)
+    logger.info(user_permissions)
     if not user_permissions['view']:
         return HttpResponse('Not authorized', status=401)
 

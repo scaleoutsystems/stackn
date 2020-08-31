@@ -2,6 +2,7 @@ from django.conf import settings
 import requests as r
 import logging
 import jwt
+import time
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -87,7 +88,7 @@ def keycloak_init():
         print('Failed to init Keycloak auth')
         return False
 
-def keycloak_get_detailed_user_info(request, aud='account'):
+def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expired=True):
     if not ('oidc_access_token' in request.session):
         logger.warn('No access token in request session -- unable to authorize user.')
         return []
@@ -103,9 +104,35 @@ def keycloak_get_detailed_user_info(request, aud='account'):
         print('Failed to discover realm settings: '+settings.KC_REALM)
         return None
     try:
+        print('Decoding user token: {}'.format(request.user))
         user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
-    except:
-        logger.info('Failed to authenticate user.')
+        print('Successfully decoded token.')
+        print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
+        print('Time now: {}'.format(time.time()))
+        time_left = (request.session['oidc_id_token_expiration']-time.time())/60
+        print(time_left)
+        print(request.session.keys())
+        logger.debug(user_json)
+    except jwt.ExpiredSignatureError:
+        print('Token has expired.')
+        print('Attempting renewal.')
+        if renew_token_if_expired:
+            kc = keycloak_init()
+            token, refresh_token, token_url, public_key = keycloak_token_exchange_studio(kc, request.user.username)
+            request.session['oidc_access_token'] = token
+            request.session.save()
+            return keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expired=False)
+
+    except Exception as err:
+        print('Failed to authenticate user.')
+        print('Reason: ')
+        print(err)
+        print(request.session.keys())
+        print(request.session['oidc_id_token_expiration'])
+        print(request.session['oidc_id_token'])
+        print(time.time())
+
+        
     return user_json
 
 def keycloak_get_user_roles(request, resource, aud='account'):
