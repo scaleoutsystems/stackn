@@ -14,18 +14,10 @@ cd ..
 # If we have set a local, custom settings.py, then use that.
 [ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
-echo "deleting all existing migrations..."
-find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-find . -path "*/migrations/*.pyc"  -delete
-echo "done!"
 echo "Installing all migrations"
-python3 manage.py makemigrations auth
-python3 manage.py migrate
 python3 manage.py makemigrations
-python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows
 python3 manage.py migrate
-python3 manage.py makemigrations ingress datasets deployments experiments files labs models projects reports workflows
-python3 manage.py migrate
+
 echo "loading seed data..."
 python3 manage.py loaddata projects/fixtures/fixtures.json
 python3 manage.py loaddata projects/fixtures/data.json
