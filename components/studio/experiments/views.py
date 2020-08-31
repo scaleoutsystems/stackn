@@ -27,6 +27,7 @@ def index(request, user, project):
     temp = 'experiments/index.html'
 
     project = Project.objects.filter(slug=project).first()
+    print('Project: '+project.slug)
     experiments = Experiment.objects.filter(project=project)
     environments = Environment.objects.all()
 
@@ -43,7 +44,6 @@ def run(request, user, project):
 
     temp = 'experiments/run.html'
     project = Project.objects.filter(slug=project).first()
-
     deployment = None
     if request.method == "POST":
         form = ExperimentForm(request.POST)
@@ -84,7 +84,7 @@ def details(request, user, project, id):
     try:
         url = settings.LOKI_SVC+'/loki/api/v1/query_range'
         query = {
-          'query': '{type="cronjob", project="demo-vqo", app="'+experiment.helmchart.name+'"}',
+          'query': '{type="cronjob", project="'+project.slug+'", app="'+experiment.helmchart.name+'"}',
           'limit': 50,
           'start': 0,
         }
