@@ -17,36 +17,36 @@ def create_user_settings(user):
     user_settings['studio_url'] = 'https://'+settings.DOMAIN
     return json.dumps(user_settings)
 
-def create_session_resources(request, user, session, prefs, project):
+# def create_session_resources(request, user, session, prefs, project):
 
-    print("1; going for the dispatch!")
+#     print("1; going for the dispatch!")
 
-    HOST = settings.DOMAIN
-    RELEASE_NAME = str(session.slug)
+#     HOST = settings.DOMAIN
+#     RELEASE_NAME = str(session.slug)
     
-    URL = 'https://'+RELEASE_NAME+'.'+HOST
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
+#     URL = 'https://'+RELEASE_NAME+'.'+HOST
+#     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
 
-    parameters = {'release': str(session.slug),
-                  'chart': session.chart,
-                  'global.domain': settings.DOMAIN,
-                  'project.name': project.slug,
-                  'gatekeeper.realm': settings.KC_REALM,
-                  'gatekeeper.client_secret': client_secret,
-                  'gatekeeper.client_id': client_id,
-                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH
-                  }
-    parameters.update(prefs)
+#     parameters = {'release': str(session.slug),
+#                   'chart': session.chart,
+#                   'global.domain': settings.DOMAIN,
+#                   'project.name': project.slug,
+#                   'gatekeeper.realm': settings.KC_REALM,
+#                   'gatekeeper.client_secret': client_secret,
+#                   'gatekeeper.client_id': client_id,
+#                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH
+#                   }
+#     parameters.update(prefs)
 
-    url = settings.CHART_CONTROLLER_URL + '/deploy'
+#     url = settings.CHART_CONTROLLER_URL + '/deploy'
 
-    retval = r.get(url, parameters)
-    print("CREATE_SESSION:helm chart creator returned {}".format(retval))
+#     retval = r.get(url, parameters)
+#     print("CREATE_SESSION:helm chart creator returned {}".format(retval))
 
-    if retval.status_code >= 200 or retval.status_code < 205:
-        return True
+#     if retval.status_code >= 200 or retval.status_code < 205:
+#         return True
 
-    return False
+#     return False
 
 
 def delete_session_resources(session):

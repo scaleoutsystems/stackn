@@ -10,29 +10,81 @@
         <h2>Monitor</h2>
     </div>
     <div>
-      
-      <h3>Total requests</h3>
-      CPU:<br>
-      Memory:
-      
-      <h3>Lab sessions</h3>
-        
-        <h4>Resources</h4>
-          <div>
-            <p class="mb-0">
-              Labs requests CPU: {{ labs_cpu_requests }} cores<br>
-              Labs requests memory: {{ labs_memory_requests }} Gi <br>
-            </p>
-            <div style="height:250; width:400">
-              <canvas id="labsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'lab' %}"></canvas>
-            </div>
-            
-          </div>
+      <h3>Project Quota</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Limits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Total</td>
+            <td>CPU</td>
+            <td>100 cores</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>100 Gi</td>
+          </tr>
+        </tbody>
+      </table>
 
-      <h3>Deployments</h3>
-      <div style="height:250; width:400">
-        <canvas id="deploymentsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'deployment' %}"></canvas>
-      </div>
+
+      <h3>Project Usage</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Requests</th>
+            <th>Limits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Labs</td>
+            <td>CPU</td>
+            <td>{{ resource_status.lab.requests.cpu_cores }}</td>
+            <td>{{ resource_status.lab.limits.cpu_cores }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>{{ resource_status.lab.requests.memory_bytes }} Gi</td>
+            <td>{{ resource_status.lab.limits.memory_bytes }} Gi</td>
+          </tr>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Deployments</td>
+            <td>CPU</td>
+            <td>{{ resource_status.deployment.requests.cpu_cores }}</td>
+            <td>{{ resource_status.deployment.limits.cpu_cores }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td></td>
+            <td> Gi</td>
+          </tr>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Total</td>
+            <td>CPU</td>
+            <td></td>
+            <td>{{ total_cpu }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td></td>
+            <td>{{ total_mem }} Gi</td>
+          </tr>
+        </tbody>
+      </table>
+      
+            <!-- <div style="height:250; width:400">
+              <canvas id="labsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'lab' %}"></canvas>
+            </div> -->
+            
+          
     </div>
 </div>
 <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
