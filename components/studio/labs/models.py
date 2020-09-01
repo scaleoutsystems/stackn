@@ -76,10 +76,6 @@ class Session(models.Model):
     flavor_slug = models.CharField(max_length=512)
     environment_slug = models.CharField(max_length=512)
 
-    # session_key = models.CharField(max_length=512)
-    # session_secret = models.CharField(max_length=512)
-    settings = models.TextField()
-    # chart = models.CharField(max_length=512)
     helm_repo = models.CharField(max_length=1024, null=True, blank=True)
 
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
@@ -106,13 +102,13 @@ def pre_save_labs(sender, instance, using, **kwargs):
     RELEASE_NAME = str(instance.slug)
     HOST = settings.DOMAIN
     URL = 'https://'+RELEASE_NAME+'.'+HOST
-    user = instance.lab_session_owner
+    user = instance.lab_session_owner.username
     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
     
     instance.keycloak_client_id = client_id
 
     parameters = {'release': RELEASE_NAME,
-                  'chart': instance.chart,
+                  'chart': 'lab',
                   'global.domain': settings.DOMAIN,
                   'project.name': instance.project.slug,
                   'gatekeeper.realm': settings.KC_REALM,
@@ -164,7 +160,6 @@ def pre_save_labs(sender, instance, using, **kwargs):
               }
     
     parameters.update(prefs)
-    instance.settings = parameters
 
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
