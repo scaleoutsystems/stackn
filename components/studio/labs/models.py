@@ -106,11 +106,13 @@ def pre_save_labs(sender, instance, using, **kwargs):
     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
     
     instance.keycloak_client_id = client_id
+    instance.appname = '{}-{}-lab'.format(instance.slug, instance.project.slug)
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'lab',
                   'global.domain': settings.DOMAIN,
                   'project.name': instance.project.slug,
+                  'appname': instance.appname,
                   'gatekeeper.realm': settings.KC_REALM,
                   'gatekeeper.client_secret': client_secret,
                   'gatekeeper.client_id': client_id,

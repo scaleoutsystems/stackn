@@ -98,17 +98,18 @@ def get_labs_cpu_requests(project_slug):
         return num_cpus
     return 0
 
-def get_resource(project_slug, resource_type, q_type, mem_or_cpu):
-    query = 'sum(kube_pod_container_resource_'+q_type+'_'+mem_or_cpu+' * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="'+resource_type+'"})'
-    print(query)
+def get_resource(project_slug, resource_type, q_type, mem_or_cpu, app_name=[]):
+    query = 'sum(kube_pod_container_resource_'+q_type+'_'+mem_or_cpu+' * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="'+resource_type+'"'
+    if app_name:
+        query += ', label_app="'+app_name+'"})'
+    else:
+        query += '})'
     response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query})
     result = response.json()['data']['result']
     if result:
         res = result[0]['value'][1]
-        # if mem_or_cpu == 'memory_bytes':
-        #     res = "{:.2f}".format(float(res)/1e9*0.931323)
         return res
-    return 0
+    return '0.0'
 
 def get_all():
     query = 'kube_pod_container_resource_limits_memory_bytes * on(pod) group_left kube_pod_labels{label_type="lab", label_project="stochss-dev-tiz"}'

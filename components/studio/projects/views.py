@@ -17,6 +17,7 @@ import base64
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
+from modules.project_auth import get_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ def index(request):
 
 @login_required(login_url='/accounts/login')
 def settings(request, user, project_slug):
+    user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
+    print(user_permissions)
     template = 'settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
