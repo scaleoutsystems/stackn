@@ -104,14 +104,14 @@ def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expir
         print('Failed to discover realm settings: '+settings.KC_REALM)
         return None
     try:
-        print('Decoding user token: {}'.format(request.user))
+        # print('Decoding user token: {}'.format(request.user))
         user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
-        print('Successfully decoded token.')
-        print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
-        print('Time now: {}'.format(time.time()))
-        time_left = (request.session['oidc_id_token_expiration']-time.time())/60
-        print(time_left)
-        print(request.session.keys())
+        # print('Successfully decoded token.')
+        # print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
+        # print('Time now: {}'.format(time.time()))
+        # time_left = (request.session['oidc_id_token_expiration']-time.time())/60
+        # print(time_left)
+        # print(request.session.keys())
         logger.debug(user_json)
     except jwt.ExpiredSignatureError:
         print('Token has expired.')
