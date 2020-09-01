@@ -82,7 +82,7 @@ def change_environment(request, user, project_slug):
 
     if request.method == 'POST':
         environment_slug = request.POST.get('environment', '')
-        if environment_slug is not '':
+        if environment_slug != '':
             environment = Environment.objects.filter(slug=environment_slug).first()
             if environment:
                 project.environment = environment
@@ -104,7 +104,7 @@ def change_description(request, user, project_slug):
 
     if request.method == 'POST':
         description = request.POST.get('description', '')
-        if description is not '':
+        if description != '':
             project.description = description
             project.save()
 
