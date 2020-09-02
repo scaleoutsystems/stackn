@@ -342,7 +342,14 @@ class StudioClient():
     def get_models(self, project_id, params=[]):
         url = self.endpoints['models'].format(project_id)
         r = requests.get(url, headers=self.auth_headers, params=params)
-        models = json.loads(r.content)
+        try:
+            models = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list models.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
         return models
     
     def get_model(self, project_id, model_id):

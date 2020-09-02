@@ -9,31 +9,145 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Monitor</h2>
     </div>
+    {% if is_authorized %}
     <div>
-      
-      <h3>Total requests</h3>
-      CPU:<br>
-      Memory:
-      
-      <h3>Lab sessions</h3>
-        
-        <h4>Resources</h4>
-          <div>
-            <p class="mb-0">
-              Labs requests CPU: {{ labs_cpu_requests }} cores<br>
-              Labs requests memory: {{ labs_memory_requests }} Gi <br>
-            </p>
-            <div style="height:250; width:400">
-              <canvas id="labsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'lab' %}"></canvas>
-            </div>
-            
-          </div>
+      <h3>Project Quota</h3>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Limits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Total</td>
+            <td>CPU</td>
+            <td>100 cores</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>100 Gi</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <h3>Project Usage</h3>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Requests</th>
+            <th>Limits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Labs</td>
+            <td>CPU</td>
+            <td>{{ resource_status.lab.requests.cpu_cores }}</td>
+            <td>{{ resource_status.lab.limits.cpu_cores }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>{{ resource_status.lab.requests.memory_bytes }} Gi</td>
+            <td>{{ resource_status.lab.limits.memory_bytes }} Gi</td>
+          </tr>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Deployments</td>
+            <td>CPU</td>
+            <td>{{ resource_status.deployment.requests.cpu_cores }}</td>
+            <td>{{ resource_status.deployment.limits.cpu_cores }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>{{ resource_status.deployment.requests.memory_bytes }} Gi</td>
+            <td>{{ resource_status.deployment.limits.memory_bytes }} Gi</td>
+          </tr>
+          <tr>
+            <td rowspan="2" style="vertical-align : middle;text-align:center;">Total</td>
+            <td>CPU</td>
+            <td>{{ total_cpu_req }}</td>
+            <td>{{ total_cpu }}</td>
+          </tr>
+          <tr>
+            <td>Memory</td>
+            <td>{{ total_mem_req }}</td>
+            <td>{{ total_mem }} Gi</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Lab Sessions</h3>
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th>Owner</th>
+            <th>Flavor</th>
+            <th>CPU limit</th>
+            <th>CPU request</th>
+            <th>Mem limit</th>
+            <th>Mem request</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lab in lab_list %}
+            <tr>
+              <td>{{ lab.0 }}</td>
+              <td>{{ lab.1 }}</td>
+              <td>{{ lab.2 }}</td>
+              <td>{{ lab.3 }}</td>
+              <td>{{ lab.4 }}</td>
+              <td>{{ lab.5 }}</td>
+              <td><a href="{% url 'monitor:delete_lab' request.user.username project.slug lab.6 %}">Delete</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
       <h3>Deployments</h3>
-      <div style="height:250; width:400">
-        <canvas id="deploymentsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'deployment' %}"></canvas>
-      </div>
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th>Owner</th>
+            <th>Model</th>
+            <th>Version</th>
+            <th>CPU limit</th>
+            <th>CPU request</th>
+            <th>Mem limit</th>
+            <th>Mem request</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dep in dep_list %}
+            <tr>
+              <td>{{ dep.0 }}</td>
+              <td>{{ dep.7 }}</td>
+              <td>{{ dep.8 }}</td>
+              <td>{{ dep.2 }}</td>
+              <td>{{ dep.3 }}</td>
+              <td>{{ dep.4 }}</td>
+              <td>{{ dep.5 }}</td>
+              <td><a href="{% url 'monitor:delete_deployment' request.user.username project.slug dep.6 %}">Delete</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+            <!-- <div style="height:250; width:400">
+              <canvas id="labsCPUChart" data-url="{% url 'monitor:cpuchart' user project.slug 'lab' %}"></canvas>
+            </div> -->
+            
+          
     </div>
+    {% else %}
+    <div>You don't have permission to access this resource.</div>
+    {% endif %}
 </div>
 <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 <script>
