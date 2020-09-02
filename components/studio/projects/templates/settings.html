@@ -33,7 +33,8 @@
             <button type="submit" class="btn btn-primary" name="save">Save</button>
         </form>
     </div>
-
+    
+    {% if user_permissions.view_credentials %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>S3 Credentials</h5>
         <div class="form-group row">
@@ -60,6 +61,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <div class="container-fluid" style="padding:15px;">
         <h5>Environment</h5>
@@ -149,7 +151,7 @@
         </form>
     </div>
 
-    {% if project.owner == request.user %}
+    {% if user_permissions.add_member %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>Grant access</h5>
         <p>For granting access to this project, select one or more users from the list below.</p>

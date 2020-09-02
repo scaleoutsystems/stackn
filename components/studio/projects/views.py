@@ -17,6 +17,7 @@ import base64
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
+from modules.project_auth import get_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ def index(request):
 
 @login_required(login_url='/accounts/login')
 def settings(request, user, project_slug):
+    user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
+    print(user_permissions)
     template = 'settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
@@ -82,7 +85,7 @@ def change_environment(request, user, project_slug):
 
     if request.method == 'POST':
         environment_slug = request.POST.get('environment', '')
-        if environment_slug is not '':
+        if environment_slug != '':
             environment = Environment.objects.filter(slug=environment_slug).first()
             if environment:
                 project.environment = environment
@@ -104,7 +107,7 @@ def change_description(request, user, project_slug):
 
     if request.method == 'POST':
         description = request.POST.get('description', '')
-        if description is not '':
+        if description != '':
             project.description = description
             project.save()
 
