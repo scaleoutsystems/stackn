@@ -31,7 +31,7 @@ def pre_save_experiments(sender, instance, using, **kwargs):
         "namespace": settings.NAMESPACE,
         "project.slug": instance.project.slug,
         "image": instance.environment.image,
-        "command": str(instance.command.split(' ')),
+        "command": '["/bin/bash", "-c", "'+instance.command+'"]', #str(instance.command.split(' ')),
         "iscron": str(is_cron),
         "cronjob.schedule": instance.schedule,
         "cronjob.port": "8786",
