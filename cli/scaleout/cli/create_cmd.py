@@ -19,7 +19,7 @@ def create_cmd(ctx, daemon):
       print('{} NYI should run as daemon...'.format(__file__))
 
 @create_cmd.command('model')
-@click.option('-f', '--model-file', required=True)
+@click.option('-f', '--model-file', required=False, default="")
 @click.option('-n', '--model-name', required=True)
 @click.option('-r', '--release-type', required=False)
 @click.option('-d', '--description', required=False,default="")

@@ -1,6 +1,5 @@
 import os
 from scaleout.config.config import load_config as load_conf, get_default_config_file_path
-
 from scaleout.runtime.runtime import Runtime
 
 import scaleout.auth as sauth
@@ -8,6 +7,7 @@ from scaleout.auth import get_bearer_token
 from scaleout.errors import AuthenticationError
 from scaleout.utils.file import dump_to_file, load_from_file
 
+import subprocess
 import requests
 import json
 import pickle
@@ -272,6 +272,21 @@ class StudioClient():
 
         import uuid
         model_uid = str(uuid.uuid1().hex)
+        building_from_current = False
+        if model_file == "":
+            building_from_current = True
+            model_file = '{}.tar.gz'.format(model_uid)
+            # Find latest serialized model
+            path = 'models'
+            os.chdir(path)
+            files = sorted(os.listdir(os.getcwd()), key=os.path.getmtime)
+            os.chdir('../')
+            newest = ''
+            if files:
+                newest = os.path.join('models', files[-1])
+            print(newest)
+            res = subprocess.run(['tar', 'czvf', model_file, newest, 'requirements.txt', 'src'], stdout=subprocess.PIPE)
+
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
@@ -290,6 +305,8 @@ class StudioClient():
             repo.delete_artifact(model_uid)
             return False
 
+        if building_from_current:
+            os.system('rm {}'.format(model_file))
         print('Released model: {}, release_type: {}'.format(model_name, release_type))
         return True
 
