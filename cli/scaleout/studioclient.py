@@ -315,9 +315,16 @@ class StudioClient():
         url = self.endpoints['deploymentInstances']+'build_instance/'
         bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context}
         r = requests.post(url, json=bd_data, headers=self.auth_headers)
-        if not _check_status(r, error_msg="Failed to create deployment."):
-            # Delete registered deployment instance from db
-            return False
+        if not r:
+            print('Failed to deploy model.')
+            print('Status code: {}'.format(r.status_code))
+            msg = r.text
+            if len(msg) > 500:
+                msg = msg[0:500]
+            print('Reason: {}'.format(msg))
+        # if not _check_status(r, error_msg="Failed to create deployment."):
+        #     # Delete registered deployment instance from db
+        #     return False
 
         print('Created deployment: {}'.format(model_name))
         return True
@@ -409,7 +416,7 @@ class StudioClient():
             if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, version)):
                 pass
             else:
-                print("Deleted model {}:{}.".format(name, version))
+                print("Deleted model {}:{}.".format(name, model['version']))
 
     def delete_deployment(self, name, version=None):
         if version:

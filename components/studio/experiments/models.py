@@ -1,9 +1,15 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
+from api.serializers import ProjectSerializer
+from rest_framework.renderers import JSONRenderer
 from deployments.models import HelmResource
 from django.dispatch import receiver
 import uuid
+import json
+import yaml
+
+from labs.helpers import create_user_settings
 
 
 class Experiment(models.Model):
@@ -25,6 +31,18 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     is_cron = 1
     if instance.schedule == "None":
         is_cron = 0
+
+    settings_file = ProjectSerializer(instance.project)
+
+    settings_file = JSONRenderer().render(settings_file.data)
+    settings_file = settings_file.decode('utf-8')
+
+    settings_file = json.loads(settings_file)
+    settings_file = yaml.dump(settings_file)
+
+    user_config_file = create_user_settings(instance.username)
+    user_config_file = yaml.dump(json.loads(user_config_file))
+
     parameters = {
         "release": release_name,
         "chart": "cronjob",
@@ -38,7 +56,9 @@ def pre_save_experiments(sender, instance, using, **kwargs):
         "resources.limits.cpu": "500m",
         "resources.limits.memory": "1Gi",
         "resources.requests.cpu": "100m",
-        "resources.requests.memory": "256Gi"
+        "resources.requests.memory": "256Gi",
+        "settings_file": settings_file,
+        "user_settings_file": user_config_file,
     }
     helmchart = HelmResource(name=release_name,
                              namespace='Default',

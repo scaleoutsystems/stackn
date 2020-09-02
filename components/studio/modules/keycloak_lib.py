@@ -414,13 +414,10 @@ def keycloak_setup_base_client(base_url, client_id, username, roles=['default'],
         if res:
             print(role)
     
-
     # Give user default roles
     for default_role in default_user_role:
         res = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session)
         if res:
             print(default_role)
-    
     session.close()
-
     return client_id, client_secret
