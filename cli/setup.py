@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
+from scaleout import version
+
 
 setup(
     name='scaleout-cli',
-    version='0.0.1',
+    version=version.__version__,
     description="""Scaleout CLI""",
     author='Morgan Ekmefjord',
     author_email='morgan@scaleout.se',
