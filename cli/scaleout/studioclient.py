@@ -59,6 +59,7 @@ class StudioClient():
         # endpoints = self.list_endpoints()
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
+        self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -441,6 +442,20 @@ class StudioClient():
             print('Status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
 
+    def create_session(self, flavor_slug, environment_slug):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        data = {'flavor': flavor_slug, 'environment': environment_slug}
+
+        r = requests.post(url, headers=self.auth_headers, json=data)
+
+        if r:
+            print('Successfully created Lab Session.')
+            print('Flavor: ' + flavor_slug)
+            print('Environment: ' + environment_slug)
+        else:
+            print('Failed to create Lab Session.')
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {} - {}'.format(r.reason, r.text))
 
 if __name__ == '__main__':
 

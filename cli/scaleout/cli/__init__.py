@@ -8,3 +8,4 @@ from .login_cmd import setup_cmd, status_cmd
 from .set_cmd import set_cmd
 from .update_cmd import update_cmd
 from .init_cmd import init_cmd
+from .lab_cmd import lab_cmd

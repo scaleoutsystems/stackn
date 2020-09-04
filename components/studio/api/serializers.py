@@ -4,6 +4,7 @@ from models.models import Model
 from reports.models import Report, ReportGenerator
 from projects.models import Project
 from deployments.models import DeploymentInstance, DeploymentDefinition
+from labs.models import Session
 
 
 class MLModelSerializer(ModelSerializer):
@@ -44,4 +45,12 @@ class ProjectSerializer(ModelSerializer):
         model = Project
         fields = (
             'id', 'name', 'description', 'slug', 'owner', 'image', 'project_key', 'project_secret', 'updated_at',
-            'created_at', 'repository', 'repository_imported', 'environment')
+            'created_at', 'repository', 'repository_imported')
+
+
+class LabSessionSerializer(ModelSerializer):
+    class Meta:
+        model = Session
+        fields = (
+            'id', 'name', 'slug', 'project', 'lab_session_owner', 'flavor_slug', 'environment_slug', 'status',
+            'created_at', 'updated_at')

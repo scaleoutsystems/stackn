@@ -7,7 +7,6 @@ from django.db.models import Q
 from projects.helpers import get_minio_keys
 from django.core import serializers
 from .helpers import create_user_settings
-from api.serializers import ProjectSerializer
 from rest_framework.renderers import JSONRenderer
 import uuid
 import yaml
@@ -18,6 +17,16 @@ from deployments.models import HelmResource
 from projects.models import Environment, Flavor
 from projects.models import Project, ProjectLog
 from modules import keycloak_lib as keylib
+from rest_framework.serializers import ModelSerializer
+
+
+class ProjectSerializer(ModelSerializer):
+    class Meta:
+        model = Project
+        fields = (
+            'id', 'name', 'description', 'slug', 'owner', 'image', 'project_key', 'project_secret', 'updated_at',
+            'created_at', 'repository', 'repository_imported')
+
 
 class SessionManager(models.Manager):
 
