@@ -291,13 +291,13 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     def add_members(self, request):
         project_slug = request.data['slug']
         current_user = request.user
-        project = Project.objects.filter(slug=project_slug, owner=current_user).first()
+        project = Project.objects.get(slug=project_slug, owner=current_user)
 
         if project:
             selected_users = request.data['selected_users']
             selected_users_ids = []
             for username in selected_users.split():
-                user = User.objects.filter(username=username).first()
+                user = User.objects.get(username=username)
                 selected_users_ids.append(user.pk)
 
             project.authorized.set(selected_users_ids)
