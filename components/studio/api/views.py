@@ -1,3 +1,4 @@
+import uuid
 from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
@@ -15,7 +16,7 @@ from django.contrib.auth.models import User
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer
+    DeploymentDefinitionSerializer, Session, LabSessionSerializer
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -53,6 +54,38 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
                           project=project)
         new_model.save()
         return HttpResponse('ok', 200)
+
+
+class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = LabSessionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'name', 'lab_session_owner']
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the Lab Sessions
+        for the currently authenticated user.
+        """
+
+        return Session.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def create(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+
+        uid = uuid.uuid4()
+        name = str(project.slug) + str(uid)[0:7]
+        try:
+            flavor_slug = request.data['flavor']
+            environment_slug = request.data['environment']
+        except Exception as e:
+            print(e)
+            return HttpResponse('Failed to create a Lab Session.', 400)
+
+        lab_session = Session(id=uid, name=name, flavor_slug=flavor_slug, environment_slug=environment_slug,
+                              project=project, lab_session_owner=request.user)
+        lab_session.save()
+        return HttpResponse('Ok.', 200)
 
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
@@ -254,7 +287,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             project.save()
             return HttpResponse('Ok', status=200)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, ProjectPermission])
     def add_members(self, request):
         project_slug = request.data['slug']
         current_user = request.user
