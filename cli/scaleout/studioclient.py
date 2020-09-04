@@ -1,17 +1,9 @@
 import os
-from scaleout.config.config import load_config as load_conf, get_default_config_file_path
-from scaleout.runtime.runtime import Runtime
-
 import scaleout.auth as sauth
-from scaleout.auth import get_bearer_token
-from scaleout.errors import AuthenticationError
 from scaleout.utils.file import dump_to_file, load_from_file
-
 import subprocess
 import requests
 import json
-import pickle
-from slugify import slugify
 import uuid
 from urllib.parse import urljoin
 
@@ -434,6 +426,21 @@ class StudioClient():
                     pass
                 else:
                     print("Deleted deployment {}:{}.".format(model['name'], model['version']))
+
+    def add_members(self, users):
+        url = self.endpoints['projects'] + 'add_members/'
+        data = {'slug': self.project_slug, 'selected_users': users}
+
+        r = requests.post(url, headers=self.auth_headers, json=data)
+
+        if r:
+            print('New members: ' + users)
+            print('Successfully added the selected users as members to project {}.'.format(self.project['name']))
+        else:
+            print('Failed to add members to project {}.'.format(self.project['name']))
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+
 
 if __name__ == '__main__':
 

@@ -1,18 +1,16 @@
-import requests
-import json
 from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
+from django.http import HttpResponse
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from .APIpermissions import ProjectPermission
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
-import modules.keycloak_lib as keylib
+from django.contrib.auth.models import User
+
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -255,3 +253,23 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         if success:
             project.save()
             return HttpResponse('Ok', status=200)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def add_members(self, request):
+        project_slug = request.data['slug']
+        current_user = request.user
+        project = Project.objects.filter(slug=project_slug, owner=current_user).first()
+
+        if project:
+            selected_users = request.data['selected_users']
+            selected_users_ids = []
+            for username in selected_users.split():
+                user = User.objects.filter(username=username).first()
+                selected_users_ids.append(user.pk)
+
+            project.authorized.set(selected_users_ids)
+            project.save()
+
+            return HttpResponse('Successfully added members.', status=200)
+
+        return HttpResponse('Failed to add members.', status=400)

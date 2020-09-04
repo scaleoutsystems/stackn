@@ -10,7 +10,6 @@ urlpatterns = [
     path('<user>/<project_slug>/settings', views.settings, name='settings'),
     path('<user>/<project_slug>/settings/download', views.download_settings, name='download_settings'),
     path('<user>/<project_slug>/delete', views.delete, name='delete'),
-    path('<user>/<project_slug>/env/change', views.change_environment, name='change_environment'),
     path('<user>/<project_slug>/details/change', views.change_description, name='change_description'),
     path('<user>/<project_slug>/project/publish', views.publish_project, name='publish_project'),
     path('<user>/<project_slug>/project/access/grant', views.grant_access_to_project, name='grant_access'),
