@@ -1,5 +1,6 @@
 import click
 from .main import main
+from prettytable import PrettyTable
 
 
 @main.group('lab')
@@ -27,4 +28,13 @@ def lab_list_cmd(ctx):
 @lab_list_cmd.command('all')
 @click.pass_context
 def lab_list_all_cmd(ctx):
-    pass
+    """ List all Lab Sessions. """
+
+    client = ctx.obj['CLIENT']
+    labs = client.get_lab_sessions()
+
+    x = PrettyTable()
+    x.field_names = ["Name", "Flavor", "Environment", "Status", "Created"]
+    for l in labs:
+        x.add_row([l["name"], l["flavor_slug"], l["environment_slug"], l['status'], l['created_at']])
+    print(x)

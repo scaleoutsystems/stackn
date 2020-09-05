@@ -368,6 +368,19 @@ class StudioClient():
             print('Error: {}'.format(err))
             return []
         return models
+
+    def get_lab_sessions(self, params=[]):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, params=params)
+        try:
+            labs = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return labs
     
     def get_model(self, project_id, model_id):
         url = '{}/{}'.format(self.endpoints['models'].format(project_id),model_id)
