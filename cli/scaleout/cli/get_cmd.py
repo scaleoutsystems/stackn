@@ -48,6 +48,21 @@ def get_projects_cmd(ctx):
     keys = ["name", "created_at", "updated_at"]
     create_table(ctx, "projects", names, keys)
 
+@get_cmd.command('labs')
+@click.pass_context
+def lab_list_all_cmd(ctx):
+    """ List all Lab Sessions. """
+    names = ["Name", "Flavor", "Environment", "Status", "Created"]
+    keys = ["name", "flavor_slug", "environment_slug", "status", "created_at"]
+    create_table(ctx, "labs", names, keys)
+
+@get_cmd.command('members')
+@click.pass_context
+def members_list_cmd(ctx):
+    """ List all project members. """
+    names = ["Username"]
+    keys = ["username"]
+    create_table(ctx, "members", names, keys)
 
 # alliance
 

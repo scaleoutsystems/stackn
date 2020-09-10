@@ -1,6 +1,8 @@
 import click
 
 import logging
+from .. import version
+
 
 logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)d] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')  # , level=logging.DEBUG)
 
@@ -19,6 +21,11 @@ CONTEXT_SETTINGS = dict(
             "Supply a project directory"
     ),
     type=click.Path(exists=False, dir_okay=True),
+)
+@click.version_option(
+    version=version.__version__,
+    prog_name='Scaleout STACKn CLI',
+    message='%(prog)s, %(version)s'
 )
 
 @click.pass_context

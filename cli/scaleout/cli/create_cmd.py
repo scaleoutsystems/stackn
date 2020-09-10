@@ -59,4 +59,13 @@ def create_project_cmd(ctx, name, description='', repository=''):
     client = ctx.obj['CLIENT']
     client.create_project(name, description, repository)
 
+@create_cmd.command('lab')
+@click.option('-f', '--flavor', required=True)
+@click.option('-e', '--environment', required=True)
+@click.pass_context
+def create_session(ctx, flavor, environment):
+    client = ctx.obj['CLIENT']
+    client.create_session(flavor_slug=flavor, environment_slug=environment)
+
+
 # Create dataset

@@ -1,17 +1,9 @@
 import os
-from scaleout.config.config import load_config as load_conf, get_default_config_file_path
-from scaleout.runtime.runtime import Runtime
-
 import scaleout.auth as sauth
-from scaleout.auth import get_bearer_token
-from scaleout.errors import AuthenticationError
 from scaleout.utils.file import dump_to_file, load_from_file
-
 import subprocess
 import requests
 import json
-import pickle
-from slugify import slugify
 import uuid
 from urllib.parse import urljoin
 
@@ -67,9 +59,12 @@ class StudioClient():
         # endpoints = self.list_endpoints()
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
+        self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
+        self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
+        
         self.endpoints['deploymentInstances'] = self.api_url+'/deploymentInstances/'
         self.deployment_definition_api = self.api_url+'/deploymentDefinitions' #endpoints['deploymentDefinitions']
 
@@ -236,6 +231,19 @@ class StudioClient():
         else:
             return []
 
+    def get_members(self):
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers)
+        try:
+            members = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return members
+
     ### Datasets API ###
 
 
@@ -354,7 +362,18 @@ class StudioClient():
                 return models
             else:
                 return []
-
+        if resource == 'labs':
+            if self.found_project:
+                labs = self.get_lab_sessions()
+                return labs
+            else:
+                return []
+        if resource == 'members':
+            if self.found_project:
+                members = self.get_members()
+                return members
+            else:
+                return []
         url = self.endpoints[resource]
 
         r = requests.get(url, headers=self.auth_headers)
@@ -375,6 +394,19 @@ class StudioClient():
             print('Error: {}'.format(err))
             return []
         return models
+
+    def get_lab_sessions(self, params=[]):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, params=params)
+        try:
+            labs = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return labs
     
     def get_model(self, project_id, model_id):
         url = '{}/{}'.format(self.endpoints['models'].format(project_id),model_id)
@@ -434,6 +466,36 @@ class StudioClient():
                     pass
                 else:
                     print("Deleted deployment {}:{}.".format(model['name'], model['version']))
+
+    def add_members(self, users):
+        # url = self.endpoints['projects'] + 'add_members/'
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        data = {'selected_users': users}
+
+        r = requests.post(url, headers=self.auth_headers, json=data)
+
+        if r:
+            print('New members: ' + users)
+            print('Successfully added the selected users as members to project {}.'.format(self.project['name']))
+        else:
+            print('Failed to add members to project {}.'.format(self.project['name']))
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+
+    def create_session(self, flavor_slug, environment_slug):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        data = {'flavor': flavor_slug, 'environment': environment_slug}
+
+        r = requests.post(url, headers=self.auth_headers, json=data)
+
+        if r:
+            print('Successfully created Lab Session.')
+            print('Flavor: ' + flavor_slug)
+            print('Environment: ' + environment_slug)
+        else:
+            print('Failed to create Lab Session.')
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {} - {}'.format(r.reason, r.text))
 
 if __name__ == '__main__':
 
