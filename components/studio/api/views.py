@@ -12,11 +12,10 @@ from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
 from django.contrib.auth.models import User
 
-
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer, Session, LabSessionSerializer
+    DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -250,6 +249,40 @@ class ReportGeneratorList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, 
         current_user = self.request.user
         return ReportGenerator.objects.filter(project__owner__username=current_user)
 
+class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission, )
+    serializer_class = UserSerializer
+    filter_backends = [DjangoFilterBackend]
+    
+    def get_queryset(self):
+        """
+        This view should return a list of all the members
+        of the project
+        """
+        proj = Project.objects.filter(pk=self.kwargs['project_pk'])
+        owner = proj[0].owner
+        auth_users = proj[0].authorized.all()
+        print(owner)
+        print(auth_users)
+        ids = set()
+        ids.add(owner.pk)
+        for user in auth_users:
+            ids.add(user.pk)
+        # return [owner, authorized]
+        print(ids)
+        users = User.objects.filter(pk__in=ids)
+        print(users)
+        return users
+
+    def create(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        selected_users = request.data['selected_users']
+        for username in selected_users.split():
+            user = User.objects.get(username=username)
+            project.authorized.add(user)
+        project.save()
+        return HttpResponse('Successfully added members.', status=200)
 
 class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
@@ -287,22 +320,3 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             project.save()
             return HttpResponse('Ok', status=200)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, ProjectPermission])
-    def add_members(self, request):
-        project_slug = request.data['slug']
-        current_user = request.user
-        project = Project.objects.get(slug=project_slug, owner=current_user)
-
-        if project:
-            selected_users = request.data['selected_users']
-            selected_users_ids = []
-            for username in selected_users.split():
-                user = User.objects.get(username=username)
-                selected_users_ids.append(user.pk)
-
-            project.authorized.set(selected_users_ids)
-            project.save()
-
-            return HttpResponse('Successfully added members.', status=200)
-
-        return HttpResponse('Failed to add members.', status=400)
