@@ -171,7 +171,7 @@ def pre_save_labs(sender, instance, using, **kwargs):
               }
     
     parameters.update(prefs)
-
+    print(parameters)
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
                              chart='lab',

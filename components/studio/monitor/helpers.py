@@ -34,7 +34,7 @@ def pod_up(app_name):
 
 
 def get_count_over_time(name, app_name, path, status_code, time_span):
-    total_count = -1
+    total_count = 0
     # Strip path of potential /
     path = path.replace('/', '')
     try:
