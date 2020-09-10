@@ -11,6 +11,8 @@ from .APIpermissions import ProjectPermission
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
 from django.contrib.auth.models import User
+from django.conf import settings
+import modules.keycloak_lib as kc
 
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -278,11 +280,30 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
         selected_users = request.data['selected_users']
-        for username in selected_users.split():
+        for username in selected_users.split(','):
             user = User.objects.get(username=username)
             project.authorized.add(user)
+            kc.keycloak_add_role_to_user(project.slug, user.username, 'member')
         project.save()
         return HttpResponse('Successfully added members.', status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        print('removing user')
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        user_id = self.kwargs['pk']
+        print(user_id)
+        user = User.objects.get(pk=user_id)
+        print('user')
+        print(user)
+        if user.username != project.owner.username:
+            print('username'+user.username)
+            project.authorized.remove(user)
+            for role in settings.PROJECT_ROLES:
+                kc.keycloak_add_role_to_user(project.slug, user.username, role, action='delete')
+            return HttpResponse('Successfully removed members.', status=200)
+        else:
+            return HttpResponse('Cannot remove owner of project.', status=400)
+        return HttpResponse('Failed to remove user.', status=400)
 
 class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
