@@ -60,9 +60,11 @@ class StudioClient():
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
+        self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
+        
         self.endpoints['deploymentInstances'] = self.api_url+'/deploymentInstances/'
         self.deployment_definition_api = self.api_url+'/deploymentDefinitions' #endpoints['deploymentDefinitions']
 
@@ -229,6 +231,19 @@ class StudioClient():
         else:
             return []
 
+    def get_members(self):
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers)
+        try:
+            members = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return members
+
     ### Datasets API ###
 
 
@@ -347,7 +362,18 @@ class StudioClient():
                 return models
             else:
                 return []
-
+        if resource == 'labs':
+            if self.found_project:
+                labs = self.get_lab_sessions()
+                return labs
+            else:
+                return []
+        if resource == 'members':
+            if self.found_project:
+                members = self.get_members()
+                return members
+            else:
+                return []
         url = self.endpoints[resource]
 
         r = requests.get(url, headers=self.auth_headers)
@@ -442,8 +468,9 @@ class StudioClient():
                     print("Deleted deployment {}:{}.".format(model['name'], model['version']))
 
     def add_members(self, users):
-        url = self.endpoints['projects'] + 'add_members/'
-        data = {'slug': self.project_slug, 'selected_users': users}
+        # url = self.endpoints['projects'] + 'add_members/'
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        data = {'selected_users': users}
 
         r = requests.post(url, headers=self.auth_headers, json=data)
 
