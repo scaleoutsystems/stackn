@@ -74,8 +74,8 @@ def change_access(request, user, project, id):
         if visibility != model.access:
             model.access = visibility
             model.save()
-
-            l = ProjectLog(project=project, module='MO', headline='Model - {name}'.format(name=model.name),
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
                            description='Changed Access Level from {previous} to {current}'.format(previous=previous,
                                                                                                   current=model.get_access_display()))
             l.save()
