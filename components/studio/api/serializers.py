@@ -4,8 +4,8 @@ from models.models import Model
 from reports.models import Report, ReportGenerator
 from projects.models import Project
 from deployments.models import DeploymentInstance, DeploymentDefinition
-
-
+from labs.models import Session
+from django.contrib.auth.models import User
 class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
@@ -43,5 +43,18 @@ class ProjectSerializer(ModelSerializer):
     class Meta:
         model = Project
         fields = (
-            'id', 'name', 'description', 'slug', 'owner', 'image', 'project_key', 'project_secret', 'updated_at',
-            'created_at', 'repository', 'repository_imported', 'environment')
+            'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 'project_key', 'project_secret', 'updated_at',
+            'created_at', 'repository', 'repository_imported')
+
+
+class LabSessionSerializer(ModelSerializer):
+    class Meta:
+        model = Session
+        fields = (
+            'id', 'name', 'slug', 'project', 'lab_session_owner', 'flavor_slug', 'environment_slug', 'status',
+            'created_at', 'updated_at')
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
