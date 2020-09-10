@@ -355,7 +355,7 @@ def keycloak_get_client_role_id(kc, role_name, client_nid, session=[]):
         print(res.text)
         return False
 
-def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, session=[]):
+def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, session=[], action='add'):
     if not session:
         session = r.session()
     user_id = keycloak_get_user_id(kc, username)
@@ -368,23 +368,39 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, sessio
     role_id = keycloak_get_client_role_id(kc, role_name, client_nid, session)
 
     role_rep = [{'name': role_name, 'id': role_id}]
-    res = session.post(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+    if action=='add':
+        print(add_user_to_role_url)
+        res = session.post(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+    elif action=='delete':
+        import json
+        print('deleting...')
+        print(add_user_to_role_url)
+        print(json.dumps(role_rep))
+        res = r.delete(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
     if res:
         return True
     else:
-        print('Failed to add user {} to client role {}.'.format(username, role_name))
+        print('Failed to {} user {} to client role {}.'.format(action, username, role_name))
         print('Status code: '+str(res.status_code))
         print(res.text)
         return False
 
-def keycloak_add_role_to_user(clientId, username, role):
+def keycloak_add_role_to_user(clientId, username, role, action='add'):
     logger.info('Adding role {} to user {}. Client is {}.'.format(role, username, clientId))
     kc = keycloak_init()
     # Get client id
     clients = keycloak_get_clients(kc, {'clientId': clientId})
     client_nid = clients[0]['id']
     # Add role to user
-    keycloak_add_user_to_client_role(kc, client_nid, username, role)
+    keycloak_add_user_to_client_role(kc, client_nid, username, role, action=action)
+
+def keycloak_remove_role_from_user(clientId, username, roles):
+    kc = keycloak_init()
+    clients = keycloak_get_clients(kc, {'clientId': clientId})
+    client_nid = clients[0]['id']
+    for role in roles:
+        logger.info('Removing role {} from user {}. Client is {}.'.format(role, username, clientId))
+
 
 def keycloak_setup_base_client(base_url, client_id, username, roles=['default'], default_user_role=['default']):
     kc = keycloak_init()
@@ -416,7 +432,7 @@ def keycloak_setup_base_client(base_url, client_id, username, roles=['default'],
     
     # Give user default roles
     for default_role in default_user_role:
-        res = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session)
+        res = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session=session)
         if res:
             print(default_role)
     session.close()

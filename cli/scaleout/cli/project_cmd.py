@@ -102,3 +102,15 @@ def project_add_cmd(ctx):
 def project_add_members(ctx, users):
     client = ctx.obj['CLIENT']
     client.add_members(users)
+
+@project_cmd.group('remove')
+@click.pass_context
+def project_remove_cmd(ctx):
+    pass
+
+@project_remove_cmd.command('members')
+@click.option('-u', '--users', required=True)
+@click.pass_context
+def project_remove_members(ctx, users):
+    client = ctx.obj['CLIENT']
+    client.remove_members(users)

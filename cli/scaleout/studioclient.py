@@ -471,9 +471,7 @@ class StudioClient():
         # url = self.endpoints['projects'] + 'add_members/'
         url = self.endpoints['members'].format(self.project['id']) + '/'
         data = {'selected_users': users}
-
         r = requests.post(url, headers=self.auth_headers, json=data)
-
         if r:
             print('New members: ' + users)
             print('Successfully added the selected users as members to project {}.'.format(self.project['name']))
@@ -481,6 +479,22 @@ class StudioClient():
             print('Failed to add members to project {}.'.format(self.project['name']))
             print('Status code: {}'.format(r.status_code))
             print('Reason: {}'.format(r.reason))
+
+    def remove_members(self, users):          
+        members = self.get_members()
+        users = users.split(',')
+        for user in users:
+            for member in members:
+                if member['username'] == user:
+                    url = self.endpoints['members'].format(self.project['id']) + '/'+str(member['id'])
+                    r = requests.delete(url, headers=self.auth_headers)
+                    if r:
+                        print('Removed member: {}'.format(user))
+                    else:
+                        print('Failed to remove member {}.'.format(user))
+                        print('Status code: {}'.format(r.status_code))
+                        print('Reason: {}'.format(r.reason))
+                    break
 
     def create_session(self, flavor_slug, environment_slug):
         url = self.endpoints['labs'].format(self.project['id']) + '/'
