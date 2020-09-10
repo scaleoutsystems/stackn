@@ -128,7 +128,13 @@ def grant_access_to_project(request, user, project_slug):
         # form = GrantAccessForm(request.POST)
         print(request.POST)
         # if form.is_valid():
-        selected_users = request.POST['selected_users'] #form.cleaned_data.get('selected_users')
+        # print('Form valid:')
+        # print(form.is_valid())
+
+        selected_users = request.POST.getlist('selected_users') #form.cleaned_data.get('selected_users')
+        print('Selected users:')
+        print(request.POST.getlist('selected_users'))
+        print('....')
         project.authorized.set(selected_users)
         project.save()
 
