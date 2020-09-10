@@ -77,29 +77,6 @@ def download_settings(request, user, project_slug):
     response['Content-Disposition'] = 'attachment; filename={0}'.format('project.yaml')
     return response
 
-@login_required(login_url='/accounts/login')
-def change_environment(request, user, project_slug):
-    project = Project.objects.filter(slug=project_slug).first()
-    environment = project.environment
-    from .models import Environment
-
-    if request.method == 'POST':
-        environment_slug = request.POST.get('environment', '')
-        if environment_slug != '':
-            environment = Environment.objects.filter(slug=environment_slug).first()
-            if environment:
-                project.environment = environment
-                project.save()
-
-                l = ProjectLog(project=project, module='PR', headline='New environment',
-                               description='Project environment has been changed to {name}'. project.environment.name)
-                l.save()
-
-        # TODO fix the create_environment_image creation
-        #from .helpers import create_environment_image
-        #create_environment_image(project)
-    return HttpResponseRedirect(
-        reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
 @login_required(login_url='/accounts/login')
 def change_description(request, user, project_slug):
@@ -125,7 +102,7 @@ def grant_access_to_project(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
     if request.method == 'POST':
-        # form = GrantAccessForm(request.POST)
+
         print(request.POST)
         # if form.is_valid():
         # print('Form valid:')
