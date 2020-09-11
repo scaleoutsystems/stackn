@@ -2,6 +2,7 @@ import uuid
 from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
@@ -319,7 +320,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         for the currently authenticated user.
         """
         current_user = self.request.user
-        return Project.objects.filter(owner__username=current_user)
+        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk))
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def create_project(self, request):
