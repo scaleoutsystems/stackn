@@ -98,10 +98,11 @@ def project_add_cmd(ctx):
 
 @project_add_cmd.command('members')
 @click.option('-u', '--users', required=True)
+@click.option('-r', '--role', required=False, default='member')
 @click.pass_context
-def project_add_members(ctx, users):
+def project_add_members(ctx, users, role):
     client = ctx.obj['CLIENT']
-    client.add_members(users)
+    client.add_members(users, role)
 
 @project_cmd.group('remove')
 @click.pass_context

@@ -467,10 +467,10 @@ class StudioClient():
                 else:
                     print("Deleted deployment {}:{}.".format(model['name'], model['version']))
 
-    def add_members(self, users):
+    def add_members(self, users, role):
         # url = self.endpoints['projects'] + 'add_members/'
         url = self.endpoints['members'].format(self.project['id']) + '/'
-        data = {'selected_users': users}
+        data = {'selected_users': users, 'role': role}
         r = requests.post(url, headers=self.auth_headers, json=data)
         if r:
             print('New members: ' + users)
