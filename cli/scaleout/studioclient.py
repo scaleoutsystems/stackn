@@ -258,7 +258,23 @@ class StudioClient():
             print('Status code: {}'.format(r.status_code))
             print(r.text)
 
-    def create_dataset(self, name, release_type, filenames, description='', bucket='dataset'):
+    def create_dataset(self, name, release_type, filenames, directory=[], description='', bucket='dataset'):
+        if not filenames:
+            if not directory:
+                print('You need to specify either files or a directory.')
+                return []
+            filenames = ''
+            for root, dirs, files in os.walk(directory):
+                for fname in files:
+                    tmp_fn = os.path.join(root, fname)
+                    filenames += tmp_fn+','
+
+            if filenames == '':
+                print('Directory is empty.')
+                return []
+            else:
+                filenames = filenames[:-1]
+
         url = self.endpoints['dataset'].format(self.project['id']) + '/'
         payload = {
           "name": name,
@@ -267,6 +283,7 @@ class StudioClient():
           "description": description,
           "bucket": bucket
         }
+        print(payload)
         r = requests.post(url, json=payload, headers=self.auth_headers)
         if r:
             print('Created dataset: {}'.format(name))
