@@ -18,7 +18,8 @@ import modules.keycloak_lib as kc
 from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer
+    DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -306,6 +307,60 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         else:
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
+
+class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission, )
+    serializer_class = DatasetSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'project_slug', 'version']
+    def get_queryset(self):
+        """
+        This view should return a list of all the members
+        of the project
+        """
+        project = Project.objects.get(pk=self.kwargs['project_pk'])
+        return Dataset.objects.filter(project_slug=project.slug)
+    
+    def create(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+
+        try:
+            dataset_name = request.data['name']
+            release_type = request.data['release_type']
+            filenames = request.data['filenames'].split(',')
+            description = request.data['description']
+            bucket = request.data['bucket']
+            new_dataset = Dataset(name=dataset_name,
+                                  release_type=release_type,
+                                  description=description,
+                                  project_slug=project.slug,
+                                  bucket=bucket,
+                                  created_by=request.user.username)
+            new_dataset.save()
+            for fname in filenames:
+                fobj = FileModel(name=fname, bucket=bucket)
+                fobj.save()
+                new_dataset.files.add(FileModel.objects.get(pk=fobj.pk))
+            new_dataset.save()
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create dataset.', 400)
+        return HttpResponse('ok', 200)
+
+    def destroy(self, request, *args, **kwargs):
+        print('Deleting dataset')
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        dataset = Dataset.objects.get(pk=self.kwargs['pk'],
+                                      project_slug=project.slug)
+        try:
+            dataset.delete()
+            print('OK')
+            return HttpResponse('ok', 200)
+        except Exception as err:
+            print('Failed')
+            print(err)
+            return HttpResponse('Failed to delete dataset', 400)
 
 class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
