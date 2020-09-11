@@ -4,6 +4,7 @@ from models.models import Model
 from reports.models import Report, ReportGenerator
 from projects.models import Project
 from deployments.models import DeploymentInstance, DeploymentDefinition
+from datasets.models import Dataset, FileModel
 from labs.models import Session
 from django.contrib.auth.models import User
 class MLModelSerializer(ModelSerializer):
@@ -58,3 +59,14 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username']
+
+class DatasetSerializer(ModelSerializer):
+    class Meta:
+        model = Dataset
+        fields = ['id', 'name', 'version', 'release_type', 'description',
+                  'bucket', 'project_slug', 'files', 'created_by', 'created_on']
+
+class FileModelSerializer(ModelSerializer):
+    class Meta:
+        model = FileModel
+        fields = ['id', 'name', 'bucket']

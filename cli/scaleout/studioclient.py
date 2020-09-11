@@ -61,6 +61,7 @@ class StudioClient():
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
+        self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -246,6 +247,46 @@ class StudioClient():
 
     ### Datasets API ###
 
+    def delete_dataset(self, name, version):
+        dataset = self.get_dataset({"name":name, "version": version})[0]
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'+str(dataset['id'])
+        r = requests.delete(url, headers=self.auth_headers)
+        if r:
+            print('Deleted dataset: {}'.format(dataset['name']))
+        else:
+            print('Failed to delete dataset.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def create_dataset(self, name, release_type, filenames, description='', bucket='dataset'):
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'
+        payload = {
+          "name": name,
+          "release_type": release_type,
+          "filenames": filenames,
+          "description": description,
+          "bucket": bucket
+        }
+        r = requests.post(url, json=payload, headers=self.auth_headers)
+        if r:
+            print('Created dataset: {}'.format(name))
+        else:
+            print('Failed to create dataset.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def get_dataset(self, params=[]):
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, params=[])
+        try:
+            dataset = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list datasets.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return dataset
 
     def list_datasets(self):
         # TODO: This only lists datasets in Minio, not the ones in Studio (Django-managed). 
@@ -374,6 +415,13 @@ class StudioClient():
                 return members
             else:
                 return []
+        if resource == 'dataset':
+            if self.found_project:
+                dataset = self.get_dataset()
+                return dataset
+            else:
+                return []
+        
         url = self.endpoints[resource]
 
         r = requests.get(url, headers=self.auth_headers)

@@ -69,3 +69,17 @@ def create_session(ctx, flavor, environment):
 
 
 # Create dataset
+
+
+@create_cmd.command('dataset')
+@click.option('-n', '--name', required=True)
+@click.option('-f', '--filenames', required=True)
+@click.option('-r', '--release_type', required=True)
+@click.pass_context
+def create_dataset(ctx, name, filenames, release_type='minor', description='', bucket='dataset'):
+    client = ctx.obj['CLIENT']
+    client.create_dataset(name,
+                          release_type,
+                          filenames,
+                          description=description,
+                          bucket=bucket)
