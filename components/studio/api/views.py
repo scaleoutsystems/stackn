@@ -280,10 +280,11 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
         selected_users = request.data['selected_users']
+        role = request.data['role']
         for username in selected_users.split(','):
             user = User.objects.get(username=username)
             project.authorized.add(user)
-            kc.keycloak_add_role_to_user(project.slug, user.username, 'member')
+            kc.keycloak_add_role_to_user(project.slug, user.username, role)
         project.save()
         return HttpResponse('Successfully added members.', status=200)
 
