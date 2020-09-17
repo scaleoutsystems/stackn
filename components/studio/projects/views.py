@@ -3,7 +3,7 @@ from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from .exceptions import ProjectCreationException
-from .helpers import create_project_resources, delete_project_resources, create_settings_file
+from .helpers import delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
@@ -18,6 +18,8 @@ from projects.helpers import get_minio_keys
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
+from .helpers import create_project_resources
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +74,8 @@ def download_settings(request, user, project_slug):
     from rest_framework.authtoken.models import Token
     token = Token.objects.get_or_create(user=request.user)
     project_instance = Project.objects.get(slug=project_slug)
-    proj_settings = create_settings_file(project_instance, user, token[0].key)
+    proj_settings = "Dummy"
+    # proj_settings = create_settings_file(project_instance, user, token[0].key)
     response = HttpResponse(proj_settings, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename={0}'.format('project.yaml')
     return response
@@ -137,18 +140,28 @@ def create(request):
     template = 'index_projects.html'
 
     if request.method == 'POST':
+
+        success = True
+
         name = request.POST.get('name', 'default')
         access = request.POST.get('access', 'org')
         description = request.POST.get('description', '')
         repository = request.POST.get('repository', '')
-        project = Project.objects.create_project(name=name,
-                                                 owner=request.user,
-                                                 description=description,
-                                                 repository=repository)
-
-        success = True
+        
+        # Try to create database project object.
         try:
-            create_project_resources(project, request.user, repository=repository)
+            project = Project.objects.create_project(name=name,
+                                                     owner=request.user,
+                                                     description=description,
+                                                     repository=repository)
+        except ProjectCreationException as e:
+            print("ERROR: Failed to create project database object.")
+            success = False
+
+        try:
+            # Create project resources
+            create_project_resources(project, request.user.username, repository)
+            # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
             request.session.save()
         except ProjectCreationException as e:
