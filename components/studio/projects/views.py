@@ -69,19 +69,6 @@ def settings(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required(login_url='/accounts/login')
-def download_settings(request, user, project_slug):
-    # Get user token
-    from rest_framework.authtoken.models import Token
-    token = Token.objects.get_or_create(user=request.user)
-    project_instance = Project.objects.get(slug=project_slug)
-    proj_settings = "Dummy"
-    # proj_settings = create_settings_file(project_instance, user, token[0].key)
-    response = HttpResponse(proj_settings, content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename={0}'.format('project.yaml')
-    return response
-
-
-@login_required(login_url='/accounts/login')
 def change_description(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
