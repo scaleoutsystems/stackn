@@ -9,7 +9,7 @@ def get_permissions(request, project):
       'delete': ['admin']
     }
 
-    user_roles = set(keylib.keycloak_get_user_roles(request, project,aud=project))
+    user_roles = set(keylib.keycloak_get_user_roles(request, project, aud=project))
     
     user_permissions = dict()
     for rule in rules:
