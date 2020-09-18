@@ -491,7 +491,7 @@ class StudioClient():
             model = self.get_model(self.project['id'], deployment['model'])
             dep = {'name': model['name'],
                    'version': model['version'],
-                   'endpoint': deployment['endpoint'],
+                   'endpoint': 'https://'+deployment['endpoint']+deployment['path']+'predict/',
                    'created_at': deployment['created_at']}
             depjson.append(dep)
         return depjson
@@ -499,7 +499,12 @@ class StudioClient():
     def get_deployment(self, params):
         url = self.endpoints['deploymentInstances']
         r = requests.get(url, params=params, headers=self.auth_headers)
-        return json.loads(r.content)
+        if r:
+            return json.loads(r.content)
+        else:
+            print("Failed to load deployments.")
+            print("Status code: {}".format(r.status_code))
+            print("Reason: {}".format(r.reason))
 
     def delete_model(self, name, version=None):
         if version:
@@ -575,6 +580,24 @@ class StudioClient():
             print('Failed to create Lab Session.')
             print('Status code: {}'.format(r.status_code))
             print('Reason: {} - {}'.format(r.reason, r.text))
+
+    def predict(self, model, inp, version=None):
+        if version:
+            params = {'name': model, 'version': version}
+        else:
+            params = {'name': model}
+        models  = self.get_models(self.project['id'], params)
+        model = models[0]
+        # for model in models:
+        #     deployment = self.get_deployment({'model':model['id'],'project':self.project['id']})
+        
+        params = {"project": self.project['id'], "model": model['id']}
+        res = self.get_deployment(params)
+        url = 'https://'+res[0]['endpoint']+res[0]['path']+'predict/'
+        res = requests.post(url,
+                     headers=self.auth_headers,
+                     json=json.loads(inp))
+        print(res.json())
 
 if __name__ == '__main__':
 
