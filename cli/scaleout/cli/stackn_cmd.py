@@ -1,7 +1,7 @@
 import click
 from .main import main
 import requests
-from scaleout.auth import login, get_stackn_config, get_remote_config
+from scaleout.auth import login, get_stackn_config, get_remote_config, get_token
 from .helpers import create_table
 
 # @click.option('--daemon',
@@ -42,3 +42,16 @@ def status_cmd(ctx):
             print('Project: '+stackn_config['active_project'])
         else:
             print('No active project; create a new project or set an existing project.')
+
+@main.command('predict')
+@click.option('-m', '--model', required=True)
+@click.option('-v', '--version')
+@click.option('-i', '--inp', required=True)
+@click.pass_context
+def predict_cmd(ctx, model, version, inp):
+    client = ctx.obj['CLIENT']
+    client.predict(model, inp, version)
+    # token, config = get_token()
+    # res = requests.post(url,
+    #                     headers={"Authorization": "Token "+token},
+    #                     json = inp)
