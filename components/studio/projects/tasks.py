@@ -4,7 +4,7 @@ import yaml
 import base64
 
 import modules.keycloak_lib as keylib
-# from .helpers import decrypt_key
+
 from .exceptions import ProjectCreationException
 
 from django.conf import settings
@@ -36,14 +36,9 @@ def create_settings_file(project_slug):
 
     return yaml.dump(proj_settings)
 
-def decrypt_key(key):
-    base64_bytes = key.encode('ascii')
-    result = base64.b64decode(base64_bytes)
-    return result.decode('ascii')
-
 @shared_task
 def create_helm_resources_task(project_slug, project_key, project_secret, repository=None):
-
+    from .helpers import decrypt_key
     proj_settings = create_settings_file(project_slug)
     parameters = {'release': str(project_slug),
                   'chart': 'project',
