@@ -24,7 +24,7 @@ def keycloak_user_auth(username, password, client_id, admin_url, realm):
            'grant_type': 'password',
            'username': username,
            'password': password}
-    res = r.post(token_url, data=req)
+    res = r.post(token_url, data=req, verify=settings.OIDC_VERIFY_SSL)
     if res:
         res = res.json()
     else:
@@ -43,7 +43,8 @@ def keycloak_client_auth(client_id, client_secret, admin_url, realm):
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     res = r.post(token_url, headers=headers,
                             data=payload,
-                            auth=r.auth.HTTPBasicAuth(client_id, client_secret)) 
+                            auth=r.auth.HTTPBasicAuth(client_id, client_secret),
+                            verify=settings.OIDC_VERIFY_SSL) 
     if res:
         res = res.json()
     else:
@@ -61,11 +62,11 @@ def keycloak_token_exchange_studio(kc, user_id):
            'client_id': 'studio-api',
            'requested_subject': user_id,
            'subject_token': kc.token}
-    res = r.post(token_url, data=req)
+    res = r.post(token_url, data=req, verify=settings.OIDC_VERIFY_SSL)
     token = res.json()['access_token']
     refresh_token = res.json()['refresh_token']
     discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
-    res = r.get(discovery_url)
+    res = r.get(discovery_url, verify=settings.OIDC_VERIFY_SSL)
     if res:
         realm_info = res.json()
         public_key = '-----BEGIN PUBLIC KEY-----\n'+realm_info['public_key']+'\n-----END PUBLIC KEY-----'
@@ -96,7 +97,7 @@ def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expir
     access_token = request.session['oidc_access_token']
     user_json = []
     discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
-    res = r.get(discovery_url)
+    res = r.get(discovery_url, verify=settings.OIDC_VERIFY_SSL)
     if res:
         realm_info = res.json()
         public_key = '-----BEGIN PUBLIC KEY-----\n'+realm_info['public_key']+'\n-----END PUBLIC KEY-----'
@@ -175,7 +176,7 @@ def keycloak_verify_user_role(request, resource, roles, aud='account'):
 
 def keycloak_get_clients(kc, payload):
     get_clients_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
-    res = r.get(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, params=payload)
+    res = r.get(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, params=payload, verify=settings.OIDC_VERIFY_SSL)
     if res:
         clients = res.json() 
         return clients
@@ -194,7 +195,9 @@ def keycloak_delete_client(kc, client_id):
         return False
     # Delete client
     delete_client_url = '{}/admin/realms/{}/clients/{}'.format(kc.admin_url, kc.realm, client_nid)
-    res = r.delete(delete_client_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.delete(delete_client_url,
+                   headers={'Authorization': 'bearer '+kc.token},
+                   verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -215,7 +218,10 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
                   'redirectUris': redirectUris}
     logger.debug("Client rep: ")
     logger.debug(client_rep)
-    res = r.post(create_client_url, json=client_rep, headers={'Authorization': 'bearer '+kc.token})
+    res = r.post(create_client_url,
+                 json=client_rep,
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
     if res:
         logger.debug('Created new client with clientId {}'.format(client_id))
         logger.debug('Status code returned: {}'.format(res.status_code))
@@ -228,7 +234,7 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
 
 def keycloak_get_client_secret(kc, client_nid):
     get_client_secret_url = '{}/admin/realms/{}/clients/{}/client-secret'.format(kc.admin_url, kc.realm, client_nid)
-    res = r.get(get_client_secret_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.get(get_client_secret_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
     if res:
         res = res.json()
         if 'value' in res:
@@ -244,7 +250,10 @@ def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect',
     client_scope_body = {'name': scope_name,
                         'protocol': 'openid-connect',
                         'attributes': {'include.in.token.scope': 'true', 'display.on.consent.screen': 'true'}}
-    res = r.post(client_scope_url, json=client_scope_body, headers={'Authorization': 'bearer '+kc.token})
+    res = r.post(client_scope_url,
+                 json=client_scope_body,
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -255,7 +264,7 @@ def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect',
 
 def keycloak_get_client_scope_id(kc, scope_name):
     client_scope_url = '{}/admin/realms/{}/client-scopes'.format(kc.admin_url, kc.realm)
-    res = r.get(client_scope_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.get(client_scope_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
     if res:
         scopes = res.json()
         scope_id = None
@@ -272,7 +281,9 @@ def keycloak_get_client_scope_id(kc, scope_name):
 def keycloak_delete_client_scope(kc, scope_id):
     # /{realm}/client-scopes/{id}
     client_scope_url = '{}/admin/realms/{}/client-scopes/{}'.format(kc.admin_url, kc.realm, scope_id)
-    res = r.delete(client_scope_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.delete(client_scope_url,
+                   headers={'Authorization': 'bearer '+kc.token},
+                   verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -293,7 +304,8 @@ def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
 
     res = r.post(create_client_scope_mapper_url,
                  json=scope_mapper,
-                 headers={'Authorization': 'bearer '+kc.token})
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -304,7 +316,9 @@ def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
 
 def keycloak_add_scope_to_client(kc, client_id, scope_id):
     add_default_scope_url = '{}/admin/realms/{}/clients/{}/default-client-scopes/{}'.format(kc.admin_url, kc.realm, client_id, scope_id)
-    res = r.put(add_default_scope_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.put(add_default_scope_url,
+                headers={'Authorization': 'bearer '+kc.token},
+                verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -316,7 +330,10 @@ def keycloak_add_scope_to_client(kc, client_id, scope_id):
 def keycloak_create_client_role(kc, client_nid, role_name, session):
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
     role_rep = {'name': role_name}
-    res = session.post(client_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token, })
+    res = session.post(client_role_url,
+                      json=role_rep,
+                      headers={'Authorization': 'bearer '+kc.token},
+                      verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
@@ -327,7 +344,10 @@ def keycloak_create_client_role(kc, client_nid, role_name, session):
 
 def keycloak_get_user_id(kc, username):
     get_users_url =  '{}/admin/realms/{}/users'.format(kc.admin_url, kc.realm)
-    res = r.get(get_users_url, params={'username': username}, headers={'Authorization': 'bearer '+kc.token}).json()
+    res = r.get(get_users_url,
+                params={'username': username},
+                headers={'Authorization': 'bearer '+kc.token},
+                verify=settings.OIDC_VERIFY_SSL).json()
     if not res:
         print('Failed to get user id.')
         print('Status code: '+str(res.status_code))
@@ -343,7 +363,9 @@ def keycloak_get_client_role_id(kc, role_name, client_nid, session=[]):
     if not session:
         session = r.session()
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
-    res = r.get(client_role_url, headers={'Authorization': 'bearer '+kc.token})
+    res = r.get(client_role_url,
+                headers={'Authorization': 'bearer '+kc.token},
+                verify=settings.OIDC_VERIFY_SSL)
     if res:
         client_roles = res.json()
         for role in client_roles:
@@ -370,13 +392,19 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, sessio
     role_rep = [{'name': role_name, 'id': role_id}]
     if action=='add':
         print(add_user_to_role_url)
-        res = session.post(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+        res = session.post(add_user_to_role_url,
+                           json=role_rep,
+                           headers={'Authorization': 'bearer '+kc.token},
+                           verify=settings.OIDC_VERIFY_SSL)
     elif action=='delete':
         import json
         print('deleting...')
         print(add_user_to_role_url)
         print(json.dumps(role_rep))
-        res = r.delete(add_user_to_role_url, json=role_rep, headers={'Authorization': 'bearer '+kc.token})
+        res = r.delete(add_user_to_role_url,
+                       json=role_rep,
+                       headers={'Authorization': 'bearer '+kc.token},
+                       verify=settings.OIDC_VERIFY_SSL)
     if res:
         return True
     else:
