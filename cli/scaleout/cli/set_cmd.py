@@ -51,6 +51,6 @@ def secure_cmd(ctx, secure):
 def project_cmd(ctx, project):
     if not project:
         project = input('Project: ')
-
-    client = ctx.obj['CLIENT']
+    from scaleout.studioclient import StudioClient
+    client = StudioClient()
     client.set_project(project)
