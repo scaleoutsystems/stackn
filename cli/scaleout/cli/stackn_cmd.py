@@ -12,14 +12,16 @@ from .helpers import create_table
 #               )
 
 @main.command('setup')
+@click.option('--secure/--insecure', default=True)
 @click.pass_context
-def setup_cmd(ctx):
-    login()
+def setup_cmd(ctx, secure):
+    login(secure=secure)
 
 @main.command('login')
+@click.option('--secure/--insecure', default=True)
 @click.pass_context
-def login_cmd(ctx):
-    stackn_config, load_status = get_stackn_config()
+def login_cmd(ctx, secure):
+    stackn_config, load_status = get_stackn_config(secure=secure)
     if not load_status:
         print('Failed to load STACKn config.')
         return

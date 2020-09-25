@@ -174,6 +174,11 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     print(RELEASE_NAME)
     print(instance.created_by.username)
     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
+    
+    skip_tls = 0
+    if not settings.OIDC_VERIFY_SSL:
+        skip_tls = 1
+        print("WARNING: Skipping TLS verify.")
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -195,7 +200,8 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.realm': settings.KC_REALM,
                   'gatekeeper.client_secret': client_secret,
                   'gatekeeper.client_id': client_id,
-                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH}
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
+                  'gatekeeper.skip_tls': str(skip_tls)}
 
     
     print('creating chart')

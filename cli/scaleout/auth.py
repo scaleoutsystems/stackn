@@ -11,9 +11,9 @@ import logging
 
 logger = logging.getLogger('cli')
 
-def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn'):
+def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn', secure=True):
     discovery_url = '{}/auth/realms/{}'.format(keycloak_url, realm)
-    res = requests.get(discovery_url)
+    res = requests.get(discovery_url, verify=secure)
     if res:
         realm_info = res.json()
         public_key = realm_info['public_key']
@@ -26,7 +26,7 @@ def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api',
            'grant_type': 'password',
            'username': username,
            'password': password}
-    res = requests.post(token_url, data=req)
+    res = requests.post(token_url, data=req, verify=secure)
     if res:
         res = res.json()
     else:
@@ -70,7 +70,7 @@ def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, st
     if not status:
         logger.info('Could not write tokens -- failed to write to file.')
 
-def get_stackn_config():
+def get_stackn_config(secure=True):
     # if not os.path.exists(os.path.expanduser('~/.scaleout/stackn.json')):
     #     print('You need to setup STACKn first.')
     #     login()
@@ -79,7 +79,7 @@ def get_stackn_config():
     if not load_status:
         print('Failed to load stackn config file.')
         print('You need to setup STACKn first.')
-        login()
+        login(secure=secure)
         stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
         # return None
 
@@ -100,7 +100,7 @@ def get_remote_config():
         print('No active project: Create a new project or set an existing project.')
         return [], False
 
-def get_token(client_id='studio-api', realm='STACKn'):
+def get_token(client_id='studio-api', realm='STACKn', secure=True):
     # stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
     # if not load_status:
     #     print('Failed to load stackn config file.')
@@ -128,7 +128,7 @@ def get_token(client_id='studio-api', realm='STACKn'):
         req = {'grant_type': 'refresh_token',
                'client_id': client_id,
                'refresh_token': token_config['refresh_token']}
-        res = requests.post(token_url, data=req)
+        res = requests.post(token_url, data=req, verify=secure)
         resp = res.json()
         if 'access_token' in resp:
             access_token = resp['access_token']
@@ -149,7 +149,7 @@ def get_token(client_id='studio-api', realm='STACKn'):
 
 
 
-def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[], studio_host=[]):
+def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[], studio_host=[], secure=True):
     """ Login to Studio services. """
     if not deployment:
         deployment = input('Name: ')
@@ -159,7 +159,7 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
         studio_host = input('Studio host: ')
     username = input('Username: ')
     password = getpass()
-    access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host)
+    access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host, secure=secure)
     # dirname = base64.urlsafe_b64encode(host.encode("utf-8")).decode("utf-8")
     dirpath = os.path.expanduser('~/.scaleout/'+deployment)
     if not os.path.exists(dirpath):

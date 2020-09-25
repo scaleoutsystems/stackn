@@ -37,12 +37,20 @@ def remote_cmd(ctx, remote):
             sauth.write_stackn_config(stackn_config)
             print('New context: '+remote)
 
+@set_cmd.command('mode')
+@click.option('--secure/--insecure', default=True)
+@click.pass_context
+def secure_cmd(ctx, secure):
+    stackn_config, load_status = sauth.get_stackn_config()
+    stackn_config['secure'] = secure
+    sauth.write_stackn_config(stackn_config)
+
 @set_cmd.command('project')
 @click.option('-p', '--project', required=False)
 @click.pass_context
 def project_cmd(ctx, project):
     if not project:
         project = input('Project: ')
-
-    client = ctx.obj['CLIENT']
+    from scaleout.studioclient import StudioClient
+    client = StudioClient()
     client.set_project(project)
