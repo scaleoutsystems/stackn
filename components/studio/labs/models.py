@@ -116,7 +116,10 @@ def pre_save_labs(sender, instance, using, **kwargs):
     
     instance.keycloak_client_id = client_id
     instance.appname = '{}-{}-lab'.format(instance.slug, instance.project.slug)
-
+    skip_tls = 0
+    if not settings.OIDC_VERIFY_SSL:
+        skip_tls = 1
+        print("WARNING: Skipping TLS verify.")
     parameters = {'release': RELEASE_NAME,
                   'chart': 'lab',
                   'global.domain': settings.DOMAIN,
@@ -125,7 +128,8 @@ def pre_save_labs(sender, instance, using, **kwargs):
                   'gatekeeper.realm': settings.KC_REALM,
                   'gatekeeper.client_secret': client_secret,
                   'gatekeeper.client_id': client_id,
-                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
+                  'gatekeeper.skip_tls': str(skip_tls)
                   }
 
     ingress_secret_name = 'prod-ingress'
