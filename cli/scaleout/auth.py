@@ -123,7 +123,7 @@ def get_token(client_id='studio-api', realm='STACKn', secure=True):
         # print('Token valid for user '+access_token_json['preferred_username'])
     except:
         # Try to refresh token
-        token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(token_config['keycloak_url'], realm)
+        token_url = os.path.join(token_config['keycloak_url'], 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
         req = {'grant_type': 'refresh_token',
                'client_id': client_id,
                'refresh_token': token_config['refresh_token']}
