@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger('cli')
 
 def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn', secure=True):
-    discovery_url = '{}/auth/realms/{}'.format(keycloak_url, realm)
+    discovery_url = os.path.join(keycloak_url, 'auth/realms/{}'.format(realm))
     res = requests.get(discovery_url, verify=secure)
     if res:
         realm_info = res.json()
@@ -20,8 +20,7 @@ def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api',
     else:
         print('Failed to discover realm settings: '+realm)
         return None
-    
-    token_url = '{}/auth/realms/{}/protocol/openid-connect/token'.format(keycloak_url, realm)
+    token_url = os.path.join(keycloak_url, 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
     req = {'client_id': client_id,
            'grant_type': 'password',
            'username': username,
