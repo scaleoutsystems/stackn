@@ -9,20 +9,24 @@ For deployment of STACKn, see [[...]]...
 Clone the STACKn and Charts repositories:
 ```
 git clone https://github.com/scaleoutsystems/stackn.git
-git clone https://github.com/scaleoutsystems/charts
+git clone https://github.com/scaleoutsystems/charts.git
 ```
 In both repositories, check out the ``develop`` branch.
 
 We use Gitflow: https://datasift.github.io/gitflow/IntroducingGitFlow.html 
 
 ## STACKn CLI
+Install setup tools (if not already installed):
+```
+sudo apt install python-setuptools
+```
 
 Setup and install the CLI:
 ```
 cd stackn/cli
 python3 setup.py install
 ```
-Run ``stackn setup`` and point to your deployment:
+Run ``stackn setup --insecure`` and point to your deployment:
 ```
 Name: local
 Keycloak host: https://keycloak.192.168.64.2.nip.io
@@ -30,7 +34,7 @@ Studio host: https://studio.192.168.64.2.nip.io
 Username: stefan@scaleoutsystems.com
 Password:
 ```
-This assumes that you already have a deployment of STACKn, and that you have a user setup in that deployment. This will not create a new user.
+This assumes that you already have a deployment of STACKn, and that you have a user setup in that deployment. This will not create a new user. If you have a valid SSL certificate, you won't have to use the ``--insecure`` option.
 
 ## Telepresence
 
