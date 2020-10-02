@@ -13,7 +13,7 @@ git clone https://github.com/scaleoutsystems/charts
 ```
 In both repositories, check out the ``develop`` branch.
 
-We use Gitflow:  
+We use Gitflow: https://datasift.github.io/gitflow/IntroducingGitFlow.html 
 
 ## STACKn CLI
 
