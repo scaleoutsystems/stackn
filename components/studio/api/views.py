@@ -175,6 +175,7 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
 
         instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user)
+        instance.params = {"test":"abc"}
         instance.save()
         
         return HttpResponse('ok', status=200)

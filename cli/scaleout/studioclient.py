@@ -62,13 +62,14 @@ class StudioClient():
             self.project_slug = self.project['slug']
 
         self.access_token, self.token_config = sauth.get_token(secure=self.secure_mode)
+        if self.token_config['studio_url'][-1] == '/':
+            self.token_config['studio_url'] = self.token_config['studio_url'][:-1]
         self.api_url = urljoin(self.token_config['studio_url'], '/api')
         self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
         # Fetch and set all active API endpoints
         self.get_endpoints()
 
     def get_endpoints(self):
-        # endpoints = self.list_endpoints()
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
@@ -388,10 +389,12 @@ class StudioClient():
         print('Released model: {}, release_type: {}'.format(model_name, release_type))
         return True
 
-    def deploy_model(self, model_name, model_version, deploy_context):
-
+    def deploy_model(self, model_name, model_version, deploy_context, settings=[]):
+        if settings:
+            settings_file = open(settings, 'r')
+            deploy_config = json.loads(settings_file.read())
         url = self.endpoints['deploymentInstances']+'build_instance/'
-        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context}
+        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context, "deploy_config": deploy_config}
         r = requests.post(url, json=bd_data, headers=self.auth_headers, verify=self.secure_mode)
         if not r:
             print('Failed to deploy model.')

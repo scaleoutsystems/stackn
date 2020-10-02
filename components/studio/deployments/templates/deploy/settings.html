@@ -17,24 +17,24 @@
                 <label for="id_replicas" class="col-sm-2 col-form-label">Replicas:</label>
                 <div class="col-sm-3">
                     <input class="form-control" type="number" name="replicas" required="" id="id_replicas"
-                           placeholder="1">
+                           placeholder="1" value="{{ replicas }}">
                 </div>
             </div>
 
             <fieldset class="form-group fieldset-custom">
                 <legend class="fieldset-legend-custom">Limits</legend>
                 <div class="form-group row">
-                    <label for="id_limits_cpu" class="col-sm-2 col-form-label">CPU:</label>
+                    <label for="id_limits_cpu" class="col-sm-2 col-form-label">CPU (m):</label>
                     <div class="col-sm-3">
                         <input class="form-control" type="number" name="limits_cpu" required="" id="id_limits_cpu"
-                               placeholder="m">
+                               placeholder="m" value="{{ cpu_limit }}">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="id_limits_memory" class="col-sm-2 col-form-label">Memory:</label>
+                    <label for="id_limits_memory" class="col-sm-2 col-form-label">Memory (Mi):</label>
                     <div class="col-sm-3">
                         <input class="form-control" type="number" name="limits_memory" required="" id="id_limits_memory"
-                               placeholder="Mi">
+                               placeholder="Mi" value="{{ mem_limit }}">
                     </div>
                 </div>
             </fieldset>
@@ -42,17 +42,17 @@
             <fieldset class="form-group fieldset-custom">
                 <legend class="fieldset-legend-custom">Requests</legend>
                 <div class="form-group row">
-                    <label for="id_requests_cpu" class="col-sm-2 col-form-label">CPU:</label>
+                    <label for="id_requests_cpu" class="col-sm-2 col-form-label">CPU (m):</label>
                     <div class="col-sm-3">
                         <input class="form-control" type="number" name="requests_cpu" required="" id="id_requests_cpu"
-                               placeholder="m">
+                               placeholder="m" value="{{ cpu_request }}">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="id_requests_memory" class="col-sm-2 col-form-label">Memory:</label>
+                    <label for="id_requests_memory" class="col-sm-2 col-form-label">Memory (Mi):</label>
                     <div class="col-sm-3">
                         <input class="form-control" type="number" name="requests_memory" required=""
-                               id="id_requests_memory" placeholder="Mi">
+                               id="id_requests_memory" placeholder="Mi" value="{{ mem_request }}">
                     </div>
                 </div>
             </fieldset>

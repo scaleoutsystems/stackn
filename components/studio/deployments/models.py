@@ -93,8 +93,6 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    # sample_input = models.TextField(blank=True, null=True)
-    # sample_output = models.TextField(blank=True, null=True)
     created_by = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
@@ -121,6 +119,7 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
 
 @receiver(pre_save, sender=DeploymentInstance, dispatch_uid='deployment_pre_save_signal')
 def pre_save_deployment(sender, instance, using, **kwargs):
+    print(kwargs)
     model = instance.model
 
     if model.status == 'DP':
