@@ -202,8 +202,9 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
                   'gatekeeper.skip_tls': str(skip_tls)}
 
-    
+    parameters.update(instance.params)
     print('creating chart')
+    print(instance.params)
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
                              chart='deploy',
