@@ -119,7 +119,6 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
 
 @receiver(pre_save, sender=DeploymentInstance, dispatch_uid='deployment_pre_save_signal')
 def pre_save_deployment(sender, instance, using, **kwargs):
-    print(kwargs)
     model = instance.model
 
     if model.status == 'DP':
@@ -204,7 +203,6 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     parameters.update(instance.params)
     print('creating chart')
-    print(instance.params)
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
                              chart='deploy',

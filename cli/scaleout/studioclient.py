@@ -396,7 +396,6 @@ class StudioClient():
             deploy_config = json.loads(settings_file.read())
         url = self.endpoints['deploymentInstances']+'build_instance/'
         bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context, "deploy_config": deploy_config}
-        print(bd_data)
         r = requests.post(url, json=bd_data, headers=self.auth_headers, verify=self.secure_mode)
         if not r:
             print('Failed to deploy model.')
