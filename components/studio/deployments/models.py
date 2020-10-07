@@ -93,8 +93,6 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    # sample_input = models.TextField(blank=True, null=True)
-    # sample_output = models.TextField(blank=True, null=True)
     created_by = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
@@ -203,7 +201,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
                   'gatekeeper.skip_tls': str(skip_tls)}
 
-    
+    parameters.update(instance.params)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',

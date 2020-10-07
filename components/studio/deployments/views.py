@@ -72,6 +72,7 @@ def deploy(request, id):
 def serve_settings(request, id, project):
     # model = Model.objects.get(id=id)
     # print(request.user)
+    
     template = 'deploy/settings.html'
     if request.user.is_authenticated and request.user and project is not None:
         proj_obj = Project.objects.get(slug=project)
@@ -83,10 +84,18 @@ def serve_settings(request, id, project):
     deployment = DeploymentInstance.objects.get(id=id)
     chart = deployment.helmchart
     params = literal_eval(chart.params)
+    # Access keys with dot in Django template...
+    replicas = params['replicas']
+    cpu_limit = params['resources.limits.cpu']
+    mem_limit = params['resources.limits.memory']
+    cpu_request = params['resources.requests.cpu']
+    mem_request = params['resources.requests.memory']
+    # print(params)
     model = deployment.model
     if request.method == 'POST' and is_authorized:
         form = SettingsForm(request.POST)
         if form.is_valid():
+            # print('Form is valid')
             params['replicas'] = request.POST.get('replicas', 1)
             params['resources.limits.cpu'] = request.POST.get('limits_cpu', 1000)
             params['resources.limits.memory'] = request.POST.get('limits_memory', 2048)
@@ -95,7 +104,10 @@ def serve_settings(request, id, project):
             print(params)
             deployment.helmchart.params = params
             deployment.helmchart.save()
-    form = SettingsForm(initial={'replicas': params['replicas']})
+        else:
+            print('Form is not valid; not updating settings.')
+    form = SettingsForm(initial={'replicas': params['replicas'],
+                                 'limits_cpu': params['resources.limits.cpu']})
 
     return render(request, template, locals())
 

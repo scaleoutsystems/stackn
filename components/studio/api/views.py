@@ -175,6 +175,11 @@ class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixi
             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
 
         instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user)
+        instance.params = request.data['deploy_config']
+        # TODO: Verify that the user is allowed to set the parameters in deploy_config.
+        #       This whole endpoint needs to be refactored:
+        #         1. Make consistent with rest of API
+        #         2. Authorization via ProjectPermissions.
         instance.save()
         
         return HttpResponse('ok', status=200)

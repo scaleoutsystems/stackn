@@ -43,10 +43,11 @@ def create_deployment_definition(ctx, name, filepath, path_predict=''):
 @click.option('-m', '--model', required=True)
 @click.option('-v', '--model-version', default='latest')
 @click.option('-d', '--deploymentdefinition', required=True)
+@click.option('-s', '--settings', required=False)
 @click.pass_context
-def create_deployment_cmd(ctx, model, deploymentdefinition, model_version=[]):
+def create_deployment_cmd(ctx, model, deploymentdefinition, model_version=[], settings=[]):
     client = ctx.obj['CLIENT']
-    client.deploy_model(model, model_version, deploymentdefinition)
+    client.deploy_model(model, model_version, deploymentdefinition, settings)
 
 
 # Create project
