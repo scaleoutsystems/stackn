@@ -165,7 +165,4 @@ helm install stackn ../charts/scaleout/stackn -f local.yaml
 ```
 kubectl get pods
 ```
-- In order to display contents of the pod:
-```
-kubectl describe pod (name of the pod)
-```
+
