@@ -105,9 +105,9 @@
   
   
   
-For Linux Ubuntu Installtion:
- 
-Installing Helm
+For Linux 
+
+- Installing Helm
 ```
 sudo snap install helm –classic
 ```
@@ -141,7 +141,7 @@ cd stackn-local
  ```
 - Then copy local.yaml from charts/scaleout/stackn/examples/:
 ```
-cp ../charts/scaleout/stackn/examples/local.yaml 
+cp ../charts/scaleout/stackn/examples/local.yaml ../stackn-local
 ```
 - Get your config for access to the cluster: 
 ```
@@ -163,9 +163,9 @@ helm install stackn ../charts/scaleout/stackn -f local.yaml
 ```
 - Get to see if everything is working fine.
 ```
-Kubectl get pods
+kubectl get pods
 ```
-- IN order to display contents of the pod:
+- In order to display contents of the pod:
 ```
 kubectl describe pod (name of the pod)
 ```
