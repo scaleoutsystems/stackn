@@ -148,9 +148,9 @@ microk8s kubectl config view --raw > config
 ```
 cp config ~/.kube/config
  ```
-Now you don't have to specify kubeconfig with ``kubectl`` and ``helm``. If you're managing multiple clusters, you can use the ``kubectx`` tool to be able to conveniently switch between different contexts.
-- Now edit ``local.yaml``:
- - Replace ``cluster_config`` with your config file.
+Now you don't have to specify kubeconfig with ``kubectl`` and ``helm``. If you're managing multiple clusters, you can use the ``kubectx`` tool to be able to conveniently switch between different contexts. Now edit ``local.yaml``:
+
+- Replace ``cluster_config`` with your config file.
  
 - And finally, deploy STACKn:
 ```
