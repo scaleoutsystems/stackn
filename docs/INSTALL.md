@@ -105,13 +105,13 @@
   
   
   
-For Linux 
+### Linux 
 
-- Installing Helm
+- Installing Helm:
 ```
 sudo snap install helm –classic
 ```
-- Installing kubectl
+- Installing kubectl:
 ```
 sudo snap install kubectl –classic
 ```
@@ -129,10 +129,7 @@ sudo microk8s enable dns storage rbac ingress
  ```
 - Clone the Scaleout charts repo and check out the develop branch:
 ```
-git clone https://github.com/scaleoutsystems/charts.git
-cd charts
-git checkout develop
-cd ..
+git clone https://github.com/scaleoutsystems/charts.git -b develop
  ```
 - Create a folder where you can keep configuration files for your deployment:
 ```
@@ -141,22 +138,20 @@ cd stackn-local
  ```
 - Then copy local.yaml from charts/scaleout/stackn/examples/:
 ```
-cp ../charts/scaleout/stackn/examples/local.yaml ../stackn-local
+cp ../charts/scaleout/stackn/examples/local.yaml .
 ```
 - Get your config for access to the cluster: 
 ```
 microk8s kubectl config view --raw > config
  ```
-- Edit config: Change the line 
-```
-server: https://127.0.0.1:16443
-to
-server: https://your-ip:16443
- ```
 - If you want to make this cluster the default cluster: 
 ```
 cp config ~/.kube/config
  ```
+Now you don't have to specify kubeconfig with ``kubectl`` and ``helm``. If you're managing multiple clusters, you can use the ``kubectx`` tool to be able to conveniently switch between different contexts.
+- Now edit ``local.yaml``:
+ - Replace ``cluster_config`` with your config file.
+ 
 - And finally, deploy STACKn:
 ```
 helm install stackn ../charts/scaleout/stackn -f local.yaml
@@ -165,4 +160,3 @@ helm install stackn ../charts/scaleout/stackn -f local.yaml
 ```
 kubectl get pods
 ```
-
