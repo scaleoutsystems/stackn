@@ -4,6 +4,8 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
+import yaml
+import json
 from projects.helpers import get_minio_keys
 import os
 import requests
@@ -179,6 +181,26 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         skip_tls = 1
         print("WARNING: Skipping TLS verify.")
 
+    
+    # Default is that access is private.
+    rules = """resources:
+    - uri: /*
+      roles:
+      - {}:owner
+    """.format(client_id)
+
+    access_rules = {"gatekeeper.rules": rules}
+
+    if 'access' in instance.params:
+        print(instance.params['access'])
+        if instance.params['access'] == 'public':
+            # No rule means open to anyone.
+            print("Public endpoint")
+            access_rules = {"gatekeeper.rules": "public"}
+        del instance.params['access']
+
+    print(instance.params)
+
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
                   'namespace': settings.NAMESPACE,
@@ -202,6 +224,8 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
                   'gatekeeper.skip_tls': str(skip_tls)}
 
+    parameters.update(instance.params)
+    parameters.update(access_rules)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
