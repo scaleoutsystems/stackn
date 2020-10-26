@@ -612,7 +612,6 @@ class StudioClient():
         params = {"project": self.project['id'], "model": model['id']}
         res = self.get_deployment(params)
         url = 'https://'+res[0]['endpoint']+res[0]['path']+'predict/'
-        print(url)
         res = requests.post(url,
                      headers=self.auth_headers,
                      json=json.loads(inp),
