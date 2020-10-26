@@ -51,6 +51,7 @@ def status_cmd(ctx):
 @click.option('-i', '--inp', required=True)
 @click.pass_context
 def predict_cmd(ctx, model, version, inp):
+    print('hello')
     client = ctx.obj['CLIENT']
     client.predict(model, inp, version)
     # token, config = get_token()

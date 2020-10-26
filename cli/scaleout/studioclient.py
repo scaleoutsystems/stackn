@@ -364,7 +364,7 @@ class StudioClient():
             if files:
                 newest = os.path.join('models', files[-1])
             print(newest)
-            res = subprocess.run(['tar', 'czvf', model_file, 'models', 'requirements.txt', 'setup.py', 'src'], stdout=subprocess.PIPE)
+            res = subprocess.run(['tar', 'czvf', model_file, 'models', 'requirements.txt', 'setup.py', 'src'], stdout=subprocess.PIPE) #, 'dataset/interim/preprocessed'
 
         repo = self.get_repository()
         repo.bucket = 'models'
@@ -610,6 +610,7 @@ class StudioClient():
         params = {"project": self.project['id'], "model": model['id']}
         res = self.get_deployment(params)
         url = 'https://'+res[0]['endpoint']+res[0]['path']+'predict/'
+        print(url)
         res = requests.post(url,
                      headers=self.auth_headers,
                      json=json.loads(inp),
