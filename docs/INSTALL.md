@@ -102,3 +102,61 @@
   Then ``open ca.crt``, and add it to ``System`` in your key-chain. Right-click the entry, select ``Get Info``, expand ``Trust`` and set ``When using this certificate`` to ``Always Trust``.
 
   Once all the pods have started (check with ``kubectl --kubeconfig config get po``), you can browse to ``Studio`` at ``studio.your-ip.nip.io``. It could take up to 10 minutes to start all the pods.
+  
+  
+  
+### Linux 
+
+- Installing Helm:
+```
+sudo snap install helm –classic
+```
+- Installing kubectl:
+```
+sudo snap install kubectl –classic
+```
+- Installing microk8s:
+```
+sudo snap install microk8s –classic
+```
+- Start microk8s:
+```
+microk8s start
+```
+- Enable add-ons: 
+```
+sudo microk8s enable dns storage rbac ingress
+ ```
+- Clone the Scaleout charts repo and check out the develop branch:
+```
+git clone https://github.com/scaleoutsystems/charts.git -b develop
+ ```
+- Create a folder where you can keep configuration files for your deployment:
+```
+mkdir stackn-local
+cd stackn-local
+ ```
+- Then copy local.yaml from charts/scaleout/stackn/examples/:
+```
+cp ../charts/scaleout/stackn/examples/local.yaml .
+```
+- Get your config for access to the cluster: 
+```
+microk8s kubectl config view --raw > config
+ ```
+- If you want to make this cluster the default cluster: 
+```
+cp config ~/.kube/config
+ ```
+Now you don't have to specify kubeconfig with ``kubectl`` and ``helm``. If you're managing multiple clusters, you can use the ``kubectx`` tool to be able to conveniently switch between different contexts. Now edit ``local.yaml``:
+
+- Replace ``cluster_config`` with your config file.
+ 
+- And finally, deploy STACKn:
+```
+helm install stackn ../charts/scaleout/stackn -f local.yaml
+```
+- Get to see if everything is working fine.
+```
+kubectl get pods
+```

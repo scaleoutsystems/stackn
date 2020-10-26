@@ -17,7 +17,7 @@
         <form method="post">
             {% csrf_token %}
 
-            <p>Are you sure you want to delete permanently {{ model.name }}:{{ model.tag }}?</p>
+            <p>Are you sure you want to delete permanently {{ model.name }}:{{ model.version }} ?</p>
             <input type="submit" class="btn btn-primary" value="Confirm">
         </form>
     </div>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -95,7 +96,7 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    created_by = models.CharField(max_length=512)
+    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 

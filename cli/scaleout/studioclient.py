@@ -528,6 +528,8 @@ class StudioClient():
         else:
             params = {'name': name}
         models  = self.get_models(self.project['id'], params)
+        if not models:
+            print("No models found with the given name and/or version.")
         for model in models:
             url = '{}/{}'.format(self.endpoints['models'].format(self.project['id']), model['id'])
             r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)

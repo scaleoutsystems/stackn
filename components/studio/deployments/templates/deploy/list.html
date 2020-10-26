@@ -63,8 +63,12 @@
                                 Callrate: 5 calls/sec
                             </td>
                         {% endif %}
-                        <td><a href="{% url 'deployments:serve_settings' project.slug deploy.id %}">Settings</a></td>
-                        <td><a href="{% url 'deployments:predict' project.slug deploy.id %}">Predict</a></td>
+                        <td>
+                            <a href="{% url 'deployments:serve_settings' project.slug deploy.id %}">Settings</a>
+                            <a href="{% url 'deployments:predict' project.slug deploy.id %}" style="padding-left: 5px;">
+                                Predict
+                            </a>
+                        </td>
                     </tr>
                     {% if is_authorized %}
                         <script>

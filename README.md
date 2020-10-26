@@ -162,6 +162,9 @@ https://github.com/scaleoutsystems/aml-example-project
 
 Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+# Where is STACKn used?
+STACKn is used in various places, examples include [SciLifeLab Data Center](https://www.scilifelab.se/data) and within the EU-funded project [EOSC-Nordics](https://www.eosc-nordic.eu/).
+
 # Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.
 - morganekmefjord
