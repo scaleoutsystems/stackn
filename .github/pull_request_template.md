@@ -24,7 +24,7 @@ _If you're unsure about any of the items below, don't hesitate to ask. We're her
 This is simply a reminder of what we are going to look for before merging your code._
 
 - [ ] This pull request is against **develop** branch (not applicable for hotfixes)
-- [ ] I have included a link to issue on GitHub or JIRA (if any)
+- [ ] I have included a link to the issue on GitHub or JIRA (if any)
 - [ ] I have included migration files (if there are changes to the model classes)
 - [ ] I have read the [CONTRIBUTING](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md) doc
 - [ ] I have included tests to complement my changes
