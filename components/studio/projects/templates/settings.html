@@ -33,7 +33,8 @@
             <button type="submit" class="btn btn-primary" name="save">Save</button>
         </form>
     </div>
-
+    
+    {% if user_permissions.view_credentials %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>S3 Credentials</h5>
         <div class="form-group row">
@@ -60,29 +61,7 @@
             </div>
         </div>
     </div>
-
-    <div class="container-fluid" style="padding:15px;">
-        <h5>Environment</h5>
-        <h6>Settings for environment</h6>
-        <form action="{% url 'projects:change_environment' request.user project.slug %}" method="POST">
-            {% csrf_token %}
-
-            <div class="form-group row">
-                <label for="id_environment" class="col-form-label col-sm-2 pt-0">Environment</label>
-                <div class="col-sm-10">
-                    <select name="environment" class="form-control" id="id_environment">
-                        {% for environment in environments %}
-                        <option value="{{ environment.slug }}"
-                                {% if environment.id == project.environment.id %} selected="selected" {% endif %}
-                        > {{ environment.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-    </div>
+    {% endif %}
 
     <!-- Not available with the first release!
 
@@ -149,6 +128,7 @@
         </form>
     </div>
 
+    {% if user_permissions.add_member %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>Grant access</h5>
         <p>For granting access to this project, select one or more users from the list below.</p>
@@ -169,14 +149,7 @@
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
-
-    <div class="container-fluid" style="padding:15px;">
-      <h5>Project Settings</h5>
-      <h6 style="padding-bottom: 15px;">
-        You need a project settings file to use the CLI.
-      </h6>
-      <a href="{% url 'projects:download_settings' request.user project.slug %}" class="btn btn-sm btn-primary">Download project.yaml</a>
-    </div>
+    {% endif %}
 
     <div class="container-fluid" style="padding:15px;">
         <h5>Publish project on GitHub</h5>

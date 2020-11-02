@@ -1,3 +1,5 @@
+![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
+
 <a href="#what-is-stackn">What is STACKn</a><br>
 <a href="#why-use-stackn">Why use STACKn</a><br>
 <a href="#core-features">Core features</a><br>
@@ -159,6 +161,9 @@ https://github.com/scaleoutsystems/aml-example-project
 
 
 Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+# Where is STACKn used?
+STACKn is used in various places, examples include [SciLifeLab Data Center](https://www.scilifelab.se/data) and within the EU-funded project [EOSC-Nordics](https://www.eosc-nordic.eu/).
 
 # Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.

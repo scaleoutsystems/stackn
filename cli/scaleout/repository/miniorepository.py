@@ -32,21 +32,21 @@ class MINIORepository(Repository):
             self.secure_mode = False
 
         if not self.secure_mode:
-            print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
-
+            # print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         if not self.secure_mode:
             from urllib3.poolmanager import PoolManager
             manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
             self.client = Minio("{}".format(config['minio_host']),
                                 access_key=access_key,
                                 secret_key=secret_key,
-                                secure=self.secure_mode, http_client=manager)
+                                http_client=manager)
         else:
             minio_url = "{}".format(config['minio_host'])
             self.client = Minio(minio_url,
                                 access_key=access_key,
-                                secret_key=secret_key,
-                                secure=self.secure_mode)
+                                secret_key=secret_key)
 
         self.create_bucket(self.bucket)
 

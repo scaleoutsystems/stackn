@@ -78,6 +78,13 @@
             <a class="nav-link side-bar-text" href="{% url 'deployments:deployment_index' request.user project.slug %}">
                 Deployments
             </a>
+          </li>
+          <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/graph-up.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'monitor:overview' request.user project.slug %}">
+                Monitor
+            </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/toggles.svg' %}" alt="" width="24" height="24" title="Bootstrap"
@@ -102,3 +109,5 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+
+{% block extrascripts %} {% endblock %}

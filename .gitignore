@@ -1,5 +1,4 @@
 # Byte-compiled / optimized / DLL files
-migrations/
 .idea/
 .DS_Store
 __pycache__/
@@ -29,6 +28,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+Pipfile
+Pipfile.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -135,3 +136,4 @@ media/generators/
 media/visualisers/
 
 tele_settings.py
+tele_settings_worker.py

@@ -6,8 +6,6 @@ from django.utils.text import slugify
 import string
 import random
 
-DEFAULT_ENVIRONMENT_ID = 1
-
 
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
@@ -54,9 +52,7 @@ class ProjectManager(models.Manager):
 
     def create_project(self, name, owner, description, repository):
         letters = string.ascii_lowercase
-        slug = name.replace(" ","-").replace("_","-")
-        from .helpers import urlify
-        slug = urlify(slug)
+        slug = slugify(name)
         slug_extension = ''.join(random.choice(letters) for i in range(3))
 
         slug = '{}-{}'.format(slugify(slug), slug_extension)
@@ -92,6 +88,23 @@ class Project(models.Model):
     def __str__(self):
         return "Name: {} Description: {}".format(self.name, self.description)
 
-    environment = models.ForeignKey('projects.Environment', on_delete=models.DO_NOTHING, default=DEFAULT_ENVIRONMENT_ID)
     clone_url = models.CharField(max_length=512, null=True, blank=True)
+
+
+class ProjectLog(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    MODULE_CHOICES = [
+        ('DE', 'deployments'),
+        ('LA', 'labs'),
+        ('MO', 'models'),
+        ('PR', 'projects'),
+        ('RE', 'reports'),
+        ('UN', 'undefined'),
+    ]
+    module = models.CharField(max_length=2, choices=MODULE_CHOICES, default='UN')
+
+    headline = models.CharField(max_length=256)
+    description = models.CharField(max_length=512)
+    created_at = models.DateTimeField(auto_now_add=True)
 

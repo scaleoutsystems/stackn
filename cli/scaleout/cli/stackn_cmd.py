@@ -1,7 +1,7 @@
 import click
 from .main import main
 import requests
-from scaleout.auth import login, get_stackn_config, get_remote_config
+from scaleout.auth import login, get_stackn_config, get_remote_config, get_token
 from .helpers import create_table
 
 # @click.option('--daemon',
@@ -12,14 +12,16 @@ from .helpers import create_table
 #               )
 
 @main.command('setup')
+@click.option('--secure/--insecure', default=True)
 @click.pass_context
-def setup_cmd(ctx):
-    login()
+def setup_cmd(ctx, secure):
+    login(secure=secure)
 
 @main.command('login')
+@click.option('--secure/--insecure', default=True)
 @click.pass_context
-def login_cmd(ctx):
-    stackn_config, load_status = get_stackn_config()
+def login_cmd(ctx, secure):
+    stackn_config, load_status = get_stackn_config(secure=secure)
     if not load_status:
         print('Failed to load STACKn config.')
         return
@@ -42,3 +44,16 @@ def status_cmd(ctx):
             print('Project: '+stackn_config['active_project'])
         else:
             print('No active project; create a new project or set an existing project.')
+
+@main.command('predict')
+@click.option('-m', '--model', required=True)
+@click.option('-v', '--version')
+@click.option('-i', '--inp', required=True)
+@click.pass_context
+def predict_cmd(ctx, model, version, inp):
+    client = ctx.obj['CLIENT']
+    client.predict(model, inp, version)
+    # token, config = get_token()
+    # res = requests.post(url,
+    #                     headers={"Authorization": "Token "+token},
+    #                     json = inp)

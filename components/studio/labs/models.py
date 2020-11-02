@@ -1,9 +1,31 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete, pre_save
+from django.dispatch import receiver
+from django.conf import settings
+from django.db.models import Q
+from projects.helpers import get_minio_keys
+from django.core import serializers
+from .helpers import create_user_settings
+from rest_framework.renderers import JSONRenderer
 import uuid
 import yaml
+import json
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
+from deployments.models import HelmResource
+from projects.models import Environment, Flavor
+from projects.models import Project, ProjectLog
+from modules import keycloak_lib as keylib
+from rest_framework.serializers import ModelSerializer
+
+
+class ProjectSerializer(ModelSerializer):
+    class Meta:
+        model = Project
+        fields = (
+            'id', 'name', 'description', 'slug', 'owner', 'image', 'project_key', 'project_secret', 'updated_at',
+            'created_at', 'repository', 'repository_imported')
 
 
 class SessionManager(models.Manager):
@@ -15,7 +37,7 @@ class SessionManager(models.Manager):
         password = ''.join(secrets.choice(alphabet) for i in range(length))
         return password
 
-    def create_session(self, name, project, chart, settings, helm_repo=None):
+    def create_session(self, name, project, lab_session_owner, chart, settings, helm_repo=None):
         slug = slugify(name)
         key = self.generate_passkey()
         secret = self.generate_passkey(40)
@@ -23,6 +45,7 @@ class SessionManager(models.Manager):
         status = 'CR'
         session = self.create(name=name,
                               project=project,
+                              lab_session_owner=lab_session_owner,
                               status=status,
                               slug=slug,
                               session_key=key,
@@ -54,20 +77,113 @@ class Session(models.Model):
         (ABORTED, 'Aborted'),
     ]
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='session')
+    lab_session_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lab_session_owner')
 
-    session_key = models.CharField(max_length=512)
-    session_secret = models.CharField(max_length=512)
-    settings = models.TextField()
-    chart = models.CharField(max_length=512)
+    helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
+    keycloak_client_id = models.CharField(max_length=512)
+    appname = models.CharField(max_length=512)
+    flavor_slug = models.CharField(max_length=512)
+    environment_slug = models.CharField(max_length=512)
+
     helm_repo = models.CharField(max_length=1024, null=True, blank=True)
 
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-# class Chart(models.Model):
-#    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#    name = models.CharField(max_length=512, unique=False)
+@receiver(pre_delete, sender=Session, dispatch_uid='session_pre_delete_signal')
+def pre_delete_labs(sender, instance, using, **kwargs):
+    kc = keylib.keycloak_init()
+    keylib.keycloak_delete_client(kc, instance.keycloak_client_id)
+    
+    scope_id = keylib.keycloak_get_client_scope_id(kc, instance.keycloak_client_id+'-scope')
+    keylib.keycloak_delete_client_scope(kc, scope_id)
 
-#    created_at = models.DateTimeField(auto_now_add=True)
-#    updated_at = models.DateTimeField(auto_now=True)
+    l = ProjectLog(project=instance.project, module='LA', headline='Lab Session',
+                       description='Lab Session {name} has been removed'.format(name=instance.name))
+    l.save()
+
+@receiver(pre_save, sender=Session, dispatch_uid='session_pre_save_signal')
+def pre_save_labs(sender, instance, using, **kwargs):
+
+    instance.slug = slugify(instance.name)
+
+    RELEASE_NAME = str(instance.slug)
+    HOST = settings.DOMAIN
+    URL = 'https://'+RELEASE_NAME+'.'+HOST
+    user = instance.lab_session_owner.username
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
+    
+    instance.keycloak_client_id = client_id
+    instance.appname = '{}-{}-lab'.format(instance.slug, instance.project.slug)
+    skip_tls = 0
+    if not settings.OIDC_VERIFY_SSL:
+        skip_tls = 1
+        print("WARNING: Skipping TLS verify.")
+    parameters = {'release': RELEASE_NAME,
+                  'chart': 'lab',
+                  'global.domain': settings.DOMAIN,
+                  'project.name': instance.project.slug,
+                  'appname': instance.appname,
+                  'gatekeeper.realm': settings.KC_REALM,
+                  'gatekeeper.client_secret': client_secret,
+                  'gatekeeper.client_id': client_id,
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
+                  'gatekeeper.skip_tls': str(skip_tls)
+                  }
+
+    ingress_secret_name = 'prod-ingress'
+    try:
+        ingress_secret_name = settings.LABS['ingress']['secretName']
+    except:
+        pass
+    
+    project = instance.project
+    minio_keys = get_minio_keys(project)
+    decrypted_key = minio_keys['project_key']
+    decrypted_secret = minio_keys['project_secret']
+
+    settings_file = ProjectSerializer(project)
+
+    settings_file = JSONRenderer().render(settings_file.data)
+    settings_file = settings_file.decode('utf-8')
+
+    settings_file = json.loads(settings_file)
+    settings_file = yaml.dump(settings_file)
+
+    user_config_file = create_user_settings(user)
+    user_config_file = yaml.dump(json.loads(user_config_file))
+
+    flavor = Flavor.objects.filter(slug=instance.flavor_slug).first()
+    environment = Environment.objects.filter(slug=instance.environment_slug).first()
+
+    prefs = {'namespace': settings.NAMESPACE,
+              'labs.resources.requests.cpu': str(flavor.cpu),
+              'labs.resources.limits.cpu': str(flavor.cpu),
+              'labs.resources.requests.memory': str(flavor.mem),
+              'labs.resources.limits.memory': str(flavor.mem),
+              'labs.resources.requests.gpu': str(flavor.gpu),
+              'labs.resources.limits.gpu': str(flavor.gpu),
+              'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
+              'labs.image': environment.image,
+              'ingress.secretName': ingress_secret_name,
+              'minio.access_key': decrypted_key,
+              'minio.secret_key': decrypted_secret,
+              'settings_file': settings_file,
+              'user_settings_file': user_config_file,
+              'project.slug': project.slug
+              }
+    
+    parameters.update(prefs)
+    print(parameters)
+    helmchart = HelmResource(name=RELEASE_NAME,
+                             namespace='Default',
+                             chart='lab',
+                             params=parameters,
+                             username=user)
+    helmchart.save()
+    instance.helmchart = helmchart
+
+    l = ProjectLog(project=project, module='LA', headline='Lab Session',
+                               description='A new Lab Session {name} has been created'.format(name=RELEASE_NAME))
+    l.save()

@@ -2,7 +2,7 @@ import uuid
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from projects.models import Project
+from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
 from .models import Model
 from .forms import ModelForm
@@ -49,6 +49,10 @@ def create(request, user, project):
         if form.is_valid():
             obj = form.save()
 
+            l = ProjectLog(project=project, module='MO', headline='Model',
+                           description='A new Model {name} has been added'.format(name=obj.name))
+            l.save()
+
             url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
         else:
             url = '/{}/{}/models/'.format(user, project.slug)
@@ -63,12 +67,18 @@ def create(request, user, project):
 @login_required(login_url='/accounts/login')
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
+    previous = model.get_access_display()
 
     if request.method == 'POST':
         visibility = request.POST.get('access', '')
         if visibility != model.access:
             model.access = visibility
             model.save()
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Changed Access Level from {previous} to {current}'.format(previous=previous,
+                                                                                                  current=model.get_access_display()))
+            l.save()
 
     return HttpResponseRedirect(
         reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
@@ -117,6 +127,10 @@ def details(request, user, project, id):
 
             new_report = Report(model=model, report="", job_id=instance['id'], generator=generator_object, status='P')
             new_report.save()
+
+            l = ProjectLog(project=project, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Newly generated Metrics #{id}'.format(id=new_report.pk))
+            l.save()
 
             from reports.jobs import run_job
 
@@ -186,7 +200,12 @@ def delete(request, user, project, id):
     model = Model.objects.get(id=id)
 
     if request.method == "POST":
+        l = ProjectLog(project=project, module='MO', headline='Model',
+                       description='Model {name} has been removed'.format(name=model.name))
+        l.save()
+
         model.delete()
+
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())

@@ -2,7 +2,7 @@ import os
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from projects.models import Project
+from projects.models import Project, ProjectLog
 from .forms import ReportGeneratorForm
 from .models import Report, ReportGenerator
 from django.db.models import Q
@@ -44,6 +44,10 @@ def add(request, user, project):
 
         if form.is_valid():
             obj = form.save()
+
+            l = ProjectLog(project=project, module='RE', headline='Metrics',
+                           description='A new Generator {id} has been added'.format(id=obj.pk))
+            l.save()
 
             get_visualiser_file(project.pk, obj.visualiser)
 
@@ -104,7 +108,11 @@ def delete_generator(request, user, project, id):
     if request.method == "POST":
         if os.path.exists(path):
             os.unlink(path)
-            
+
+        l = ProjectLog(project=project, module='RE', headline='Metrics',
+                       description='Generator {id} has been removed'.format(id=report.pk))
+        l.save()
+
         report.delete()
 
         return HttpResponseRedirect('/{}/{}/reports/'.format(request.user, project.slug))
@@ -122,6 +130,10 @@ def delete_report(request, user, project, id):
     if request.method == "POST":
         if os.path.exists(path):
             os.unlink(path)
+
+        l = ProjectLog(project=project, module='RE', headline='Metrics',
+                       description='Metrics {id} has been removed'.format(id=report.pk))
+        l.save()
 
         report.delete()
 

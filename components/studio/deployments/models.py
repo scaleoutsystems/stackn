@@ -1,8 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
+import yaml
+import json
 from projects.helpers import get_minio_keys
 import os
 import requests
@@ -12,7 +15,7 @@ class HelmResource(models.Model):
     name = models.CharField(max_length=512, unique=True)
     namespace = models.CharField(max_length=512)
     chart = models.CharField(max_length=512)
-    params = models.CharField(max_length=2048)
+    params = models.CharField(max_length=10000)
     username = models.CharField(max_length=512)
     status = models.CharField(max_length=20)
     created = models.DateTimeField(auto_now_add=True)
@@ -25,6 +28,7 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     if update:
         action = 'upgrade'
     url = settings.CHART_CONTROLLER_URL + '/'+action
+    print(instance.params)
     retval = requests.get(url, instance.params)
     if retval:
         print('Resource: '+instance.name)
@@ -32,6 +36,8 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
         instance.status = 'OK'
     else:
         print('Failed to deploy resource: '+instance.name)
+        print('Reason: {}'.format(retval.text))
+        print('Status code: {}'.format(retval.status_code))
         instance.status = 'Failed'
 
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
@@ -90,9 +96,7 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    # sample_input = models.TextField(blank=True, null=True)
-    # sample_output = models.TextField(blank=True, null=True)
-    created_by = models.CharField(max_length=512)
+    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -167,10 +171,39 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
     
     # Create Keycloak client corresponding to this deployment
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username)
+    print(URL)
+    print(RELEASE_NAME)
+    print(instance.created_by.username)
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
+    
+    skip_tls = 0
+    if not settings.OIDC_VERIFY_SSL:
+        skip_tls = 1
+        print("WARNING: Skipping TLS verify.")
+
+    
+    # Default is that access is private.
+    rules = """resources:
+    - uri: /*
+      roles:
+      - {}:owner
+    """.format(client_id)
+
+    access_rules = {"gatekeeper.rules": rules}
+
+    if 'access' in instance.params:
+        print(instance.params['access'])
+        if instance.params['access'] == 'public':
+            # No rule means open to anyone.
+            print("Public endpoint")
+            access_rules = {"gatekeeper.rules": "public"}
+        del instance.params['access']
+
+    print(instance.params)
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
+                  'namespace': settings.NAMESPACE,
                   'appname': instance.appname,
                   'replicas': '1',
                   'global.domain': global_domain,
@@ -188,9 +221,11 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.realm': settings.KC_REALM,
                   'gatekeeper.client_secret': client_secret,
                   'gatekeeper.client_id': client_id,
-                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH}
+                  'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
+                  'gatekeeper.skip_tls': str(skip_tls)}
 
-    
+    parameters.update(instance.params)
+    parameters.update(access_rules)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',

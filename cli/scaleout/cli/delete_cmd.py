@@ -35,6 +35,15 @@ def delete_deployment_cmd(ctx, name, version=None):
     client = ctx.obj['CLIENT']
     client.delete_deployment(name, version)
 
+@delete_cmd.command('dataset')
+@click.option('-n', '--name', required=True)
+@click.option('-v', '--version', required=True)
+@click.pass_context
+def delete_dataset_cmd(ctx, name, version=None):
+    """ Delete a model """
+    client = ctx.obj['CLIENT']
+    client.delete_dataset(name, version)
+
 # @delete_cmd.command('deployments')
 # @click.pass_context
 # def delete_deployment_cmd(ctx):

@@ -1,17 +1,9 @@
 import os
-from scaleout.config.config import load_config as load_conf, get_default_config_file_path
-
-from scaleout.runtime.runtime import Runtime
-
 import scaleout.auth as sauth
-from scaleout.auth import get_bearer_token
-from scaleout.errors import AuthenticationError
 from scaleout.utils.file import dump_to_file, load_from_file
-
+import subprocess
 import requests
 import json
-import pickle
-from slugify import slugify
 import uuid
 from urllib.parse import urljoin
 
@@ -31,12 +23,9 @@ class StudioClient():
 
     def __init__(self, config=None):
         self.found_project = False
-        self.access_token, self.token_config = sauth.get_token()
-        self.api_url = urljoin(self.token_config['studio_url'], '/api')
-        self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
+        
 
-        # Fetch and set all active API endpoints
-        self.get_endpoints()
+        
 
         self.stackn_config, load_status = sauth.get_stackn_config()
         if not load_status:
@@ -55,23 +44,43 @@ class StudioClient():
                 #     print('Could not load project config for '+self.stackn_config['active_project'])
             else:
                 print('You must set an active valid project.')
+        
+        self.secure_mode = True
+        if 'secure' in self.stackn_config:
+            self.secure_mode = self.stackn_config['secure']
+        if self.secure_mode == False:
+            print("WARNING: Running in insecure mode.")
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         # self.project = self.get_projects({'slug': self.project_slug})
         if not self.project:
-            print('Did not find existing config')
+            print('Did not find active project in config')
             self.project_id = -1
         else:
             self.project_id = self.project['id']
             self.project_slug = self.project['slug']
 
+        self.access_token, self.token_config = sauth.get_token(secure=self.secure_mode)
+        if self.token_config['studio_url'][-1] == '/':
+            self.token_config['studio_url'] = self.token_config['studio_url'][:-1]
+        self.api_url = urljoin(self.token_config['studio_url'], '/api')
+        self.auth_headers = {'Authorization': 'Token {}'.format(self.access_token)}
+        # Fetch and set all active API endpoints
+        self.get_endpoints()
+
     def get_endpoints(self):
-        endpoints = self.list_endpoints()
-        self.endpoints = endpoints
-        self.models_api = endpoints['models']
-        self.reports_api = endpoints['reports']
-        self.projects_api = endpoints['projects']
-        self.generators_api = endpoints['generators']
-        self.deployment_instance_api = endpoints['deploymentInstances']
-        self.deployment_definition_api = endpoints['deploymentDefinitions']
+        self.endpoints = dict()
+        self.endpoints['models'] = self.api_url+'/projects/{}/models'
+        self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
+        self.endpoints['members'] = self.api_url+'/projects/{}/members'
+        self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
+        self.reports_api = self.api_url+'/reports'
+        self.endpoints['projects'] = self.api_url+'/projects/'
+        self.generators_api = self.api_url+'/generators' #endpoints['generators']
+        
+        self.endpoints['deploymentInstances'] = self.api_url+'/deploymentInstances/'
+        self.deployment_definition_api = self.api_url+'/deploymentDefinitions' #endpoints['deploymentDefinitions']
 
     def _get_repository_conf(self):
         """ Return the project minio keys. """
@@ -87,7 +96,7 @@ class StudioClient():
             'minio_port': 9000,
             'minio_access_key': self.decrypt_key(project['project_key']),
             'minio_secret_key': self.decrypt_key(project['project_secret']),
-            'minio_secure_mode': True,
+            'minio_secure_mode': self.secure_mode,
         }
         return data
 
@@ -110,7 +119,7 @@ class StudioClient():
         # TODO: "studio" subdomain hardcoded here
         #url = "https://studio.{}/api/".format(self.config['so_domain_name'])
     
-        r = requests.get(self.api_url, headers=self.auth_headers)
+        r = requests.get(self.api_url, headers=self.auth_headers, verify=self.secure_mode)
 
         if (r.status_code < 200 or r.status_code > 299):
             print("Endpoint list failed.")
@@ -124,9 +133,9 @@ class StudioClient():
     ### Projects api  ####
     
     def create_project(self, name, description, repository):
-        url = self.projects_api+'create_project/'
+        url = self.endpoints['projects']+'create_project/'
         data = {'name': name, 'description': description, 'repository': repository}
-        res = requests.post(url, headers=self.auth_headers, json=data)
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
         if res:
             print('Created project: '+name)
             print('Setting {} as the active project.'.format(name))
@@ -139,8 +148,8 @@ class StudioClient():
 
     def list_projects(self):
         """ List all projects a user has access to. """
-        url = self.projects_api
-        r = requests.get(url, headers=self.auth_headers)
+        url = self.endpoints['projects']
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
         if (r.status_code < 200 or r.status_code > 299):
             print("List projects failed.")
             print('Returned status code: {}'.format(r.status_code))
@@ -150,11 +159,11 @@ class StudioClient():
             return json.loads(r.content)
 
     def get_projects(self, params=[]):
-        url = self.projects_api
+        url = self.endpoints['projects']
         if params:
-            r = requests.get(url, headers=self.auth_headers, params=params)
+            r = requests.get(url, headers=self.auth_headers, params=params, verify=self.secure_mode)
         else:
-            r = requests.get(url, headers=self.auth_headers)
+            r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
         if r:
             projects = json.loads(r.content)
             if len(projects) == 1:
@@ -230,14 +239,84 @@ class StudioClient():
 
     def get_deployment_definition(self, name):
         url = os.path.join(self.deployment_definition_api, '?name={}'.format(name))
-        r = requests.get(url, headers=self.auth_headers)
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
         if _check_status(r,error_msg="Get deployment definition failed."):
             return json.loads(r.content)
         else:
             return []
 
+    def get_members(self):
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
+        try:
+            members = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return members
+
     ### Datasets API ###
 
+    def delete_dataset(self, name, version):
+        dataset = self.get_dataset({"name":name, "version": version})[0]
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'+str(dataset['id'])
+        r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Deleted dataset: {}'.format(dataset['name']))
+        else:
+            print('Failed to delete dataset.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def create_dataset(self, name, release_type, filenames, directory=[], description='', bucket='dataset'):
+        if not filenames:
+            if not directory:
+                print('You need to specify either files or a directory.')
+                return []
+            filenames = ''
+            for root, dirs, files in os.walk(directory):
+                for fname in files:
+                    tmp_fn = os.path.join(root, fname)
+                    filenames += tmp_fn+','
+
+            if filenames == '':
+                print('Directory is empty.')
+                return []
+            else:
+                filenames = filenames[:-1]
+
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'
+        payload = {
+          "name": name,
+          "release_type": release_type,
+          "filenames": filenames,
+          "description": description,
+          "bucket": bucket
+        }
+        print(payload)
+        r = requests.post(url, json=payload, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Created dataset: {}'.format(name))
+        else:
+            print('Failed to create dataset.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def get_dataset(self, params=[]):
+        url = self.endpoints['dataset'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, params=[], verify=self.secure_mode)
+        try:
+            dataset = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list datasets.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return dataset
 
     def list_datasets(self):
         # TODO: This only lists datasets in Minio, not the ones in Studio (Django-managed). 
@@ -258,7 +337,7 @@ class StudioClient():
     def show_model(self, model_id=None):
         """ Get all metadata associated with a model. """
         try:
-            for model in self.list_models():
+            for model in self.get_models():
                 if model['uid'] == model_id:
                     return model
         except:
@@ -272,6 +351,21 @@ class StudioClient():
 
         import uuid
         model_uid = str(uuid.uuid1().hex)
+        building_from_current = False
+        if model_file == "":
+            building_from_current = True
+            model_file = '{}.tar.gz'.format(model_uid)
+            # Find latest serialized model
+            path = 'models'
+            os.chdir(path)
+            files = sorted(os.listdir(os.getcwd()), key=os.path.getmtime)
+            os.chdir('../')
+            newest = ''
+            if files:
+                newest = os.path.join('models', files[-1])
+            print(newest)
+            res = subprocess.run(['tar', 'czvf', model_file, 'models', 'requirements.txt', 'setup.py', 'src'], stdout=subprocess.PIPE) #, 'dataset/interim/preprocessed'
+
         repo = self.get_repository()
         repo.bucket = 'models'
         # Upload model.
@@ -280,37 +374,48 @@ class StudioClient():
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "release_type": release_type,
-                      "description": model_description,
-                      "project": str(self.project_id)}
+                      "description": model_description}
 
-        url = self.models_api+'release/'
-        url = url.replace('http:', 'https:')
+        url = self.endpoints['models'].format(self.project['id'])+'/'
+        # url = url.replace('http:', 'https:')
 
-        r = requests.post(url, json=model_data, headers=self.auth_headers)
+        r = requests.post(url, json=model_data, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to create model."):
             repo.delete_artifact(model_uid)
             return False
 
+        if building_from_current:
+            os.system('rm {}'.format(model_file))
         print('Released model: {}, release_type: {}'.format(model_name, release_type))
         return True
 
-    def deploy_model(self, model_name, model_version, deploy_context):
-
-        url = self.deployment_instance_api+'build_instance/'
-        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context}
-        r = requests.post(url, json=bd_data, headers=self.auth_headers)
-        if not _check_status(r, error_msg="Failed to create deployment."):
-            # Delete registered deployment instance from db
-            return False
+    def deploy_model(self, model_name, model_version, deploy_context, settings=[]):
+        deploy_config = ""
+        if settings:
+            settings_file = open(settings, 'r')
+            deploy_config = json.loads(settings_file.read())
+        url = self.endpoints['deploymentInstances']+'build_instance/'
+        bd_data = {"project": self.project['id'], "name": model_name, "version": model_version, "depdef": deploy_context, "deploy_config": deploy_config}
+        r = requests.post(url, json=bd_data, headers=self.auth_headers, verify=self.secure_mode)
+        if not r:
+            print('Failed to deploy model.')
+            print('Status code: {}'.format(r.status_code))
+            msg = r.text
+            if len(msg) > 500:
+                msg = msg[0:500]
+            print('Reason: {}'.format(msg))
+        # if not _check_status(r, error_msg="Failed to create deployment."):
+        #     # Delete registered deployment instance from db
+        #     return False
 
         print('Created deployment: {}'.format(model_name))
         return True
 
     def update_deployment(self, name, version, params):
-        url = self.deployment_instance_api+'update_instance/'
+        url = self.endpoints['deploymentInstances']+'update_instance/'
         params['name'] = name
         params['version'] = version
-        r = requests.post(url, headers=self.auth_headers, json=params)
+        r = requests.post(url, headers=self.auth_headers, json=params, verify=self.secure_mode)
         if r:
             print('Updated deployment: ')
             print(params)
@@ -327,81 +432,191 @@ class StudioClient():
                 return []
         if resource == 'models':
             if self.found_project:
-                models = self.get_models({'project': self.project['id']})
+                models = self.get_models(self.project['id'])
                 return models
             else:
                 return []
-
+        if resource == 'labs':
+            if self.found_project:
+                labs = self.get_lab_sessions()
+                return labs
+            else:
+                return []
+        if resource == 'members':
+            if self.found_project:
+                members = self.get_members()
+                return members
+            else:
+                return []
+        if resource == 'dataset':
+            if self.found_project:
+                dataset = self.get_dataset()
+                return dataset
+            else:
+                return []
+        
         url = self.endpoints[resource]
-        r = requests.get(url, headers=self.auth_headers)
+
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to list {}.".format(resource)):
             return False
         else:
             return json.loads(r.content)
 
-    def get_models(self, params):
-        r = requests.get(self.endpoints['models'], params=params, headers=self.auth_headers)
-        models = json.loads(r.content)
+    def get_models(self, project_id, params=[]):
+        url = self.endpoints['models'].format(project_id)
+        r = requests.get(url, headers=self.auth_headers, params=params, verify=self.secure_mode)
+        try:
+            models = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list models.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
         return models
+
+    def get_lab_sessions(self, params=[]):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        r = requests.get(url, headers=self.auth_headers, params=params, verify=self.secure_mode)
+        try:
+            labs = json.loads(r.content)
+        except Exception as err:
+            print('Failed to list Lab Sessions.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+        return labs
+    
+    def get_model(self, project_id, model_id):
+        url = '{}/{}'.format(self.endpoints['models'].format(project_id),model_id)
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
+        model = json.loads(r.content)
+        return model
         
     def list_deployments(self):
         url = self.endpoints['deploymentInstances']
-        r = requests.get(url, headers=self.auth_headers, params={'project':self.project['id']})
+        r = requests.get(url, headers=self.auth_headers, params={'project':self.project['id']}, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to fetch deployments"):
             return False
         deployments = json.loads(r.content)
-        # print(deployments)
         depjson = []
         for deployment in deployments:
-            model = self.get_models({'id': deployment['model']})[0]
-            # print(model)
-            # print(deployment)
+
+            model = self.get_model(self.project['id'], deployment['model'])
             dep = {'name': model['name'],
                    'version': model['version'],
-                   'endpoint': deployment['endpoint'],
+                   'endpoint': 'https://'+deployment['endpoint']+deployment['path']+'predict/',
                    'created_at': deployment['created_at']}
             depjson.append(dep)
         return depjson
 
-        
-
-    
-
     def get_deployment(self, params):
-        url = self.deployment_instance_api
-        r = requests.get(url, params=params, headers=self.auth_headers)
-        return json.loads(r.content)
+        url = self.endpoints['deploymentInstances']
+        r = requests.get(url, params=params, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            return json.loads(r.content)
+        else:
+            print("Failed to load deployments.")
+            print("Status code: {}".format(r.status_code))
+            print("Reason: {}".format(r.reason))
 
     def delete_model(self, name, version=None):
         if version:
             params = {'name': name, 'version': version}
         else:
             params = {'name': name}
-        models  = self.get_models(params)
+        models  = self.get_models(self.project['id'], params)
+        if not models:
+            print("No models found with the given name and/or version.")
         for model in models:
-            url = os.path.join(self.models_api, '{}'.format(model['id']))
-            r = requests.delete(url, headers=self.auth_headers)
+            url = '{}/{}'.format(self.endpoints['models'].format(self.project['id']), model['id'])
+            r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)
             if not _check_status(r, error_msg="Failed to delete model {}:{}.".format(name, version)):
                 pass
             else:
-                print("Deleted model {}:{}.".format(name, version))
+                print("Deleted model {}:{}.".format(name, model['version']))
 
     def delete_deployment(self, name, version=None):
         if version:
             params = {'name': name, 'version': version}
         else:
             params = {'name': name}
-        models  = self.get_models(params)
+        models  = self.get_models(self.project['id'], params)
         for model in models:
             deployment = self.get_deployment({'model':model['id'],'project':self.project['id']})
             if deployment:
                 deployment = deployment[0]
-                url = self.deployment_instance_api+'destroy'
-                r = requests.delete(url, headers=self.auth_headers, params=params)
+                url = self.endpoints['deploymentInstances']+'destroy'
+                r = requests.delete(url, headers=self.auth_headers, params=params, verify=self.secure_mode)
                 if not _check_status(r, error_msg="Failed to delete deployment {}:{}.".format(model['name'], model['version'])):
                     pass
                 else:
                     print("Deleted deployment {}:{}.".format(model['name'], model['version']))
+
+    def add_members(self, users, role):
+        # url = self.endpoints['projects'] + 'add_members/'
+        url = self.endpoints['members'].format(self.project['id']) + '/'
+        data = {'selected_users': users, 'role': role}
+        r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if r:
+            print('New members: ' + users)
+            print('Successfully added the selected users as members to project {}.'.format(self.project['name']))
+        else:
+            print('Failed to add members to project {}.'.format(self.project['name']))
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+
+    def remove_members(self, users):          
+        members = self.get_members()
+        users = users.split(',')
+        for user in users:
+            for member in members:
+                if member['username'] == user:
+                    url = self.endpoints['members'].format(self.project['id']) + '/'+str(member['id'])
+                    r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)
+                    if r:
+                        print('Removed member: {}'.format(user))
+                    else:
+                        print('Failed to remove member {}.'.format(user))
+                        print('Status code: {}'.format(r.status_code))
+                        print('Reason: {}'.format(r.reason))
+                    break
+
+    def create_session(self, flavor_slug, environment_slug):
+        url = self.endpoints['labs'].format(self.project['id']) + '/'
+        data = {'flavor': flavor_slug, 'environment': environment_slug}
+
+        r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+
+        if r:
+            print('Successfully created Lab Session.')
+            print('Flavor: ' + flavor_slug)
+            print('Environment: ' + environment_slug)
+        else:
+            print('Failed to create Lab Session.')
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {} - {}'.format(r.reason, r.text))
+
+    def predict(self, model, inp, version=None):
+        if version:
+            params = {'name': model, 'version': version}
+        else:
+            params = {'name': model}
+        models  = self.get_models(self.project['id'], params)
+        model = models[0]
+        # for model in models:
+        #     deployment = self.get_deployment({'model':model['id'],'project':self.project['id']})
+        
+        params = {"project": self.project['id'], "model": model['id']}
+        res = self.get_deployment(params)
+        url = 'https://'+res[0]['endpoint']+res[0]['path']+'predict/'
+        res = requests.post(url,
+                     headers=self.auth_headers,
+                     json=json.loads(inp),
+                     verify=self.secure_mode)
+        print(res.json())
 
 if __name__ == '__main__':
 

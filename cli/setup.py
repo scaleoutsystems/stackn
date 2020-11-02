@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
+from scaleout import version
+
 
 setup(
     name='scaleout-cli',
-    version='0.0.1',
+    version=version.__version__,
     description="""Scaleout CLI""",
     author='Morgan Ekmefjord',
     author_email='morgan@scaleout.se',
@@ -17,13 +19,13 @@ setup(
         "Click>6.6",
         "cytoolz",
         "PyYAML>=4.2b1",
-        "requests==2.21.0",
+        "requests==2.23.0",
         "urllib3==1.24.2",
         "minio==5.0.6",
         "six>=1.14.0",
         "python-slugify",
         "prettytable",
-        "pyjwt",
+        "pyjwt"
     ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,

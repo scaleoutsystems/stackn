@@ -19,7 +19,7 @@ def create_cmd(ctx, daemon):
       print('{} NYI should run as daemon...'.format(__file__))
 
 @create_cmd.command('model')
-@click.option('-f', '--model-file', required=True)
+@click.option('-f', '--model-file', required=False, default="")
 @click.option('-n', '--model-name', required=True)
 @click.option('-r', '--release-type', required=False)
 @click.option('-d', '--description', required=False,default="")
@@ -43,10 +43,11 @@ def create_deployment_definition(ctx, name, filepath, path_predict=''):
 @click.option('-m', '--model', required=True)
 @click.option('-v', '--model-version', default='latest')
 @click.option('-d', '--deploymentdefinition', required=True)
+@click.option('-s', '--settings', required=False)
 @click.pass_context
-def create_deployment_cmd(ctx, model, deploymentdefinition, model_version=[]):
+def create_deployment_cmd(ctx, model, deploymentdefinition, model_version=[], settings=[]):
     client = ctx.obj['CLIENT']
-    client.deploy_model(model, model_version, deploymentdefinition)
+    client.deploy_model(model, model_version, deploymentdefinition, settings)
 
 
 # Create project
@@ -59,4 +60,29 @@ def create_project_cmd(ctx, name, description='', repository=''):
     client = ctx.obj['CLIENT']
     client.create_project(name, description, repository)
 
+@create_cmd.command('lab')
+@click.option('-f', '--flavor', required=True)
+@click.option('-e', '--environment', required=True)
+@click.pass_context
+def create_session(ctx, flavor, environment):
+    client = ctx.obj['CLIENT']
+    client.create_session(flavor_slug=flavor, environment_slug=environment)
+
+
 # Create dataset
+
+
+@create_cmd.command('dataset')
+@click.option('-n', '--name', required=True)
+@click.option('-f', '--filenames', required=False)
+@click.option('-d', '--directory', required=False)
+@click.option('-r', '--release_type', required=False, default='minor')
+@click.pass_context
+def create_dataset(ctx, name, directory=[], filenames=[], release_type='minor', description='', bucket='dataset'):
+    client = ctx.obj['CLIENT']
+    client.create_dataset(name,
+                          release_type,
+                          filenames,
+                          directory,
+                          description=description,
+                          bucket=bucket)

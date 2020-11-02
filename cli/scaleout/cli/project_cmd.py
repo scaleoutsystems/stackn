@@ -1,10 +1,9 @@
 import click
-import os
+
 from .main import main
 from prettytable import PrettyTable
-
 from scaleout.project import init_project as init_p
-from scaleout.studioclient import StudioClient
+
 
 def init_project(project_dir):
     init_p(project_dir)
@@ -90,3 +89,29 @@ def project_get_deployment_definition(ctx, name):
     x.field_names = ["Name","Definition","Bucket","File"]
     x.add_row([dd[0]["name"],dd[0]["definition"],dd[0]["bucket"],dd[0]["filename"]])
     print(x)
+
+
+@project_cmd.group('add')
+@click.pass_context
+def project_add_cmd(ctx):
+    pass
+
+@project_add_cmd.command('members')
+@click.option('-u', '--users', required=True)
+@click.option('-r', '--role', required=False, default='member')
+@click.pass_context
+def project_add_members(ctx, users, role):
+    client = ctx.obj['CLIENT']
+    client.add_members(users, role)
+
+@project_cmd.group('remove')
+@click.pass_context
+def project_remove_cmd(ctx):
+    pass
+
+@project_remove_cmd.command('members')
+@click.option('-u', '--users', required=True)
+@click.pass_context
+def project_remove_members(ctx, users):
+    client = ctx.obj['CLIENT']
+    client.remove_members(users)

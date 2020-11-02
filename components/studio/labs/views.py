@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
-from projects.models import Project
+from projects.models import Project, ProjectLog
 from .models import Session
 from projects.models import Environment, Flavor
 from django.contrib.auth.decorators import login_required
@@ -18,7 +18,7 @@ import yaml
 def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    sessions = Session.objects.filter(project=project)
+    sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user)).order_by('-created_at')
     flavors = Flavor.objects.all()
     environments = Environment.objects.all()
     url = settings.DOMAIN
@@ -35,75 +35,14 @@ def run(request, user, project):
         name = str(project.slug) + str(uid)[0:7]
         flavor_slug = request.POST.get('flavor', None)
         environment_slug = request.POST.get('environment', None)
-
-        if flavor_slug:
-            flavor = Flavor.objects.filter(slug=flavor_slug).first()
-        else:
-            flavor = Flavor.objects.all().first()
-
-        if environment_slug:
-            environment = Environment.objects.filter(slug=environment_slug).first()
-        else:
-            environment = Environment.objects.filter.all().first()
-
-        print("dispatching with {}  {}".format(flavor, name))
-        import base64
-        if name != '' and flavor is not None:
-            # Default values here, because otherwise an old deployment can stop working
-            # if the deployment configuration files are not compatible with the latest
-            # studio image.
-            ingress_secret_name = 'prod-ingress'
-            try:
-                ingress_secret_name = settings.LABS['ingress']['secretName']
-            except:
-                pass
-
-            minio_keys = get_minio_keys(project)
-            decrypted_key = minio_keys['project_key']
-            decrypted_secret = minio_keys['project_secret']
-
-            settings_file = ProjectSerializer(project)
-
-            settings_file = JSONRenderer().render(settings_file.data)
-            settings_file = settings_file.decode('utf-8')
-            print(settings_file)
-            # settings_file = yaml.load(settings_file, Loader=yaml.FullLoader)
-            settings_file = json.loads(settings_file)
-            settings_file = yaml.dump(settings_file)
-            print(settings_file)
-            # settings_file = json.dumps(json.loads(settings_file))
-
-            # settings_file = yaml.dump(settings_file)
-            user_config_file = create_user_settings(user)
-            user_config_file = yaml.dump(json.loads(user_config_file))
-
-            prefs = {'labs.resources.requests.cpu': str(flavor.cpu),
-                     'labs.resources.limits.cpu': str(flavor.cpu),
-                     'labs.resources.requests.memory': str(flavor.mem),
-                     'labs.resources.limits.memory': str(flavor.mem),
-                     'labs.resources.requests.gpu': str(flavor.gpu),
-                     'labs.resources.limits.gpu': str(flavor.gpu),
-                     'labs.gpu.enabled': str("true" if flavor.gpu else "false"),
-                     'labs.image': environment.image,
-                     'ingress.secretName': ingress_secret_name,
-                     # 'labs.setup': environment.setup,
-                     'minio.access_key': decrypted_key,
-                     'minio.secret_key': decrypted_secret,
-                     'settings_file': settings_file,
-                     'user_settings_file': user_config_file,
-                     'project.slug': project.slug
-                     }
-            session = Session.objects.create_session(name=name, project=project, chart='lab', settings=prefs)
-            from .helpers import create_session_resources
-
-            print("trying to create resources")
-            retval = create_session_resources(request, user, session, prefs, project)
-            if retval:
-                print("saving session!")
-                project.save()
-                session.save()
-                return HttpResponseRedirect(
-                    reverse('labs:index', kwargs={'user': request.user, 'project': str(project.slug)}))
+        
+        lab_instance = Session(name=name,
+                               id=uid,
+                               flavor_slug=flavor_slug,
+                               environment_slug=environment_slug,
+                               project=project,
+                               lab_session_owner=request.user)
+        lab_instance.save()
 
     return HttpResponseRedirect(
         reverse('labs:index', kwargs={'user': request.user, 'project': str(project.slug)}))
@@ -111,14 +50,11 @@ def run(request, user, project):
 
 @login_required(login_url='/accounts/login')
 def delete(request, user, project, id):
-    template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
-    session = Session.objects.filter(id=id, project=project).first()
+    session = Session.objects.filter(Q(id=id), Q(project=project), Q(lab_session_owner=request.user)).first()
 
     if session:
-        from .helpers import delete_session_resources
-        delete_session_resources(session)
-        session.delete()
+        session.helmchart.delete()
 
     return HttpResponseRedirect(
         reverse('labs:index', kwargs={'user': request.user, 'project': str(project.slug)}))

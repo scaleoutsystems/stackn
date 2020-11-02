@@ -12,7 +12,7 @@ class KeycloakAuthentication(authentication.BaseAuthentication):
         token_str = request.META['HTTP_AUTHORIZATION']
         access_token = token_str.replace('Token ', '')
         discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
-        res = r.get(discovery_url)
+        res = r.get(discovery_url, verify=settings.OIDC_VERIFY_SSL)
         if res:
             realm_info = res.json()
             public_key = '-----BEGIN PUBLIC KEY-----\n'+realm_info['public_key']+'\n-----END PUBLIC KEY-----'
@@ -27,5 +27,6 @@ class KeycloakAuthentication(authentication.BaseAuthentication):
         
         username = access_token_json['preferred_username']
         user = User.objects.get(username=username)
-
+        request.session['oidc_access_token'] = access_token
+        request.session.save()
         return (user, None)

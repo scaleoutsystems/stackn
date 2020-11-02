@@ -34,7 +34,7 @@ def pod_up(app_name):
 
 
 def get_count_over_time(name, app_name, path, status_code, time_span):
-    total_count = -1
+    total_count = 0
     # Strip path of potential /
     path = path.replace('/', '')
     try:
@@ -97,3 +97,22 @@ def get_labs_cpu_requests(project_slug):
         num_cpus = result[0]['value'][1]
         return num_cpus
     return 0
+
+def get_resource(project_slug, resource_type, q_type, mem_or_cpu, app_name=[]):
+    query = 'sum(kube_pod_container_resource_'+q_type+'_'+mem_or_cpu+' * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="'+resource_type+'"'
+    if app_name:
+        query += ', label_app="'+app_name+'"})'
+    else:
+        query += '})'
+    response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query})
+    result = response.json()['data']['result']
+    if result:
+        res = result[0]['value'][1]
+        return res
+    return '0.0'
+
+def get_all():
+    query = 'kube_pod_container_resource_limits_memory_bytes * on(pod) group_left kube_pod_labels{label_type="lab", label_project="stochss-dev-tiz"}'
+    response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query})
+    result = response.json()['data']['result']
+    print(result)

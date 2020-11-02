@@ -15,8 +15,8 @@ def refresh_charts(branch='master'):
         charts_url = 'https://github.com/scaleoutsystems/charts/archive/{}.zip'.format(branch)
 
     status = subprocess.run('rm -rf charts-{}'.format(branch).split(' '), cwd=cwd)
-    status = subprocess.run('wget -O {}.zip {}'.format(branch, charts_url).split(' '), cwd=cwd)
-    status = subprocess.run('unzip {}.zip'.format(branch).split(' '),cwd=cwd)
+    status = subprocess.run('wget -O {}.zip {}'.format(branch.replace('/', '-'), charts_url).split(' '), cwd=cwd)
+    status = subprocess.run('unzip {}.zip'.format(branch.replace('/', '-')).split(' '),cwd=cwd)
 
 
 class Controller:
@@ -75,7 +75,8 @@ class Controller:
             chart = 'charts/scaleout/'+options['chart']
         else:
             refresh_charts(self.branch)
-            chart = 'charts-{}/scaleout/{}'.format(self.branch, options['chart'])
+            fname = self.branch.replace('/', '-')
+            chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
         # tmp_file_name = uuid.uuid1().hex+'.yaml'
@@ -87,7 +88,7 @@ class Controller:
         for key in options:
             args.append('--set')
             # args.append('{}={}'.format(key, options[key]))
-            args.append(key+"="+options[key])
+            args.append(key+"="+options[key].replace(',', '\,'))
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
@@ -104,6 +105,7 @@ class Controller:
         # args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']) #.split(' ')
         args = ['helm', '--kubeconfig', str(kubeconfig), 'delete', options['release']]
         status = subprocess.run(args, cwd=self.cwd)
+
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def update(self, options, chart):

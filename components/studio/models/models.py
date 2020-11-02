@@ -10,9 +10,10 @@ from functools import cmp_to_key
 from projects.helpers import get_minio_keys
 from minio import Minio
 
-VERSION_CLASS = import_string(settings.VERSION_BACKEND)
+
 
 def compare_version(v1, v2):
+    VERSION_CLASS = import_string(settings.VERSION_BACKEND)
     v1obj = VERSION_CLASS(v1.version)
     v2obj = VERSION_CLASS(v2.version)
     if v1obj < v2obj:
@@ -91,7 +92,7 @@ class Model(models.Model):
 @receiver(pre_save, sender=Model, dispatch_uid='model_pre_save_signal')
 def pre_save_model(sender, instance, using, **kwargs):
     # Load version backend
-    
+    VERSION_CLASS = import_string(settings.VERSION_BACKEND)
     # Set version
     release_type = instance.release_type
     # If version is not already set, create new release
@@ -112,7 +113,6 @@ def pre_save_model(sender, instance, using, **kwargs):
 
 @receiver(pre_delete, sender=Model, dispatch_uid='model_pre_delete_signal')
 def pre_delete_deployment(sender, instance, using, **kwargs):
-    # TODO: Also delete model from minio
     # Model is saved in bucket 'model' with filename 'instance.uid'
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)

@@ -14,7 +14,11 @@ class DeploymentInstanceForm(forms.ModelForm):
         fields = ('model', 'access', 'deployment')
 
 class PredictForm(forms.Form):
-    file = forms.FileField()
+    pred_request = forms.FileField()
 
 class SettingsForm(forms.Form):
     replicas = forms.IntegerField(min_value=1, max_value=25, label="Replicas")
+    limits_cpu = forms.IntegerField()
+    limits_memory = forms.IntegerField()
+    requests_cpu = forms.IntegerField()
+    requests_memory = forms.IntegerField()
