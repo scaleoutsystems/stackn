@@ -1,19 +1,104 @@
-# MNIST Example
+# Getting started
+
+## Create a Project
+To get up and running with STACKn, start by creating a new Project 
+following the steps below:
+
+1. Click `Projects` in the left side menu.
+2. Type in a name and description for your Project.
+3. If you have an existing GitHub repository that you want to use as a base
+for your Project, include a URL to it in the `Import from...` field. This will import the repository in your Project file area.
+
+## Project Overview
+Once you have created a Project, you will see another side menu that gives you
+access to the different components of STACKn. On the `Overview` page, you will see
+a README.md file that serves as an introduction to the project. It's content is taken from a README file in the root of your working directory. If no such file is present, you will see a __Getting Started__ 
+guide similar to this one.
+
+## Create a new Lab Session
+Lab Sessions let you spawn Jupyter Labs instances backed by resources of a given flavor. Labs are the hub for experimentation in your Projects. To set one up, follow the steps below:
+
+1. Go to `Labs` from the side menu to the left.
+2. Choose an `Image` and a `Flavor` for you Lab Session.
+3. Simply press `Submit`. 
+
+You will see a list of your Lab Sessions below the submit form.
+
+![Lab Sessions](images/labs.png)
+
+## Datasets
+When you create a Project, you automatically get an S3-compatible object storage (MinIO) for your datasets, 
+reports, models etc. You can see what is available in your `datasets` bucket 
+directly from STACKn on the `Datasets` page.
+
+On top of the page, you find a link to your MinIO instance together with the login
+credentials. Once you are logged in, you can upload files and manage your buckets, but 
+do not delete or rename the already existing buckets since they fill specific functions.
+
+![Datasets](images/datasets.png)
+
+## Models
+You can see a list of your machine learning models on the `Models` page. From there, 
+you can also deploy models or delete the ones that are not needed anymore.
+
+## Metrics
+Within the `Metrics` page, you can see a list of all your configurations for measuring
+a model's performance. For example, classification reports.
+
+To add new Metrics, click `Add new` in the top right corner of the screen.
+
+![Add Metrics](images/metrics.png)
+
+To be able to configure this, you need to have a file implementing the algorithm for 
+measuring the performance of the model. We call this a `generator file`. You might want 
+to set up a way to visualize this performance. For example, a pyplot for a classification
+report. We call this a `visualizer file`. These two files and any other metrics-related files
+need to be placed under a folder called `reports` in your Lab Session. In this way, you will
+get access to all the related files within your working directory when executing the generation
+and visualization algorithms. Once the files are stored in the correct place, you will see 
+them in the drop-down menus in the submit form.
+
+## Settings
+The `Settings` page contains all the information about your Project and its components. Some
+of the things you can do there are:
+
+- Change your Project's description
+- Find link to your MinIO instance and login keys
+- Download a configuration file for your Project which is required when working with 
+STACKn CLI
+- Transfer ownership of your Project to another user
+- Delete permanently your Project
+
+## Next steps
+Now that you are familiar with the base functionality of STACKn, a good next step is to work through the example Projects available here: 
+
+* [Classification of hand-written digits (MNIST)](https://github.com/scaleoutsystems/digits-example-project)
+* [Classfication of malignant blood cells (AML)](https://github.com/scaleoutsystems/aml-example-project)
+
+These examples will teach you how to build a ML-model from scratch and how to serve it for private or public use. 
+
+# Deploy a Model
 
 Create a directory and initialize an empty project structure:
+
 ```
 mkdir MNIST && cd MNIST
 stackn init
 ```
+
 ## Data
+
 We keep the raw data in ``data/raw``:
+
 ```
 wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz -P data/raw/
 wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz -P data/raw/
 wget http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz -P data/raw/
 wget http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz -P data/raw/
 ```
+
 Unzip the raw data:
+
 ```
 gunzip data/raw/t*-ubyte.gz
 ```
@@ -21,6 +106,7 @@ gunzip data/raw/t*-ubyte.gz
 The data is not in any standard image format, so we will need to process it before using it for training a model. The processed data goes in ``data/processed``. For this we will use the packages ``idx2numpy``, ``numpy``. Add them to ``requirements.txt``.
 
 We will now create a script for preprocessing the data, ``src/data/load_convert.py``:
+
 ```
 import idx2numpy
 import numpy as np
@@ -40,10 +126,13 @@ pickle.dump((imgs_test, labels_test), file_test)
 file_train.close()
 file_test.close()
 ```
+
 ```
 python src/data/load_convert.py
 ```
+
 Next, we create a script ``src/data/reshape_normalize.py`` that takes the interim data and reshapes and normalizes it to its final format, stored in ``data/processed``:
+
 ```
 import pickle
 
@@ -70,10 +159,13 @@ file_test = open('data/processed/mnist_test.pkl', 'wb')
 pickle.dump((imgs_train, labels_train), file_train)
 pickle.dump((imgs_test, labels_test), file_test)
 ```
+
 ```
 python src/data/reshape_normalize.py
 ```
- ## Train
+
+## Train
+
 Now that we have the processed data, we can build and train a model. We will use ``Keras`` to build the model, which requires Tensorflow, so add ``keras`` and ``tensorflow`` to ``requirements.txt``.
 
 The script that trains the model is saved in ``src/models/train.py``. The trained model is saved in ``models/``
@@ -127,13 +219,15 @@ f.write(model_json)
 f.close()
 model.save_weights('models/model_weights.h5')
 ```
+
 ```
 python src/models/train.py
 ```
 
-
 ## Deploy
+
 To use the trained model, we need to implement ``model_load`` and ``model_predict`` in ``src/models/predict.py``:
+
 ```
 import tensorflow as tf
 import numpy as np
@@ -157,7 +251,9 @@ def model_predict(inp, model=[]):
     pred = model.predict(np.array(inp.img))
     return json.dumps({"prediction": pred.tolist()})
 ```
+
 Note that we access the input as ``inp.img``. The input is defined in ``src/models/input_type.py``:
+
 ```
 from pydantic import BaseModel
 from typing import List
@@ -168,23 +264,31 @@ class PredType(BaseModel):
     # Default pred: str. Can be accessed in predict as inp.pred.
     img: List[List[List[List[float]]]]
 ```
+
 Here, the input is a four-dimensional list of floats. You can read more about Pydantic here: https://pydantic-docs.helpmanual.io/
 
-
 You create a new model with the CLI:
+
 ```
 stackn create model  -n mnist -r minor
 ```
+
 and then you deploy it in the ``default-python`` environment:
+
 ```
 stackn create deployment -m mnist -d default-python
 ```
+
 List your new deployment:
+
 ```
 stackn get deployments
 ```
+
 ## Predict
+
 You can call the endpoint:
+
 ```
 import pickle
 
@@ -202,7 +306,9 @@ url = 'your endpoint'
 res = requests.post(url, headers={"Authorization": "Token "+token}, json={"img": img_inp}, verify=False)
 print(res.json())
 ```
+
 You can also test your ``predict`` function locally (add to ``src/models/predict.py``)
+
 ```
 if __name__ == "__main__":
     model = model_load()
@@ -217,4 +323,65 @@ if __name__ == "__main__":
     inp = PredType(img=img_inp)
     res = model_predict(inp, model)
     print(res)
+```
+
+# CLI
+
+## Minimal Model Deployment
+
+If you haven't already installed the STACKn CLI, you can install it with pip:
+
+```
+pip install git+https://@github.com/scaleoutsystems/stackn@develop#subdirectory=cli
+```
+
+- Create a project
+
+```
+stackn create project -n demo
+```
+
+- Create a directory for your model
+
+```
+mkdir demo-model
+cd demo-model
+```
+
+- Initialize the model with
+
+```
+stackn init
+```
+
+- Create the model and deploy it
+
+```
+stackn create model -n test-model -r minor
+stackn create deployment -m test-model -d default-python
+```
+
+It will take a minute for the model to deploy. 
+
+- Once it is ready, you can run a prediction
+
+```
+stackn predict -m test-model -v v0.1.0 -i '{"pred":"test"}'
+```
+
+- Alternatively you can create a lab session
+
+```
+stackn create lab -f large -e default
+```
+
+and then you can call the model endpoint from inside a notebook
+
+```
+from scaleout.auth import get_token
+import requests
+url = 'https://studio.scilifelab.stackn.dev/demo-cbn/serve/demo-model/v010/predict/'
+token, config = get_token()
+res = requests.post(url, headers={"Authorization": "Token "+token}, json={"pred":"test"})
+res.json()
 ```
