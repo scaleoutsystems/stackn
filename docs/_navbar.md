@@ -1,6 +1,6 @@
 <!-- docs/_navbar.md -->
 
 * [Home](/)
-* [Installation](/install)
+* [Installation](/INSTALL)
 * [Tutorials](/tutorial)
 * [Dev](/dev)
