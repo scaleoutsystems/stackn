@@ -6,6 +6,8 @@ import requests
 import json
 import uuid
 from urllib.parse import urljoin
+from datetime import datetime
+from .info import get_cpu_info, get_system_info, get_git_info
 
 def _check_status(r,error_msg="Failed"):
     if (r.status_code < 200 or r.status_code > 299):
@@ -327,7 +329,7 @@ class StudioClient():
         except NoSuchBucket as e:
             print("The datasets repository has not been initialized yet.", e)
         return objs
-
+    
 
     ### Models API ###
 
@@ -592,6 +594,61 @@ class StudioClient():
             print('Failed to create Lab Session.')
             print('Status code: {}'.format(r.status_code))
             print('Reason: {} - {}'.format(r.reason, r.text))
+
+
+    def log_to_db(self, data_to_log):
+        try:
+            from pymongo import MongoClient
+        except ImportError:
+            print('Failed to import MongoClient')
+            return None
+        myclient = MongoClient("localhost:27017", username = 'root', password = 'tvJdjZm6PG')
+        db = myclient["test"]
+        Collection = db["testCollection"]
+        if isinstance(data_to_log, list): 
+            Collection.insert_many(data_to_log)   
+        else: 
+            Collection.insert_one(data_to_log)     
+
+
+    def train(self, train_file, run_id):
+        system_info = json.loads(get_system_info({}))
+        cpu_info = json.loads(get_cpu_info({}))
+        hardware_dict = {
+            "System info" : system_info,
+            "CPU info" : cpu_info
+        }
+        sha, last_commit, committed = get_git_info()
+        if not committed:
+            print("WARNING: Uncommitted files exist in repo")
+        git_dict = {
+            "Git hash" : sha, 
+            "Last commit" : last_commit
+        }
+        print('Code for model training successfully found in "src/models".\nStarting training...')
+        #utc_time_created = str(datetime.utcnow()) # Date and time for when training started
+        start_time = datetime.now()
+        start_time_str = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        #subprocess.run(['python', train_file])
+        end_time = datetime.now()
+        time_elapsed = end_time - start_time
+        time_elapsed = str(time_elapsed)
+        end_time_str = end_time.strftime("%Y/%m/%d, %H:%M:%S")
+        print('Finished training and logging.')
+        time_dict = {
+            "Start time": start_time_str, 
+            "End time": end_time_str, 
+            "Training duration": time_elapsed
+        }
+        data_to_log = {
+            "Run ID" : run_id, 
+            **hardware_dict, 
+            **git_dict, 
+            **time_dict
+        }
+        #print(data_to_log)
+        self.log_to_db(data_to_log)
+    
 
     def predict(self, model, inp, version=None):
         if version:

@@ -3,6 +3,10 @@ from .main import main
 import requests
 from scaleout.auth import login, get_stackn_config, get_remote_config, get_token
 from .helpers import create_table
+import os
+import random
+import string
+import json
 
 # @click.option('--daemon',
 #               is_flag=True,
@@ -57,3 +61,23 @@ def predict_cmd(ctx, model, version, inp):
     # res = requests.post(url,
     #                     headers={"Authorization": "Token "+token},
     #                     json = inp)
+
+@main.command('train')
+@click.pass_context
+def train_cmd(ctx):
+    current_dir = os.getcwd()
+    if os.path.isdir('src/models'):
+        if os.path.isfile('src/models/train.py'):
+            run_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k = 32)) # Randomized id for current run; string of size 32, same as MLflow
+            os.mkdir('mlruns/' + run_id) # Make sub-directory in 'mlruns' for current training run
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            file_path = os.path.join(dir_path, 'run-structure.tar.gz')
+            import tarfile
+            tf = tarfile.open(file_path)
+            tf.extractall('mlruns/' + run_id)
+            client = ctx.obj['CLIENT']
+            client.train('src/models/train.py', run_id)
+        else:
+            print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
+    else:
+        print('No project structure initialized in ' + current_dir + '; navigate to the correct folder or use "stackn init" to initialize a generic project structure in the current directory.')
