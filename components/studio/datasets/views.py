@@ -6,7 +6,7 @@ from django.conf import settings as sett
 from projects.helpers import get_minio_keys
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def page(request, user, project, page_index):
     template = 'dataset_page.html'
     project = Project.objects.filter(slug=project).first()
@@ -47,7 +47,7 @@ def page(request, user, project, page_index):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def path_page(request, user, project, path_name, page_index):
     template = 'dataset_path_page.html'
     project = Project.objects.filter(slug=project).first()

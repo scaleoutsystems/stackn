@@ -135,34 +135,26 @@
                     -->
 
                     <li class="list-inline" style="margin-top: auto; margin-bottom: 25px; margin-left: auto; margin-right: auto;">
-
-                        <a href="https://scaleoutsystems.github.io/stackn/" target="_blank"> <img src="{% static '/icons/question-circle.svg' %}" alt="" width="24" height="24" title=""></a>
+                        <a href="https://scaleoutsystems.github.io/stackn/" target="_blank">
+                            <img src="{% static '/icons/question-circle.svg' %}" alt="" width="24" height="24" title="">
+                        </a>
                         {% if request.user.is_authenticated %}
-                        <!--<a> <img src="{% static '/icons/inbox-fill.svg' %}" alt="" width="24" height="24" title=""></a> -->
-                        <a class="dropdown-toggle" href="#" id="navbarDropdown2" role="button"
+                        <a class="dropdown-toggle" href="#" id="auth_dropdown_id" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <img src="{% static '/icons/people-circle.svg' %}" alt="" width="24" height="24" title="">
                         </a>
-
-                        <div class="dropdown-menu"
-                             aria-labelledby="navbarDropdown2">
-                            <p class="d-flex justify-content-center">{{ request.user }}</p>
-                            {% if request.user.is_superuser %}
-                            <a class="d-flex dropdown-item justify-content-center" href="/api"><b>API</b></a>
-                            <a class="d-flex dropdown-item justify-content-center" href="{% url 'admin:index' %}"><b>Admin</b></a>
-                            <div class="dropdown-divider"></div>
-                            {% endif %}<form action="{% url 'oidc_logout' %}" method="post">
+                        <div class="dropdown-menu" aria-labelledby="auth_dropdown_id">
+                            <p class="d-flex justify-content-center">
+                                {{ request.user }}
+                            </p>
+                            <form action="{% url 'oidc_logout' %}" method="post">
                               {% csrf_token %}
+
                               <input type="submit" value="Sign out">
                             </form>
-                            <!-- <a class="dropdown-item d-flex justify-content-center" href="{% url 'oidc_logout' %}">Sign
-                                out</a> -->
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item  d-flex justify-content-center" href="#">View as user</a>
                         </div>
                         {% else %}
                         <a href="{% url 'oidc_authentication_init' %}">
-                        <!-- <a class="" href="{% url 'login' %}"> -->
                             <img src="{% static '/icons/person.svg' %}" alt="" width="24" height="24" title="">
                         </a>
                         {% endif %}
@@ -170,10 +162,10 @@
                 </ul>
             </div>
             {% endblock %}
+
             {% block sidebar %} {% endblock %}
 
             {% block content %} {% endblock %}
-
         </div>
     </div>
 
