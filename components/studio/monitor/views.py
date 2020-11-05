@@ -48,7 +48,7 @@ def get_cpu_mem(resources, project_slug, resource_type):
         res_list.append((res_owner, res_flavor, res_cpu_limit, res_cpu_request, res_mem_limit, res_mem_request, res_id, res_model, res_version))
     return res_list
 
-@login_required(login_url='/accounts/login')
+@login_required
 def overview(request, user, project):
     is_authorized = True
     user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
