@@ -96,7 +96,7 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    created_by = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -199,6 +199,34 @@ def pre_save_deployment(sender, instance, using, **kwargs):
             access_rules = {"gatekeeper.rules": "public"}
         del instance.params['access']
 
+    envstr = []
+    envparams = []
+
+    if 'environment' in instance.params:
+        envvars = instance.params['environment']
+        envstr = ""
+        # print(envvars)
+        for envvar in envvars:
+            # print(envvar)
+            envstr += """
+- name: {}
+  value: {}          
+            """.format(envvar['name'], envvar['value'])
+        print(envstr)
+        # print(instance.params['environment'])
+        del instance.params['environment']
+
+    if 'volumes' in instance.params:
+        volumes = instance.params['volumes']
+
+    if envstr:
+        envparams = {"extraEnv": envstr}
+        print(envparams)
+  #   envtest = """- name: LICENSE_FILE
+  # value: NEWLICENSE
+  #   """
+    
+
     print(instance.params)
 
     parameters = {'release': RELEASE_NAME,
@@ -226,6 +254,8 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     parameters.update(instance.params)
     parameters.update(access_rules)
+    if envparams:
+        parameters.update(envparams)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
