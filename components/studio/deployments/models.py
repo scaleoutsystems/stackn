@@ -216,9 +216,6 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         # print(instance.params['environment'])
         del instance.params['environment']
 
-    if 'volumes' in instance.params:
-        volumes = instance.params['volumes']
-
     if envstr:
         envparams = {"extraEnv": envstr}
         print(envparams)
