@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model
+from .models import Model, ModelLog
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
@@ -52,6 +52,9 @@ def create(request, user, project):
             l = ProjectLog(project=project, module='MO', headline='Model',
                            description='A new Model {name} has been added'.format(name=obj.name))
             l.save()
+
+            l1 = ModelLog(run_id='1', run_created_at='', run_duration='10 seconds', current_git_commit='#222', current_git_repo='King repo', status='CR')
+            l1.save()
 
             url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
         else:

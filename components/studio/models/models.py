@@ -89,6 +89,31 @@ class Model(models.Model):
     def __str__(self): 
         return "{name}".format(name=self.name)
 
+class ModelLog(models.Model):
+    CREATED = 'CR'
+    ONGOING = 'ON'
+    FINISHED = 'FI'
+    ARCHIVED = 'AR'
+    STATUS = [
+        (CREATED, 'Created'),
+        (ONGOING, 'Ongoing'),
+        (FINISHED, 'Finished'),
+        (ARCHIVED, 'Archived'),
+    ]
+    model_to_log = models.CharField(max_length=32, default='Some model')
+    run_id = models.CharField(max_length=32)
+    # run_utc_created = models.CharField(max_length=255)
+    run_created_at = models.DateField()
+    run_duration = models.CharField(max_length=255)
+    current_git_commit = models.CharField(max_length=255)
+    current_git_repo = models.CharField(max_length=255)
+    status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
+
+    class Meta:
+        unique_together = ('model_to_log', 'run_id')
+
+
+
 @receiver(pre_save, sender=Model, dispatch_uid='model_pre_save_signal')
 def pre_save_model(sender, instance, using, **kwargs):
     # Load version backend

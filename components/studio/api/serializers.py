@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from models.models import Model
+from models.models import Model, ModelLog
 from reports.models import Report, ReportGenerator
 from projects.models import Project
 from deployments.models import DeploymentInstance, DeploymentDefinition
@@ -12,6 +12,14 @@ class MLModelSerializer(ModelSerializer):
         model = Model
         fields = (
             'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version')
+
+
+class ModelLogSerializer(ModelSerializer):
+    class Meta:
+        model = ModelLog
+        fields = (
+            'id', 'model_to_log', 'run_id', 'run_created_at', 'run_duration', 'current_git_commit', 'current_git_repo', 'status')
+
 
 class DeploymentDefinitionSerializer(ModelSerializer):
     class Meta:
