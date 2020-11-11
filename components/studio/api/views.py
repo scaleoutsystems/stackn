@@ -19,7 +19,7 @@ from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel, ModelLogSerializer
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
