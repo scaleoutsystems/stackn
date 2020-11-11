@@ -1,5 +1,5 @@
 from django import forms
-from .models import Model
+from .models import Model, ModelLog
 
 
 class ModelForm(forms.ModelForm):
@@ -10,3 +10,8 @@ class ModelForm(forms.ModelForm):
             'uid': forms.HiddenInput(),
             'project': forms.HiddenInput()
         }
+
+class ModelLogForm(forms.ModelForm):
+    class Meta:
+        model = ModelLog
+        fields = ('model_to_log', 'run_id', 'run_created_at', 'run_duration', 'current_git_commit', 'current_git_repo', 'status')
