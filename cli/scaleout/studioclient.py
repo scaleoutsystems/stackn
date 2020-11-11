@@ -330,6 +330,7 @@ class StudioClient():
         except NoSuchBucket as e:
             print("The datasets repository has not been initialized yet.", e)
         return objs
+    
 
     ### Models API ###
 
