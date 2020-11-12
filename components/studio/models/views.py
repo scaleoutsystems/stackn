@@ -29,6 +29,9 @@ def list(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
     models = Model.objects.filter(project=project)
+    
+    # model_logs = ModelLog.objects.all()
+
     # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
@@ -52,9 +55,6 @@ def create(request, user, project):
             l = ProjectLog(project=project, module='MO', headline='Model',
                            description='A new Model {name} has been added'.format(name=obj.name))
             l.save()
-
-            l1 = ModelLog(run_id='1', run_created_at='', run_duration='10 seconds', current_git_commit='#222', current_git_repo='King repo', status='CR')
-            l1.save()
 
             url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
         else:
@@ -94,6 +94,7 @@ def details(request, user, project, id):
     model_access_choices = ['PU', 'PR', 'LI']
     model_access_choices.remove(model.access)
     deployments = DeploymentInstance.objects.filter(model=model)
+    # model_logs = ModelLog.objects.filter(model=model)
 
     report_generators = ReportGenerator.objects.filter(project=project)
 
