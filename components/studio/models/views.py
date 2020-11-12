@@ -23,7 +23,7 @@ def index(request):
     return render(request, 'models_cards.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def list(request, user, project):
     template = 'models_list.html'
     project = Project.objects.filter(slug=project).first()
@@ -35,7 +35,7 @@ def list(request, user, project):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def create(request, user, project):
     template = 'models_upload.html'
 
@@ -64,7 +64,7 @@ def create(request, user, project):
         return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -84,7 +84,7 @@ def change_access(request, user, project, id):
         reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
@@ -192,7 +192,7 @@ def details_public(request, id):
     return render(request, 'models_details_public.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project, id):
     template = 'model_confirm_delete.html'
 

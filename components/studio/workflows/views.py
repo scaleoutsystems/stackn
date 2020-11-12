@@ -8,7 +8,7 @@ from .forms import WorkflowDefinitionForm, WorkflowInstanceForm
 from django.urls import reverse
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_index(request, user, project):
     temp = 'workflow/list.html'
 
@@ -19,7 +19,7 @@ def workflows_index(request, user, project):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_run(request, user, project):
     temp = 'workflow/add.html'
     project = Project.objects.filter(slug=project).first()
@@ -40,7 +40,7 @@ def workflows_run(request, user, project):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_details(request, user, project, id=None):
     temp = 'workflow/details.html'
 
@@ -61,7 +61,7 @@ def workflows_details(request, user, project, id=None):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_definition_index(request):
     temp = 'definition/list.html'
 
@@ -70,7 +70,7 @@ def workflows_definition_index(request):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_definition_add(request):
     temp = 'definition/add.html'
 
@@ -87,7 +87,7 @@ def workflows_definition_add(request):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def workflows_definition_edit(request, id=None):
     temp = 'definition/edit.html'
 
