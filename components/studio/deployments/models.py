@@ -96,7 +96,7 @@ class DeploymentInstance(models.Model):
     path = models.CharField(max_length=512)
     release = models.CharField(max_length=512)
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    created_by = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_at = models.DateTimeField(auto_now=True)
 
@@ -171,10 +171,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
     
     # Create Keycloak client corresponding to this deployment
-    print(URL)
-    print(RELEASE_NAME)
-    print(instance.created_by.username)
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by, ['owner'], ['owner'])
     
     skip_tls = 0
     if not settings.OIDC_VERIFY_SSL:
@@ -194,12 +191,27 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     if 'access' in instance.params:
         print(instance.params['access'])
         if instance.params['access'] == 'public':
-            # No rule means open to anyone.
             print("Public endpoint")
             access_rules = {"gatekeeper.rules": "public"}
         del instance.params['access']
 
-    print(instance.params)
+    envstr = []
+    envparams = []
+
+    if 'environment' in instance.params:
+        envvars = instance.params['environment']
+        envstr = ""
+        for envvar in envvars:
+            envstr += """
+- name: {}
+  value: {}          
+            """.format(envvar['name'], envvar['value'])
+        print(envstr)
+        del instance.params['environment']
+
+    if envstr:
+        envparams = {"extraEnv": envstr}
+
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -226,12 +238,14 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     parameters.update(instance.params)
     parameters.update(access_rules)
+    if envparams:
+        parameters.update(envparams)
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
                              chart='deploy',
                              params=parameters,
-                             username=instance.created_by.username)
+                             username=instance.created_by)
     helmchart.save()
     instance.helmchart = helmchart
 
