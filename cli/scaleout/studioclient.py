@@ -379,6 +379,8 @@ class StudioClient():
                       "description": model_description}
 
         url = self.endpoints['models'].format(self.project['id'])+'/'
+        print(url)
+        print("Here's endpoints {}".format(self.endpoints))
         # url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers, verify=self.secure_mode)
@@ -617,41 +619,68 @@ class StudioClient():
             Collection.insert_one(data_to_log)     
 
 
-    def train(self, train_file, run_id):
+    def train_model(self, training_file):
+        start_time = datetime.now()
+        print('Model training starting...')
+        subprocess.run(['python', training_file])
+        print('Finished model training.')
+        end_time = datetime.now()
+
+        start_time_str = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        end_time_str = end_time.strftime("%Y/%m/%d, %H:%M:%S")
+        time_elapsed = str(end_time - start_time)
+        return start_time_str, end_time_str, time_elapsed
+
+
+    def log_training(self, model, training_file):
+        """ Train a model and publish run data to Studio. """
+        #url = self.endpoints['models'].format(self.project['id'])+'/'
+        #print(url)
+        import uuid 
+        training_run_uid = str(uuid.uuid1().hex)
+
         system_info = json.loads(get_system_info({}))
         cpu_info = json.loads(get_cpu_info({}))
-        hardware_dict = {
-            "System info" : system_info,
-            "CPU info" : cpu_info
-        }
-        sha, last_commit, committed = get_git_info()
-        if not committed:
-            print("WARNING: Uncommitted files exist in repo")
-        git_dict = {
-            "Git hash" : sha, 
-            "Last commit" : last_commit
-        }
-        print('Code for model training successfully found in "src/models".\nStarting training...')
+        #sha, last_commit, committed = get_git_info()
+        #if not committed:
+        #    print("WARNING: Uncommitted files exist in repo")
+        start_time, end_time, train_duration = self.train_model(training_file)
+        repo = self.get_repository()
+        repo.bucket = 'training'
+        #repo.set_artifact(training_run_uid, model)
+        training_data = {"uid": training_run_uid,
+                         "model": model,
+                         "training started at": start_time}
+        url = self.endpoints['models'].format(self.project['id'])+'/'
+        r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
+        return True
+
+        
+        #hardware_dict = {
+        #    "System info" : system_info,
+        #    "CPU info" : cpu_info
+        #}
+        
+        #git_dict = {
+        #    "Git hash" : sha, 
+        #    "Last commit" : last_commit
+        #}
+        #print('Code for model training successfully found in "src/models".\nStarting training...')
         #utc_time_created = str(datetime.utcnow()) # Date and time for when training started
-        start_time = datetime.now()
-        start_time_str = start_time.strftime("%Y/%m/%d, %H:%M:%S")
-        #subprocess.run(['python', train_file])
-        end_time = datetime.now()
-        time_elapsed = end_time - start_time
-        time_elapsed = str(time_elapsed)
-        end_time_str = end_time.strftime("%Y/%m/%d, %H:%M:%S")
-        print('Finished training and logging.')
-        time_dict = {
-            "Start time": start_time_str, 
-            "End time": end_time_str, 
-            "Training duration": time_elapsed
-        }
-        data_to_log = {
-            "Run ID" : run_id, 
-            **hardware_dict, 
-            **git_dict, 
-            **time_dict
-        }
+        
+        
+        
+        #time_dict = {
+        #    "Start time": start_time_str, 
+        #    "End time": end_time_str, 
+        #    "Training duration": time_elapsed
+        #}
+        #data_to_log = {
+        #    "Run ID" : run_id, 
+        #    **hardware_dict, 
+        #    **git_dict, 
+        #    **time_dict
+        #}
         #print(data_to_log)
         self.log_to_db(data_to_log)
     
