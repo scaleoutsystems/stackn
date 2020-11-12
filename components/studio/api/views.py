@@ -15,11 +15,11 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
 
-from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
+from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel, ModelLogSerializer
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -56,6 +56,27 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
                           uid=model_uid,
                           project=project)
         new_model.save()
+        return HttpResponse('ok', 200)
+
+
+class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = ModelLogSerializer
+    filter_backends = [DjangoFilterBackend]
+    #filterset_fields = ['id','name', 'version']
+
+    def create(self, request, *args, **kwargs):
+        print("inside create")
+        try:
+            model = request.data['model']
+            training_run_uid = request.data['uid']
+            started_training_at = request.data['training started at']
+        except:
+            return HttpResponse('Failed to create model.', 400)
+        new_log = ModelLog(uid=training_run_uid,
+                          trained_model=model,
+                          training_started_at=started_training_at)
+        new_log.save()
         return HttpResponse('ok', 200)
 
 
