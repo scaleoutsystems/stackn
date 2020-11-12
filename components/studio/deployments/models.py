@@ -171,10 +171,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
     
     # Create Keycloak client corresponding to this deployment
-    print(URL)
-    print(RELEASE_NAME)
-    print(instance.created_by.username)
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by.username, ['owner'], ['owner'])
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by, ['owner'], ['owner'])
     
     skip_tls = 0
     if not settings.OIDC_VERIFY_SSL:
@@ -194,7 +191,6 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     if 'access' in instance.params:
         print(instance.params['access'])
         if instance.params['access'] == 'public':
-            # No rule means open to anyone.
             print("Public endpoint")
             access_rules = {"gatekeeper.rules": "public"}
         del instance.params['access']
@@ -205,26 +201,17 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     if 'environment' in instance.params:
         envvars = instance.params['environment']
         envstr = ""
-        # print(envvars)
         for envvar in envvars:
-            # print(envvar)
             envstr += """
 - name: {}
   value: {}          
             """.format(envvar['name'], envvar['value'])
         print(envstr)
-        # print(instance.params['environment'])
         del instance.params['environment']
 
     if envstr:
         envparams = {"extraEnv": envstr}
-        print(envparams)
-  #   envtest = """- name: LICENSE_FILE
-  # value: NEWLICENSE
-  #   """
-    
 
-    print(instance.params)
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -258,7 +245,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                              namespace='Default',
                              chart='deploy',
                              params=parameters,
-                             username=instance.created_by.username)
+                             username=instance.created_by)
     helmchart.save()
     instance.helmchart = helmchart
 
