@@ -90,27 +90,25 @@ class Model(models.Model):
         return "{name}".format(name=self.name)
 
 class ModelLog(models.Model):
-    CREATED = 'CR'
-    ONGOING = 'ON'
-    FINISHED = 'FI'
-    ARCHIVED = 'AR'
+    STARTED = 'ST'
+    DONE = 'DO'
+    FAILED = 'FA'
     STATUS = [
-        (CREATED, 'Created'),
-        (ONGOING, 'Ongoing'),
-        (FINISHED, 'Finished'),
-        (ARCHIVED, 'Archived'),
+        (STARTED, 'Started'),
+        (DONE, 'Done'),
+        (FAILED, 'Failed'),
     ]
-    model_to_log = models.CharField(max_length=32, default='Some model')
-    run_id = models.CharField(max_length=32)
-    # run_utc_created = models.CharField(max_length=255)
-    run_created_at = models.DateField()
-    run_duration = models.CharField(max_length=255)
-    current_git_commit = models.CharField(max_length=255)
-    current_git_repo = models.CharField(max_length=255)
-    status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
-
+    uid = models.CharField(max_length=32)
+    trained_model = models.CharField(max_length=32, default='')
+    training_started_at = models.CharField(max_length=255)
+    training_duration = models.CharField(max_length=255, null=True, blank=True)
+    current_git_commit = models.CharField(max_length=255, null=True, blank=True)
+    current_git_repo = models.CharField(max_length=255, null=True, blank=True)
+    endpoint = models.CharField(max_length=512, default='', null=True, blank=True)
+    training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
+    
     class Meta:
-        unique_together = ('model_to_log', 'run_id')
+        unique_together = ('uid', 'trained_model')
 
 
 
