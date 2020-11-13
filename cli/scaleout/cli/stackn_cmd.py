@@ -77,11 +77,3 @@ def train_cmd(ctx, model, training_file):
             print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
     else:
         print('No project structure initialized in ' + current_dir + '; navigate to the correct folder or use "stackn init" to initialize a generic project structure in the current directory.')
-
-            #run_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k = 32)) # Randomized id for current run; string of size 32, same as MLflow
-            #os.mkdir('mlruns/' + run_id) # Make sub-directory in 'mlruns' for current training run
-            #dir_path = os.path.dirname(os.path.realpath(__file__))
-            #file_path = os.path.join(dir_path, 'run-structure.tar.gz')
-            #import tarfile
-            #tf = tarfile.open(file_path)
-            #tf.extractall('mlruns/' + run_id)
