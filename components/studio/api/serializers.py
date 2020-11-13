@@ -18,7 +18,8 @@ class ModelLogSerializer(ModelSerializer):
     class Meta:
         model = ModelLog
         fields = (
-            'id', 'uid', 'trained_model', 'training_started_at', 'training_duration', 'current_git_commit', 'current_git_repo', 'training_status', 'endpoint')
+            'id', 'uid', 'trained_model', 'training_started_at', 'execution_time', 'current_git_commit', 'current_git_repo', 
+            'system_info', 'cpu_info', 'training_status')
 
 
 class DeploymentDefinitionSerializer(ModelSerializer):

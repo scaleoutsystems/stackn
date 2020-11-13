@@ -65,17 +65,34 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
     filter_backends = [DjangoFilterBackend]
     #filterset_fields = ['id','name', 'version']
 
+    def get_queryset(self):
+        """
+        This view should return a list of all the models
+        for the currently authenticated user.
+        """
+        return Model.objects.filter(project__pk=self.kwargs['project_pk'])
+
     def create(self, request, *args, **kwargs):
         print("inside create")
         try:
-            model = request.data['model']
-            training_run_uid = request.data['uid']
-            started_training_at = request.data['training started at']
+            uid = request.data['uid']
+            trained_model = request.data['trained_model']
+            training_started_at = request.data['training_started_at']
+            execution_time = request.data['execution_time']
+            current_git_commit = request.data['current_git_commit']
+            current_git_repo = request.data['current_git_repo']
+            system_info = request.data['system_info']
+            cpu_info = request.data['cpu_info']
         except:
-            return HttpResponse('Failed to create model.', 400)
-        new_log = ModelLog(uid=training_run_uid,
-                          trained_model=model,
-                          training_started_at=started_training_at)
+            return HttpResponse('Failed to create log.', 400)
+        new_log = ModelLog(uid=uid,
+                          trained_model=trained_model,
+                          training_started_at=training_started_at,
+                          execution_time=execution_time,
+                          current_git_commit=current_git_commit,
+                          current_git_repo=current_git_repo,
+                          system_info=system_info,
+                          cpu_info=cpu_info)
         new_log.save()
         return HttpResponse('ok', 200)
 
