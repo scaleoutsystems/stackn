@@ -66,14 +66,13 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
     #filterset_fields = ['id','name', 'version']
 
     def get_queryset(self):
-        """
-        This view should return a list of all the models
-        for the currently authenticated user.
-        """
+        
+        # Not sure if this function is needed?
+        
         return Model.objects.filter(project__pk=self.kwargs['project_pk'])
 
     def create(self, request, *args, **kwargs):
-        print("inside create")
+        
         try:
             uid = request.data['uid']
             trained_model = request.data['trained_model']
