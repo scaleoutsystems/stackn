@@ -623,10 +623,11 @@ class StudioClient():
 
     def execute_training(self, training_file):
         """ Run training file and return date and time for training, and execution time """
+
         start_time = datetime.now()
         print('Model training starting...')
-        train = subprocess.run(['python', training_file])
-        if train.returncode == 0:
+        training = subprocess.run(['python', training_file])
+        if training.returncode == 0:
             print('Finished model training.')
             end_time = datetime.now()
             execution_time = str(end_time - start_time)
@@ -657,11 +658,9 @@ class StudioClient():
         # start_time, execution_time = self.execute_training(training_file)
         training_output = self.execute_training(training_file)
         if not training_output:
-            print("Training file not executed properly. Nothing will be logged from training session.")
+            print("Training file was not executed properly. Nothing will be logged from training session.")
             return False 
         else:
-            #start_time = training_output[0]
-            #execution_time = t 
             repo = self.get_repository()
             repo.bucket = 'training'
             training_data = {"uid": training_run_uid,
