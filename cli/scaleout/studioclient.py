@@ -637,7 +637,7 @@ class StudioClient():
 
 
     def train(self, model, file):
-        """ Train a model and publish model logs to Studio. """
+        """ Train a model and publish corresponding model logs to Studio. """
 
         training_output = self.run_training_file(file)
         if not training_output:
