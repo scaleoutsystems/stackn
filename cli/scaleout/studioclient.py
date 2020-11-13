@@ -628,7 +628,6 @@ class StudioClient():
         print('Model training starting...')
         training = subprocess.run(['python', training_file])
         if training.returncode == 0:
-            print('Finished model training.')
             end_time = datetime.now()
             execution_time = str(end_time - start_time)
             start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
@@ -638,29 +637,29 @@ class StudioClient():
 
 
     def train_model(self, model, training_file):
-        """ Train a model and publish run data to Studio. """
+        """ Train a model and publish model logs to Studio. """
 
-        import uuid 
-        training_run_uid = str(uuid.uuid1().hex)
-        system_info = json.loads(get_system_info({}))
-        cpu_info = json.loads(get_cpu_info({}))
-        git_info = []
-        git_info = get_git_info()
-        if git_info:
-            current_git_repo = git_info[0]
-            if git_info[1]:
-                current_git_commit = git_info[1]
-            else:
-                current_git_commit = "No git commit available for logging"
-        else:
-            current_git_commit = "No git commit available for logging"
-            current_git_repo = "Training executed in a non git repository"
-        # start_time, execution_time = self.execute_training(training_file)
         training_output = self.execute_training(training_file)
         if not training_output:
             print("Training file was not executed properly. Nothing will be logged from training session.")
             return False 
         else:
+            print('Training file executed properly. Initiating logging to database.')
+            import uuid 
+            training_run_uid = str(uuid.uuid1().hex)
+            system_info = json.loads(get_system_info({}))
+            cpu_info = json.loads(get_cpu_info({}))
+            git_info = []
+            git_info = get_git_info()
+            if git_info:
+                current_git_repo = git_info[0]
+                if git_info[1]:
+                    current_git_commit = git_info[1]
+                else:
+                    current_git_commit = "No git commit available for logging"
+            else:
+                current_git_commit = "No git commit available for logging"
+                current_git_repo = "Training executed in a non git repository"
             repo = self.get_repository()
             repo.bucket = 'training'
             training_data = {"uid": training_run_uid,
