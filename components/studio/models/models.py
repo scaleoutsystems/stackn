@@ -112,6 +112,7 @@ class ModelLog(models.Model):
     cpu_info = models.TextField(blank=True)
     #endpoint = models.CharField(max_length=512, default='', null=True, blank=True)
     training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
+    miscellaneous = models.CharField(max_length=255, default='')
     
     class Meta:
         unique_together = ('uid', 'trained_model')

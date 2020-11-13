@@ -148,7 +148,14 @@ def details(request, user, project, id):
     for model_log in model_logs:
         all_logs.append({
             'id': model_log.id,
-            'model_trained': 'demo-model'
+            'trained_model': model_log.trained_model,
+            'training_status': model_log.training_status,
+            'training_started_at': model_log.training_started_at,
+            'execution_time': model_log.execution_time,
+            'current_git_commit': model_log.current_git_commit,
+            'current_git_repo': model_log.current_git_repo,
+            'system_info': model_log.system_info,
+            'cpu_info': model_log.cpu_info
         })
 
 
