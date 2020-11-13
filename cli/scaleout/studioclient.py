@@ -625,7 +625,7 @@ class StudioClient():
         """ Run training file and return date and time for training, and execution time """
         start_time = datetime.now()
         print('Model training starting...')
-        subprocess.run(['python', training_file])
+        subprocess.run(['python3', training_file])
         print('Finished model training.')
         end_time = datetime.now()
         
