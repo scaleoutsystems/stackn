@@ -69,7 +69,7 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         
         # Not sure if this function is needed?
         
-        return Model.objects.filter(project__pk=self.kwargs['project_pk'])
+        return ModelLog.objects.filter(project__pk=self.kwargs['project_pk'])
 
     def create(self, request, *args, **kwargs):
         
@@ -84,14 +84,10 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
             cpu_info = request.data['cpu_info']
         except:
             return HttpResponse('Failed to create log.', 400)
-        new_log = ModelLog(uid=uid,
-                          trained_model=trained_model,
-                          training_started_at=training_started_at,
-                          execution_time=execution_time,
-                          current_git_commit=current_git_commit,
-                          current_git_repo=current_git_repo,
-                          system_info=system_info,
-                          cpu_info=cpu_info)
+
+        new_log = ModelLog(uid=uid, trained_model=trained_model, training_started_at=training_started_at,
+                           execution_time=execution_time, current_git_commit=current_git_commit, current_git_repo=current_git_repo,
+                           system_info=system_info, cpu_info=cpu_info)
         new_log.save()
         return HttpResponse('ok', 200)
 
