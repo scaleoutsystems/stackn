@@ -94,7 +94,6 @@ def details(request, user, project, id):
     model_access_choices = ['PU', 'PR', 'LI']
     model_access_choices.remove(model.access)
     deployments = DeploymentInstance.objects.filter(model=model)
-    # model_logs = ModelLog.objects.filter(model=model)
 
     report_generators = ReportGenerator.objects.filter(project=project)
 
@@ -143,6 +142,15 @@ def details(request, user, project, id):
             return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
+    
+    model_logs = ModelLog.objects.filter(trained_model=model)
+    all_logs = []
+    for model_log in model_logs:
+        all_logs.append({
+            'id': model_log.id,
+            'model_trained': 'demo-model'
+        })
+
 
     filename = None
     readme = None

@@ -100,11 +100,17 @@ class ModelLog(models.Model):
     ]
     uid = models.CharField(max_length=32)
     trained_model = models.CharField(max_length=32, default='')
+    #trained_model = models.ForeignKey(
+    #    Model, 
+    #    on_delete=models.CASCADE
+    #)
     training_started_at = models.CharField(max_length=255)
-    training_duration = models.CharField(max_length=255, null=True, blank=True)
-    current_git_commit = models.CharField(max_length=255, null=True, blank=True)
-    current_git_repo = models.CharField(max_length=255, null=True, blank=True)
-    endpoint = models.CharField(max_length=512, default='', null=True, blank=True)
+    execution_time = models.CharField(max_length=255, default='')
+    current_git_commit = models.CharField(max_length=255, default='')
+    current_git_repo = models.CharField(max_length=255, default='')
+    system_info = models.TextField(blank=True)
+    cpu_info = models.TextField(blank=True)
+    #endpoint = models.CharField(max_length=512, default='', null=True, blank=True)
     training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
     
     class Meta:
