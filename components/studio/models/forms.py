@@ -16,4 +16,4 @@ class ModelLogForm(forms.ModelForm):
         model = ModelLog
         fields = (
             'uid', 'trained_model', 'training_started_at', 'execution_time', 'current_git_commit', 
-            'current_git_repo', 'system_info', 'cpu_info', 'training_status')
+            'current_git_repo', 'system_info', 'cpu_info', 'training_status', 'miscellaneous')
