@@ -77,6 +77,7 @@ class StudioClient():
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
+        self.endpoints['modellogs'] = self.api_url+'/projects/{}/modellogs'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -603,7 +604,7 @@ class StudioClient():
             print('Status code: {}'.format(r.status_code))
             print('Reason: {} - {}'.format(r.reason, r.text))
 
-
+    """
     def log_to_db(self, data_to_log):
         try:
             from pymongo import MongoClient
@@ -616,73 +617,56 @@ class StudioClient():
         if isinstance(data_to_log, list): 
             Collection.insert_many(data_to_log)   
         else: 
-            Collection.insert_one(data_to_log)     
+            Collection.insert_one(data_to_log)
+    """     
 
 
-    def train_model(self, training_file):
+    def execute_training(self, training_file):
+        """ Run training file and return date and time for training, and execution time """
         start_time = datetime.now()
         print('Model training starting...')
         subprocess.run(['python', training_file])
         print('Finished model training.')
         end_time = datetime.now()
+        
+        execution_time = str(end_time - start_time)
+        start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        return start_time, execution_time
 
-        start_time_str = start_time.strftime("%Y/%m/%d, %H:%M:%S")
-        end_time_str = end_time.strftime("%Y/%m/%d, %H:%M:%S")
-        time_elapsed = str(end_time - start_time)
-        return start_time_str, end_time_str, time_elapsed
 
-
-    def log_training(self, model, training_file):
+    def train_model(self, model, training_file):
         """ Train a model and publish run data to Studio. """
-        #url = self.endpoints['models'].format(self.project['id'])+'/'
-        #print(url)
+
         import uuid 
         training_run_uid = str(uuid.uuid1().hex)
-
         system_info = json.loads(get_system_info({}))
         cpu_info = json.loads(get_cpu_info({}))
-        #sha, last_commit, committed = get_git_info()
-        #if not committed:
-        #    print("WARNING: Uncommitted files exist in repo")
-        start_time, end_time, train_duration = self.train_model(training_file)
+        git_info = []
+        git_info = get_git_info()
+        if git_info:
+            current_git_repo = git_info[0]
+            if git_info[1]:
+                current_git_commit = git_info[1]
+            else:
+                current_git_commit = "No git commit available for logging"
+        else:
+            current_git_commit = "No git commit available for logging"
+            current_git_repo = "Training executed in a non git repository"
+
+        start_time, execution_time = self.execute_training(training_file)
         repo = self.get_repository()
         repo.bucket = 'training'
-        #repo.set_artifact(training_run_uid, model)
         training_data = {"uid": training_run_uid,
-                         "model": model,
-                         "training started at": start_time}
-        url = self.endpoints['models'].format(self.project['id'])+'/'
+                         "trained_model": model,
+                         "training_started_at": start_time,
+                         "execution_time": execution_time,
+                         "current_git_commit": current_git_commit,
+                         "current_git_repo": current_git_repo,
+                         "system_info": system_info,
+                         "cpu_info": cpu_info}
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         return True
-
-        
-        #hardware_dict = {
-        #    "System info" : system_info,
-        #    "CPU info" : cpu_info
-        #}
-        
-        #git_dict = {
-        #    "Git hash" : sha, 
-        #    "Last commit" : last_commit
-        #}
-        #print('Code for model training successfully found in "src/models".\nStarting training...')
-        #utc_time_created = str(datetime.utcnow()) # Date and time for when training started
-        
-        
-        
-        #time_dict = {
-        #    "Start time": start_time_str, 
-        #    "End time": end_time_str, 
-        #    "Training duration": time_elapsed
-        #}
-        #data_to_log = {
-        #    "Run ID" : run_id, 
-        #    **hardware_dict, 
-        #    **git_dict, 
-        #    **time_dict
-        #}
-        #print(data_to_log)
-        self.log_to_db(data_to_log)
     
 
     def predict(self, model, inp, version=None):

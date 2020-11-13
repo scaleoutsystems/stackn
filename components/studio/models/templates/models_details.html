@@ -195,23 +195,19 @@
             {% endif %}
         </div>
         <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="profile-tab">
-            {% if model_logs %}
+            {% if all_logs %}
             <table class="table table-borderless">
                 <thead>
                 <tr>
                     <th scope="col">Id</th>
-                    <th scope="col">Log URL</th>
-                    <th scope="col">Created</th>
+                    <th scope="col">Model trained</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for log in model_logs %}
+                {% for log in all_logs %}
                 <tr>
-                    <th scope="row">{{ log.pk }}</th>
-                    <td>
-                        <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}" target="_blank">{{ m.endpoint }}{{ m.path }}/{{ m.deployment.path_predict }}</a>
-                    </td>
-                    <td>{{ m.created_at }}</td>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.model_trained }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

@@ -31,16 +31,18 @@ def get_git_info():
         import git
     except ImportError:
         print('Failed to import Git')
-        return None
+        return []
     try:
         repo = git.Repo(os.getcwd())
         sha = repo.head.object.hexsha
-        last_commit = repo.head.commit.committed_datetime
-        uncommitted = repo.is_dirty()
-        return sha, last_commit, uncommitted
+        latest_commit_timestamp = repo.head.commit.committed_datetime
+        is_committed = repo.is_dirty()
+        if not is_committed:
+            print("WARNING: Uncommitted files exist in current git repository.")
+        return [repo, sha, latest_commit_timestamp]
     except (git.InvalidGitRepositoryError, git.GitCommandNotFound, git.NoSuchPathError, ValueError):
-        print('Failed to exctract Git info')
-        return None
+        print('WARNING: Failed to exctract Git info. This could be due to the working directory not being a git repository.')
+        return []
 
 """    
 def get_git_commit():
