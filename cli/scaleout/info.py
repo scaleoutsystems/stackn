@@ -41,7 +41,7 @@ def get_git_info():
             print("WARNING: Uncommitted files exist in current git repository.")
         return [repo, sha, latest_commit_timestamp]
     except (git.InvalidGitRepositoryError, git.GitCommandNotFound, git.NoSuchPathError, ValueError):
-        print('WARNING: Failed to exctract Git info. This could be due to the working directory not being a git repository.')
+        print('WARNING: Failed to exctract Git info. This could be due to the working directory not being a git repository. Run "git init" and create a first commit')
         return []
 
 """    
