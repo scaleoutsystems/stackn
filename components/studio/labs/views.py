@@ -14,7 +14,7 @@ from rest_framework.renderers import JSONRenderer
 import json
 import yaml
 
-@login_required(login_url='/accounts/login')
+@login_required
 def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
@@ -26,7 +26,7 @@ def index(request, user, project):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def run(request, user, project):
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
 
@@ -48,7 +48,7 @@ def run(request, user, project):
         reverse('labs:index', kwargs={'user': request.user, 'project': str(project.slug)}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project, id):
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
     session = Session.objects.filter(Q(id=id), Q(project=project), Q(lab_session_owner=request.user)).first()
