@@ -621,12 +621,12 @@ class StudioClient():
     """     
 
 
-    def execute_training(self, training_file):
+    def run_training_file(self, file):
         """ Run training file and return date and time for training, and execution time """
 
         start_time = datetime.now()
         print('Model training starting...')
-        training = subprocess.run(['python', training_file])
+        training = subprocess.run(['python', file])
         if training.returncode == 0:
             end_time = datetime.now()
             execution_time = str(end_time - start_time)
@@ -636,10 +636,10 @@ class StudioClient():
             return None
 
 
-    def train_model(self, model, training_file):
+    def train(self, model, file):
         """ Train a model and publish model logs to Studio. """
 
-        training_output = self.execute_training(training_file)
+        training_output = self.run_training_file(file)
         if not training_output:
             print("Training file was not executed properly. Nothing will be logged from training session.")
             return False 

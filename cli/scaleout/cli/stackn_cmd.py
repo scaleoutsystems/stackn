@@ -72,7 +72,7 @@ def train_cmd(ctx, model, training_file):
     if os.path.isdir('src/models'):
         if os.path.isfile(training_file):
             client = ctx.obj['CLIENT']
-            client.train_model(model, training_file)
+            client.train(model, training_file)
         else:
             print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
     else:
