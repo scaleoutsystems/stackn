@@ -145,6 +145,7 @@ def details(request, user, project, id):
     
     model_logs = ModelLog.objects.filter(trained_model=model)
     all_logs = []
+    import ast
     for model_log in model_logs:
         all_logs.append({
             'id': model_log.id,
@@ -154,8 +155,8 @@ def details(request, user, project, id):
             'execution_time': model_log.execution_time,
             'current_git_commit': model_log.current_git_commit,
             'current_git_repo': model_log.current_git_repo,
-            'system_info': model_log.system_info,
-            'cpu_info': model_log.cpu_info
+            'system_info': ast.literal_eval(model_log.system_info),
+            'cpu_info': ast.literal_eval(model_log.cpu_info)
         })
 
 

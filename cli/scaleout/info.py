@@ -6,22 +6,22 @@ import os
 
 def get_system_info(info):
     try:
-        info['platform'] = platform.system()
-        info['platform_version'] = platform.version()
-        info['architecture'] = platform.machine()
-        info['processor'] = platform.processor()
-        info['ram'] = str(round(psutil.virtual_memory().total / (1024.0 **3))) + " GB"
+        info['Platform'] = platform.system()
+        #info['Platform version'] = platform.version()
+        info['Architecture'] = platform.machine()
+        info['Processor'] = platform.processor()
+        info['RAM'] = str(round(psutil.virtual_memory().total / (1024.0 **3))) + " GB"
         return json.dumps(info)
     except Exception as e:
         logging.exception(e)
 
 def get_cpu_info(info):
     try:
-        info['physical_cores'] = psutil.cpu_count(logical=False)
-        info['total_cores'] = psutil.cpu_count(logical=True)
+        info['Physical cores'] = psutil.cpu_count(logical=False)
+        info['Total cores'] = psutil.cpu_count(logical=True)
         for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
-            info[f'core_{i}'] = f'{percentage}%'
-        info['total_cpu_usage'] = f'{psutil.cpu_percent()}%'
+            info[f'Core {i}'] = f'{percentage}%'
+        info['Total CPU usage'] = f'{psutil.cpu_percent()}%'
         return json.dumps(info)
     except Exception as e:
         logging.exception(e)
