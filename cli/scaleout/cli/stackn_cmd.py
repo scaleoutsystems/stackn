@@ -2,7 +2,7 @@ import click
 from .main import main
 import requests
 from scaleout.auth import login, get_stackn_config, get_remote_config, get_token
-from .helpers import create_table
+from .helpers import create_table, search_for_model
 import os
 import random
 import string
@@ -67,13 +67,17 @@ def predict_cmd(ctx, model, version, inp):
 @click.option('-f', '--training-file', required=False, default="src/models/train.py")
 @click.pass_context
 def train_cmd(ctx, model, training_file):
-    current_dir = os.getcwd()
-    # Should include try-except clauses here instead of if-else
-    if os.path.isdir('src/models'):
-        if os.path.isfile(training_file):
-            client = ctx.obj['CLIENT']
-            client.train_model(model, training_file)
+    model_exists = search_for_model(ctx, "models", model)
+    if model_exists:
+        # Should include try-except clauses here instead of if-else
+        if os.path.isdir('src/models'):
+            if os.path.isfile(training_file):
+                client = ctx.obj['CLIENT']
+                client.train(model, training_file)
+            else:
+                print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
         else:
-            print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
+            current_dir = os.getcwd()
+            print('No project structure initialized in ' + current_dir + '; navigate to the correct folder or use "stackn init" to initialize a generic project structure in the current directory.')
     else:
-        print('No project structure initialized in ' + current_dir + '; navigate to the correct folder or use "stackn init" to initialize a generic project structure in the current directory.')
+        print('The model {} does not exist in the active project. Cannot run training file for non-existing models.'.format(model))

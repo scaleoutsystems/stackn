@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def index(request, user, project):
     template = 'reports_list.html'
 
@@ -22,7 +22,7 @@ def index(request, user, project):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def add(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
@@ -62,7 +62,7 @@ def add(request, user, project):
     return render(request, 'reports_add.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project, id):
     template = 'reports_details_generator.html'
 
@@ -72,7 +72,7 @@ def details(request, user, project, id):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def visualize_report(request, user, project, id):
     template = 'reports_details.html'
 
@@ -98,7 +98,7 @@ def visualize_report_public(request, id):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete_generator(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     report = ReportGenerator.objects.filter(id=id).first()
@@ -120,7 +120,7 @@ def delete_generator(request, user, project, id):
     return render(request, 'report_confirm_delete.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete_report(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     report = Report.objects.filter(id=id).first()

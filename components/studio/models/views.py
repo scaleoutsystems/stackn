@@ -23,7 +23,7 @@ def index(request):
     return render(request, 'models_cards.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def list(request, user, project):
     template = 'models_list.html'
     project = Project.objects.filter(slug=project).first()
@@ -38,7 +38,7 @@ def list(request, user, project):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def create(request, user, project):
     template = 'models_upload.html'
 
@@ -67,7 +67,7 @@ def create(request, user, project):
         return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -87,7 +87,7 @@ def change_access(request, user, project, id):
         reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
@@ -143,12 +143,21 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
     
-    model_logs = ModelLog.objects.filter(trained_model=model)
-    all_logs = []
-    for model_log in model_logs:
-        all_logs.append({
-            'id': model_log.id,
-            'model_trained': 'demo-model'
+    
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    model_logs = []
+    import ast
+    for log in log_objects:
+        model_logs.append({
+            'id': log.id,
+            'trained_model': log.trained_model,
+            'training_status': log.training_status,
+            'training_started_at': log.training_started_at,
+            'execution_time': log.execution_time,
+            'latest_git_commit': log.latest_git_commit,
+            'current_git_repo': log.current_git_repo,
+            'system_info': ast.literal_eval(log.system_info),
+            'cpu_info': ast.literal_eval(log.cpu_info)
         })
 
 
@@ -204,7 +213,7 @@ def details_public(request, id):
     return render(request, 'models_details_public.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project, id):
     template = 'model_confirm_delete.html'
 

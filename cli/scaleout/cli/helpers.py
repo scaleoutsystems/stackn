@@ -46,3 +46,12 @@ def create_table(ctx, resource, names, keys):
     client = ctx.obj['CLIENT']
     objects = client.create_list(resource)
     _print_table(objects, names, keys)
+
+def search_for_model(ctx, resource, name):
+    client = ctx.obj['CLIENT']
+    objects = client.create_list(resource)
+    model_exists = False
+    for item in objects:
+        if item['name'] == name:
+            model_exists = True
+    return model_exists

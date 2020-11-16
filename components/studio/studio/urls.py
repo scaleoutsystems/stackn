@@ -15,14 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-# from projects.views import auth
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
-    # path('auth/', auth, name='auth'),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('', include('models.urls', namespace='models')),

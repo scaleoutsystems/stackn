@@ -16,7 +16,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@login_required(login_url='/accounts/login')
+@login_required
 def index(request, user, project):
     print('User: {}'.format(user))
     user_permissions = get_permissions(request, project)
@@ -36,7 +36,7 @@ def index(request, user, project):
         
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def run(request, user, project):
     user_permissions = get_permissions(request, project)
     if not user_permissions['create']:
@@ -70,7 +70,7 @@ def run(request, user, project):
 
     return render(request, temp, locals())
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project, id):
     user_permissions = get_permissions(request, project)
     if not user_permissions['view']:
@@ -104,7 +104,7 @@ def details(request, user, project, id):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project, id):
     user_permissions = get_permissions(request, project)
     if not user_permissions['delete']:
