@@ -65,29 +65,30 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
     filter_backends = [DjangoFilterBackend]
     #filterset_fields = ['id','name', 'version']
 
-    def get_queryset(self):
+    # Not sure if this kind of function is needed for ModelLog?
+    # def get_queryset(self):
         
-        # Not sure if this function is needed?
-        
-        return ModelLog.objects.filter(project__pk=self.kwargs['project_pk'])
+        # return ModelLog.objects.filter(project__pk=self.kwargs['project_pk'])
 
     def create(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
         
         try:
             uid = request.data['uid']
             trained_model = request.data['trained_model']
-            training_started_at = request.data['training_started_at']
+            #training_started_at = request.data['training_started_at']
             execution_time = request.data['execution_time']
-            current_git_commit = request.data['current_git_commit']
+            latest_git_commit = request.data['latest_git_commit']
             current_git_repo = request.data['current_git_repo']
             system_info = request.data['system_info']
             cpu_info = request.data['cpu_info']
+            training_status = request.data['training_status']
         except:
             return HttpResponse('Failed to create log.', 400)
 
-        new_log = ModelLog(uid=uid, trained_model=trained_model, training_started_at=training_started_at,
-                           execution_time=execution_time, current_git_commit=current_git_commit, current_git_repo=current_git_repo,
-                           system_info=system_info, cpu_info=cpu_info)
+        new_log = ModelLog(uid=uid, trained_model=trained_model, project=project.name, execution_time=execution_time, 
+                           latest_git_commit=latest_git_commit, current_git_repo=current_git_repo,
+                           system_info=system_info, cpu_info=cpu_info, training_status=training_status)
         new_log.save()
         return HttpResponse('ok', 200)
 
