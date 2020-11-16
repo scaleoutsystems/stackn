@@ -104,13 +104,14 @@ class ModelLog(models.Model):
     #    Model, 
     #    on_delete=models.CASCADE
     #)
-    training_started_at = models.CharField(max_length=255)
+    project = models.CharField(max_length=255, default='')
+    #training_started_at = models.CharField(max_length=255)
+    training_started_at = models.DateTimeField(auto_now_add=True)
     execution_time = models.CharField(max_length=255, default='')
-    current_git_commit = models.CharField(max_length=255, default='')
+    latest_git_commit = models.CharField(max_length=255, default='')
     current_git_repo = models.CharField(max_length=255, default='')
     system_info = models.TextField(blank=True)
     cpu_info = models.TextField(blank=True)
-    #endpoint = models.CharField(max_length=512, default='', null=True, blank=True)
     training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
     miscellaneous = models.CharField(max_length=255, default='')
     

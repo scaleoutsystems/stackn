@@ -143,20 +143,21 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
     
-    model_logs = ModelLog.objects.filter(trained_model=model)
-    all_logs = []
+    
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    model_logs = []
     import ast
-    for model_log in model_logs:
-        all_logs.append({
-            'id': model_log.id,
-            'trained_model': model_log.trained_model,
-            'training_status': model_log.training_status,
-            'training_started_at': model_log.training_started_at,
-            'execution_time': model_log.execution_time,
-            'current_git_commit': model_log.current_git_commit,
-            'current_git_repo': model_log.current_git_repo,
-            'system_info': ast.literal_eval(model_log.system_info),
-            'cpu_info': ast.literal_eval(model_log.cpu_info)
+    for log in log_objects:
+        model_logs.append({
+            'id': log.id,
+            'trained_model': log.trained_model,
+            'training_status': log.training_status,
+            'training_started_at': log.training_started_at,
+            'execution_time': log.execution_time,
+            'latest_git_commit': log.latest_git_commit,
+            'current_git_repo': log.current_git_repo,
+            'system_info': ast.literal_eval(log.system_info),
+            'cpu_info': ast.literal_eval(log.cpu_info)
         })
 
 

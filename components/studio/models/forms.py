@@ -1,5 +1,5 @@
 from django import forms
-from .models import Model, ModelLog
+from .models import Model
 
 
 class ModelForm(forms.ModelForm):
@@ -11,9 +11,9 @@ class ModelForm(forms.ModelForm):
             'project': forms.HiddenInput()
         }
 
-class ModelLogForm(forms.ModelForm):
-    class Meta:
-        model = ModelLog
-        fields = (
-            'uid', 'trained_model', 'training_started_at', 'execution_time', 'current_git_commit', 
-            'current_git_repo', 'system_info', 'cpu_info', 'training_status', 'miscellaneous')
+#class ModelLogForm(forms.ModelForm):
+#    class Meta:
+#        model = ModelLog
+#        fields = (
+#            'uid', 'trained_model', 'project', 'training_started_at', 'execution_time', 'latest_git_commit', 
+#            'current_git_repo', 'system_info', 'cpu_info', 'training_status', 'miscellaneous')
