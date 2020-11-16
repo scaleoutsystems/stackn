@@ -677,7 +677,11 @@ class StudioClient():
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         return True
-    
+
+    def log(self, data):
+        log_data = {"miscellaneous": data}
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        r = requests.post(url, json=log_data, headers=self.auth_headers, verify=self.secure_mode)
 
     def predict(self, model, inp, version=None):
         if version:
