@@ -380,8 +380,6 @@ class StudioClient():
                       "description": model_description}
 
         url = self.endpoints['models'].format(self.project['id'])+'/'
-        print(url)
-        print("Here's endpoints {}".format(self.endpoints))
         # url = url.replace('http:', 'https:')
 
         r = requests.post(url, json=model_data, headers=self.auth_headers, verify=self.secure_mode)
@@ -624,55 +622,61 @@ class StudioClient():
     def run_training_file(self, file):
         """ Run training file and return date and time for training, and execution time """
 
+        training_successful = True
         start_time = datetime.now()
         print('Model training starting...')
         training = subprocess.run(['python', file])
-        if training.returncode == 0:
-            end_time = datetime.now()
-            execution_time = str(end_time - start_time)
-            start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
-            return (start_time, execution_time)
-        else:
-            return None
+        end_time = datetime.now()
+        execution_time = str(end_time - start_time)
+        start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+
+        if training.returncode != 0:
+            training_successful = False
+
+        return (start_time, execution_time, training_successful)
 
 
     def train(self, model, file):
         """ Train a model and publish corresponding model logs to Studio. """
 
+        # Training file executed here by calling run_training_file function
         training_output = self.run_training_file(file)
-        if not training_output:
-            print("Training file was not executed properly. Nothing will be logged from training session.")
-            return False 
+        if not training_output[2]:
+            print("Training file was not executed properly. This will be logged in database.")
+            status = 'FA'
         else:
-            print('Training file executed properly. Initiating logging to database.')
-            import uuid 
-            training_run_uid = str(uuid.uuid1().hex)
-            system_info = json.loads(get_system_info({}))
-            cpu_info = json.loads(get_cpu_info({}))
-            git_info = []
-            git_info = get_git_info()
-            if git_info:
-                current_git_repo = git_info[0]
-                if git_info[1]:
-                    current_git_commit = git_info[1]
-                else:
-                    current_git_commit = "No git commit available for logging"
+            print('Training file executed properly.')
+            status = 'DO'
+
+        import uuid 
+        training_run_uid = str(uuid.uuid1().hex)
+        system_info = json.loads(get_system_info({}))
+        cpu_info = json.loads(get_cpu_info({}))
+        git_info = []
+        git_info = get_git_info()
+        if git_info:
+            current_git_repo = git_info[0]
+            if git_info[1]:
+                latest_git_commit = git_info[1]
             else:
-                current_git_commit = "No git commit available for logging"
-                current_git_repo = "Training executed in a non git repository"
-            repo = self.get_repository()
-            repo.bucket = 'training'
-            training_data = {"uid": training_run_uid,
-                            "trained_model": model,
-                            "training_started_at": training_output[0],
-                            "execution_time": training_output[1],
-                            "current_git_commit": current_git_commit,
-                            "current_git_repo": current_git_repo,
-                            "system_info": system_info,
-                            "cpu_info": cpu_info}
-            url = self.endpoints['modellogs'].format(self.project['id'])+'/'
-            r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
-            return True
+                latest_git_commit = "No recent Git commit to log"
+        else:
+            latest_git_commit = "No recent Git commit to log"
+            current_git_repo = "Training executed in a non Git repository"
+        repo = self.get_repository()
+        repo.bucket = 'training'
+        training_data = {"uid": training_run_uid,
+                         "trained_model": model,
+                        #"training_started_at": training_output[0],
+                         "execution_time": training_output[1],
+                         "latest_git_commit": latest_git_commit,
+                         "current_git_repo": current_git_repo,
+                         "system_info": system_info,
+                         "cpu_info": cpu_info,
+                         "training_status": status}    
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
+        return True
     
 
     def predict(self, model, inp, version=None):
