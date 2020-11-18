@@ -258,6 +258,19 @@ class StudioClient():
             return []
         return members
 
+    ### Volumes API ###
+
+    def create_volume(self, size, name):
+        print('Creating volume {}, {}.'.format(name, size))
+        url = self.endpoints['volumes'].format(self.project['id'])
+        r = requests.post(url, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Created volume: {}'.format(name))
+        else:
+            print('Failed to create volume.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
     ### Datasets API ###
 
     def delete_dataset(self, name, version):

@@ -68,6 +68,15 @@ def create_session(ctx, flavor, environment):
     client = ctx.obj['CLIENT']
     client.create_session(flavor_slug=flavor, environment_slug=environment)
 
+@create_cmd.command('volume')
+@click.option('-s', '--size', required=True)
+@click.option('-n', '--name', required=True)
+@click.pass_context
+def create_volume(ctx, size, name):
+    client = ctx.obj['CLIENT']
+    print('Creating volume')
+    # client.create_volume(flavor_slug=flavor, environment_slug=environment)
+
 
 # Create dataset
 
