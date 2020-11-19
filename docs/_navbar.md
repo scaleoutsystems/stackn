@@ -4,3 +4,4 @@
 * [Installation](/INSTALL)
 * [Tutorials](/tutorial)
 * [Dev](/dev)
+* [Release Notes](/releasenotes)
