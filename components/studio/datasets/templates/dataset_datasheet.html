@@ -3,16 +3,17 @@
 <div class="col-md-9">
     <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
         <ol class="breadcrumb project-breadcrumb-ol">
-            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
+            <li class="breadcrumb-item">Projects</li>
             <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+            <li>Datasheet</li>
         </ol>
     </nav>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-        <h2>Datasets</h2>
+        <h2>Datasheet</h2>
     </div>
     <div class="get-started-header">
         <p>If you would want to manage the files and/or upload new ones, you can simply do that by
-            going to <a href="https://{{ project.slug }}-minio.{{ url_domain }}/" target="_blank">MiniO</a>
+            going to hejsan hoppsan
             and use the following login credentials: </p>
         <p>
             Access Key: <b>{{ decrypted_key }}</b>
@@ -46,18 +47,17 @@
         <tr>
             {% if entry.is_dir %}
             <td><span class="oi oi-folder"></span></td>
-            <td>{{ entry.location }}</td>
-            <td><a href="{% url 'datasets:path_page' user project.slug entry.name 1 %}">{{ entry.name }}</a></td>
+            <td></td>
+            <td><a ></a></td>
             <td>--</td>
             <td>--</td>
             {% else %}
             <td><span class="oi oi-file"></span></td>
-            <td>{{ entry.location }}</td>
-            <td>{{ entry.name }}</td>
-            <td><a href="{%url 'datasets:datasheet' request.user project.slug 1 %}" class="btn mt-auto btn-info"
-                style="width: fit-content;">{{ entry.datasheet }}</a></td>
-            <td>{{ entry.size }} MB</td>
-            <td>{{ entry.modified }}</td>
+            <td></td>
+            <td></td>
+            <td><button>b</button></td>
+            <td></td>
+            <td></td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -66,27 +66,27 @@
     <nav aria-label="Datasets page navigation">
         <ul class="pagination justify-content-center">
             <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug previous_page %}">
+                <a class="page-link">
                     Previous
                 </a>
             </li>
             {% for page in pages %}
             {% if page == page_index %}
             <li class="page-item active">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
+                <a class="page-link" href=>
                     {{ page }}
                 </a>
             </li>
             {% else %}
             <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
+                <a class="page-link">
                     {{ page }}
                 </a>
             </li>
             {% endif %}
             {% endfor %}
             <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug next_page %}">
+                <a class="page-link">
                     Next
                 </a>
             </li>
