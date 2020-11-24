@@ -2,11 +2,13 @@ import click
 from .main import main
 import requests
 from scaleout.auth import login, get_stackn_config, get_remote_config, get_token
-from .helpers import create_table, search_for_model
+from .helpers import create_table, search_for_model, new_id, Determinant
 import os
 import random
 import string
 import json
+import uuid
+from scaleout.details import get_run_details 
 
 # @click.option('--daemon',
 #               is_flag=True,
@@ -62,22 +64,44 @@ def predict_cmd(ctx, model, version, inp):
     #                     headers={"Authorization": "Token "+token},
     #                     json = inp)
 
+
+# ------------------- Question ---------------------
+# Is it a good idea to make it possible to pass --log-off as an argument if the user does not want to log the run to Studio?
+# In that case, the model name and code version is not possible to pass to the stackn train command and train.py will run without logging. 
+# Not sure if this is a good idea
+# --------------------------------------------------
 @main.command('train')
-@click.option('-m', '--model', required=True)
+@click.option('--log-off', flag_value='log-off', default=False)
+@click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
+@click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
 @click.option('-f', '--training-file', required=False, default="src/models/train.py")
+@click.option('-v', '--version', prompt=True, cls=Determinant, determinant='log_off')
 @click.pass_context
-def train_cmd(ctx, model, training_file):
-    model_exists = search_for_model(ctx, "models", model)
-    if model_exists:
-        # Should include try-except clauses here instead of if-else
-        if os.path.isdir('src/models'):
-            if os.path.isfile(training_file):
-                client = ctx.obj['CLIENT']
-                client.train(model, training_file)
-            else:
-                print('The file "train.py" does not exist in "src/models". Create it in the directory and include code for model training before running "stackn train" again.')
+def train_cmd(ctx, log_off, model, run_id, training_file, version):
+    """ Train a model and log metadata """
+    
+    if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): # Only checks locally. Should we check if there exists a log on Studio with the same ID as well?
+        run_id = new_id(run_id)
+    print("Preparing to start training session with '{}' as unique ID.".format(run_id))
+    if os.path.isfile(training_file):
+        if log_off:
+            import subprocess
+            subprocess.run(['python', training_file, run_id])
         else:
-            current_dir = os.getcwd()
-            print('No project structure initialized in ' + current_dir + '; navigate to the correct folder or use "stackn init" to initialize a generic project structure in the current directory.')
+            model_exists = search_for_model(ctx, "models", model) 
+            if model_exists:
+                client = ctx.obj['CLIENT']
+                client.train(model, run_id, training_file, version)
+            else: 
+                print("The model '{}' does not exist in the active project and cannot be trained.".format(model))
     else:
-        print('The model {} does not exist in the active project. Cannot run training file for non-existing models.'.format(model))
+        current_dir = os.getcwd()
+        print("Could not start a training session. Check that you have initialized a model "\
+            + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))    
+
+
+
+@main.command('test')
+@click.pass_context
+def test_cmd(ctx):
+    get_run_details('12')

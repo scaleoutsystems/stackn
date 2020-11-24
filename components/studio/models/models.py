@@ -98,26 +98,36 @@ class ModelLog(models.Model):
         (DONE, 'Done'),
         (FAILED, 'Failed'),
     ]
-    uid = models.CharField(max_length=32)
+    run_id = models.CharField(max_length=32)
     trained_model = models.CharField(max_length=32, default='')
     #trained_model = models.ForeignKey(
     #    Model, 
     #    on_delete=models.CASCADE
     #)
     project = models.CharField(max_length=255, default='')
-    #training_started_at = models.CharField(max_length=255)
-    training_started_at = models.DateTimeField(auto_now_add=True)
+    training_started_at = models.CharField(max_length=255)
+    #training_started_at = models.DateTimeField(auto_now_add=True)
     execution_time = models.CharField(max_length=255, default='')
-    latest_git_commit = models.CharField(max_length=255, default='')
+    code_version = models.CharField(max_length=255, default='')
     current_git_repo = models.CharField(max_length=255, default='')
-    system_info = models.TextField(blank=True)
-    cpu_info = models.TextField(blank=True)
+    latest_git_commit = models.CharField(max_length=255, default='')
+    system_details = models.TextField(blank=True)
+    cpu_details = models.TextField(blank=True)
     training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
-    miscellaneous = models.TextField(blank=true)
     
     class Meta:
-        unique_together = ('uid', 'trained_model')
+        unique_together = ('run_id', 'trained_model')
 
+class Metadata(models.Model):
+    run_id = models.CharField(max_length=32)
+    trained_model = models.CharField(max_length=32, default='')
+    project = models.CharField(max_length=255, default='')
+    model_details = models.TextField(blank=True)
+    parameters = models.TextField(blank=True)
+    metrics = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('run_id', 'trained_model')
 
 
 @receiver(pre_save, sender=Model, dispatch_uid='model_pre_save_signal')
