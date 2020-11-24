@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model, ModelLog
+from .models import Model, ModelLog, Metadata
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
@@ -143,7 +143,7 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
     
-    
+
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     import ast
@@ -154,10 +154,11 @@ def details(request, user, project, id):
             'training_status': log.training_status,
             'training_started_at': log.training_started_at,
             'execution_time': log.execution_time,
-            'latest_git_commit': log.latest_git_commit,
+            'code_version': log.code_version,
             'current_git_repo': log.current_git_repo,
-            'system_info': ast.literal_eval(log.system_info),
-            'cpu_info': ast.literal_eval(log.cpu_info)
+            'latest_git_commit': log.latest_git_commit,
+            'system_details': ast.literal_eval(log.system_details),
+            'cpu_details': ast.literal_eval(log.cpu_details)
         })
 
 
