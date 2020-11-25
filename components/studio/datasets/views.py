@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from projects.models import Project
 from studio.minio import MinioRepository, ResponseError
 from django.conf import settings as sett
 from projects.helpers import get_minio_keys
+from .forms import DatasheetForm
 
 
 @login_required
@@ -107,6 +109,16 @@ def datasheet(request, user, project, page_index):
     decrypted_key = minio_keys['project_key']
     decrypted_secret = minio_keys['project_secret']
 
+    submitbutton = request.POST.get("submit")
+
+    datasheet_info = []
+
+    form = DatasheetForm(request.POST or None)
+    if form.is_valid():
+        datasheet_info.append(form.cleaned_data.get("q1"))
+        datasheet_info.append(form.cleaned_data.get("q2"))
+        print(datasheet_info)
+
     datasets = []
     try:
         minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
@@ -137,3 +149,17 @@ def datasheet(request, user, project, page_index):
         next_page = page_index if page_index == pages[-1] else page_index + 1
 
     return render(request, template, locals())
+
+
+"""
+def datasheet(request, user, project, page_index):
+    template = 'dataset_datasheet.html'
+    if request.method == 'POST':
+        form = DatasheetForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/submitted')
+    else:
+        form = DatasheetForm()
+
+    return render(request, template, {'form': form})
+"""

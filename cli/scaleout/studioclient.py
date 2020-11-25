@@ -298,7 +298,8 @@ class StudioClient():
           "release_type": release_type,
           "filenames": filenames,
           "description": description,
-          "bucket": bucket
+          "bucket": bucket,
+          "url": url
         }
         print(payload)
         r = requests.post(url, json=payload, headers=self.auth_headers, verify=self.secure_mode)

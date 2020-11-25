@@ -80,7 +80,8 @@ class DatasetSerializer(ModelSerializer):
     class Meta:
         model = Dataset
         fields = ['id', 'name', 'version', 'release_type', 'description',
-                  'bucket', 'project_slug', 'files', 'created_by', 'created_on']
+                  'bucket', 'project_slug', 'files', 'created_by', 'created_on', 'datasheet']
+
 
 class FileModelSerializer(ModelSerializer):
     class Meta:

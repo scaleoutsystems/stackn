@@ -3,24 +3,19 @@
 <div class="col-md-9">
     <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
         <ol class="breadcrumb project-breadcrumb-ol">
+            {% for entry in datasets %}
             <li class="breadcrumb-item">Projects</li>
-            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-            <li>Datasheet</li>
+            <li class="breadcrumb-item" aria-current="page">{{ project.name }}</li>
+            <li class="breadcrumb-item" aria-curretn="page">{{ entry.name }}</li>
+            <li class="breadcrumb-item active">Datasheet</li>
+            {% endfor %}
         </ol>
     </nav>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
         <h2>Datasheet</h2>
     </div>
     <div class="get-started-header">
-        <p>If you would want to manage the files and/or upload new ones, you can simply do that by
-            going to hejsan hoppsan
-            and use the following login credentials: </p>
-        <p>
-            Access Key: <b>{{ decrypted_key }}</b>
-        </p>
-        <p>
-            Secret Key: <b>{{ decrypted_secret }}</b>
-        </p>
+        <p>A datasheet is blblblbl</p>
     </div>
     <nav aria-label="breadcrumb" style="margin-bottom: 25px;">
         <ol class="breadcrumb">
@@ -31,66 +26,17 @@
             </li>
         </ol>
     </nav>
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col" style="width: 5%;text-align: center;"></th>
-            <th scope="col" style="width: 10%;text-align: left">Location</th>
-            <th scope="col" style="width: 35%;text-align: left">Name</th>
-            <th scope="col" style="width: 15%;text-align: left">Datasheet</th>
-            <th scope="col" style="width: 10%;text-align: left">Size</th>
-            <th scope="col" style="width: 15%;text-align: left">Last Modified</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for entry in datasets %}
-        <tr>
-            {% if entry.is_dir %}
-            <td><span class="oi oi-folder"></span></td>
-            <td></td>
-            <td><a ></a></td>
-            <td>--</td>
-            <td>--</td>
-            {% else %}
-            <td><span class="oi oi-file"></span></td>
-            <td></td>
-            <td></td>
-            <td><button>b</button></td>
-            <td></td>
-            <td></td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Datasets page navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item">
-                <a class="page-link">
-                    Previous
-                </a>
-            </li>
-            {% for page in pages %}
-            {% if page == page_index %}
-            <li class="page-item active">
-                <a class="page-link" href=>
-                    {{ page }}
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item">
-                <a class="page-link">
-                    {{ page }}
-                </a>
-            </li>
-            {% endif %}
-            {% endfor %}
-            <li class="page-item">
-                <a class="page-link">
-                    Next
-                </a>
-            </li>
-        </ul>
-    </nav>
+    <form action="" method="post">
+        <!---
+        <label for="q1" style="width: 52%"><b>What do the instances that comprise the dataset represent (e.g.,documents, photos, people, countries)?</b>
+             Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)? 
+            Please provide a description.</label><br>
+        <textarea id="q1" name="q1" rows = 10 cols= 80></textarea>
+        <input type="submit" value="Submit">
+        -->
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
 </div>
 {% endblock %}
