@@ -297,7 +297,8 @@ class StudioClient():
           "release_type": release_type,
           "filenames": filenames,
           "description": description,
-          "bucket": bucket
+          "bucket": bucket,
+          "url": url
         }
         print(payload)
         r = requests.post(url, json=payload, headers=self.auth_headers, verify=self.secure_mode)
@@ -619,37 +620,52 @@ class StudioClient():
     """     
 
 
-    def run_training_file(self, file):
-        """ Run training file and return date and time for training, and execution time """
+    def retrieve_metadata(self, run_id):
+        metadata_exists = True
+        data_src = 'src/models/tracking/metadata/{}.pkl'.format(run_id)
+        if os.path.isfile(data_src):
+            print('Retrieving metadata that was tracked during the training session for storage in Studio.')
+            try:
+                import pickle
+                data_src = 'src/models/tracking/metadata/{}.pkl'.format(run_id)
+                with open(data_src, 'rb') as metadata_file:
+                    metadata = pickle.load(metadata_file)
+                    print("Training metadata was retrieved successfully.")
+            except Exception as e: # Should catch more specific error here
+                print("Error")
+                return None
+        else:
+            print("No metadata available for current training session.")
+            return None
+        return metadata
 
+    def run_training_file(self, file, run_id):
+        """ Run training file and return date and time for training, and execution time """
+        from datetime import datetime
         training_successful = True
         start_time = datetime.now()
         print('Model training starting...')
-        training = subprocess.run(['python', file])
+        training = subprocess.run(['python', file, run_id])
         end_time = datetime.now()
         execution_time = str(end_time - start_time)
         start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
-
         if training.returncode != 0:
             training_successful = False
-
+        metadata = self.retrieve_metadata(run_id)
         return (start_time, execution_time, training_successful)
-
-
+        
     def train(self, model, file):
         """ Train a model and publish corresponding model logs to Studio. """
-
+        import uuid 
+        run_id = str(uuid.uuid1().hex)
         # Training file executed here by calling run_training_file function
-        training_output = self.run_training_file(file)
+        training_output = self.run_training_file(file, run_id)
         if not training_output[2]:
             print("Training file was not executed properly. This will be logged in database.")
             status = 'FA'
         else:
             print('Training file executed properly.')
             status = 'DO'
-
-        import uuid 
-        training_run_uid = str(uuid.uuid1().hex)
         system_info = json.loads(get_system_info({}))
         cpu_info = json.loads(get_cpu_info({}))
         git_info = []
@@ -665,23 +681,21 @@ class StudioClient():
             current_git_repo = "Training executed in a non Git repository"
         repo = self.get_repository()
         repo.bucket = 'training'
-        training_data = {"uid": training_run_uid,
+        training_data = {"uid": run_id,
                          "trained_model": model,
-                        #"training_started_at": training_output[0],
+                         "training_started_at": training_output[0],
                          "execution_time": training_output[1],
                          "latest_git_commit": latest_git_commit,
                          "current_git_repo": current_git_repo,
                          "system_info": system_info,
                          "cpu_info": cpu_info,
-                         "training_status": status}    
+                         "training_status": status}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
+        if not _check_status(r, error_msg="Failed to create training session log for {}".format(model)):
+            return False
+        print("Created training session log for {}".format(model))
         return True
-
-    def log(self, data):
-        log_data = {"miscellaneous": data}
-        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
-        r = requests.post(url, json=log_data, headers=self.auth_headers, verify=self.secure_mode)
 
     def predict(self, model, inp, version=None):
         if version:

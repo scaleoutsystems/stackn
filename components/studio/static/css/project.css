@@ -112,3 +112,10 @@ ul.timeline > li:before {
     margin-left: 15px;
     border-radius: 5px;
 }
+
+/* Datasheet questions */
+
+.qlabels {
+    width: 60%;
+    font-size: 250%;
+}

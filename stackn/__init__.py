@@ -2,7 +2,6 @@
 
 
 import stackn.tracking.fluent
-print("hello")
 import stackn.tracking as tracking
 
 log_param = stackn.tracking.fluent.log_param
