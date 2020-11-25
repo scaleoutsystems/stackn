@@ -249,7 +249,7 @@
                                         <div style="float:left;">
                                             <b>System info</b>
                                             <ul>
-                                                {% for key, value in log.system_info.items %}
+                                                {% for key, value in log.system_details.items %}
                                                 <li>{{ key }}: {{ value }}</li>
                                                 {% endfor %}
                                             </ul>
@@ -257,7 +257,7 @@
                                         <div style="float:left;margin-left:50px;">
                                             <b>CPU info</b>
                                             <ul>
-                                                {% for key, value in log.cpu_info.items %}
+                                                {% for key, value in log.cpu_details.items %}
                                                 <li>{{ key }}: {{ value }}</li>
                                                 {% endfor %}
                                             </ul>
