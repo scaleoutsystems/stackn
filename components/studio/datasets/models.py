@@ -46,13 +46,9 @@ class Dataset(models.Model):
     files = models.ManyToManyField(FileModel, blank=True)
     created_by = models.CharField(max_length=255) # Username
     created_on = models.DateTimeField(auto_now_add=True)
+    datsheet = models.FileField(upload_to='datasheets/', default=None)
     class Meta:
         unique_together = ('name', 'version', 'project_slug')
-
-class Datasheet(models.Model):
-    objects_version = ModelManager()
-    objects = models.Manager
-    name = models.CharField(max_length=255)
 
 @receiver(pre_save, sender=Dataset, dispatch_uid='dataset_pre_save_signal')
 def pre_save_model(sender, instance, using, **kwargs):
