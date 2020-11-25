@@ -87,7 +87,7 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         except:
             return HttpResponse('Failed to create training session log.', 400)
 
-        new_log = ModelLog(run_id=run_id, trained_model=trained_model, project=project.name, execution_time=execution_time,
+        new_log = ModelLog(run_id=run_id, trained_model=trained_model, project=project.name, training_started_at=training_started_at, execution_time=execution_time,
                            code_version=code_version, current_git_repo=current_git_repo, latest_git_commit=latest_git_commit, 
                            system_details=system_details, cpu_details=cpu_details, training_status=training_status, )
         new_log.save()

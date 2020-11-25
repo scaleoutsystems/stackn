@@ -97,7 +97,6 @@ def get_git_details(code_version):
             print("Since uncommitted files exist in the current repo, it will be noted in the training log that the code " \
                 + "used to train the model in this run does not correspond to the recorded commit hash. " \
                 + "This is done mainly for the purpose of appropriate code versioning and future reproducibility.")
-        # commit_timestamp = current_repo.head.commit.committed_datetime 
     except (git.InvalidGitRepositoryError, ValueError):
         latest_commit = "No recent Git commit to log"
         if git.InvalidGitRepositoryError:

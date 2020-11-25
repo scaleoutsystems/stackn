@@ -641,9 +641,9 @@ class StudioClient():
                 }
                 url = self.endpoints['metadata'].format(self.project['id'])+'/'
                 r = requests.post(url, json=metadata, headers=self.auth_headers, verify=self.secure_mode)
-                if not _check_status(r, error_msg="Failed to create metadata log for run with ID '{}'".format(run_id)):
+                if not _check_status(r, error_msg="Failed to create metadata log in Studio for run with ID '{}'".format(run_id)):
                     return 
-                print("Created metadata log for run with ID '{}'".format(run_id))
+                print("Created metadata log in Studio for run with ID '{}'".format(run_id))
             except Exception as e: # Should catch more specific error here
                 print("Error")
                 return 
@@ -670,7 +670,7 @@ class StudioClient():
 
 
     def train(self, model, run_id, training_file, code_version):
-        """ Train a model and log corresponding data ing Studio. """
+        """ Train a model and log corresponding data in Studio. """
         
         system_details, cpu_details, git_details = get_run_details(code_version)
         print('Running training script...')
@@ -690,10 +690,11 @@ class StudioClient():
                          "training_status": training_output[2]}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
-        if not _check_status(r, error_msg="Failed to create training session log for {}".format(model)):
+        if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
             return False
-        print("Created training log for {}".format(model))
-        return True
+        else:
+            print("Created training log for {}".format(model))
+            return True
 
 
     def predict(self, model, inp, version=None):
