@@ -1,6 +1,6 @@
 import uuid
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
@@ -12,6 +12,7 @@ from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
+import ast
 
 
 logger = logging.getLogger(__name__)
@@ -143,10 +144,9 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
     
-
+    
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
-    import ast
     for log in log_objects:
         model_logs.append({
             'id': log.id,
@@ -160,7 +160,6 @@ def details(request, user, project, id):
             'system_details': ast.literal_eval(log.system_details),
             'cpu_details': ast.literal_eval(log.cpu_details)
         })
-
 
     filename = None
     readme = None
@@ -231,3 +230,26 @@ def delete(request, user, project, id):
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())
+
+
+def metrics_chart(request, user, project, id):
+    project = Project.objects.filter(slug=project).first()
+    model = Model.objects.filter(id=id).first()
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
+    metrics = []
+    for md in md_objects:
+        metrics.append({
+            'run_id': md.run_id,
+            'metrics': ast.literal_eval(md.metrics)['Accuracy']
+        })
+    data = []
+    labels = []
+    for dictio in metrics:
+        data.append(dictio['metrics'])
+    for i in range(1, len(data) + 1):
+        labels.append("Run {}".format(i))
+
+    return JsonResponse(data={
+        'labels': labels,
+        'data': data,
+    })
