@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 from django.http import QueryDict
-from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
-    ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
+from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
+    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer
 import modules.keycloak_lib as keylib

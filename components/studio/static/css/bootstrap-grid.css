@@ -2337,6 +2337,11 @@ html {
   margin-left: auto !important;
 }
 
+.qlabel {
+  width: 60%;
+  font-size: 250%;
+}
+
 @media (min-width: 576px) {
   .m-sm-0 {
     margin: 0 !important;

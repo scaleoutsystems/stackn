@@ -1,5 +1,7 @@
 import sys
 from prettytable import PrettyTable
+import click
+import uuid
 
 
 def prompt(question, default="yes"):
@@ -46,3 +48,46 @@ def create_table(ctx, resource, names, keys):
     client = ctx.obj['CLIENT']
     objects = client.create_list(resource)
     _print_table(objects, names, keys)
+
+def search_for_model(ctx, resource, name):
+    client = ctx.obj['CLIENT']
+    objects = client.create_list(resource)
+    model_exists = False
+    for item in objects:
+        if item['name'] == name:
+            model_exists = True
+    return model_exists
+ 
+def new_id(run_id):
+    new_id = input("A log object with ID = {} already exists in 'src/models/tracking' directory. \n".format(run_id) \
+                 + "Please provide a unique ID for the current run or press enter to use a randomly generated ID: ")
+    if new_id:
+        confirmed = False
+        question = "Do you want to assign this training run with the ID '{}'?".format(new_id)
+        while not confirmed:
+            confirmed = prompt(question)
+            if confirmed:
+                return new_id
+            else:
+                new_id = input("Assign a new unique ID or press enter to assign a random ID: ")
+                print(new_id)
+                if not new_id:
+                    break
+    new_id = str(uuid.uuid1().hex)
+    return new_id
+
+class Determinant(click.Option):
+    def __init__(self, *args, **kwargs):
+        self.determinant = kwargs.pop('determinant')
+        assert self.determinant, "'determinant' parameter required"
+        super(Determinant, self).__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        unallowed_present = self.name in opts
+        determinant_present = self.determinant in opts
+        if determinant_present:
+            if unallowed_present:
+                raise click.UsageError("Illegal usage: Cannot pass a value for '{}' together with '{}' when running 'stackn train'".format(self.name, self.determinant))
+            else:
+                self.prompt = None
+        return super(Determinant, self).handle_parse_result(ctx, opts, args)

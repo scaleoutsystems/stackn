@@ -6,6 +6,8 @@ import requests
 import json
 import uuid
 from urllib.parse import urljoin
+from datetime import datetime
+from .details import get_run_details
 
 def _check_status(r,error_msg="Failed"):
     if (r.status_code < 200 or r.status_code > 299):
@@ -72,6 +74,8 @@ class StudioClient():
     def get_endpoints(self):
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
+        self.endpoints['modellogs'] = self.api_url+'/projects/{}/modellogs'
+        self.endpoints['metadata'] = self.api_url+'/projects/{}/metadata'
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
@@ -294,7 +298,8 @@ class StudioClient():
           "release_type": release_type,
           "filenames": filenames,
           "description": description,
-          "bucket": bucket
+          "bucket": bucket,
+          "url": url
         }
         print(payload)
         r = requests.post(url, json=payload, headers=self.auth_headers, verify=self.secure_mode)
@@ -328,7 +333,7 @@ class StudioClient():
         except NoSuchBucket as e:
             print("The datasets repository has not been initialized yet.", e)
         return objs
-
+    
 
     ### Models API ###
 
@@ -599,6 +604,100 @@ class StudioClient():
             print('Status code: {}'.format(r.status_code))
             print('Reason: {} - {}'.format(r.reason, r.text))
 
+    """
+    def log_to_db(self, data_to_log):
+        try:
+            from pymongo import MongoClient
+        except ImportError:
+            print('Failed to import MongoClient')
+            return None
+        myclient = MongoClient("localhost:27017", username = 'root', password = 'tvJdjZm6PG')
+        db = myclient["test"]
+        Collection = db["testCollection"]
+        if isinstance(data_to_log, list): 
+            Collection.insert_many(data_to_log)   
+        else: 
+            Collection.insert_one(data_to_log)
+    """     
+
+
+    def retrieve_metadata(self, model, run_id):
+        """ Retrieve metadata logged during model training """
+
+        md_file = 'src/models/tracking/metadata/{}.pkl'.format(run_id)
+        if os.path.isfile(md_file):
+            print('Retrieving metadata for current training session for storage in Studio...')
+            try:
+                import pickle
+                with open(md_file, 'rb') as metadata_file:
+                    metadata_json = pickle.load(metadata_file)
+                    print("Metadata was retrieved successfully from local file.")
+                repo = self.get_repository()
+                repo.bucket = 'metadata'
+                metadata = {"run_id": run_id,
+                            "trained_model": model,
+                            "model_details": metadata_json["model"],
+                            "parameters": metadata_json["params"],
+                            "metrics": metadata_json["metrics"]
+                }
+                url = self.endpoints['metadata'].format(self.project['id'])+'/'
+                r = requests.post(url, json=metadata, headers=self.auth_headers, verify=self.secure_mode)
+                if not _check_status(r, error_msg="Failed to create metadata log in Studio for run with ID '{}'".format(run_id)):
+                    return 
+                print("Created metadata log in Studio for run with ID '{}'".format(run_id))
+            except Exception as e: # Should catch more specific error here
+                print("Error")
+                return 
+        else:
+            print("No metadata available for current training session.")
+            return 
+
+
+    def run_training_file(self, model, training_file, run_id):
+        """ Run training file and return date and time for training, and execution time """
+
+        start_time = datetime.now()
+        training = subprocess.run(['python', training_file, run_id])
+        end_time = datetime.now()
+        execution_time = str(end_time - start_time)
+        start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        if training.returncode != 0:
+            training_status = 'FA'
+            print("Training of the model was not executed properly.")
+        else:
+            training_status = 'DO'
+        self.retrieve_metadata(model, run_id)
+        return (start_time, execution_time, training_status)
+
+
+    def train(self, model, run_id, training_file, code_version):
+        """ Train a model and log corresponding data in Studio. """
+        
+        system_details, cpu_details, git_details = get_run_details(code_version)
+        print('Running training script...')
+        training_output = self.run_training_file(model, training_file, run_id) # Change output of run_training_file
+        repo = self.get_repository()
+        repo.bucket = 'training'
+
+        training_data = {"run_id": run_id,
+                         "trained_model": model,
+                         "training_started_at": training_output[0],
+                         "execution_time": training_output[1],
+                         "code_version": code_version,
+                         "current_git_repo": git_details[0],
+                         "latest_git_commit": git_details[1],
+                         "system_details": system_details,
+                         "cpu_details": cpu_details,
+                         "training_status": training_output[2]}  
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
+        if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
+            return False
+        else:
+            print("Created training log for {}".format(model))
+            return True
+
+
     def predict(self, model, inp, version=None):
         if version:
             params = {'name': model, 'version': version}
@@ -629,4 +728,3 @@ if __name__ == '__main__':
     print("Minio settings: ", data)
 
     print(client.token)
-
