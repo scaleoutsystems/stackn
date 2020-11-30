@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model
+from .models import Model, ModelLog, Metadata
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
@@ -29,6 +29,9 @@ def list(request, user, project):
     project = Project.objects.filter(slug=project).first()
 
     models = Model.objects.filter(project=project)
+    
+    # model_logs = ModelLog.objects.all()
+
     # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
@@ -139,6 +142,25 @@ def details(request, user, project, id):
             return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
+    
+
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    model_logs = []
+    import ast
+    for log in log_objects:
+        model_logs.append({
+            'id': log.id,
+            'trained_model': log.trained_model,
+            'training_status': log.training_status,
+            'training_started_at': log.training_started_at,
+            'execution_time': log.execution_time,
+            'code_version': log.code_version,
+            'current_git_repo': log.current_git_repo,
+            'latest_git_commit': log.latest_git_commit,
+            'system_details': ast.literal_eval(log.system_details),
+            'cpu_details': ast.literal_eval(log.cpu_details)
+        })
+
 
     filename = None
     readme = None
