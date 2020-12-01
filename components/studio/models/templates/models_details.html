@@ -23,6 +23,10 @@
                 aria-selected="false">Training Logs</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" id="graphics-tab" data-toggle="tab" href="#graphics" role="tab" aria-controls="graphics"
+                aria-selected="false">Model Graphics</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" id="readme-tab" data-toggle="tab" href="#readme" role="tab" aria-controls="readme"
                 aria-selected="false">README.md</a>
         </li>
@@ -200,62 +204,6 @@
         <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
             {% if model_logs %}
 
-            <div class="container">
-                <canvas id="metrics-chart" data-url="{% url 'models:metrics-chart' request.user model.project.slug model.id %}"></canvas>
-            </div>
-            <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
-            <script>
-
-                $(function () {
-                    var $metricsChart = $("#metrics-chart");
-                    $.ajax({
-                        url: $metricsChart.data("url"),
-                        success: function (data) {
-                            var ctx = $metricsChart[0].getContext("2d");
-                            new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: data.labels,
-                                    datasets: [{
-                                        label: 'Metric',
-                                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                        borderColor: 'blue',
-                                        data: data.data
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    legend: {
-                                        display: false,
-                                        position: 'top',
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Metric'
-                                    }
-                                }
-                            });
-
-                        }
-                    });
-
-                });
-            </script>
-
-            <!--
-            <div method="GET" class="row col-md-7" style="float: right;padding-right: 0px;margin-bottom: 30px;">
-                <select class="col-md-8 form-control" type="text" name="training_summary" maxlength="100" required=""
-                    id="id_training_summary">
-                    <option value="">General</option>
-                    <option value="">Graphics</option>
-                </select>
-                <button type="submit" class="btn btn-outline-primary col-md-3" style="margin-left: 10px;">
-                    Show
-                </button>
-            </div>
-            -->
-
-            <!--
             <table class="table table-borderless">
                 <thead>
                     <tr>
@@ -298,10 +246,10 @@
                                         {% endif %} {{ log.execution_time }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Current GIT repo:</b> {{ log.current_git_repo }}
+                                        <b>GIT repo:</b> {{ log.current_git_repo }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Latest GIT commit:</b> {{ log.latest_git_commit }}
+                                        <b>GIT commit:</b> {{ log.latest_git_commit }}
                                     </div>
                                     <div class="modal-body">
                                         <div style="float:left;">
@@ -332,22 +280,68 @@
                     {% endfor %}
                 </tbody>
             </table>
-            -->
             {% else %}
-            <!--<div class="col-md-12 d-flex justify-content-center">
+            <div class="col-md-12 d-flex justify-content-center">
                 No logs exist for {{ model.name }}; train the model to see log output.
-            </div>-->
-            <div class="row col-md-7" style="float: right;padding-right: 0px;margin-bottom: 30px;">
-                <select class="col-md-8 form-control" type="text" title="training_summary" maxlength="100" required=""
-                    id="id_training_summary">
-                    <option value="general">General</option>
-                    <option value="graphics">Graphics</option>
+            </div>
+            {% endif %}
+        </div>
+        <div class="tab-pane fade" id="graphics" role="tabpanel" aria-labelledby="graphics-tab">
+
+            <form method="POST"
+                action="{% url 'models:update-chart' request.user model.project.slug model.id %}"
+                class="row col-md-7" style="float: right;padding-right: 0px;margin-bottom: 30px;">
+                {% csrf_token %}
+                <select name="chosen_metric" class="col-md-8 form-control" type="text" maxlength="100" required="">
+                    <option value="Accuracy">Accuracy</option>
+                    <option value="Loss">Loss</option>
                 </select>
                 <button type="submit" class="btn btn-outline-primary col-md-3" style="margin-left: 10px;">
                     Show
                 </button>
+            </form>
+
+            <div class="container">
+                <canvas id="metrics-chart"
+                    data-url="{% url 'models:metrics-chart' request.user model.project.slug model.id 'Accuracy' %}"></canvas>
             </div>
-            {% endif %}
+
+            <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+            <script>
+                $(function () {
+                    var $metricsChart = $('#metrics-chart');
+                    $.ajax({
+                        url: $metricsChart.data("url"),
+                        success: function (data) {
+                            var ctx = $metricsChart[0].getContext("2d");
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: 'Metric',
+                                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                        borderColor: 'blue',
+                                        data: data.data
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    legend: {
+                                        display: false,
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Metric'
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+
+            </script>
         </div>
         <div class="tab-pane fade" id="readme" role="tabpanel" aria-labelledby="readme-tab">
             {% if not readme %}

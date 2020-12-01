@@ -161,6 +161,7 @@ def details(request, user, project, id):
             'cpu_details': ast.literal_eval(log.cpu_details)
         })
 
+    test_array = ['Loss', 'Accuracy']
     filename = None
     readme = None
     import requests as r
@@ -231,8 +232,13 @@ def delete(request, user, project, id):
 
     return render(request, template, locals())
 
+def update_chart(request, user, project, id):
+    metric = request.POST.get('chosen_metric')
+    print(metric)
+    return HttpResponseRedirect(reverse('models:metrics-chart', kwargs={'user': user, 'project': project, 'id': id, 'metric': metric}))
 
-def metrics_chart(request, user, project, id):
+def metrics_chart(request, user, project, id, metric):
+    print(metric)
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
     md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
@@ -240,15 +246,14 @@ def metrics_chart(request, user, project, id):
     for md in md_objects:
         metrics.append({
             'run_id': md.run_id,
-            'metrics': ast.literal_eval(md.metrics)['Accuracy']
+            'metrics': ast.literal_eval(md.metrics)[metric]
         })
     data = []
     labels = []
-    for dictio in metrics:
-        data.append(dictio['metrics'])
+    for metric in metrics:
+        data.append(metric['metrics'])
     for i in range(1, len(data) + 1):
         labels.append("Run {}".format(i))
-
     return JsonResponse(data={
         'labels': labels,
         'data': data,
