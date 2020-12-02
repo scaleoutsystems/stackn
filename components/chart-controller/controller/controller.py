@@ -28,54 +28,33 @@ class Controller:
         pass
 
     def deploy(self, options, action='install'):
-        print('DEPLOYING...')
-        print(options)
-
-
-        # for key in options:
-        #     print(key)
-        #     print(options[key])
-        #     extras = extras + ' --set {}={}'.format(key, options[key])
-        print('here')
         volume_root = "/"
         if "TELEPRESENCE_ROOT" in os.environ:
             volume_root = os.environ["TELEPRESENCE_ROOT"]
         kubeconfig = os.path.join(volume_root, 'root/.kube/config')
-        print('there')
         if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
             if not 'chart' in options:
                 print('Chart option not specified.')
                 return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
             chart = 'charts/scaleout/'+options['chart']
-            print(1)
         else:
             refresh_charts(self.branch)
             fname = self.branch.replace('/', '-')
             chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
-            print(2)
 
         if not 'release' in options:
-            print('Chart option not specified.')
+            print('Release option not specified.')
             return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
-        print('args: ')
-        print(args)
-        # tmp_file_name = uuid.uuid1().hex+'.yaml'
-        # tmp_file = open(tmp_file_name, 'w')
-        # yaml.dump(options, tmp_file, allow_unicode=True)
-        # tmp_file.close()
-        # args.append('-f')
-        # args.append(tmp_file_name)
+
         for key in options:
             args.append('--set')
-            # args.append('{}={}'.format(key, options[key]))
             args.append(key+"="+options[key].replace(',', '\,'))
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
         print(status)
-        # os.remove(tmp_file_name)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
     def delete(self, options):

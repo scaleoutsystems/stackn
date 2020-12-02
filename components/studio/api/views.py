@@ -87,6 +87,9 @@ class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModel
 
         lab_session = Session(id=uid, name=name, flavor_slug=flavor_slug, environment_slug=environment_slug,
                               project=project, lab_session_owner=request.user)
+        lab_session.extraVols = []
+        if 'extraVols' in request.data:
+            lab_session.extraVols = request.data['extraVols']
         lab_session.save()
         return HttpResponse('Ok.', 200)
 
