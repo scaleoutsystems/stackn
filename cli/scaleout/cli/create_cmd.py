@@ -74,8 +74,7 @@ def create_session(ctx, flavor, environment):
 @click.pass_context
 def create_volume(ctx, size, name):
     client = ctx.obj['CLIENT']
-    print('Creating volume')
-    # client.create_volume(flavor_slug=flavor, environment_slug=environment)
+    client.create_volume(name=name, size=size)
 
 
 # Create dataset

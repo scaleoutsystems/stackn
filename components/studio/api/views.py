@@ -19,7 +19,7 @@ from .serializers import Model, MLModelSerializer, Report, ReportSerializer, \
     ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -312,6 +312,48 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         else:
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
+
+class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission, )
+    serializer_class = VolumeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'slug', 'created_by']
+    def get_queryset(self):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        volumes = Volume.objects.filter(project_slug=project.slug)
+        return volumes
+
+    def create(self, request, *args, **kwargs):
+        try:
+            project = Project.objects.get(id=self.kwargs['project_pk'])
+            print(project)
+            name = request.data['name']
+            print(name)
+            size = request.data['size']
+            print(size)
+            proj_slug = project.slug
+            print(proj_slug)
+            created_by = request.user.username
+            print(created_by)
+            volume = Volume(name=name, size=size, created_by=created_by, project_slug=proj_slug)
+            volume.save()
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create volume.', 400)
+        return HttpResponse('ok', 200)
+    
+    def destroy(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        volume = Volume.objects.get(pk=self.kwargs['pk'], project_slug=project.slug)
+        try:
+            volume.helmchart.delete()
+            print('OK')
+            return HttpResponse('ok', 200)
+        except Exception as err:
+            print('Failed')
+            print(err)
+            return HttpResponse('Failed to delete volume', 400)
 
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):

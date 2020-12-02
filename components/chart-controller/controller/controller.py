@@ -28,57 +28,39 @@ class Controller:
         pass
 
     def deploy(self, options, action='install'):
-        # extras = ''
-        """
-        try:
-            minio = ' --set service.minio=' + str(options['minio_port'])
-            extras = extras + minio
-        except KeyError as e:
-            print("could not get minioport!")
-        try:
-            controller = ' --set service.controller=' + str(options['controller_port'])
-            extras = extras + controller
-        except KeyError as e:
-            print("could not get controllerport")
-            pass
-        try:
-            user = ' --set alliance.user=' + str(options['user'])
-            extras = extras + user
-        except KeyError as e:
-            print("could not get user")
-            pass
-        try:
-            project = ' --set alliance.project=' + str(options['project'])
-            extras = extras + project
-        except KeyError as e:
-            print("could not get project")
-            pass
-        try:
-            apiUrl = ' --set alliance.apiUrl=' + str(options['api_url'])
-            extras = extras + apiUrl
-        except KeyError as e:
-            print("could not get apiUrl")
-            pass
-        """
+        print('DEPLOYING...')
+        print(options)
+
 
         # for key in options:
         #     print(key)
         #     print(options[key])
         #     extras = extras + ' --set {}={}'.format(key, options[key])
-
+        print('here')
         volume_root = "/"
         if "TELEPRESENCE_ROOT" in os.environ:
             volume_root = os.environ["TELEPRESENCE_ROOT"]
         kubeconfig = os.path.join(volume_root, 'root/.kube/config')
-
+        print('there')
         if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
+            if not 'chart' in options:
+                print('Chart option not specified.')
+                return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
             chart = 'charts/scaleout/'+options['chart']
+            print(1)
         else:
             refresh_charts(self.branch)
             fname = self.branch.replace('/', '-')
             chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
+            print(2)
+
+        if not 'release' in options:
+            print('Chart option not specified.')
+            return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
+        print('args: ')
+        print(args)
         # tmp_file_name = uuid.uuid1().hex+'.yaml'
         # tmp_file = open(tmp_file_name, 'w')
         # yaml.dump(options, tmp_file, allow_unicode=True)
@@ -92,6 +74,7 @@ class Controller:
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
+        print(status)
         # os.remove(tmp_file_name)
         return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})
 
