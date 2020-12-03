@@ -390,15 +390,10 @@ class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retriev
     def create(self, request, *args, **kwargs):
         try:
             project = Project.objects.get(id=self.kwargs['project_pk'])
-            print(project)
             name = request.data['name']
-            print(name)
             size = request.data['size']
-            print(size)
             proj_slug = project.slug
-            print(proj_slug)
             created_by = request.user.username
-            print(created_by)
             volume = Volume(name=name, size=size, created_by=created_by, project_slug=proj_slug)
             volume.save()
         except Exception as err:
