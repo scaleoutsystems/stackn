@@ -1,10 +1,10 @@
 import uuid
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model
+from .models import Model, ModelLog, Metadata
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
@@ -12,8 +12,10 @@ from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
+import ast
+from collections import defaultdict
 
-
+new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
@@ -23,19 +25,22 @@ def index(request):
     return render(request, 'models_cards.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def list(request, user, project):
     template = 'models_list.html'
     project = Project.objects.filter(slug=project).first()
 
     models = Model.objects.filter(project=project)
+    
+    # model_logs = ModelLog.objects.all()
+
     # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def create(request, user, project):
     template = 'models_upload.html'
 
@@ -64,7 +69,7 @@ def create(request, user, project):
         return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -84,7 +89,7 @@ def change_access(request, user, project, id):
         reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project, id):
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
@@ -140,6 +145,26 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
 
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    model_logs = []
+    for log in log_objects:
+        model_logs.append({
+            'id': log.id,
+            'trained_model': log.trained_model,
+            'training_status': log.training_status,
+            'training_started_at': log.training_started_at,
+            'execution_time': log.execution_time,
+            'code_version': log.code_version,
+            'current_git_repo': log.current_git_repo,
+            'latest_git_commit': log.latest_git_commit,
+            'system_details': ast.literal_eval(log.system_details),
+            'cpu_details': ast.literal_eval(log.cpu_details)
+        })
+
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
+    if md_objects:
+        metrics = get_chart_data(md_objects)
+
     filename = None
     readme = None
     import requests as r
@@ -157,6 +182,42 @@ def details(request, user, project, id):
         logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return render(request, 'models_details.html', locals())
+
+def get_chart_data(md_objects):
+    new_data.clear()
+    metrics_pre = []
+    metrics = []
+    for md_item in md_objects:
+        metrics_pre.append({
+            'run_id': md_item.run_id,
+            'metrics': ast.literal_eval(md_item.metrics),
+            'parameters': ast.literal_eval(md_item.parameters)
+        })
+    for m in metrics_pre: 
+        for key, value in m["metrics"].items():
+            new_data[key].append([m["run_id"], value, m["parameters"]])
+    for key, value in new_data.items():
+        data = []
+        labels = []
+        params = []
+        run_id = []
+        run_counter = 0
+        for item in value:
+            run_counter += 1
+            labels.append("Run {}".format(run_counter))
+            run_id.append(item[0])
+            data.append(item[1])
+            params.append(item[2])
+        metrics.append({
+            "metric": key,
+            "details": {
+                "run_id": run_id,
+                "labels": labels,
+                "data": data,
+                "params": params
+            }
+        })
+    return metrics
 
 
 def details_public(request, id):
@@ -192,7 +253,7 @@ def details_public(request, id):
     return render(request, 'models_details_public.html', locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project, id):
     template = 'model_confirm_delete.html'
 

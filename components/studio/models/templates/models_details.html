@@ -1,4 +1,5 @@
 {% extends 'baseproject.html' %}
+{% load staticfiles %}
 {% block content %}
 <div class="col-md-9">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
@@ -7,19 +8,27 @@
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab"
-               aria-controls="details" aria-selected="true">Model Details</a>
+                aria-controls="details" aria-selected="true">Model Details</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="deployments-tab" data-toggle="tab" href="#deployments" role="tab"
-               aria-controls="deployments" aria-selected="false">Deployments</a>
+                aria-controls="deployments" aria-selected="false">Deployments</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="reports-tab" data-toggle="tab" href="#reports" role="tab" aria-controls="profile"
-               aria-selected="false">Metrics</a>
+                aria-selected="false">Metrics</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs"
+                aria-selected="false">Training Logs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="graphics-tab" data-toggle="tab" href="#graphics" role="tab" aria-controls="graphics"
+                aria-selected="false">Performance</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="readme-tab" data-toggle="tab" href="#readme" role="tab" aria-controls="readme"
-               aria-selected="false">README.md</a>
+                aria-selected="false">README.md</a>
         </li>
     </ul>
     <div class="tab-content" id="myTabContent" style="padding: 10px; margin: 15px;">
@@ -80,7 +89,7 @@
                         Visibility
                     </label>
                     <select id="id_access" type="text" name="access" maxlength="2" required
-                            class="ml-auto form-control form-control-sm" style="width: 20%;">
+                        class="ml-auto form-control form-control-sm" style="width: 20%;">
                         <option selected>
                             {% if model.access == 'PR' %}
                             Private
@@ -102,7 +111,7 @@
                     </select>
                 </div>
                 <div class="d-flex bd-highlight mb-3 col-md-6"
-                     style="border-top: 1px solid #dee2e6; padding-top: 20px;">
+                    style="border-top: 1px solid #dee2e6; padding-top: 20px;">
                     <button type="submit" class="ml-auto btn btn-primary">Save</button>
                 </div>
             </form>
@@ -111,24 +120,25 @@
             {% if deployments %}
             <table class="table table-borderless">
                 <thead>
-                <tr>
-                    <th scope="col">Id</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Endpoint</th>
-                    <th scope="col">Created</th>
-                </tr>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Endpoint</th>
+                        <th scope="col">Created</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {% for d in deployments %}
-                <tr>
-                    <th scope="row">{{ d.pk }}</th>
-                    <td>{{ d.model.name }}:{{ d.model.version }}</td>
-                    <td>
-                        <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}" target="_blank">{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}</a>
-                    </td>
-                    <td>{{ d.created_at }}</td>
-                </tr>
-                {% endfor %}
+                    {% for d in deployments %}
+                    <tr>
+                        <th scope="row">{{ d.pk }}</th>
+                        <td>{{ d.model.name }}:{{ d.model.version }}</td>
+                        <td>
+                            <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}"
+                                target="_blank">{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}</a>
+                        </td>
+                        <td>{{ d.created_at }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             {% else %}
@@ -142,7 +152,7 @@
                 {% csrf_token %}
 
                 <select class="col-md-8 form-control" type="text" name="generator_file" maxlength="100" required=""
-                        id="id_generator_file">
+                    id="id_generator_file">
                     <option value="">--</option>
                     {% for g in report_generators %}
                     <option value="{{ g.id }}">{{ g.generator }} - {{ g.created_at }}</option>
@@ -156,32 +166,32 @@
             {% if report_dtos %}
             <table class="table table-borderless">
                 <thead>
-                <tr>
-                    <th scope="col" style="width: 10%">Id</th>
-                    <th scope="col" style="width: 40%">Description</th>
-                    <th scope="col" style="width: 20%">Created</th>
-                    <th scope="col" style="width: 30%">Actions</th>
-                </tr>
+                    <tr>
+                        <th scope="col" style="width: 10%">Id</th>
+                        <th scope="col" style="width: 40%">Description</th>
+                        <th scope="col" style="width: 20%">Created</th>
+                        <th scope="col" style="width: 30%">Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {% for report in report_dtos %}
-                <tr>
-                    <th scope="row">{{ report.id }}</th>
-                    <td>{{ report.description }}</td>
-                    <td>{{ report.created_at }}</td>
-                    <td>
-                        <a href="{% url 'reports:visualize' request.user project.slug report.id %}">
-                            <button id="report" class="btn btn-sm btn-outline-secondary">View</button>
-                        </a>
-                        <a href="{{ report.filename }}" download="">
-                            <button id="download" class="btn btn-sm btn-outline-secondary">Download</button>
-                        </a>
-                        <a href="{% url 'reports:delete_report' request.user project.slug report.id %}">
-                            <button id="delete" class="btn btn-sm btn-outline-warning">Delete</button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
+                    {% for report in report_dtos %}
+                    <tr>
+                        <th scope="row">{{ report.id }}</th>
+                        <td>{{ report.description }}</td>
+                        <td>{{ report.created_at }}</td>
+                        <td>
+                            <a href="{% url 'reports:visualize' request.user project.slug report.id %}">
+                                <button id="report" class="btn btn-sm btn-outline-secondary">View</button>
+                            </a>
+                            <a href="{{ report.filename }}" download="">
+                                <button id="download" class="btn btn-sm btn-outline-secondary">Download</button>
+                            </a>
+                            <a href="{% url 'reports:delete_report' request.user project.slug report.id %}">
+                                <button id="delete" class="btn btn-sm btn-outline-warning">Delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             {% else %}
@@ -189,6 +199,198 @@
                 No metrics available for this model.
             </div>
             {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+            {% if model_logs %}
+
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Initiated by</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Log details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in model_logs reversed %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.training_started_at }}</td>
+                        <td>{{ model.project.owner }}</td>
+                        <td>{% if log.training_status == 'DO' %} Success {% else %} Failed {% endif %}</td>
+                        <td><a href data-toggle="modal" data-target="#logModal{{log.id}}">Show details</a></td>
+                        <div class="modal fade" id="logModal{{log.id}}" tabindex="-1" role="dialog"
+                            aria-labelledby="logModalLabel{{log.id}}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="logModalLabel{{log.id}}">
+                                            Training Session with ID {{ log.id }}
+                                            {% if forloop.first %} (Most Recent) {% endif %}
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <b>Training started at:</b> {{ log.training_started_at }}
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if log.training_status == 'DO' %}
+                                        <b>Execution time:</b>
+                                        {% else %}
+                                        <b>Time passed before failure:</b>
+                                        {% endif %} {{ log.execution_time }}
+                                    </div>
+                                    <div class="modal-body">
+                                        <b>GIT repo:</b> {{ log.current_git_repo }}
+                                    </div>
+                                    <div class="modal-body">
+                                        <b>GIT commit:</b> {{ log.latest_git_commit }}
+                                    </div>
+                                    <div class="modal-body">
+                                        <div style="float:left;">
+                                            <b>System info</b>
+                                            <ul>
+                                                {% for key, value in log.system_details.items %}
+                                                <li>{{ key }}: {{ value }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div style="float:left;margin-left:50px;">
+                                            <b>CPU info</b>
+                                            <ul>
+                                                {% for key, value in log.cpu_details.items %}
+                                                <li>{{ key }}: {{ value }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="col-md-12 d-flex justify-content-center">
+                No logs exist for {{ model.name }}; train the model to see log output.
+            </div>
+            {% endif %}
+        </div>
+        <div class="tab-pane fade" id="graphics" role="tabpanel" aria-labelledby="graphics-tab">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="col-sm-8">
+                    <h4>Active metric: <text id="active"></text></h4>
+                </div>
+                <div class="col-sm-4">
+                    <label for="metricList">Choose a metric:</label>
+                    <select id="metricList" class="col-md-4 form-control" type="text" maxlength="100" required="">
+                        <option value="">---------</option>
+                        {% for metric in metrics %}
+                        <option value="{{metric.details}}">{{ metric.metric }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:50px;">
+                <canvas id="metricChart" width=50 height=20></canvas>
+            </div>
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h4>Summary</h4>
+            </div>
+            <div class="row>">
+                <div class="col-sm-6" style="margin-top:20px;">
+                    <p><b>Highest value:</b> <text id="max"></text></p>
+                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_max"></text></p>
+                    <p><b>Lowest value:</b> <text id="min"></text></p>
+                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_min"></text></p>
+                </div>
+                <div class="col-sm-6">
+        
+                </div>
+            </div>
+            <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+            <script>
+                var ctx = document.getElementById('metricChart').getContext('2d');
+                var metricChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'blue',
+                            data: []
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            display: false,
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                            text: 'Metric'
+                        }
+                    }
+                });
+
+                function updateSummary(isData, obj) {
+                    if (isData) {
+                        var max = Math.max(...obj.data);
+                        var max_index = obj.data.indexOf(max);
+                        var min = Math.min(...obj.data);
+                        var min_index = obj.data.indexOf(min);
+                        document.getElementById("max").innerHTML = max;
+                        document.getElementById("id_max").innerHTML = obj.run_id[max_index];
+                        document.getElementById("min").innerHTML = min;
+                        document.getElementById("id_min").innerHTML = obj.run_id[min_index];
+
+                    } else {
+                        document.getElementById("max").innerHTML = "";
+                        document.getElementById("id_max").innerHTML = "";
+                        document.getElementById("min").innerHTML = "";
+                        document.getElementById("id_min").innerHTML = "";
+                    }
+                };
+
+                function updateChart() {
+                    var str = element.value;
+                    var text = element.options[element.selectedIndex].text;
+                    if (str) {
+                        console.log(str)
+                        var isData = true;
+                        document.getElementById("active").innerHTML = text;
+                        var obj = eval("(" + str + ")");
+                        metricChart.data.datasets[0].label = text;
+                        metricChart.data.datasets[0].data = obj.data;
+                        metricChart.data.labels = obj.labels;
+                        metricChart.update();
+                        updateSummary(isData, obj);
+                    } else {
+                        var isData = false;
+                        document.getElementById("active").innerHTML = "None";
+                        metricChart.data.datasets[0].data = [];
+                        metricChart.data.labels = [];
+                        metricChart.update();
+                        updateSummary(isData, []);
+                    }
+                };
+                var element = document.getElementById("metricList");
+                element.onchange = updateChart;
+            </script>
         </div>
         <div class="tab-pane fade" id="readme" role="tabpanel" aria-labelledby="readme-tab">
             {% if not readme %}
