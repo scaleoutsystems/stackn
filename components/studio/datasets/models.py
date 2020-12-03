@@ -46,6 +46,7 @@ class Dataset(models.Model):
     files = models.ManyToManyField(FileModel, blank=True)
     created_by = models.CharField(max_length=255) # Username
     created_on = models.DateTimeField(auto_now_add=True)
+    datasheet = models.FileField(upload_to='datasheets/', default=None)
     class Meta:
         unique_together = ('name', 'version', 'project_slug')
 
