@@ -136,7 +136,7 @@ class StudioClient():
 
     def get_studio_settings(self):
         url = self.endpoints['settings']
-        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
+        r = requests.get(url)
         if (r.status_code < 200 or r.status_code > 299):
             print("Couldn't get studio settings.")
             print('Returned status code: {}'.format(r.status_code))
