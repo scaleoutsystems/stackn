@@ -280,11 +280,8 @@ class StudioClient():
 
 
     def create_volume(self, size, name):
-        print('Creating volume {}, {}.'.format(name, size))
         url = self.endpoints['volumes'].format(self.project['id'])
         data = {'name': name, 'size': size}
-        print(url)
-        print(data)
         r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
         if r:
             print('Created volume: {}'.format(name))
