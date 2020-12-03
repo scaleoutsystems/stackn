@@ -27,7 +27,6 @@ class Volume(models.Model):
 
 @receiver(pre_save, sender=Volume, dispatch_uid='volume_pre_save_signal')
 def pre_save_volume(sender, instance, using, **kwargs):
-    print('PRE SAVE')
     instance.slug = slugify(instance.name+'-'+instance.project_slug)
     user = instance.created_by
     parameters = {'release': instance.slug,
@@ -36,9 +35,6 @@ def pre_save_volume(sender, instance, using, **kwargs):
                   'accessModes': 'ReadWriteMany',
                   'storageClass': settings.STORAGECLASS,
                   'size': instance.size}
-    print(user)
-    print(parameters)
-    print(instance.slug)
     helmchart = HelmResource(name=instance.slug,
                              namespace='Default',
                              chart='volume',
@@ -46,9 +42,9 @@ def pre_save_volume(sender, instance, using, **kwargs):
                              username=user)
     helmchart.save()
     instance.helmchart = helmchart
-    # l = ProjectLog(project=project, module='LA', headline='Lab Session',
-    #                            description='A new Lab Session {name} has been created'.format(name=RELEASE_NAME))
-    # l.save()
+    l = ProjectLog(project=Project.objects.get(slug=instance.project_slug), module='PR', headline='Volume',
+                               description='A new volume {name} has been created'.format(name=instance.name))
+    l.save()
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512)
