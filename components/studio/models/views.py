@@ -13,8 +13,10 @@ import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
 import ast
+from collections import defaultdict
 
-
+new_data = defaultdict(list)
+param_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
@@ -143,8 +145,7 @@ def details(request, user, project, id):
             return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
-    
-    
+
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     for log in log_objects:
@@ -161,7 +162,10 @@ def details(request, user, project, id):
             'cpu_details': ast.literal_eval(log.cpu_details)
         })
 
-    test_array = ['Loss', 'Accuracy']
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
+    if md_objects:
+        metrics = get_chart_data(md_objects)
+
     filename = None
     readme = None
     import requests as r
@@ -179,6 +183,43 @@ def details(request, user, project, id):
         logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return render(request, 'models_details.html', locals())
+
+def get_chart_data(md_objects):
+    new_data.clear()
+    metrics_pre = []
+    metrics = []
+    for md_item in md_objects:
+        metrics_pre.append({
+            'run_id': md_item.run_id,
+            'metrics': ast.literal_eval(md_item.metrics),
+            'parameters': ast.literal_eval(md_item.parameters)
+        })
+    for m in metrics_pre: 
+        for key, value in m["metrics"].items():
+            new_data[key].append([m["run_id"], value, m["parameters"]])
+    for key, value in new_data.items():
+        data = []
+        labels = []
+        params = []
+        run_id = []
+        run_counter = 0
+        for item in value:
+            run_counter += 1
+            labels.append("Run {}".format(run_counter))
+            run_id.append(item[0])
+            data.append(item[1])
+            params.append(item[2])
+        metrics.append({
+            "metric": key,
+            "details": {
+                "run_id": run_id,
+                "labels": labels,
+                "data": data,
+                "params": params,
+                "chart_params": dict(param_data)
+            }
+        })
+    return metrics
 
 
 def details_public(request, id):
@@ -231,30 +272,3 @@ def delete(request, user, project, id):
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())
-
-def update_chart(request, user, project, id):
-    metric = request.POST.get('chosen_metric')
-    print(metric)
-    return HttpResponseRedirect(reverse('models:metrics-chart', kwargs={'user': user, 'project': project, 'id': id, 'metric': metric}))
-
-def metrics_chart(request, user, project, id, metric):
-    print(metric)
-    project = Project.objects.filter(slug=project).first()
-    model = Model.objects.filter(id=id).first()
-    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
-    metrics = []
-    for md in md_objects:
-        metrics.append({
-            'run_id': md.run_id,
-            'metrics': ast.literal_eval(md.metrics)[metric]
-        })
-    data = []
-    labels = []
-    for metric in metrics:
-        data.append(metric['metrics'])
-    for i in range(1, len(data) + 1):
-        labels.append("Run {}".format(i))
-    return JsonResponse(data={
-        'labels': labels,
-        'data': data,
-    })
