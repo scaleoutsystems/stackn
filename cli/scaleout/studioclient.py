@@ -73,6 +73,7 @@ class StudioClient():
 
     def get_endpoints(self):
         self.endpoints = dict()
+        self.endpoints['settings'] = self.api_url + '/settings'
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
         self.endpoints['modellogs'] = self.api_url+'/projects/{}/modellogs'
         self.endpoints['metadata'] = self.api_url+'/projects/{}/metadata'
@@ -133,6 +134,16 @@ class StudioClient():
         else:
             return json.loads(r.content)
 
+    def get_studio_settings(self):
+        url = self.endpoints['settings']
+        r = requests.get(url, headers=self.auth_headers, verify=self.secure_mode)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Couldn't get studio settings.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            return None
+        else:
+            return json.loads(r.content)
 
     ### Projects api  ####
     

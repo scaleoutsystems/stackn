@@ -25,7 +25,8 @@ setup(
         "six>=1.14.0",
         "python-slugify",
         "prettytable",
-        "pyjwt"
+        "pyjwt",
+        "psutil"
     ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,

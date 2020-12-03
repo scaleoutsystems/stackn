@@ -17,6 +17,15 @@ def get_cmd(ctx, daemon):
     if daemon:
         print('{} NYI should run as daemon...'.format(__file__))
 
+@get_cmd.command('settings')
+@click.pass_context
+def get_settings_cmd(ctx):
+    """ List STACKn settings needed to set up the CLI client. """
+
+    names = ['Setting', 'Value']
+    keys = ['name', 'value']
+    create_table(ctx, 'settings', names, keys)
+
 @get_cmd.command('models')
 @click.pass_context
 def get_models_cmd(ctx):

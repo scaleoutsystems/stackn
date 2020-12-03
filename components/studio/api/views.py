@@ -4,6 +4,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -463,3 +465,21 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             project.save()
             return HttpResponse('Ok', status=200)
 
+
+class StudioSettingsList(APIView):
+
+    def get(self, request, *args, **kwargs):
+        """
+        This view should return a list of settings
+        needed to set up the CLI client.
+        """
+
+        studio_settings = []
+
+        kc_url = {
+            "name": "keycloak_host",
+            "value": settings.KC_ADMIN_URL.replace("/auth","")
+        }
+        studio_settings.append(kc_url)
+
+        return Response(studio_settings)
