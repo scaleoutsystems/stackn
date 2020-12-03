@@ -16,7 +16,6 @@ import ast
 from collections import defaultdict
 
 new_data = defaultdict(list)
-param_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
@@ -215,8 +214,7 @@ def get_chart_data(md_objects):
                 "run_id": run_id,
                 "labels": labels,
                 "data": data,
-                "params": params,
-                "chart_params": dict(param_data)
+                "params": params
             }
         })
     return metrics
