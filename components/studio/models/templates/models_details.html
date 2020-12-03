@@ -1,4 +1,5 @@
 {% extends 'baseproject.html' %}
+{% load staticfiles %}
 {% block content %}
 <div class="col-md-9">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
@@ -20,6 +21,10 @@
         <li class="nav-item">
             <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs"
                 aria-selected="false">Training Logs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="graphics-tab" data-toggle="tab" href="#graphics" role="tab" aria-controls="graphics"
+                aria-selected="false">Performance</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="readme-tab" data-toggle="tab" href="#readme" role="tab" aria-controls="readme"
@@ -198,6 +203,7 @@
 
         <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
             {% if model_logs %}
+
             <table class="table table-borderless">
                 <thead>
                     <tr>
@@ -240,10 +246,10 @@
                                         {% endif %} {{ log.execution_time }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Current GIT repo:</b> {{ log.current_git_repo }}
+                                        <b>GIT repo:</b> {{ log.current_git_repo }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Latest GIT commit:</b> {{ log.latest_git_commit }}
+                                        <b>GIT commit:</b> {{ log.latest_git_commit }}
                                     </div>
                                     <div class="modal-body">
                                         <div style="float:left;">
@@ -279,6 +285,112 @@
                 No logs exist for {{ model.name }}; train the model to see log output.
             </div>
             {% endif %}
+        </div>
+        <div class="tab-pane fade" id="graphics" role="tabpanel" aria-labelledby="graphics-tab">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="col-sm-8">
+                    <h4>Active metric: <text id="active"></text></h4>
+                </div>
+                <div class="col-sm-4">
+                    <label for="metricList">Choose a metric:</label>
+                    <select id="metricList" class="col-md-4 form-control" type="text" maxlength="100" required="">
+                        <option value="">---------</option>
+                        {% for metric in metrics %}
+                        <option value="{{metric.details}}">{{ metric.metric }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:50px;">
+                <canvas id="metricChart" width=50 height=20></canvas>
+            </div>
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h4>Summary</h4>
+            </div>
+            <div class="row>">
+                <div class="col-sm-6" style="margin-top:20px;">
+                    <p><b>Highest value:</b> <text id="max"></text></p>
+                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_max"></text></p>
+                    <p><b>Lowest value:</b> <text id="min"></text></p>
+                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_min"></text></p>
+                </div>
+                <div class="col-sm-6">
+        
+                </div>
+            </div>
+            <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+            <script>
+                var ctx = document.getElementById('metricChart').getContext('2d');
+                var metricChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'blue',
+                            data: []
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            display: false,
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                            text: 'Metric'
+                        }
+                    }
+                });
+
+                function updateSummary(isData, obj) {
+                    if (isData) {
+                        var max = Math.max(...obj.data);
+                        var max_index = obj.data.indexOf(max);
+                        var min = Math.min(...obj.data);
+                        var min_index = obj.data.indexOf(min);
+                        document.getElementById("max").innerHTML = max;
+                        document.getElementById("id_max").innerHTML = obj.run_id[max_index];
+                        document.getElementById("min").innerHTML = min;
+                        document.getElementById("id_min").innerHTML = obj.run_id[min_index];
+
+                    } else {
+                        document.getElementById("max").innerHTML = "";
+                        document.getElementById("id_max").innerHTML = "";
+                        document.getElementById("min").innerHTML = "";
+                        document.getElementById("id_min").innerHTML = "";
+                    }
+                };
+
+                function updateChart() {
+                    var str = element.value;
+                    var text = element.options[element.selectedIndex].text;
+                    if (str) {
+                        console.log(str)
+                        var isData = true;
+                        document.getElementById("active").innerHTML = text;
+                        var obj = eval("(" + str + ")");
+                        metricChart.data.datasets[0].label = text;
+                        metricChart.data.datasets[0].data = obj.data;
+                        metricChart.data.labels = obj.labels;
+                        metricChart.update();
+                        updateSummary(isData, obj);
+                    } else {
+                        var isData = false;
+                        document.getElementById("active").innerHTML = "None";
+                        metricChart.data.datasets[0].data = [];
+                        metricChart.data.labels = [];
+                        metricChart.update();
+                        updateSummary(isData, []);
+                    }
+                };
+                var element = document.getElementById("metricList");
+                element.onchange = updateChart;
+            </script>
         </div>
         <div class="tab-pane fade" id="readme" role="tabpanel" aria-labelledby="readme-tab">
             {% if not readme %}
