@@ -634,6 +634,13 @@ class StudioClient():
                     print("Metadata was retrieved successfully from local file.")
                 repo = self.get_repository()
                 repo.bucket = 'metadata'
+                if not 'model' in metadata_json:
+                    metadata_json['model'] = ''
+                if not 'params' in metadata_json:
+                    metadata_json['params'] = {}
+                if not 'metrics' in metadata_json:
+                    metadata_json['metrics'] = {}
+
                 metadata = {"run_id": run_id,
                             "trained_model": model,
                             "model_details": metadata_json["model"],
@@ -647,6 +654,7 @@ class StudioClient():
                 print("Created metadata log in Studio for run with ID '{}'".format(run_id))
             except Exception as e: # Should catch more specific error here
                 print("Error")
+                print(e)
                 return 
         else:
             print("No metadata available for current training session.")
@@ -657,7 +665,7 @@ class StudioClient():
         """ Run training file and return date and time for training, and execution time """
 
         start_time = datetime.now()
-        training = subprocess.run(['python', training_file, run_id])
+        training = subprocess.run(['python3', training_file, run_id])
         end_time = datetime.now()
         execution_time = str(end_time - start_time)
         start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
@@ -684,12 +692,13 @@ class StudioClient():
                          "training_started_at": training_output[0],
                          "execution_time": training_output[1],
                          "code_version": code_version,
-                         "current_git_repo": git_details[0],
+                         "current_git_repo": str(git_details[0]),
                          "latest_git_commit": git_details[1],
                          "system_details": system_details,
                          "cpu_details": cpu_details,
                          "training_status": training_output[2]}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        print(git_details)
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
             return False
