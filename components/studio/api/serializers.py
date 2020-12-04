@@ -5,6 +5,7 @@ from reports.models import Report, ReportGenerator
 from projects.models import Project, Volume
 from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
+from experiments.models import Experiment
 from labs.models import Session
 from django.contrib.auth.models import User
 class MLModelSerializer(ModelSerializer):
@@ -92,3 +93,8 @@ class VolumeSerializer(ModelSerializer):
     class Meta:
         model = Volume
         fields = ['id', 'name', 'slug', 'size', 'settings', 'created_by', 'created_on', 'updated_on']
+
+class ExperimentSerializer(ModelSerializer):
+    class Meta:
+        model = Experiment
+        fields = ['id', 'username', 'command', 'environment', 'project', 'schedule', 'created_at', 'uploaded_at']
