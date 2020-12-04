@@ -2,7 +2,8 @@ from django.conf.urls import include
 from django.urls import path
 import rest_framework.routers as drfrouters
 from .views import ModelList, ModelLogList, MetadataList, ReportList, ReportGeneratorList, ProjectList, DeploymentInstanceList, \
-    DeploymentDefinitionList, LabsList, MembersList, DatasetList, StudioSettingsList, VolumeList
+    DeploymentDefinitionList, LabsList, MembersList, DatasetList, VolumeList
+from .public_views import get_studio_settings
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework_nested import routers
 
@@ -33,5 +34,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(models_router.urls)),
     path('api-token-auth', obtain_auth_token, name='api_token_auth'),
-    path('settings', StudioSettingsList.as_view())
+    path('settings', get_studio_settings)
 ]
