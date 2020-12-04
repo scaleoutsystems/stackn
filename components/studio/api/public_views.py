@@ -11,7 +11,7 @@ def get_studio_settings(request):
 
     studio_url = {
         "name": "studio_host",
-        "value": "https://" + settings.DOMAIN
+        "value": settings.STUDIO_HOST
     }
     kc_url = {
         "name": "keycloak_host",
