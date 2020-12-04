@@ -77,6 +77,12 @@ def create_volume(ctx, size, name):
     client = ctx.obj['CLIENT']
     client.create_volume(name=name, size=size)
 
+@create_cmd.command('job')
+@click.option('-c', '--config', required=True)
+@click.pass_context
+def create_job(ctx, config):
+    client = ctx.obj['CLIENT']
+    client.create_job(config)
 
 # Create dataset
 

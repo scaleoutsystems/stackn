@@ -65,6 +65,14 @@ def get_volumes_cmd(ctx):
     keys = ['name', 'size', 'created_by', 'created_on']
     create_table(ctx, 'volumes', names, keys)
 
+@get_cmd.command('jobs')
+@click.pass_context
+def get_jobs_cmd(ctx):
+    """ List all jobs """
+    names = ["User","command", "Environment","Schedule"]
+    keys = ['username', 'command', 'environment', 'schedule']
+    create_table(ctx, 'jobs', names, keys)
+
 @get_cmd.command('members')
 @click.pass_context
 def members_list_cmd(ctx):

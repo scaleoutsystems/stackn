@@ -19,7 +19,8 @@ from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer,
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer, \
+    ExperimentSerializer, Experiment
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -375,6 +376,16 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         else:
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
+
+class JobsList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission, )
+    serializer_class = VolumeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'username', 'project']
+    def get_queryset(self):
+        jobs = Experiment.objects.get(project__pk=self.kwargs['project_pk'])
+        return jobs
 
 class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):

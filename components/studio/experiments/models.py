@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
-from api.serializers import ProjectSerializer
+# from api.serializers import ProjectSerializer
 from rest_framework.renderers import JSONRenderer
 from deployments.models import HelmResource
 from django.dispatch import receiver
@@ -32,6 +32,7 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     if instance.schedule == "None":
         is_cron = 0
 
+    from api.serializers import ProjectSerializer
     settings_file = ProjectSerializer(instance.project)
 
     settings_file = JSONRenderer().render(settings_file.data)
