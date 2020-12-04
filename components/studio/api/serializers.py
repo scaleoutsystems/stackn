@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
-from projects.models import Project
+from projects.models import Project, Volume
 from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
 from labs.models import Session
@@ -87,3 +87,8 @@ class FileModelSerializer(ModelSerializer):
     class Meta:
         model = FileModel
         fields = ['id', 'name', 'bucket']
+
+class VolumeSerializer(ModelSerializer):
+    class Meta:
+        model = Volume
+        fields = ['id', 'name', 'slug', 'size', 'settings', 'created_by', 'created_on', 'updated_on']
