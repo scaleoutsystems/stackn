@@ -44,6 +44,14 @@ def delete_dataset_cmd(ctx, name, version=None):
     client = ctx.obj['CLIENT']
     client.delete_dataset(name, version)
 
+@delete_cmd.command('volume')
+@click.option('-n', '--name', required=True)
+@click.pass_context
+def delete_volume_cmd(ctx, name):
+    """ Delete a volume """
+    client = ctx.obj['CLIENT']
+    client.delete_volume(name)
+
 # @delete_cmd.command('deployments')
 # @click.pass_context
 # def delete_deployment_cmd(ctx):

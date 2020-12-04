@@ -153,7 +153,7 @@ def pre_save_model(sender, instance, using, **kwargs):
             raise Exception('Failed to create new release for model {}-{}, release type {}.'.format(instance.name, instance.version, release_type))
 
 @receiver(pre_delete, sender=Model, dispatch_uid='model_pre_delete_signal')
-def pre_delete_deployment(sender, instance, using, **kwargs):
+def pre_delete_model(sender, instance, using, **kwargs):
     # Model is saved in bucket 'model' with filename 'instance.uid'
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)

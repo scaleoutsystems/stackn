@@ -53,6 +53,7 @@ def get_deploymentdefinitions_cmd(ctx):
 @get_cmd.command('projects')
 @click.pass_context
 def get_projects_cmd(ctx):
+    """ List all projects. """
     names = ["Name","Created", "Last updated"]
     keys = ["name", "created_at", "updated_at"]
     create_table(ctx, "projects", names, keys)
@@ -64,6 +65,14 @@ def lab_list_all_cmd(ctx):
     names = ["Name", "Flavor", "Environment", "Status", "Created"]
     keys = ["name", "flavor_slug", "environment_slug", "status", "created_at"]
     create_table(ctx, "labs", names, keys)
+
+@get_cmd.command('volumes')
+@click.pass_context
+def get_volumes_cmd(ctx):
+    """ List all volumes """
+    names = ["Name","Size", "Created by","Created"]
+    keys = ['name', 'size', 'created_by', 'created_on']
+    create_table(ctx, 'volumes', names, keys)
 
 @get_cmd.command('members')
 @click.pass_context

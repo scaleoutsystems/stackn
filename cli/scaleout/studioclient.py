@@ -80,6 +80,7 @@ class StudioClient():
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
+        self.endpoints['volumes'] = self.api_url+'/projects/{}/volumes/'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -272,6 +273,49 @@ class StudioClient():
             print('Error: {}'.format(err))
             return []
         return members
+
+    ### Volumes API ###
+
+    def get_volumes(self, data={}):
+        url = self.endpoints['volumes'].format(self.project['id'])
+        try:
+            r = requests.get(url, headers=self.auth_headers, params=data, verify=self.secure_mode)
+            volumes = json.loads(r.content)
+            return volumes
+        except Exception as err:
+            print('Failed to list volumes.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+
+
+    def create_volume(self, size, name):
+        url = self.endpoints['volumes'].format(self.project['id'])
+        data = {'name': name, 'size': size}
+        r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if r:
+            print('Created volume: {}'.format(name))
+        else:
+            print('Failed to create volume.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def delete_volume(self, name):
+        try:
+            volume = self.get_volumes({"name": name, "project_slug": self.project['slug']})[0]
+        except:
+            print('Volume {} not found.'.format(name))
+            return
+        url = self.endpoints['volumes'].format(self.project['id'])+str(volume['id'])
+        r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Deleted volume: {}'.format(volume['name']))
+        else:
+            print('Failed to delete volume.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
 
     ### Datasets API ###
 
@@ -470,6 +514,12 @@ class StudioClient():
                 return dataset
             else:
                 return []
+        if resource == 'volumes':
+            if self.found_project:
+                volumes = self.get_volumes()
+                return volumes
+            else:
+                return []
         
         url = self.endpoints[resource]
 
@@ -600,9 +650,9 @@ class StudioClient():
                         print('Reason: {}'.format(r.reason))
                     break
 
-    def create_session(self, flavor_slug, environment_slug):
+    def create_session(self, flavor_slug, environment_slug, volumes=[]):
         url = self.endpoints['labs'].format(self.project['id']) + '/'
-        data = {'flavor': flavor_slug, 'environment': environment_slug}
+        data = {'flavor': flavor_slug, 'environment': environment_slug, 'extraVols': volumes}
 
         r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
 
@@ -645,6 +695,13 @@ class StudioClient():
                     print("Metadata was retrieved successfully from local file.")
                 repo = self.get_repository()
                 repo.bucket = 'metadata'
+                if not 'model' in metadata_json:
+                    metadata_json['model'] = ''
+                if not 'params' in metadata_json:
+                    metadata_json['params'] = {}
+                if not 'metrics' in metadata_json:
+                    metadata_json['metrics'] = {}
+
                 metadata = {"run_id": run_id,
                             "trained_model": model,
                             "model_details": metadata_json["model"],
@@ -658,6 +715,7 @@ class StudioClient():
                 print("Created metadata log in Studio for run with ID '{}'".format(run_id))
             except Exception as e: # Should catch more specific error here
                 print("Error")
+                print(e)
                 return 
         else:
             print("No metadata available for current training session.")
@@ -668,7 +726,7 @@ class StudioClient():
         """ Run training file and return date and time for training, and execution time """
 
         start_time = datetime.now()
-        training = subprocess.run(['python', training_file, run_id])
+        training = subprocess.run(['python3', training_file, run_id])
         end_time = datetime.now()
         execution_time = str(end_time - start_time)
         start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
@@ -695,12 +753,13 @@ class StudioClient():
                          "training_started_at": training_output[0],
                          "execution_time": training_output[1],
                          "code_version": code_version,
-                         "current_git_repo": git_details[0],
+                         "current_git_repo": str(git_details[0]),
                          "latest_git_commit": git_details[1],
                          "system_details": system_details,
                          "cpu_details": cpu_details,
                          "training_status": training_output[2]}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        print(git_details)
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
             return False
