@@ -15,7 +15,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from deployments.models import HelmResource
 from projects.models import Environment, Flavor
-from projects.models import Project, ProjectLog
+from projects.models import Project, ProjectLog, Volume
 from modules import keycloak_lib as keylib
 from rest_framework.serializers import ModelSerializer
 
@@ -120,6 +120,32 @@ def pre_save_labs(sender, instance, using, **kwargs):
     if not settings.OIDC_VERIFY_SSL:
         skip_tls = 1
         print("WARNING: Skipping TLS verify.")
+
+    volume_param = []
+    if instance.extraVols:
+        vols = instance.extraVols.split(',')
+        extraVolumes = ""
+        extraVolumeMounts = ""
+        i = 1
+        for vol in vols:
+            volobject = Volume.objects.get(name=vol, project_slug=instance.project.slug)
+            if volobject:
+                print(volobject)
+                volume_name = 'extravol'+str(i)
+                extraVolumes += """
+- name: {}
+  persistentVolumeClaim:
+    claimName: {}
+                """.format(volume_name, volobject.slug)
+
+                extraVolumeMounts += """
+- name: {}
+  mountPath: /home/jovyan/{}
+                """.format(volume_name, vol)
+                i = i+1
+        if i>1:
+            volume_param = {"extraVolumes": extraVolumes, "extraVolumeMounts": extraVolumeMounts}
+    print(volume_param)
     parameters = {'release': RELEASE_NAME,
                   'chart': 'lab',
                   'global.domain': settings.DOMAIN,
@@ -131,7 +157,8 @@ def pre_save_labs(sender, instance, using, **kwargs):
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
                   'gatekeeper.skip_tls': str(skip_tls)
                   }
-
+    if volume_param:
+        parameters.update(volume_param)
     ingress_secret_name = 'prod-ingress'
     try:
         ingress_secret_name = settings.LABS['ingress']['secretName']

@@ -79,6 +79,7 @@ class StudioClient():
         self.endpoints['labs'] = self.api_url + '/projects/{}/labs'
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
+        self.endpoints['volumes'] = self.api_url+'/projects/{}/volumes/'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -261,6 +262,49 @@ class StudioClient():
             print('Error: {}'.format(err))
             return []
         return members
+
+    ### Volumes API ###
+
+    def get_volumes(self, data={}):
+        url = self.endpoints['volumes'].format(self.project['id'])
+        try:
+            r = requests.get(url, headers=self.auth_headers, params=data, verify=self.secure_mode)
+            volumes = json.loads(r.content)
+            return volumes
+        except Exception as err:
+            print('Failed to list volumes.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+
+
+    def create_volume(self, size, name):
+        url = self.endpoints['volumes'].format(self.project['id'])
+        data = {'name': name, 'size': size}
+        r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if r:
+            print('Created volume: {}'.format(name))
+        else:
+            print('Failed to create volume.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
+    def delete_volume(self, name):
+        try:
+            volume = self.get_volumes({"name": name, "project_slug": self.project['slug']})[0]
+        except:
+            print('Volume {} not found.'.format(name))
+            return
+        url = self.endpoints['volumes'].format(self.project['id'])+str(volume['id'])
+        r = requests.delete(url, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Deleted volume: {}'.format(volume['name']))
+        else:
+            print('Failed to delete volume.')
+            print('Status code: {}'.format(r.status_code))
+            print(r.text)
+
 
     ### Datasets API ###
 
@@ -459,6 +503,12 @@ class StudioClient():
                 return dataset
             else:
                 return []
+        if resource == 'volumes':
+            if self.found_project:
+                volumes = self.get_volumes()
+                return volumes
+            else:
+                return []
         
         url = self.endpoints[resource]
 
@@ -589,9 +639,9 @@ class StudioClient():
                         print('Reason: {}'.format(r.reason))
                     break
 
-    def create_session(self, flavor_slug, environment_slug):
+    def create_session(self, flavor_slug, environment_slug, volumes=[]):
         url = self.endpoints['labs'].format(self.project['id']) + '/'
-        data = {'flavor': flavor_slug, 'environment': environment_slug}
+        data = {'flavor': flavor_slug, 'environment': environment_slug, 'extraVols': volumes}
 
         r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
 

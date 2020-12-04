@@ -20,6 +20,9 @@ class HelmResource(models.Model):
     status = models.CharField(max_length=20)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{}".format(self.name)
 
 @receiver(pre_save, sender=HelmResource, dispatch_uid='helmresource_pre_save_signal')
 def pre_save_helmresource(sender, instance, using, **kwargs):
