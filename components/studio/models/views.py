@@ -148,8 +148,10 @@ def details(request, user, project, id):
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     for log in log_objects:
+        run_md = Metadata.objects.get(project=project.name, trained_model=model, run_id=log.run_id)
         model_logs.append({
             'id': log.id,
+            'run_id': log.run_id,
             'trained_model': log.trained_model,
             'training_status': log.training_status,
             'training_started_at': log.training_started_at,
@@ -158,7 +160,10 @@ def details(request, user, project, id):
             'current_git_repo': log.current_git_repo,
             'latest_git_commit': log.latest_git_commit,
             'system_details': ast.literal_eval(log.system_details),
-            'cpu_details': ast.literal_eval(log.cpu_details)
+            'cpu_details': ast.literal_eval(log.cpu_details),
+            'params': ast.literal_eval(run_md.parameters),
+            'metrics': ast.literal_eval(run_md.metrics),
+            'model_details': ast.literal_eval(run_md.model_details)
         })
 
     md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
