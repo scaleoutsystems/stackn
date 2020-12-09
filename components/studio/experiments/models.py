@@ -29,7 +29,7 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     job_id = uuid.uuid1().hex[0:5]
     release_name = '{}-{}-{}'.format(instance.project.slug, 'cronjob', job_id)
     is_cron = 1
-    if instance.schedule == "None":
+    if instance.schedule == "None" or instance.schedule == "":
         is_cron = 0
 
     from api.serializers import ProjectSerializer
@@ -43,7 +43,25 @@ def pre_save_experiments(sender, instance, using, **kwargs):
 
     user_config_file = create_user_settings(instance.username)
     user_config_file = yaml.dump(json.loads(user_config_file))
-
+    # print(settings.NAMESPACE)
+    # limit_cpu = "500m"
+    # limit_mem = "1Gi"
+    # req_cpu = "500m"
+    # req_mem = "1Gi"
+    # gpu_enabled = "false"
+    # gpu_count = "0"
+    # if "resources.limits.cpu" in instance.options:
+    #     limit_cpu = instance.options["resources.limits.cpu"]
+    # if "resources.limits.memory" in instance.options:
+    #     limit_cpu = instance.options["resources.limits.memory"]
+    # if "resources.requests.cpu" in instance.options:
+    #     limit_cpu = instance.options["resources.requests.cpu"]
+    # if "resources.requests.memory" in instance.options:
+    #     limit_cpu = instance.options["resources.requests.memory"]
+    # if "gpu.enabled" in instance.options:
+    #     limit_cpu = instance.options["resources.limits.cpu"]
+    # if "resources.limits.cpu" in instance.options:
+    #     limit_cpu = instance.options["resources.limits.cpu"]   
     parameters = {
         "release": release_name,
         "chart": "cronjob",
@@ -57,10 +75,16 @@ def pre_save_experiments(sender, instance, using, **kwargs):
         "resources.limits.cpu": "500m",
         "resources.limits.memory": "1Gi",
         "resources.requests.cpu": "100m",
-        "resources.requests.memory": "256Gi",
+        "resources.requests.memory": "256Mi",
+        "resources.gpu.enabled": "false",
         "settings_file": settings_file,
         "user_settings_file": user_config_file,
     }
+    if hasattr(instance, 'options'):
+        del instance.options['command']
+        del instance.options['environment']
+        del instance.options['schedule']
+        parameters.update(instance.options)
     helmchart = HelmResource(name=release_name,
                              namespace='Default',
                              chart='cronjob',

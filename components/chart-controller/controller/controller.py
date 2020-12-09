@@ -47,7 +47,8 @@ class Controller:
             return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
-
+        # args.append('--dry-run')
+        # args.append('--debug')
         for key in options:
             args.append('--set')
             args.append(key+"="+options[key].replace(',', '\,'))
