@@ -14,6 +14,7 @@ from projects.helpers import create_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
+from projects.models import Environment
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -380,12 +381,28 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
 class JobsList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = VolumeSerializer
+    serializer_class = ExperimentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id', 'username', 'project']
     def get_queryset(self):
-        jobs = Experiment.objects.get(project__pk=self.kwargs['project_pk'])
+        jobs = Experiment.objects.filter(project__pk=self.kwargs['project_pk'])
         return jobs
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            project = Project.objects.get(id=self.kwargs['project_pk'])
+            environment = Environment.objects.get(name=request.data['environment'])
+            job = Experiment(username=request.user.username,
+                             command=request.data['command'],
+                             environment=environment,
+                             project=project,
+                             schedule=request.data['schedule'])
+            job.options = request.data
+            job.save()                 
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create job.', 400)
+        return HttpResponse('ok', 200)
 
 class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
