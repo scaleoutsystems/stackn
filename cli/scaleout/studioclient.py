@@ -281,7 +281,6 @@ class StudioClient():
     def create_job(self, config):
         settings_file = open(config, 'r')
         job_config = json.loads(settings_file.read())
-        print(job_config)
         url = self.endpoints['jobs'].format(self.project['id'])
         try:
             r = requests.post(url, headers=self.auth_headers, json=job_config, verify=self.secure_mode)
