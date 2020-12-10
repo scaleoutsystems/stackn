@@ -213,8 +213,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         del instance.params['environment']
 
     if envstr:
-        envparams = {"extraEnv": envstr}
-
+        envparams = {"extraEnv": envstr}        
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -243,6 +242,16 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     parameters.update(access_rules)
     if envparams:
         parameters.update(envparams)
+    
+    if 'minio.buckets' in instance.params:
+        bucket_param = '{'
+        buckets = instance.params['minio.buckets']
+        for bucket in buckets:
+            bucket_param += bucket+','
+        bucket_param = bucket_param[0:-1]+'}'
+        del instance.params['minio.buckets']
+        parameters.update({"minio.buckets": bucket_param})
+    
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',

@@ -50,7 +50,12 @@ class Controller:
 
         for key in options:
             args.append('--set')
-            args.append(key+"="+options[key].replace(',', '\,'))
+            # If list, don't escape ,
+            if options[key][0] == '{' and options[key][-1] == '}':
+                args.append(key+"="+options[key])
+            # And if not list, we should escape ,
+            else:
+                args.append(key+"="+options[key].replace(',', '\,'))
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
