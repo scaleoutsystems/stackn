@@ -16,6 +16,7 @@ from django.utils.text import slugify
 from deployments.models import HelmResource
 from projects.models import Environment, Flavor
 from projects.models import Project, ProjectLog, Volume
+from clusters.models import Cluster
 from modules import keycloak_lib as keylib
 from rest_framework.serializers import ModelSerializer
 
@@ -110,7 +111,31 @@ def pre_save_labs(sender, instance, using, **kwargs):
 
     RELEASE_NAME = str(instance.slug)
     HOST = settings.DOMAIN
+    
+
     URL = 'https://'+RELEASE_NAME+'.'+HOST
+    global_domain = settings.DOMAIN
+    namespace = settings.NAMESPACE
+    cluster_name = ''
+    if hasattr(instance, "cluster"):
+        try:
+            print("CLUSTER")
+            print(instance.cluster)
+            cluster = Cluster.objects.filter(name=instance.cluster).first()
+            print(cluster)
+            URL = 'https://'+RELEASE_NAME+'.'+cluster.base_url
+            print(URL)
+            global_domain = cluster.base_url
+            print(global_domain)
+            namespace = cluster.namespace
+            print(namespace)
+            cluster_name = cluster.name
+            print(cluster.name)
+        except:
+            cluster = []
+            print('In labs: Using default cluster (this).')
+        
+
     user = instance.lab_session_owner.username
     client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, user, ['owner'], ['owner'])
     
@@ -122,14 +147,16 @@ def pre_save_labs(sender, instance, using, **kwargs):
         print("WARNING: Skipping TLS verify.")
 
     volume_param = []
-    if instance.extraVols:
+    if hasattr(instance, "extraVols") and instance.extraVols:
         vols = instance.extraVols.split(',')
         extraVolumes = ""
         extraVolumeMounts = ""
         i = 1
+        print("VOLS")
+        print(vols)
         for vol in vols:
-            volobject = Volume.objects.get(name=vol, project_slug=instance.project.slug)
-            if volobject:
+            try:
+                volobject = Volume.objects.get(name=vol, project_slug=instance.project.slug)
                 print(volobject)
                 volume_name = 'extravol'+str(i)
                 extraVolumes += """
@@ -143,12 +170,14 @@ def pre_save_labs(sender, instance, using, **kwargs):
   mountPath: /home/jovyan/{}
                 """.format(volume_name, vol)
                 i = i+1
+            except:
+                pass
         if i>1:
             volume_param = {"extraVolumes": extraVolumes, "extraVolumeMounts": extraVolumeMounts}
     print(volume_param)
     parameters = {'release': RELEASE_NAME,
                   'chart': 'lab',
-                  'global.domain': settings.DOMAIN,
+                  'global.domain': global_domain,
                   'project.name': instance.project.slug,
                   'appname': instance.appname,
                   'gatekeeper.realm': settings.KC_REALM,
@@ -184,7 +213,7 @@ def pre_save_labs(sender, instance, using, **kwargs):
     flavor = Flavor.objects.filter(slug=instance.flavor_slug).first()
     environment = Environment.objects.filter(slug=instance.environment_slug).first()
 
-    prefs = {'namespace': settings.NAMESPACE,
+    prefs = {'namespace': namespace,
               'labs.resources.requests.cpu': str(flavor.cpu),
               'labs.resources.limits.cpu': str(flavor.cpu),
               'labs.resources.requests.memory': str(flavor.mem),
@@ -207,7 +236,8 @@ def pre_save_labs(sender, instance, using, **kwargs):
                              namespace='Default',
                              chart='lab',
                              params=parameters,
-                             username=user)
+                             username=user,
+                             cluster=cluster_name)
     helmchart.save()
     instance.helmchart = helmchart
 

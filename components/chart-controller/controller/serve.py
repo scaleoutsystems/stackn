@@ -20,12 +20,12 @@ def index():
     return json.dumps({'helm': {'command': args, 'cwd': str(path), 'status': str(status)}})
 
 
-@app.route('/deploy')
+@app.route('/deploy', methods=['POST'])
 def deploy():
     path = os.getcwd()
     c = Controller(path)
 
-    return c.deploy(request.args)
+    return c.deploy(request.json)
 
 @app.route('/upgrade')
 def update():

@@ -150,6 +150,10 @@ class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModel
         lab_session.extraVols = []
         if 'extraVols' in request.data:
             lab_session.extraVols = request.data['extraVols']
+        if 'cluster' in request.data:
+            lab_session.cluster = request.data['cluster']
+            print(request.data)
+            print(lab_session.cluster)
         lab_session.save()
         return HttpResponse('Ok.', 200)
 

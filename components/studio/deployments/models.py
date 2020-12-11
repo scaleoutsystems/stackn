@@ -4,6 +4,7 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils.text import slugify
+from clusters.models import Cluster
 import yaml
 import json
 from projects.helpers import get_minio_keys
@@ -13,6 +14,7 @@ import modules.keycloak_lib as keylib
 
 class HelmResource(models.Model):
     name = models.CharField(max_length=512, unique=True)
+    cluster = models.CharField(max_length=512, default='')
     namespace = models.CharField(max_length=512)
     chart = models.CharField(max_length=512)
     params = models.CharField(max_length=10000)
@@ -30,9 +32,18 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     action = 'deploy'
     if update:
         action = 'upgrade'
+    try:
+        cluster = Cluster.objects.get(name=instance.cluster)
+        instance.namespace = cluster.namespace
+        print(cluster.name)
+        instance.params['stackn_cluster'] = cluster.config
+    except:
+        cluster = []
+        print('Using default cluster (this).')
+        
     url = settings.CHART_CONTROLLER_URL + '/'+action
     print(instance.params)
-    retval = requests.get(url, instance.params)
+    retval = requests.post(url, json=instance.params)
     if retval:
         print('Resource: '+instance.name)
         print('Action: '+action)

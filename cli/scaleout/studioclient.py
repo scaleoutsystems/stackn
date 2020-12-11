@@ -639,9 +639,9 @@ class StudioClient():
                         print('Reason: {}'.format(r.reason))
                     break
 
-    def create_session(self, flavor_slug, environment_slug, volumes=[]):
+    def create_session(self, flavor_slug, environment_slug, volumes=[], cluster=[]):
         url = self.endpoints['labs'].format(self.project['id']) + '/'
-        data = {'flavor': flavor_slug, 'environment': environment_slug, 'extraVols': volumes}
+        data = {'flavor': flavor_slug, 'environment': environment_slug, 'extraVols': volumes, 'cluster': cluster}
 
         r = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
 

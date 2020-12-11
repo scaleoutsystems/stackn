@@ -64,10 +64,11 @@ def create_project_cmd(ctx, name, description='', repository=''):
 @click.option('-f', '--flavor', required=True)
 @click.option('-e', '--environment', required=True)
 @click.option('-v', '--volumes', required=False, default=[])
+@click.option('-c', '--cluster', required=False, default=[])
 @click.pass_context
-def create_session(ctx, flavor, environment, volumes):
+def create_session(ctx, flavor, environment, volumes, cluster):
     client = ctx.obj['CLIENT']
-    client.create_session(flavor_slug=flavor, environment_slug=environment, volumes=volumes)
+    client.create_session(flavor_slug=flavor, environment_slug=environment, volumes=volumes, cluster=cluster)
 
 @create_cmd.command('volume')
 @click.option('-s', '--size', required=True)

@@ -32,6 +32,14 @@ class Controller:
         if "TELEPRESENCE_ROOT" in os.environ:
             volume_root = os.environ["TELEPRESENCE_ROOT"]
         kubeconfig = os.path.join(volume_root, 'root/.kube/config')
+
+        if 'stackn_cluster' in options:
+            ftemp = open('kubeconfig', 'w')
+            ftemp.write(options['stackn_cluster'])
+            ftemp.close()
+            kubeconfig = 'kubeconfig'
+            del options['stackn_cluster']
+
         if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
             if not 'chart' in options:
                 print('Chart option not specified.')
