@@ -5,6 +5,8 @@
 ### New functionality
 
 - You can now set environment variables in a model deployment
+- New CLI command `stackn get settings` for listing all the settings needed to set up the CLI client. 
+The keycloak host is now set automatically after providing the studio host.
 
 
 ### Bug fixes
