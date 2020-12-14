@@ -60,6 +60,8 @@ class Controller:
             args.append('--set')
             args.append(key+"="+options[key].replace(',', '\,'))
 
+        # args.append('--dry-run')
+        # args.append('--debug')
         print(args)
         status = subprocess.run(args, cwd=self.cwd)
         print(status)

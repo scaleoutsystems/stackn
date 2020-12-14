@@ -5,9 +5,12 @@ import base64
 
 import modules.keycloak_lib as keylib
 
+
 from .exceptions import ProjectCreationException
 
 from django.conf import settings
+
+from clusters.models import Cluster
 
 @shared_task
 def create_keycloak_client_task(project_slug, username, repository):
@@ -37,27 +40,44 @@ def create_settings_file(project_slug):
     return yaml.dump(proj_settings)
 
 @shared_task
-def create_helm_resources_task(project_slug, project_key, project_secret, repository=None):
+def create_helm_resources_task(project_slug, project_key, project_secret, cluster, username, repository=None):
     from .helpers import decrypt_key
+    from deployments.models import HelmResource
     proj_settings = create_settings_file(project_slug)
+    
+    cluster = Cluster.objects.get(name=cluster)
+    print(cluster.name)
+    
     parameters = {'release': str(project_slug),
                   'chart': 'project',
                   'minio.access_key': decrypt_key(project_key),
                   'minio.secret_key': decrypt_key(project_secret),
                   'global.domain': settings.DOMAIN,
-                  'storageClassName': settings.STORAGECLASS,
-                  'settings_file': proj_settings}
+                  'storageClassName': cluster.storageclass,
+                  'settings_file': proj_settings,
+                  'stackn_cluster': cluster.config,
+                  'global.domain': cluster.base_url}
+
     if repository:
         parameters.update({'labs.repository': repository})
 
-    url = settings.CHART_CONTROLLER_URL + '/deploy'
+    helmchart = HelmResource(name=str(project_slug),
+                             namespace=cluster.namespace,
+                             chart='project',
+                             params=parameters,
+                             username=username,
+                             cluster=cluster)
+    helmchart.save()
+    
 
-    retval = r.get(url, parameters)
-    print("CREATE_PROJECT:helm chart creator returned {}".format(retval))
+    # url = settings.CHART_CONTROLLER_URL + '/deploy'
 
-    if retval.status_code >= 200 or retval.status_code < 205:
-        # return True
-        print('DONE CREATING PROJECT HELM DEPLOYMENT')
-    else:
-        print('FAILED TO CREATE PROJECT HELM DEPLOYMENT')
-        raise ProjectCreationException(__name__)
+    # retval = r.get(url, parameters)
+    # print("CREATE_PROJECT:helm chart creator returned {}".format(retval))
+
+    # if retval.status_code >= 200 or retval.status_code < 205:
+    #     # return True
+    #     print('DONE CREATING PROJECT HELM DEPLOYMENT')
+    # else:
+    #     print('FAILED TO CREATE PROJECT HELM DEPLOYMENT')
+    #     raise ProjectCreationException(__name__)

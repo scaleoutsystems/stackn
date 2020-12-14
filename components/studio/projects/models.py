@@ -35,11 +35,13 @@ def pre_save_volume(sender, instance, using, **kwargs):
                   'accessModes': 'ReadWriteMany',
                   'storageClass': settings.STORAGECLASS,
                   'size': instance.size}
+    project = Project.objects.get(slug=instance.project_slug)
     helmchart = HelmResource(name=instance.slug,
                              namespace='Default',
                              chart='volume',
                              params=parameters,
-                             username=user)
+                             username=user,
+                             cluster=project.cluster)
     helmchart.save()
     instance.helmchart = helmchart
     l = ProjectLog(project=Project.objects.get(slug=instance.project_slug), module='PR', headline='Volume',
@@ -88,7 +90,7 @@ class ProjectManager(models.Manager):
 
         return password
 
-    def create_project(self, name, owner, description, repository):
+    def create_project(self, name, owner, description, repository, cluster):
         letters = string.ascii_lowercase
         slug = slugify(name)
         slug_extension = ''.join(random.choice(letters) for i in range(3))
@@ -99,7 +101,7 @@ class ProjectManager(models.Manager):
 
         project = self.create(name=name, owner=owner, slug=slug, project_key=key, project_secret=secret,
                               description=description, repository=repository,
-                              repository_imported=False)
+                              repository_imported=False, cluster=cluster)
 
         return project
 
@@ -108,6 +110,7 @@ class Project(models.Model):
     objects = ProjectManager()
 
     name = models.CharField(max_length=512, unique=True)
+    cluster = models.CharField(max_length=512, default='Default')
     description = models.TextField(null=True, blank=True)
     slug = models.CharField(max_length=512, unique=True)
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='owner')

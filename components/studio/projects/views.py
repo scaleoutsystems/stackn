@@ -15,6 +15,8 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
+from clusters.models import Cluster
+from deployments.models import HelmResource
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
@@ -32,6 +34,8 @@ def index(request):
         projects = []
         print(err)
 
+    clusters = Cluster.objects.all()
+
     request.session['next'] = '/projects/'
     return render(request, template, locals())
 
@@ -42,7 +46,8 @@ def settings(request, user, project_slug):
     print(user_permissions)
     template = 'settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
-    url_domain = sett.DOMAIN
+    cluster = Cluster.objects.get(name=project.cluster)
+    url_domain = cluster.base_url
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.all()
 
@@ -134,20 +139,22 @@ def create(request):
         access = request.POST.get('access', 'org')
         description = request.POST.get('description', '')
         repository = request.POST.get('repository', '')
-        
+        cluster = request.POST.get('cluster', 'Default')
         # Try to create database project object.
         try:
             project = Project.objects.create_project(name=name,
                                                      owner=request.user,
                                                      description=description,
-                                                     repository=repository)
+                                                     repository=repository,
+                                                     cluster=cluster)
         except ProjectCreationException as e:
             print("ERROR: Failed to create project database object.")
             success = False
 
         try:
             # Create project resources
-            create_project_resources(project, request.user.username, repository)
+
+            create_project_resources(project, request.user.username, cluster, repository)
             # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
             request.session.save()
@@ -180,7 +187,7 @@ def details(request, user, project_slug):
     
     template = 'project.html'
 
-    url_domain = sett.DOMAIN
+    # url_domain = sett.DOMAIN
 
     project = None
     message = None
@@ -188,6 +195,8 @@ def details(request, user, project_slug):
     try:
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
+        cluster = Cluster.objects.get(name=project.cluster)
+        url_domain = cluster.base_url
     except Exception as e:
         message = 'No project found'
 

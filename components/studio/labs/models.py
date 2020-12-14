@@ -116,24 +116,29 @@ def pre_save_labs(sender, instance, using, **kwargs):
     URL = 'https://'+RELEASE_NAME+'.'+HOST
     global_domain = settings.DOMAIN
     namespace = settings.NAMESPACE
-    cluster_name = ''
-    if hasattr(instance, "cluster"):
-        try:
-            print("CLUSTER")
-            print(instance.cluster)
-            cluster = Cluster.objects.filter(name=instance.cluster).first()
-            print(cluster)
-            URL = 'https://'+RELEASE_NAME+'.'+cluster.base_url
-            print(URL)
-            global_domain = cluster.base_url
-            print(global_domain)
-            namespace = cluster.namespace
-            print(namespace)
-            cluster_name = cluster.name
-            print(cluster.name)
-        except:
-            cluster = []
-            print('In labs: Using default cluster (this).')
+
+    cluster_name = instance.project.cluster
+    cluster = Cluster.objects.get(name=cluster_name)
+    namespace = cluster.namespace
+    global_domain = cluster.base_url
+    URL = 'https://'+RELEASE_NAME+'.'+cluster.base_url
+    # if hasattr(instance, "cluster"):
+    #     try:
+    #         print("CLUSTER")
+    #         print(instance.cluster)
+    #         cluster = Cluster.objects.filter(name=instance.cluster).first()
+    #         print(cluster)
+    #         URL = 'https://'+RELEASE_NAME+'.'+cluster.base_url
+    #         print(URL)
+    #         global_domain = cluster.base_url
+    #         print(global_domain)
+    #         namespace = cluster.namespace
+    #         print(namespace)
+    #         cluster_name = cluster.name
+    #         print(cluster.name)
+    #     except:
+    #         cluster = []
+    #         print('In labs: Using default cluster (this).')
         
 
     user = instance.lab_session_owner.username
@@ -233,7 +238,7 @@ def pre_save_labs(sender, instance, using, **kwargs):
     parameters.update(prefs)
     print(parameters)
     helmchart = HelmResource(name=RELEASE_NAME,
-                             namespace='Default',
+                             namespace=namespace,
                              chart='lab',
                              params=parameters,
                              username=user,

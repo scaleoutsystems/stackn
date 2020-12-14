@@ -21,9 +21,9 @@ def urlify(s):
     return s
 
     
-def create_project_resources(project, username, repository=None):
+def create_project_resources(project, username, cluster, repository=None):
     res1 = create_keycloak_client_task.delay(project.slug, username, [])
-    res2 = create_helm_resources_task.delay(project.slug, project.project_key, project.project_secret, repository)
+    res2 = create_helm_resources_task(project.slug, project.project_key, project.project_secret, cluster, username, repository)
     # Wait for keycloak task to finish before returning (otherwise user wouldn't have
     # correct Keycloak roles)
     while not res1.ready():

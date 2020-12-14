@@ -12,6 +12,7 @@ class Cluster(models.Model):
     base_url = models.CharField(max_length=512)
     config = models.TextField()
     namespace = models.CharField(max_length=512)
+    storageclass = models.CharField(max_length=512, default="microk8s-hostpath")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
     

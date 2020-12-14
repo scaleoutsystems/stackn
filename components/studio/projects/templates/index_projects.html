@@ -27,6 +27,7 @@
                         {{ user.username }} ,
                         {% endfor %}
                     </p>
+                    <p class="card-text">Cluster: {{ project.cluster }}</p>
                     <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
                        style="width: fit-content;">Open project</a>
                 </div>
@@ -60,6 +61,16 @@
                                 <input type="text" class="form-control" id="repository" name="repository"
                                        placeholder="Import from...">
                             </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12 mb-3">
+                              <label>Cluster</label>
+                              <select id="cluster" name="cluster">
+                                {% for cluster in clusters %}
+                                <option value="{{ cluster.name }}">{{ cluster.name }}</option>
+                                {% endfor %}
+                              </select>
+                          </div>
                         </div>
                         {% if request.user.is_authenticated %}
                         <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;">

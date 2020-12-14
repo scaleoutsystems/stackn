@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect, reverse
 from projects.models import Project, ProjectLog
 from .models import Session
 from projects.models import Environment, Flavor
+from clusters.models import Cluster
 from django.contrib.auth.decorators import login_required
 import uuid
 from django.conf import settings
@@ -21,7 +22,8 @@ def index(request, user, project):
     sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user)).order_by('-created_at')
     flavors = Flavor.objects.all()
     environments = Environment.objects.all()
-    url = settings.DOMAIN
+    cluster = Cluster.objects.get(name=project.cluster)
+    url = cluster.base_url
 
     return render(request, template, locals())
 
