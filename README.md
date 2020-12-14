@@ -125,19 +125,6 @@ You can lint or check the deployment with the flags —dry-run —debug.
 
 Make sure to assign the chart to the right namespace with —namespace yournamespace (when deploying to the default namespace this can be omitted.)
 
-### 5. Setup a user
-
-You will need to create a user to login into Studio. Click the login button in the lower left corner, and click register. By default, Keycloak is configured not to require email verification, but this can be changed by logging into the Keycloak admin console and updating the STACKn realm login settings.
-
-To access the admin page of Studio, you will need to create a Django user with admin rights. First find the pod name to the Studio deployment:
-```bash
-$ kubectl get pods -n yournamespace
-```
-and get the pod id that correspond to the studio pod running. Replace `pod-Id` in the command below.
-```bash
-$ kubectl exec -it pod-Id python manage.py createsuperuser
-```
-
 ### Additional - Upgrading STACKn
 
 Similar to how you install a chart you may also upgrade a chart.

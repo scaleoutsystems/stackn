@@ -109,15 +109,15 @@
 
 - Installing Helm:
 ```
-sudo snap install helm –classic
+sudo snap install helm --classic
 ```
 - Installing kubectl:
 ```
-sudo snap install kubectl –classic
+sudo snap install kubectl --classic
 ```
 - Installing microk8s:
 ```
-sudo snap install microk8s –classic
+sudo snap install microk8s --classic
 ```
 - Start microk8s:
 ```
