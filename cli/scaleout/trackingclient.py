@@ -25,7 +25,7 @@ class TrackingClient():
     def log_model(self, model_type, model):
         self.model = {
             **self.model, 
-            **{'type': model_type, 'fitted_model': model}
+            **{'Model type': model_type, 'Model details': model}
         }
 
     def save_tracking(self):

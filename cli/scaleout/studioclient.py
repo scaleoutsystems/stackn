@@ -702,14 +702,16 @@ class StudioClient():
                 if not _check_status(r, error_msg="Failed to create metadata log in Studio for run with ID '{}'".format(run_id)):
                     return 
                 print("Created metadata log in Studio for run with ID '{}'".format(run_id))
-            except Exception as e: # Should catch more specific error here
-                print("Error")
+            except (ImportError, OSError) as e: # Should catch more specific error here
+                if ImportError:
+                    print("Could not import the pickle module; therefore, metadata cannot be extracted from your local file.")
+                else:
+                    print("Metadata could not be extracted from your local file.")
                 print(e)
                 return 
         else:
             print("No metadata available for current training session.")
             return 
-
 
     def run_training_file(self, model, training_file, run_id):
         """ Run training file and return date and time for training, and execution time """
@@ -724,11 +726,10 @@ class StudioClient():
             print("Training of the model was not executed properly.")
         else:
             training_status = 'DO'
-        self.retrieve_metadata(model, run_id)
         return (start_time, execution_time, training_status)
 
 
-    def train(self, model, run_id, training_file, code_version):
+    def train(self, model, model_version, run_id, training_file, code_version):
         """ Train a model and log corresponding data in Studio. """
         
         system_details, cpu_details, git_details = get_run_details(code_version)
@@ -739,7 +740,7 @@ class StudioClient():
 
         training_data = {"run_id": run_id,
                          "trained_model": model,
-                         "training_started_at": training_output[0],
+                         "model_version": model_version,
                          "execution_time": training_output[1],
                          "code_version": code_version,
                          "current_git_repo": str(git_details[0]),
@@ -748,12 +749,12 @@ class StudioClient():
                          "cpu_details": cpu_details,
                          "training_status": training_output[2]}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
-        print(git_details)
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
             return False
         else:
             print("Created training log for {}".format(model))
+            self.retrieve_metadata(model, run_id)
             return True
 
 

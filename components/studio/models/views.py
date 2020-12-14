@@ -145,7 +145,7 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
 
-    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model, model_version=model.version)
     model_logs = []
     for log in log_objects:
         run_md = Metadata.objects.get(project=project.name, trained_model=model, run_id=log.run_id)
@@ -165,10 +165,10 @@ def details(request, user, project, id):
             'metrics': ast.literal_eval(run_md.metrics),
             'model_details': ast.literal_eval(run_md.model_details)
         })
-
+        
     md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
     if md_objects:
-        metrics = get_chart_data(md_objects)
+        metrics = get_chart_data(md_objects, project, model)
 
     filename = None
     readme = None
@@ -188,23 +188,30 @@ def details(request, user, project, id):
 
     return render(request, 'models_details.html', locals())
 
-def get_chart_data(md_objects):
+def get_chart_data(md_objects, project, model):
     new_data.clear()
     metrics_pre = []
     metrics = []
     for md_item in md_objects:
-        metrics_pre.append({
-            'run_id': md_item.run_id,
-            'metrics': ast.literal_eval(md_item.metrics),
-            'parameters': ast.literal_eval(md_item.parameters)
-        })
+        try:
+            log = ModelLog.objects.get(project=project.name, trained_model=model, run_id=md_item.run_id)
+            time = log.training_started_at.strftime("%Y/%m/%d, %H:%M:%S")
+            metrics_pre.append({
+                'run_id': md_item.run_id,
+                'metrics': ast.literal_eval(md_item.metrics),
+                'parameters': ast.literal_eval(md_item.parameters),
+                'date': time.replace('/', '-').replace(',', '') 
+            })
+        except:
+            print("Could not retrieve timestamp for training run")
     for m in metrics_pre: 
         for key, value in m["metrics"].items():
-            new_data[key].append([m["run_id"], value, m["parameters"]])
+            new_data[key].append([m["run_id"], value, m["parameters"], m["date"]])
     for key, value in new_data.items():
         data = []
         labels = []
         params = []
+        dates = []
         run_id = []
         run_counter = 0
         for item in value:
@@ -213,10 +220,12 @@ def get_chart_data(md_objects):
             run_id.append(item[0])
             data.append(item[1])
             params.append(item[2])
+            dates.append(item[3])
         metrics.append({
             "metric": key,
             "details": {
                 "run_id": run_id,
+                "dates": dates,
                 "labels": labels,
                 "data": data,
                 "params": params
@@ -275,3 +284,20 @@ def delete(request, user, project, id):
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())
+
+
+def metric_chart(request, user, project, id):
+    project = Project.objects.filter(slug=project).first()
+    model = Model.objects.filter(id=id).first()
+    versions = []
+    dates = []
+    same_name_models = Model.objects.filter(project=project, name=model)
+    for model in same_name_models:
+        model_version = model.version
+        uploaded_at = model.uploaded_at.strftime("%Y/%m/%d, %H:%M:%S")
+        versions.append(model_version)
+        dates.append(uploaded_at.replace('/', '-').replace(',', ''))
+    return JsonResponse(data={
+        'dates': dates,
+        'version': versions,
+    })

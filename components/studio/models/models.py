@@ -100,13 +100,10 @@ class ModelLog(models.Model):
     ]
     run_id = models.CharField(max_length=32)
     trained_model = models.CharField(max_length=32, default='')
-    #trained_model = models.ForeignKey(
-    #    Model, 
-    #    on_delete=models.CASCADE
-    #)
+    model_version = models.CharField(max_length=255, default='')
     project = models.CharField(max_length=255, default='')
-    training_started_at = models.CharField(max_length=255)
-    #training_started_at = models.DateTimeField(auto_now_add=True)
+    #training_started_at = models.CharField(max_length=255)
+    training_started_at = models.DateTimeField(auto_now_add=True)
     execution_time = models.CharField(max_length=255, default='')
     code_version = models.CharField(max_length=255, default='')
     current_git_repo = models.CharField(max_length=255, default='')
@@ -128,6 +125,7 @@ class Metadata(models.Model):
 
     class Meta:
         unique_together = ('run_id', 'trained_model')
+        verbose_name_plural = "metadata"
 
 
 @receiver(pre_save, sender=Model, dispatch_uid='model_pre_save_signal')

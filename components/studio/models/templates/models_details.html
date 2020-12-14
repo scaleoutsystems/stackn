@@ -319,6 +319,10 @@
                                             {% endfor %}
                                         </ul>
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -337,17 +341,18 @@
                 <p>
                     Here you can select metrics that have been logged during model training and plot them to see how
                     they have changed over time. Select the metric you are interested in using the drop down list to the
-                    right below this box.
+                    right below this box. The vertical lines represent timestamps for the release date of your deployed
+                    versions of model {{ model.name }}.
                 </p>
                 <p>
-                    Hover over the data points to see the precise metric value, ID and logged parameters for the run
-                    that corresponds to the data point.
+                    Hover over a data point to see date and time, ID, the precise metric value, and logged
+                    parameters for the run that corresponds to the data point.
                 </p>
             </div>
             <div
                 class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div class="col-sm-8">
-                    <h4>Active metric: <text id="active"></text></h4>
+                    <h4>Active performance metric: <text id="active"></text></h4>
                 </div>
                 <div class="col-sm-4">
                     <label for="metricList">Choose a metric:</label>
@@ -359,9 +364,23 @@
                     </select>
                 </div>
             </div>
+            <!-- Working here
             <div style="margin-top:50px;">
                 <canvas id="metricChart" width=50 height=20></canvas>
             </div>
+
+            <div style="margin-top:50px;">
+                <canvas id="testChart" width=50 height=20></canvas>
+            </div>
+-->
+
+            <div style="margin-top:50px;">
+                <canvas id="metricChart"
+                    data-url="{% url 'models:metric-chart' request.user model.project.slug model.id %}" width=50
+                    height=20></canvas>
+            </div>
+
+
             <!--
             <div
                 class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -379,128 +398,179 @@
                 </div>
             </div>
             -->
+            <script type="text/javascript"
+                src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
             <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
             <script>
-                var ctx = document.getElementById('metricChart').getContext('2d');
-                var metricChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [
-                            {
-                                label: '',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                borderColor: 'blue',
-                                pointBorderColor: "blue",
-                                pointBackgroundColor: "rgba(54, 162, 235, 0.2)",
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBorderWidth: 2,
-                                pointRadius: 1,
-                                pointHitRadius: 10,
-                                data: []
-                            },
-                            {
-                                data: []
-                            },
-                            {
-                                data: []
-                            }
-                        ]
+                moment().format();
+                var metricChart;
+                const verticalLinePlugin = {
+                    getLinePosition: function (chart, versionInfo) {
+                        const meta = chart.getDatasetMeta(3);
+                        const data = meta.data;
+                        return data[versionInfo]._model.x;
                     },
-                    options: {
-                        responsive: true,
-                        legend: {
-                            display: false,
-                            position: 'top',
-                        },
-                        title: {
-                            display: false,
-                            text: 'Metric'
-                        },
-                        tooltips: {
-                            enabled: true,
-                            mode: 'single',
-                            callbacks: {
-                                label: function (tooltipItems, data) {
-                                    var multistringText = ['  ' + data.datasets[0].label + ': ' + tooltipItems.yLabel];
-                                    multistringText.push('  ID: ' + data.datasets[1].data[tooltipItems.index]);
-                                    const params = Object.entries(data.datasets[2].data[tooltipItems.index]);
-                                    for (const [param, value] of params) {
-                                        multistringText.push(`  ${param}: ${value}`);
-                                    };
-                                    return multistringText;
-                                }
-                            }
-                        },
-                        scales: {
-                            yAxes: [{
-                                scaleLabel: {
-                                    display: true,
-                                    fontStyle: "bold",
-                                    labelString: ''
-                                }
-                            }],
-                            xAxes: [{
-                                scaleLabel: {
-                                    display: true,
-                                    fontStyle: "bold",
-                                    labelString: 'Runs (in chronological order)'
-                                }
-                            }]
+                    renderVerticalLine: function (chartInstance, versionInfo) {
+                        const lineLeftOffset = this.getLinePosition(chartInstance, versionInfo[0]);
+                        const scale = chartInstance.scales['y-axis-0'];
+                        const context = chartInstance.chart.ctx;
+
+                        context.beginPath();
+                        context.strokeStyle = '#000080';
+                        context.lineWidth = 2;
+                        context.moveTo(lineLeftOffset, scale.top);
+                        context.lineTo(lineLeftOffset, scale.bottom);
+                        context.stroke();
+
+                        context.fillStyle = "#000000";
+                        context.textAlign = 'center';
+                        context.fillText('Version release: ' + versionInfo[1], lineLeftOffset, (scale.bottom - scale.top) / 2 + scale.top);
+                    },
+                    afterDatasetsDraw: function (chart, easing) {
+                        if (chart.config.lineAtIndex) {
+                            chart.config.lineAtIndex.forEach(versionInfo => this.renderVerticalLine(chart, versionInfo));
                         }
                     }
-                });
-                /*
-                function updateSummary(isData, obj) {
-                    if (isData) {
-                        console.log(obj)
-                        var max = Math.max(...obj.data);
-                        var max_index = obj.data.indexOf(max);
-                        var min = Math.min(...obj.data);
-                        var min_index = obj.data.indexOf(min);
-                        document.getElementById("max").innerHTML = max;
-                        document.getElementById("id_max").innerHTML = obj.run_id[max_index];
-                        document.getElementById("min").innerHTML = min;
-                        document.getElementById("id_min").innerHTML = obj.run_id[min_index];
-
-                    } else {
-                        document.getElementById("max").innerHTML = "";
-                        document.getElementById("id_max").innerHTML = "";
-                        document.getElementById("min").innerHTML = "";
-                        document.getElementById("id_min").innerHTML = "";
-                    }
                 };
-                */
+                Chart.plugins.register(verticalLinePlugin);
+
+                $(function () {
+                    var $metricChart = $("#metricChart");
+                    $.ajax({
+                        url: $metricChart.data("url"),
+                        success: function (data) {
+                            var ctx = $metricChart[0].getContext("2d");
+                            var versionDates = [];
+                            var versionLocs = [];
+                            for (i = 0; i < data.dates.length; i++) {
+                                datePoint = {
+                                    x: moment(data.dates[i])
+                                };
+                                versionDates.push(datePoint);
+                                versionLocs.push([i, data.version[i]]);
+                            };
+                            metricChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: [],
+                                    datasets: [
+                                        {
+                                            label: '',
+                                            fill: false,
+                                            borderColor: '#5CB3FF',
+                                            pointBorderColor: "#5CB3FF",
+                                            pointBackgroundColor: "#5CB3FF",
+                                            pointBorderWidth: 1,
+                                            pointHoverRadius: 5,
+                                            pointHoverBorderWidth: 2,
+                                            pointRadius: 3,
+                                            pointHitRadius: 10,
+                                            data: []
+                                        },
+                                        {
+                                            data: []
+                                        },
+                                        {
+                                            data: []
+                                        },
+                                        {
+                                            data: versionDates
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    legend: {
+                                        display: false,
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: false,
+                                        text: 'Metric'
+                                    },
+                                    tooltips: {
+                                        enabled: true,
+                                        mode: 'single',
+                                        callbacks: {
+                                            label: function (tooltipItems, data) {
+                                                var multistringText = ['  ' + data.datasets[0].label + ': ' + tooltipItems.yLabel];
+                                                multistringText.push('  ID: ' + data.datasets[1].data[tooltipItems.index]);
+                                                const params = Object.entries(data.datasets[2].data[tooltipItems.index]);
+                                                for (const [param, value] of params) {
+                                                    multistringText.push(`  ${param}: ${value}`);
+                                                };
+                                                return multistringText;
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        yAxes: [{
+                                            scaleLabel: {
+                                                display: true,
+                                                fontStyle: "bold",
+                                                labelString: ''
+                                            }
+                                        }],
+                                        xAxes: [{
+                                            type: 'time',
+                                            distribution: 'series',
+                                            time: {
+                                                unit: 'day',
+                                                displayFormats: {
+                                                    minute: 'h:mm a'
+                                                },
+                                            },
+                                            scaleLabel: {
+                                                display: true,
+                                                fontStyle: "bold",
+                                                labelString: 'Time'
+                                            }
+                                        }]
+                                    }
+                                },
+                                lineAtIndex: versionLocs
+                            })
+                        }
+                    })
+                });
 
                 function updateChart() {
                     var str = element.value;
                     var text = element.options[element.selectedIndex].text;
                     if (str) {
-                        var isData = true;
-                        document.getElementById("active").innerHTML = text;
+                        var chartData = [];
                         var obj = eval("(" + str + ")");
+                        document.getElementById("active").innerHTML = text;
                         metricChart.options.scales.yAxes[0].scaleLabel.labelString = text;
                         metricChart.data.datasets[0].label = text;
-                        metricChart.data.datasets[0].data = obj.data;
+                        for (i = 0; i < obj.data.length; i++) {
+                            var date = obj.dates[i]
+                            date = date.replace(/\//g, '-').replace(",", "");
+                            var dataPoint = {
+                                x: moment(date),
+                                y: obj.data[i]
+                            };
+                            chartData.push(dataPoint);
+                        }
+                        metricChart.data.datasets[0].data = chartData;
                         metricChart.data.datasets[1].data = obj.run_id;
                         metricChart.data.datasets[2].data = obj.params;
-                        metricChart.data.labels = obj.labels;
                         metricChart.update();
-                        /*updateSummary(isData, obj);*/
                     } else {
-                        var isData = false;
                         document.getElementById("active").innerHTML = "None";
                         metricChart.options.scales.yAxes[0].scaleLabel.labelString = "";
                         metricChart.data.datasets[0].data = [];
                         metricChart.data.datasets[1].data = [];
-                        metricChart.data.labels = [];
+                        metricChart.data.datasets[2].data = [];
                         metricChart.update();
-                        /*updateSummary(isData, []);*/
                     }
                 };
                 var element = document.getElementById("metricList");
                 element.onchange = updateChart;
+
+                window.onbeforeunload = function () {
+                    metricChart.destroy();
+                };
             </script>
         </div>
         <div class="tab-pane fade" id="readme" role="tabpanel" aria-labelledby="readme-tab">

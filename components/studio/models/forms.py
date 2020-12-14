@@ -15,7 +15,7 @@ class ModelLogForm(forms.ModelForm):
     class Meta:
         model = ModelLog
         fields = (
-            'run_id', 'trained_model', 'project', 'training_started_at', 'execution_time', 'code_version',
+            'run_id', 'trained_model', 'model_version', 'project', 'execution_time', 'code_version',
             'current_git_repo', 'latest_git_commit', 'system_details', 'cpu_details', 'training_status')
 
 class Metadata(forms.ModelForm):
