@@ -152,10 +152,17 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
     """ Login to Studio services. """
     if not deployment:
         deployment = input('Name: ')
-    if not keycloak_host:
-        keycloak_host = input('Keycloak host: ')
     if not studio_host:
         studio_host = input('Studio host: ')
+
+    url = "{}/api/settings".format(studio_host)
+    r = requests.get(url)
+    if (r.status_code >= 200 or r.status_code <= 299):
+        studio_settings = json.loads(r.content)["data"]
+        keycloak_host = next(item for item in studio_settings if item["name"] == "keycloak_host")["value"]
+
+    if not keycloak_host:
+        keycloak_host = input('Keycloak host: ')
     if not username:
         username = input('Username: ')
     password = getpass()
