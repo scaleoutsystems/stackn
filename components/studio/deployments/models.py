@@ -263,9 +263,9 @@ def pre_save_deployment(sender, instance, using, **kwargs):
             bucket_param = bucket_param[0:-1]+'}'
             del instance.params['minio.buckets']
             parameters.update({"minio.buckets": bucket_param})
-      except:
-          print("Failed to update parameters in deployment.models")
-          param_success = False
+    except:
+        print("Failed to update parameters in deployment.models")
+        param_success = False
     
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
