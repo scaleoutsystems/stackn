@@ -1,8 +1,8 @@
+import json
 import click
 from .main import main
 import requests
-from scaleout.studioclient import StudioClient 
-from .helpers import create_table
+from .helpers import create_table, PrettyTable
 
 @click.option('--daemon',
               is_flag=True,
@@ -16,6 +16,32 @@ from .helpers import create_table
 def get_cmd(ctx, daemon):
     if daemon:
         print('{} NYI should run as daemon...'.format(__file__))
+
+@get_cmd.command('settings')
+@click.pass_context
+def get_settings_cmd(ctx):
+    """
+    List STACKn settings needed to set up the CLI client.
+    """
+    studio_host = input("Studio host: ")
+    url = "{}/api/settings".format(studio_host)
+    try:
+        r = requests.get(url)
+        studio_settings = json.loads(r.content)["data"]
+
+        names = ['Setting', 'Value']
+        keys = ['name', 'value']
+        x = PrettyTable()
+        x.field_names = names
+        for item in studio_settings:
+            row = [item[k] for k in keys]
+            x.add_row(row)
+        print(x)
+    except Exception as e:
+        print("Couldn't get studio settings.")
+        print("Returned status code: {}".format(r.status_code))
+        print("Reason: {}".format(r.reason))
+        print("Error: {}".format(e))
 
 @get_cmd.command('models')
 @click.pass_context

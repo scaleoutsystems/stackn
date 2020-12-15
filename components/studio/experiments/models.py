@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
-# from api.serializers import ProjectSerializer
 from rest_framework.renderers import JSONRenderer
 from deployments.models import HelmResource
 from django.dispatch import receiver
@@ -43,32 +42,14 @@ def pre_save_experiments(sender, instance, using, **kwargs):
 
     user_config_file = create_user_settings(instance.username)
     user_config_file = yaml.dump(json.loads(user_config_file))
-    # print(settings.NAMESPACE)
-    # limit_cpu = "500m"
-    # limit_mem = "1Gi"
-    # req_cpu = "500m"
-    # req_mem = "1Gi"
-    # gpu_enabled = "false"
-    # gpu_count = "0"
-    # if "resources.limits.cpu" in instance.options:
-    #     limit_cpu = instance.options["resources.limits.cpu"]
-    # if "resources.limits.memory" in instance.options:
-    #     limit_cpu = instance.options["resources.limits.memory"]
-    # if "resources.requests.cpu" in instance.options:
-    #     limit_cpu = instance.options["resources.requests.cpu"]
-    # if "resources.requests.memory" in instance.options:
-    #     limit_cpu = instance.options["resources.requests.memory"]
-    # if "gpu.enabled" in instance.options:
-    #     limit_cpu = instance.options["resources.limits.cpu"]
-    # if "resources.limits.cpu" in instance.options:
-    #     limit_cpu = instance.options["resources.limits.cpu"]   
+
     parameters = {
         "release": release_name,
         "chart": "cronjob",
         "namespace": settings.NAMESPACE,
         "project.slug": instance.project.slug,
         "image": instance.environment.image,
-        "command": '["/bin/bash", "-c", "'+instance.command+'"]', #str(instance.command.split(' ')),
+        "command": '["/bin/bash", "-c", "'+instance.command+'"]',
         "iscron": str(is_cron),
         "cronjob.schedule": instance.schedule,
         "cronjob.port": "8786",
