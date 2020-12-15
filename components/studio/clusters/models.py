@@ -13,6 +13,9 @@ class Cluster(models.Model):
     config = models.TextField()
     namespace = models.CharField(max_length=512)
     storageclass = models.CharField(max_length=512, default="microk8s-hostpath")
+    status = models.CharField(max_length=30, default="active")
+    quota = models.TextField(default="")
+    load = models.TextField(default="")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
     
