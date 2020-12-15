@@ -224,8 +224,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         del instance.params['environment']
 
     if envstr:
-        envparams = {"extraEnv": envstr}
-
+        envparams = {"extraEnv": envstr}        
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -249,11 +248,25 @@ def pre_save_deployment(sender, instance, using, **kwargs):
                   'gatekeeper.client_id': client_id,
                   'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
                   'gatekeeper.skip_tls': str(skip_tls)}
-
-    parameters.update(instance.params)
-    parameters.update(access_rules)
-    if envparams:
-        parameters.update(envparams)
+    param_success = True
+    try:
+        parameters.update(instance.params)
+        parameters.update(access_rules)
+        if envparams:
+            parameters.update(envparams)
+        
+        if 'minio.buckets' in instance.params:
+            bucket_param = '{'
+            buckets = instance.params['minio.buckets']
+            for bucket in buckets:
+                bucket_param += bucket+','
+            bucket_param = bucket_param[0:-1]+'}'
+            del instance.params['minio.buckets']
+            parameters.update({"minio.buckets": bucket_param})
+      except:
+          print("Failed to update parameters in deployment.models")
+          param_success = False
+    
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
@@ -263,7 +276,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     helmchart.save()
     instance.helmchart = helmchart
 
-    if helmchart.status == 'Failed':
+    if helmchart.status == 'Failed' or (not param_success):
         # If fail, clean up in Keycloak
         kc = keylib.keycloak_init()
         keylib.keycloak_delete_client(kc, RELEASE_NAME) 

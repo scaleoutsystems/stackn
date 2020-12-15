@@ -152,7 +152,7 @@ def pre_save_labs(sender, instance, using, **kwargs):
         print("WARNING: Skipping TLS verify.")
 
     volume_param = []
-    if hasattr(instance, "extraVols") and instance.extraVols:
+    if hasattr(instance, 'extraVols') and instance.extraVols:
         vols = instance.extraVols.split(',')
         extraVolumes = ""
         extraVolumeMounts = ""
