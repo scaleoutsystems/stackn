@@ -80,6 +80,7 @@ class StudioClient():
         self.endpoints['members'] = self.api_url+'/projects/{}/members'
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
         self.endpoints['volumes'] = self.api_url+'/projects/{}/volumes/'
+        self.endpoints['jobs'] = self.api_url+'/projects/{}/jobs/'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -262,6 +263,33 @@ class StudioClient():
             print('Error: {}'.format(err))
             return []
         return members
+
+    ### Jobs API ###
+    def get_jobs(self, data={}):
+        url = self.endpoints['jobs'].format(self.project['id'])
+        try:
+            r = requests.get(url, headers=self.auth_headers, params=data, verify=self.secure_mode)
+            jobs = json.loads(r.content)
+            return jobs
+        except Exception as err:
+            print('Failed to list jobs.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
+
+    def create_job(self, config):
+        settings_file = open(config, 'r')
+        job_config = json.loads(settings_file.read())
+        url = self.endpoints['jobs'].format(self.project['id'])
+        try:
+            r = requests.post(url, headers=self.auth_headers, json=job_config, verify=self.secure_mode)
+        except Exception as err:
+            print('Failed to list jobs.')
+            print('Status code: {}'.format(r.status_code))
+            print('Message: {}'.format(r.text))
+            print('Error: {}'.format(err))
+            return []
 
     ### Volumes API ###
 
@@ -507,6 +535,12 @@ class StudioClient():
             if self.found_project:
                 volumes = self.get_volumes()
                 return volumes
+            else:
+                return []
+        if resource == 'jobs':
+            if self.found_project:
+                jobs = self.get_jobs()
+                return jobs
             else:
                 return []
         
