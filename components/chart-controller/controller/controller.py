@@ -52,7 +52,7 @@ class Controller:
             try:
                 args.append('--set')
                 # If list, don't escape ,
-                if options[key][0] == '{' and options[key][-1] == '}':
+                if len(options[key]) > 0 and options[key][0] == '{' and options[key][-1] == '}':
                     args.append(key+"="+options[key])
                 # And if not list, we should escape ,
                 else:
