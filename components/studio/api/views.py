@@ -530,4 +530,3 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         if success:
             project.save()
             return HttpResponse('Ok', status=200)
-
