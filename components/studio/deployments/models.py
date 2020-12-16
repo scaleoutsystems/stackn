@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -12,6 +11,7 @@ import os
 import requests
 import modules.keycloak_lib as keylib
 
+
 class HelmResource(models.Model):
     name = models.CharField(max_length=512, unique=True)
     cluster = models.CharField(max_length=512, default='')
@@ -22,9 +22,10 @@ class HelmResource(models.Model):
     status = models.CharField(max_length=20)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return "{}".format(self.name)
+
 
 @receiver(pre_save, sender=HelmResource, dispatch_uid='helmresource_pre_save_signal')
 def pre_save_helmresource(sender, instance, using, **kwargs):
@@ -32,6 +33,7 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     action = 'deploy'
     if update:
         action = 'upgrade'
+
     try:
         cluster = Cluster.objects.get(name=instance.cluster)
         instance.namespace = cluster.namespace
@@ -42,17 +44,20 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
         print('Using default cluster (this).')
         
     url = settings.CHART_CONTROLLER_URL + '/'+action
+
+
     print(instance.params)
     retval = requests.post(url, json=instance.params)
     if retval:
-        print('Resource: '+instance.name)
-        print('Action: '+action)
+        print('Resource: ' + instance.name)
+        print('Action: ' + action)
         instance.status = 'OK'
     else:
-        print('Failed to deploy resource: '+instance.name)
+        print('Failed to deploy resource: ' + instance.name)
         print('Reason: {}'.format(retval.text))
         print('Status code: {}'.format(retval.status_code))
         instance.status = 'Failed'
+
 
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
 def pre_delete_helmresource(sender, instance, using, **kwargs):
@@ -62,12 +67,12 @@ def pre_delete_helmresource(sender, instance, using, **kwargs):
         url = settings.CHART_CONTROLLER_URL + '/delete'
         retval = requests.get(url, parameters)
         if retval:
-            print('Deleted resource: '+instance.name)
+            print('Deleted resource: ' + instance.name)
         else:
-            print('Failed to delete resource: '+instance.name)
+            print('Failed to delete resource: ' + instance.name)
+
 
 class DeploymentDefinition(models.Model):
-
     PRIVATE = 'PR'
     PUBLIC = 'PU'
     ACCESS = [
@@ -90,9 +95,8 @@ class DeploymentDefinition(models.Model):
     def __str__(self):
         return "{}".format(self.name)
 
+
 class DeploymentInstance(models.Model):
-
-
     PRIVATE = 'PR'
     LIMITED = 'LI'
     PUBLIC = 'PU'
@@ -117,9 +121,9 @@ class DeploymentInstance(models.Model):
     def __str__(self):
         return "{}:{}".format(self.model.name, self.model.version)
 
+
 @receiver(pre_delete, sender=DeploymentInstance, dispatch_uid='deployment_pre_delete_signal')
 def pre_delete_deployment(sender, instance, using, **kwargs):
-
     model = instance.model
     model.status = 'CR'
     model.save()
@@ -129,10 +133,11 @@ def pre_delete_deployment(sender, instance, using, **kwargs):
     # Clean up in Keycloak
     print('Cleaning up in Keycloak...')
     kc = keylib.keycloak_init()
-    keylib.keycloak_delete_client(kc, instance.release) 
-    scope_id = keylib.keycloak_get_client_scope_id(kc, instance.release+'-scope')
+    keylib.keycloak_delete_client(kc, instance.release)
+    scope_id = keylib.keycloak_get_client_scope_id(kc, instance.release + '-scope')
     keylib.keycloak_delete_client_scope(kc, scope_id)
     print('Done.')
+
 
 @receiver(pre_save, sender=DeploymentInstance, dispatch_uid='deployment_pre_save_signal')
 def pre_save_deployment(sender, instance, using, **kwargs):
@@ -143,17 +148,17 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     model_file = model.uid
     model_bucket = 'models'
-    
+
     deployment_name = slugify(model.name)
     deployment_version = slugify(model.version)
     deployment_endpoint = '{}-{}.{}'.format(model.name,
                                             model.version,
-                                            settings.DOMAIN) 
-    
+                                            settings.DOMAIN)
+
     deployment_endpoint = settings.DOMAIN
     deployment_path = '/{}/serve/{}/{}/'.format(model.project.slug,
-                                               slugify(model.name),
-                                               slugify(model.version))
+                                                slugify(model.name),
+                                                slugify(model.version))
 
     instance.endpoint = deployment_endpoint
     instance.path = deployment_path
@@ -170,29 +175,28 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     minio_access_key = decrypted_key
     minio_secret_key = decrypted_secret
 
-    minio_host = project_slug+'-minio:9000'
+    minio_host = project_slug + '-minio:9000'
 
     global_domain = settings.DOMAIN
 
-    
     HOST = settings.DOMAIN
-    RELEASE_NAME = slugify(str(project_slug)+'-'+str(deployment_name)+'-'+str(deployment_version))
+    RELEASE_NAME = slugify(str(project_slug) + '-' + str(deployment_name) + '-' + str(deployment_version))
     burl = os.path.join('https://', HOST)
     eurl = os.path.join(deployment_endpoint, deployment_path)
-    URL = burl+eurl
- 
-    
-    instance.appname =instance.model.project.slug+'-'+slugify(instance.model.name)+'-'+slugify(instance.model.version)
-    
+    URL = burl + eurl
+
+    instance.appname = instance.model.project.slug + '-' + slugify(instance.model.name) + '-' + slugify(
+        instance.model.version)
+
     # Create Keycloak client corresponding to this deployment
-    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by, ['owner'], ['owner'])
-    
+    client_id, client_secret = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, instance.created_by, ['owner'],
+                                                                 ['owner'])
+
     skip_tls = 0
     if not settings.OIDC_VERIFY_SSL:
         skip_tls = 1
         print("WARNING: Skipping TLS verify.")
 
-    
     # Default is that access is private.
     rules = """resources:
     - uri: /*
@@ -224,7 +228,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         del instance.params['environment']
 
     if envstr:
-        envparams = {"extraEnv": envstr}        
+        envparams = {"extraEnv": envstr}
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
@@ -254,19 +258,19 @@ def pre_save_deployment(sender, instance, using, **kwargs):
         parameters.update(access_rules)
         if envparams:
             parameters.update(envparams)
-        
+
         if 'minio.buckets' in instance.params:
             bucket_param = '{'
             buckets = instance.params['minio.buckets']
             for bucket in buckets:
-                bucket_param += bucket+','
-            bucket_param = bucket_param[0:-1]+'}'
+                bucket_param += bucket + ','
+            bucket_param = bucket_param[0:-1] + '}'
             del instance.params['minio.buckets']
             parameters.update({"minio.buckets": bucket_param})
     except:
         print("Failed to update parameters in deployment.models")
         param_success = False
-    
+
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace='Default',
@@ -279,8 +283,8 @@ def pre_save_deployment(sender, instance, using, **kwargs):
     if helmchart.status == 'Failed' or (not param_success):
         # If fail, clean up in Keycloak
         kc = keylib.keycloak_init()
-        keylib.keycloak_delete_client(kc, RELEASE_NAME) 
-        scope_id = keylib.keycloak_get_client_scope_id(kc, RELEASE_NAME+'-scope')
+        keylib.keycloak_delete_client(kc, RELEASE_NAME)
+        scope_id = keylib.keycloak_get_client_scope_id(kc, RELEASE_NAME + '-scope')
         keylib.keycloak_delete_client_scope(kc, scope_id)
         raise Exception('Failed to launch deploy job.')
     else:
