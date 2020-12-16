@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
-from api.serializers import ProjectSerializer
 from rest_framework.renderers import JSONRenderer
 from deployments.models import HelmResource
 from django.dispatch import receiver
@@ -29,9 +28,10 @@ def pre_save_experiments(sender, instance, using, **kwargs):
     job_id = uuid.uuid1().hex[0:5]
     release_name = '{}-{}-{}'.format(instance.project.slug, 'cronjob', job_id)
     is_cron = 1
-    if instance.schedule == "None":
+    if instance.schedule == "None" or instance.schedule == "":
         is_cron = 0
 
+    from api.serializers import ProjectSerializer
     settings_file = ProjectSerializer(instance.project)
 
     settings_file = JSONRenderer().render(settings_file.data)
@@ -49,17 +49,23 @@ def pre_save_experiments(sender, instance, using, **kwargs):
         "namespace": settings.NAMESPACE,
         "project.slug": instance.project.slug,
         "image": instance.environment.image,
-        "command": '["/bin/bash", "-c", "'+instance.command+'"]', #str(instance.command.split(' ')),
+        "command": '["/bin/bash", "-c", "'+instance.command+'"]',
         "iscron": str(is_cron),
         "cronjob.schedule": instance.schedule,
         "cronjob.port": "8786",
         "resources.limits.cpu": "500m",
         "resources.limits.memory": "1Gi",
         "resources.requests.cpu": "100m",
-        "resources.requests.memory": "256Gi",
+        "resources.requests.memory": "256Mi",
+        "resources.gpu.enabled": "false",
         "settings_file": settings_file,
         "user_settings_file": user_config_file,
     }
+    if hasattr(instance, 'options'):
+        del instance.options['command']
+        del instance.options['environment']
+        del instance.options['schedule']
+        parameters.update(instance.options)
     helmchart = HelmResource(name=release_name,
                              namespace='Default',
                              chart='cronjob',

@@ -142,21 +142,29 @@ def get_token(client_id='studio-api', realm='STACKn', secure=True):
         else:
             print('Failed to authenticate with token, please login again.')
             print(res.text)
-            access_token = login()
+            access_token = login(deployment=stackn_config['active'], keycloak_host=token_config['keycloak_url'], studio_host=token_config['studio_url'], secure=secure)
 
     return access_token, token_config
 
 
 
-def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[], studio_host=[], secure=True):
+def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[], studio_host=[], username=[], secure=True):
     """ Login to Studio services. """
     if not deployment:
         deployment = input('Name: ')
-    if not keycloak_host:
-        keycloak_host = input('Keycloak host: ')
     if not studio_host:
         studio_host = input('Studio host: ')
-    username = input('Username: ')
+
+    url = "{}/api/settings".format(studio_host)
+    r = requests.get(url)
+    if (r.status_code >= 200 or r.status_code <= 299):
+        studio_settings = json.loads(r.content)["data"]
+        keycloak_host = next(item for item in studio_settings if item["name"] == "keycloak_host")["value"]
+
+    if not keycloak_host:
+        keycloak_host = input('Keycloak host: ')
+    if not username:
+        username = input('Username: ')
     password = getpass()
     access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host, secure=secure)
     # dirname = base64.urlsafe_b64encode(host.encode("utf-8")).decode("utf-8")

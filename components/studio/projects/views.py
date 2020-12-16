@@ -36,7 +36,7 @@ def index(request):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def settings(request, user, project_slug):
     user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
     print(user_permissions)
@@ -68,7 +68,7 @@ def settings(request, user, project_slug):
 
     return render(request, template, locals())
 
-@login_required(login_url='/accounts/login')
+@login_required
 def change_description(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
@@ -87,7 +87,7 @@ def change_description(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def grant_access_to_project(request, user, project_slug):
     project = Project.objects.filter(slug=project_slug).first()
 
@@ -122,7 +122,7 @@ def grant_access_to_project(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
-@login_required(login_url='/accounts/login')
+@login_required
 def create(request):
     template = 'index_projects.html'
 
@@ -173,7 +173,7 @@ def create(request):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def details(request, user, project_slug):
 
     is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
@@ -211,7 +211,7 @@ def details(request, user, project_slug):
     return render(request, template, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def delete(request, user, project_slug):
     next_page = request.GET.get('next', '/projects/')
 
@@ -236,7 +236,7 @@ def delete(request, user, project_slug):
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def publish_project(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
@@ -277,7 +277,7 @@ def publish_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def load_project_activity(request, user, project_slug):
     template = 'project_activity.html'
 

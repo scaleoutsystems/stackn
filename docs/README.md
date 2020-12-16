@@ -1,7 +1,4 @@
-<a href="#what-is-stackn">What is STACKn</a><br>
-<a href="#why-use-stackn">Why use STACKn</a><br>
-<a href="#core-features">Core features</a><br>
-<a href="#setup">Setup</a>
+![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
 
 # What is STACKn?
 
@@ -17,13 +14,13 @@ STACKn is cloud-native and can be deployed on any solution that implements the K
 # Core features
 
 ## Custom Resource management
-- Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management.
+Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management.
 
 ## Model Management
-- Ability to track models from cradle to grave with version control, inference auto scaling and control as well as audit trails and scheduled rollouts and/or decommissions. 
+Ability to track models from cradle to grave with version control, inference auto scaling and control as well as audit trails and scheduled rollouts and/or decommissions. 
 
 ## Platform support
-- Deploy anywhere where there is a Kubernetes compliant API.
+Deploy anywhere where there is a Kubernetes compliant API.
 
 ## Integration and customization
 - The STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
@@ -35,6 +32,7 @@ STACKn is a composition of multiple required components. The overview can give y
 For additional details please see the technical documentation.
 
 # Setup
+
 ## Getting started
 This guide lets you quickly get started with STACKn.
 
@@ -43,7 +41,7 @@ This guide lets you quickly get started with STACKn.
 3. Download charts
 4. Install STACKn
 5. Setup a user
-<!-- 5. Create a project -->
+6. Create a project
 
 ### 1. Check prerequisites
 
@@ -62,6 +60,7 @@ To configure STACKn you must know your storage class name and storage provisione
 - Setup a desired namespace (or default)
 - Setup a service account (or rolebind to admin)
 Ensure your service account user has a rolebinding to administrator permissions for deployment.
+
 ```bash
 cat <<EOF | kubectl apply -f - 
 kind: RoleBinding
@@ -123,18 +122,9 @@ You can lint or check the deployment with the flags —dry-run —debug.
 
 Make sure to assign the chart to the right namespace with —namespace yournamespace (when deploying to the default namespace this can be omitted.)
 
-### 5. Setup a user
+### 5. Create a project
 
-You will need to create a user to login into Studio. Click the login button in the lower left corner, and click register. By default, Keycloak is configured not to require email verification, but this can be changed by logging into the Keycloak admin console and updating the STACKn realm login settings.
-
-To access the admin page of Studio, you will need to create a Django user with admin rights. First find the pod name to the Studio deployment:
-```bash
-$ kubectl get pods -n yournamespace
-```
-and get the pod id that correspond to the studio pod running. Replace `pod-Id` in the command below.
-```bash
-$ kubectl exec -it pod-Id python manage.py createsuperuser
-```
+Set up a project and start using STACKn through the [tutorials](/tutorial).
 
 ### Additional - Upgrading STACKn
 
@@ -158,7 +148,7 @@ https://github.com/scaleoutsystems/digits-example-project
 https://github.com/scaleoutsystems/aml-example-project
 
 
-Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome. Please see [CONTRIBUTING.md](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md ).
 
 # Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.
@@ -168,4 +158,4 @@ Contributions are welcome. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 ## License
-> See [LICENSE](LICENCE.md)
+> See [LICENSE](https://github.com/scaleoutsystems/stackn/blob/master/LICENSE)

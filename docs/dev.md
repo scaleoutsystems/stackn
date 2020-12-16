@@ -2,7 +2,7 @@
 
 ## Deployment
 
-For deployment of STACKn, see [[...]]...
+For deployment of STACKn, see the [installation guide](/INSTALL).
 
 ## Github
 

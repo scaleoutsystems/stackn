@@ -89,6 +89,47 @@ class Model(models.Model):
     def __str__(self): 
         return "{name}".format(name=self.name)
 
+class ModelLog(models.Model):
+    STARTED = 'ST'
+    DONE = 'DO'
+    FAILED = 'FA'
+    STATUS = [
+        (STARTED, 'Started'),
+        (DONE, 'Done'),
+        (FAILED, 'Failed'),
+    ]
+    run_id = models.CharField(max_length=32)
+    trained_model = models.CharField(max_length=32, default='')
+    #trained_model = models.ForeignKey(
+    #    Model, 
+    #    on_delete=models.CASCADE
+    #)
+    project = models.CharField(max_length=255, default='')
+    training_started_at = models.CharField(max_length=255)
+    #training_started_at = models.DateTimeField(auto_now_add=True)
+    execution_time = models.CharField(max_length=255, default='')
+    code_version = models.CharField(max_length=255, default='')
+    current_git_repo = models.CharField(max_length=255, default='')
+    latest_git_commit = models.CharField(max_length=255, default='')
+    system_details = models.TextField(blank=True)
+    cpu_details = models.TextField(blank=True)
+    training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
+
+    class Meta:
+        unique_together = ('run_id', 'trained_model')
+
+class Metadata(models.Model):
+    run_id = models.CharField(max_length=32)
+    trained_model = models.CharField(max_length=32, default='')
+    project = models.CharField(max_length=255, default='')
+    model_details = models.TextField(blank=True)
+    parameters = models.TextField(blank=True)
+    metrics = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('run_id', 'trained_model')
+
+
 @receiver(pre_save, sender=Model, dispatch_uid='model_pre_save_signal')
 def pre_save_model(sender, instance, using, **kwargs):
     # Load version backend
@@ -112,7 +153,7 @@ def pre_save_model(sender, instance, using, **kwargs):
             raise Exception('Failed to create new release for model {}-{}, release type {}.'.format(instance.name, instance.version, release_type))
 
 @receiver(pre_delete, sender=Model, dispatch_uid='model_pre_delete_signal')
-def pre_delete_deployment(sender, instance, using, **kwargs):
+def pre_delete_model(sender, instance, using, **kwargs):
     # Model is saved in bucket 'model' with filename 'instance.uid'
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)

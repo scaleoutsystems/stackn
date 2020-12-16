@@ -63,11 +63,26 @@ def create_project_cmd(ctx, name, description='', repository=''):
 @create_cmd.command('lab')
 @click.option('-f', '--flavor', required=True)
 @click.option('-e', '--environment', required=True)
+@click.option('-v', '--volumes', required=False, default=[])
 @click.pass_context
-def create_session(ctx, flavor, environment):
+def create_session(ctx, flavor, environment, volumes):
     client = ctx.obj['CLIENT']
-    client.create_session(flavor_slug=flavor, environment_slug=environment)
+    client.create_session(flavor_slug=flavor, environment_slug=environment, volumes=volumes)
 
+@create_cmd.command('volume')
+@click.option('-s', '--size', required=True)
+@click.option('-n', '--name', required=True)
+@click.pass_context
+def create_volume(ctx, size, name):
+    client = ctx.obj['CLIENT']
+    client.create_volume(name=name, size=size)
+
+@create_cmd.command('job')
+@click.option('-c', '--config', required=True)
+@click.pass_context
+def create_job(ctx, config):
+    client = ctx.obj['CLIENT']
+    client.create_job(config)
 
 # Create dataset
 

@@ -13,7 +13,7 @@ from django.utils.text import slugify
 import modules.keycloak_lib as keylib
 from monitor.helpers import pod_up, get_count_over_time
 
-@login_required(login_url='/accounts/login')
+@login_required
 def predict(request, id, project):
     template = 'deploy/predict.html'
     is_authorized = False
@@ -55,7 +55,7 @@ def predict(request, id, project):
 
     return render(request, template, locals())
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deploy(request, id):
     model = Model.objects.get(id=id)
     print(request.user)
@@ -68,7 +68,7 @@ def deploy(request, id):
 
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':request.user, 'project':model.project.slug}))
 
-@login_required(login_url='/accounts/login')
+@login_required
 def serve_settings(request, id, project):
     # model = Model.objects.get(id=id)
     # print(request.user)
@@ -113,7 +113,7 @@ def serve_settings(request, id, project):
 
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def undeploy(request, id):
     model = Model.objects.get(id=id)
     instance = DeploymentInstance.objects.get(model=model)
@@ -130,7 +130,7 @@ def index(request):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deployment_index(request, user, project):
     temp = 'deploy/list.html'
 
@@ -155,7 +155,7 @@ def deployment_index(request, user, project):
 
     return render(request, temp, locals())
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deployment_edit(request, user, project, id=None):
     temp = 'deploy/edit.html'
     from projects.models import Project
@@ -181,7 +181,7 @@ def deployment_edit(request, user, project, id=None):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deployment_definition_index(request):
     temp = 'deploy/definition/list.html'
 
@@ -192,7 +192,7 @@ def deployment_definition_index(request):
 
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deployment_definition_add(request):
 
     temp = 'deploy/definition/add.html'
@@ -209,7 +209,7 @@ def deployment_definition_add(request):
     return render(request, temp, locals())
 
 
-@login_required(login_url='/accounts/login')
+@login_required
 def deployment_definition_edit(request, id=None):
     temp = 'deploy/definition/edit.html'
 

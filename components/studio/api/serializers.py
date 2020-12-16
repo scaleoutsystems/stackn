@@ -1,10 +1,11 @@
 from rest_framework.serializers import ModelSerializer
 
-from models.models import Model
+from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
-from projects.models import Project
+from projects.models import Project, Volume
 from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
+from experiments.models import Experiment
 from labs.models import Session
 from django.contrib.auth.models import User
 class MLModelSerializer(ModelSerializer):
@@ -12,6 +13,22 @@ class MLModelSerializer(ModelSerializer):
         model = Model
         fields = (
             'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version')
+
+
+class ModelLogSerializer(ModelSerializer):
+    class Meta:
+        model = ModelLog
+        fields = (
+            'id', 'run_id', 'trained_model', 'project', 'training_started_at', 'execution_time', 'code_version', 
+            'current_git_repo', 'latest_git_commit', 'system_details', 'cpu_details', 'training_status')
+
+
+class MetadataSerializer(ModelSerializer):
+    class Meta:
+        model = Metadata
+        fields = (
+            'id', 'run_id', 'trained_model', 'project', 'model_details', 'parameters', 'metrics')
+
 
 class DeploymentDefinitionSerializer(ModelSerializer):
     class Meta:
@@ -64,9 +81,20 @@ class DatasetSerializer(ModelSerializer):
     class Meta:
         model = Dataset
         fields = ['id', 'name', 'version', 'release_type', 'description',
-                  'bucket', 'project_slug', 'files', 'created_by', 'created_on']
+                  'bucket', 'project_slug', 'files', 'created_by', 'created_on', 'datasheet']
+
 
 class FileModelSerializer(ModelSerializer):
     class Meta:
         model = FileModel
         fields = ['id', 'name', 'bucket']
+
+class VolumeSerializer(ModelSerializer):
+    class Meta:
+        model = Volume
+        fields = ['id', 'name', 'slug', 'size', 'settings', 'created_by', 'created_on', 'updated_on']
+
+class ExperimentSerializer(ModelSerializer):
+    class Meta:
+        model = Experiment
+        fields = ['id', 'username', 'command', 'environment', 'project', 'schedule', 'created_at', 'uploaded_at']

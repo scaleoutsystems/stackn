@@ -35,7 +35,8 @@
         <tr>
             <th scope="col" style="width: 5%;text-align: center;"></th>
             <th scope="col" style="width: 10%;text-align: left">Location</th>
-            <th scope="col" style="width: 50%;text-align: left">Name</th>
+            <th scope="col" style="width: 35%;text-align: left">Name</th>
+            <th scope="col" style="width: 15%;text-align: left">Datasheet</th>
             <th scope="col" style="width: 10%;text-align: left">Size</th>
             <th scope="col" style="width: 15%;text-align: left">Last Modified</th>
         </tr>
@@ -53,6 +54,8 @@
             <td><span class="oi oi-file"></span></td>
             <td>{{ entry.location }}</td>
             <td>{{ entry.name }}</td>
+            <td><a href="{%url 'datasets:datasheet' request.user project.slug 1 %}" class="btn mt-auto btn-info"
+                style="width: fit-content;">{{ entry.datasheet }}</a></td>
             <td>{{ entry.size }} MB</td>
             <td>{{ entry.modified }}</td>
             {% endif %}
