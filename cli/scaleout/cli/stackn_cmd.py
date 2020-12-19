@@ -8,7 +8,7 @@ import random
 import string
 import json
 import uuid
-from scaleout.details import get_run_details 
+
 
 # @click.option('--daemon',
 #               is_flag=True,
@@ -65,11 +65,7 @@ def predict_cmd(ctx, model, version, inp):
     #                     json = inp)
 
 
-# ------------------- Question ---------------------
-# Is it a good idea to make it possible to pass --log-off as an argument if the user does not want to log the run to Studio?
-# In that case, the model name and code version is not possible to pass to the stackn train command and train.py will run without logging. 
-# Not sure if this is a good idea
-# --------------------------------------------------
+
 @main.command('train')
 @click.option('--log-off', flag_value='log-off', default=False)
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
@@ -100,8 +96,20 @@ def train_cmd(ctx, log_off, model, run_id, training_file, version):
             + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))    
 
 
-
-@main.command('test')
+@main.command('dvc')
+#@click.option('--init', required=True)
 @click.pass_context
-def test_cmd(ctx):
-    get_run_details('12')
+def dvc_cmd(ctx):
+    stackn_config, load_status = get_stackn_config()
+    if not load_status:
+        print('Failed to load STACKn config.')
+    else:
+        if not os.path.isdir('.dvc'):
+            if 'active_project' in stackn_config:
+                client = ctx.obj['CLIENT']
+                client.dvc_init()
+            else:
+                print("No active project in STACKn config; set an existing project as active using 'stackn set project -p <name of project>'")
+        else:
+            print('DVC already installed in current directory.')
+        
