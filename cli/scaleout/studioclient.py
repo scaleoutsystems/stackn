@@ -813,16 +813,15 @@ class StudioClient():
 
 
     def dvc_init(self):
-        """ Initiate DVC for active project """
+        """ Initialize DVC config for currently active project """
 
-        project = self.project
-        remote_name = '{}-remote'.format(self.stackn_config['active_project'])
-        remote_endpoint = 'https://{}-minio.{}/'.format(self.project_slug, self.token_config['studio_url'].replace('https://', '').replace('http://', '')) 
-        os.environ["AWS_ACCESS_KEY_ID"] = self.decrypt_key(project['project_key'])
-        os.environ["AWS_SECRET_ACCESS_KEY"] = self.decrypt_key(project['project_secret'])
-        
         try:
             print("DVC setup initalizing...")
+            project = self.project
+            remote_name = '{}-remote'.format(self.stackn_config['active_project'])
+            remote_endpoint = 'https://{}-minio.{}/'.format(self.project_slug, self.token_config['studio_url'].replace('https://', '').replace('http://', '')) 
+            os.environ["AWS_ACCESS_KEY_ID"] = self.decrypt_key(project['project_key'])
+            os.environ["AWS_SECRET_ACCESS_KEY"] = self.decrypt_key(project['project_secret'])
             if subprocess.run(["git", "branch"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) != 0:
                 question = "Current directory is not a Git repo. Do you want to initialize DVC anyways?"
                 confirmed = prompt(question)
@@ -845,51 +844,9 @@ class StudioClient():
             return True
         except Exception as e:
             print("DVC setup failed.\n{}".format(e))
+            print("Make sure DVC is installed on your local system.")
             return False
-        
-        """
-        if arg == 'install':
-            try:
-                if subprocess.run(["git", "branch"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) != 0:
-                    subprocess.run(['dvc', 'init', '--no-scm']) 
-                else:
-                    subprocess.run(['dvc', 'init'])
-                processes = [
-                    ['dvc', 'remote', 'add', '-d', remote_name, 's3://dataset'],
-                    ['dvc', 'remote', 'modify', remote_name, 'endpointurl', remote_endpoint],
-                    ['dvc', 'config', 'cache.s3', 's3cache'],
-                    ['dvc', 'remote', 'add' ,'s3cache', 'remote://{}/cache'.format(remote_name)]
-                ]
-                for process in processes:
-                    subprocess.run(process)
-            except Exception as e:
-                print("DVC setup failed.\n{}".format(e))
-                return False
-            return True
-        else:
-            file_name = arg
-            try:
-                #subprocess.run(['dvc', 'add', 'remote://{}/{}'.format(remote_name, file_name)])
-                with open('{}.dvc'.format(file_name)) as f:
-                    for i, line in enumerate(f):
-                        if i == 1:
-                            if self.get_dataset({"name": file_name}):
-                                print("Updating dataset {} in Studio database...".format(file_name))
-                                data = {"etag": line[8:].replace('\n', '')}
-                                url = self.endpoints['dataset'].format(self.project['id'])+'/update_instance/'
-                            else:
-                                print("Unable to find entry for dataset {} in Studio database. Creating new database entry...".format(file_name))
-                                data = {"name": file_name, "etag": line[8:].replace('\n', '')}
-                                url = self.endpoints['dataset'].format(self.project['id'])+'/'
-                            break
-            except Exception as e:
-                print("S3 File management failed.\n{}\nMake sure you are".format(e))
-                return False
-            r = requests.post(url, json=data, headers=self.auth_headers, verify=self.secure_mode)
-            if not _check_status(r, error_msg="Failed to create dataset entry in database"):
-                return False
-            return True
-        """
+
 
 if __name__ == '__main__':
 
