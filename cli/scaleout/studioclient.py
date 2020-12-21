@@ -812,9 +812,11 @@ class StudioClient():
         print(res.json())
 
 
-    def dvc_init(self):
+    def dvc_init(self, action):
         """ Initialize DVC config for currently active project """
 
+
+        # TO DO: User should be able to restart config in a directory, for example in case the user changes the active project
         try:
             print("DVC setup initalizing...")
             project = self.project
@@ -822,16 +824,17 @@ class StudioClient():
             remote_endpoint = 'https://{}-minio.{}/'.format(self.project_slug, self.token_config['studio_url'].replace('https://', '').replace('http://', '')) 
             os.environ["AWS_ACCESS_KEY_ID"] = self.decrypt_key(project['project_key'])
             os.environ["AWS_SECRET_ACCESS_KEY"] = self.decrypt_key(project['project_secret'])
-            if subprocess.run(["git", "branch"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) != 0:
+            check_git = subprocess.run(["git", "branch"], stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
+            if check_git.returncode == 0:
+                subprocess.run(['dvc', 'init'])
+            else:
                 question = "Current directory is not a Git repo. Do you want to initialize DVC anyways?"
                 confirmed = prompt(question)
                 if confirmed:
                     subprocess.run(['dvc', 'init', '--no-scm']) 
                 else:
-                    print("Aborting DVC setup.")
+                    print("Aborting DVC setup. Consider using DVC with Git for proper data version tracking")
                     return False
-            else:
-                subprocess.run(['dvc', 'init'])
             processes = [
                 ['dvc', 'remote', 'add', '-d', remote_name, 's3://dataset'],
                 ['dvc', 'remote', 'modify', remote_name, 'endpointurl', remote_endpoint],
@@ -840,11 +843,11 @@ class StudioClient():
             ]
             for process in processes:
                 subprocess.run(process)
-            print("DVC setup successfully completed.")
+            print("Setting '{}' as a remote endpoint".format(remote_endpoint))
+            print("DVC setup successful.")
             return True
         except Exception as e:
             print("DVC setup failed.\n{}".format(e))
-            print("Make sure DVC is installed on your local system.")
             return False
 
 

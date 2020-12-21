@@ -8,6 +8,7 @@ import random
 import string
 import json
 import uuid
+import subprocess
 
 
 # @click.option('--daemon',
@@ -81,7 +82,6 @@ def train_cmd(ctx, log_off, model, run_id, training_file, version):
     print("Preparing to start training session with '{}' as unique ID.".format(run_id))
     if os.path.isfile(training_file):
         if log_off:
-            import subprocess
             subprocess.run(['python', training_file, run_id])
         else:
             model_exists = search_for_model(ctx, "models", model) 
@@ -97,19 +97,24 @@ def train_cmd(ctx, log_off, model, run_id, training_file, version):
 
 
 @main.command('dvc')
-#@click.option('--init', required=True)
 @click.pass_context
 def dvc_cmd(ctx):
     stackn_config, load_status = get_stackn_config()
     if not load_status:
         print('Failed to load STACKn config.')
     else:
-        if not os.path.isdir('.dvc'):
-            if 'active_project' in stackn_config:
-                client = ctx.obj['CLIENT']
-                client.dvc_init()
+        if 'active_project' in stackn_config:
+            client = ctx.obj['CLIENT']
+            if not os.path.isdir('.dvc'):
+                print("Checking for local DVC installation:")
+                version_control = subprocess.run(["dvc", "version"], stdout=subprocess.PIPE, text=True)
+                if version_control.returncode == 0:
+                    print("\n{}".format(version_control.stdout))
+                    client.dvc_init("install")
+                else:
+                    print("DVC is not installed on your local system. Please install DVC before initializing a dvc setup with 'stackn dvc'")
             else:
-                print("No active project in STACKn config; set an existing project as active using 'stackn set project -p <name of project>'")
+                print('DVC config already exists in current directory.')
         else:
-            print('DVC already installed in current directory.')
+            print("No active project in STACKn config; set an existing project as active using 'stackn set project -p <name of project>'")
         
