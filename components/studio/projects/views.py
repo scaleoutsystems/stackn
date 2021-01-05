@@ -206,8 +206,6 @@ def details(request, user, project_slug):
     except Exception as e:
         logger.error("Failed to get response from {} with error: {}".format(url, e))
 
-    project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
-
     return render(request, template, locals())
 
 
@@ -281,16 +279,25 @@ def publish_project(request, user, project_slug):
 def load_project_activity(request, user, project_slug):
     template = 'project_activity.html'
 
-    time_period = request.GET.get('period')
-    if time_period == 'week':
-        last_week = datetime.today() - timedelta(days=7)
-        project_logs = ProjectLog.objects.filter(created_at__gte=last_week).order_by('-created_at')
-    elif time_period == 'month':
-        last_month = datetime.today() - timedelta(days=30)
-        project_logs = ProjectLog.objects.filter(created_at__gte=last_month).order_by('-created_at')
+    member = None
+    project = None
+    try:
+        member = User.objects.get(username=user)
+        project = Project.objects.get(Q(slug=project_slug), Q(owner=member) | Q(authorized=member))
+    except Exception as e:
+        print(e)
+
+    if member and project:
+        time_period = request.GET.get('period')
+        if time_period == 'week':
+            last_week = datetime.today() - timedelta(days=7)
+            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_week).order_by('-created_at')
+        elif time_period == 'month':
+            last_month = datetime.today() - timedelta(days=30)
+            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_month).order_by('-created_at')
+        else:
+            project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
     else:
-        project_logs = ProjectLog.objects.all().order_by('-created_at')
+        project_logs = ProjectLog.objects.none()
 
     return render(request, template, {'project_logs': project_logs})
-
-
