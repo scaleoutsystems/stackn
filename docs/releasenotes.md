@@ -1,5 +1,15 @@
 # Release Notes
 
+## v0.4.0 (upcoming release)
+
+### New functionality
+
+### Bug fixes
+
+- Project's detailed page is now listing only the related activity logs
+
+### Other
+
 ## v0.3.0
 
 ### New functionality
