@@ -7,6 +7,7 @@
 ### Bug fixes
 
 - Project's detailed page is now listing only the related activity logs
+- Public models are no more shown after the corresponding project has been removed
 
 ### Other
 

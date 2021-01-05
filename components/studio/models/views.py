@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    models = Model.objects.filter(access='PU')
+    models = Model.objects.filter(access='PU', project__isnull=False)
 
     return render(request, 'models_cards.html', locals())
 
