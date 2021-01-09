@@ -35,11 +35,8 @@ def update():
     return c.deploy(request.args, 'upgrade')
 
 
-@app.route('/delete')
+@app.route('/delete', methods=['POST'])
 def delete():
     path = os.getcwd()
     c = Controller(path)
-    release_name = request.args.get('release')
-    options = dict()
-    options['release'] = release_name
-    return c.delete(options)
+    return c.delete(request.json)

@@ -81,6 +81,13 @@ class Controller:
         if "TELEPRESENCE_ROOT" in os.environ:
             volume_root = os.environ["TELEPRESENCE_ROOT"]
         kubeconfig = os.path.join(volume_root, 'root/.kube/config')
+        
+        if 'stackn_cluster' in options:
+            ftemp = open('kubeconfig', 'w')
+            ftemp.write(options['stackn_cluster'])
+            ftemp.close()
+            kubeconfig = 'kubeconfig'
+            del options['stackn_cluster']
         print(type(options))
         print(options)
         # args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']) #.split(' ')

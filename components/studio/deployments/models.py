@@ -63,9 +63,9 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
 def pre_delete_helmresource(sender, instance, using, **kwargs):
     print('Deleting helm resource.')
     if instance.status == 'OK':
-        parameters = {'release': instance.name}
         url = settings.CHART_CONTROLLER_URL + '/delete'
-        retval = requests.get(url, parameters)
+        param_dict = eval(instance.params)
+        retval = requests.post(url, json=param_dict)
         if retval:
             print('Deleted resource: ' + instance.name)
         else:
