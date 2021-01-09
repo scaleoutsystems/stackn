@@ -57,6 +57,7 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
         print('Reason: {}'.format(retval.text))
         print('Status code: {}'.format(retval.status_code))
         instance.status = 'Failed'
+    print("LEAVING PRESAVE")
 
 
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
