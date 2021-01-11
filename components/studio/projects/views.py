@@ -89,23 +89,12 @@ def change_description(request, user, project_slug):
 
 @login_required
 def grant_access_to_project(request, user, project_slug):
-    project = Project.objects.filter(slug=project_slug).first()
+
+    project = Project.objects.get(slug=project_slug)
 
     if request.method == 'POST':
 
-        print(request.POST)
-        # if form.is_valid():
-        # print('Form valid:')
-        # print(form.is_valid())
-
-        selected_users = request.POST.getlist('selected_users') #form.cleaned_data.get('selected_users')
-        print('Selected users:')
-        print(request.POST.getlist('selected_users'))
-        print('....')
-        already_authorized = project.authorized
-        new_authorized = already_authorized + selected_users
-        project.authorized.set(new_authorized)
-        project.save()
+        selected_users = request.POST.getlist('selected_users')
 
         l = ProjectLog(project=project, module='PR', headline='New members',
                        description='{number} new members have been added to the Project'.format(
@@ -117,6 +106,7 @@ def grant_access_to_project(request, user, project_slug):
 
         for selected_user in selected_users:
             user_tmp = User.objects.get(pk=selected_user)
+            project.authorized.add(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
             kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
