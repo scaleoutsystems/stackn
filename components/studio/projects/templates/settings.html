@@ -139,10 +139,11 @@
             <div class="form-group">
                 <select name="selected_users" required="" multiple="" class="form-control" id="id_selected_users">
                     {% for user in platform_users %}
-                    <option value="{{ user.pk }}"
-                            {% if user in project.authorized.all %} style="background-color: #D5F5E3;" {% endif %}>
+                    {% if user not in project.authorized.all %}
+                    <option value="{{ user.pk }}">
                         {{ user.username }}
                     </option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
