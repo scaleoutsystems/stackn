@@ -131,8 +131,11 @@
     {% if user_permissions.add_member %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>Grant access</h5>
-        <p>For granting access to this project, select one or more users from the list below.</p>
+        <p>For granting/revoking access to this project, select one or more users from the list below.</p>
         <p>Hold <b>ctrl</b> or <b>shift</b> (or drag with the mouse) to select more than one.</p>
+        {% if platform_users|length == project.authorized.all|length %}
+        <p>All users have already been added as members to this project.</p>
+        {% else %}
         <form method="POST" action="{% url 'projects:grant_access' request.user project.slug %}">
             {% csrf_token %}
 
@@ -149,6 +152,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Grant</button>
         </form>
+        {% endif %}
     </div>
     {% endif %}
 
