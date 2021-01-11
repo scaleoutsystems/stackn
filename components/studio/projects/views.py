@@ -102,7 +102,9 @@ def grant_access_to_project(request, user, project_slug):
         print('Selected users:')
         print(request.POST.getlist('selected_users'))
         print('....')
-        project.authorized.set(selected_users)
+        already_authorized = project.authorized
+        new_authorized = already_authorized + selected_users
+        project.authorized.set(new_authorized)
         project.save()
 
         l = ProjectLog(project=project, module='PR', headline='New members',

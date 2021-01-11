@@ -1,46 +1,46 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="col-md-11">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Models</h2>
-    </div>
-    <div class="row">
-        {% for model in models %}
-        <div class="card col-md-3" style="width: 18rem; margin: 15px;">
-            <div class="card-body">
-                <h5 class="card-title">{{ model.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ model.project.name }}</h6>
-                {% if model.description %}
-                <p class="card-text" style="margin-bottom: 30px;">
-                    {{ model.description }}
-                </p>
-                {% endif %}
-                {% if request.user.is_authenticated %}
-                    {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
-                    <a href="{% url 'models:details' request.user model.project.slug model.id %}" class="card-link">
-                        Model Card
-                    </a>
-                    {% else %}
-                    <a href="{% url 'models:details_public' model.id %}" class="card-link">
-                        Model Card
-                    </a>
-                    {% endif%}
-                {% else %}
-                <a href="{% url 'models:details_public' model.id %}" class="card-link">
-                    Model Card
-                </a>
-                {% endif%}
-                <p class="card-text" style="margin-top: 10px;">
-                    <small class="text-muted">Uploaded at {{ model.uploaded_at }}</small>
-                </p>
-            </div>
-        </div>
-        {% empty %}
-        <p style="margin-left: 15px;">
-            No publicly published services available.
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+  >
+    <h2>Models - Develop</h2>
+  </div>
+  <div class="row">
+    {% for model in models %}
+    <div class="card col-md-3" style="width: 18rem; margin: 15px">
+      <div class="card-body">
+        <h5 class="card-title">{{ model.name }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ model.project.name }}</h6>
+        {% if model.description %}
+        <p class="card-text" style="margin-bottom: 30px">
+          {{ model.description }}
         </p>
-        {% endfor %}
+        {% endif %} {% if request.user.is_authenticated %} {% if
+        model.project.owner == request.user or request.user in
+        model.project.authorized.all %}
+        <a
+          href="{% url 'models:details' request.user model.project.slug model.id %}"
+          class="card-link"
+        >
+          Model Card
+        </a>
+        {% else %}
+        <a href="{% url 'models:details_public' model.id %}" class="card-link">
+          Model Card
+        </a>
+        {% endif%} {% else %}
+        <a href="{% url 'models:details_public' model.id %}" class="card-link">
+          Model Card
+        </a>
+        {% endif%}
+        <p class="card-text" style="margin-top: 10px">
+          <small class="text-muted">Uploaded at {{ model.uploaded_at }}</small>
+        </p>
+      </div>
     </div>
+    {% empty %}
+    <p style="margin-left: 15px">No publicly published services available.</p>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

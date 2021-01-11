@@ -1,82 +1,111 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="col-md-11">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Projects</h2>
-    </div>
-    <div class="row">
-        {% if not request.user.is_authenticated %}
-        <p class="col-md-12">
-            You need to be
-            <a href="{% url 'oidc_authentication_init' %}">logged in</a>
-            to be able to create a project.
-        </p>
-        {% endif %}
-        {% for project in projects %}
-        <div class="col-sm-6">
-            <div class="card card-project">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">
-                        <span style="font-weight:bolder;">{{ project.name }}</span>
-                    </h5>
-                    <p class="card-text"> {{ project.description }}</p>
-                    <p class="card-text">Project started: {{ project.created_at }}</p>
-                    <p class="card-text">Owner {{ project.owner }}</p>
-                    <p class="card-text">Members
-                        {% for user in project.authorized.all %}
-                        {{ user.username }} ,
-                        {% endfor %}
-                    </p>
-                    <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
-                       style="width: fit-content;">Open project</a>
-                </div>
-            </div>
+  <div
+    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+  >
+    <h2>Projects - Develop</h2>
+  </div>
+  <div class="row">
+    {% if not request.user.is_authenticated %}
+    <p class="col-md-12">
+      You need to be
+      <a href="{% url 'oidc_authentication_init' %}">logged in</a>
+      to be able to create a project.
+    </p>
+    {% endif %} {% for project in projects %}
+    <div class="col-sm-6">
+      <div class="card card-project">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">
+            <span style="font-weight: bolder">{{ project.name }}</span>
+          </h5>
+          <p class="card-text">{{ project.description }}</p>
+          <p class="card-text">Project started: {{ project.created_at }}</p>
+          <p class="card-text">Owner {{ project.owner }}</p>
+          <p class="card-text">
+            Members {% for user in project.authorized.all %} {{ user.username }}
+            , {% endfor %}
+          </p>
+          <a
+            href="{% url 'projects:details' request.user project.slug %}"
+            class="btn mt-auto btn-info"
+            style="width: fit-content"
+            >Open project</a
+          >
         </div>
-        {% endfor %}
-        {% if request.user.is_authenticated %}
-        <div class="col-sm-6">
-            <div class="card card-add-project">
-                <div class="card-body d-flex flex-column">
-                    <form class="needs-validation form-add-project" action="{% url 'projects:create' %}" method="POST">
-                        {% csrf_token %}
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <input type="text" class="form-control" id="name" name="name"
-                                       placeholder="Give your project a name here..." required>
-                                <div class="invalid-feedback">
-                                    Valid project name is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <textarea class="form-control" id="description" name="description" rows="3"
-                                          placeholder="Write a short description here..."></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <input type="text" class="form-control" id="repository" name="repository"
-                                       placeholder="Import from...">
-                            </div>
-                        </div>
-                        {% if request.user.is_authenticated %}
-                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;">
-                            Create project
-                        </button>
-                        {% else %}
-                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;"
-                                disabled>
-                            Create project
-                        </button>
-                        {% endif %}
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
+      </div>
     </div>
+    {% endfor %} {% if request.user.is_authenticated %}
+    <div class="col-sm-6">
+      <div class="card card-add-project">
+        <div class="card-body d-flex flex-column">
+          <form
+            class="needs-validation form-add-project"
+            action="{% url 'projects:create' %}"
+            method="POST"
+          >
+            {% csrf_token %}
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Give your project a name here..."
+                  required
+                />
+                <div class="invalid-feedback">
+                  Valid project name is required.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <textarea
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  rows="3"
+                  placeholder="Write a short description here..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="repository"
+                  name="repository"
+                  placeholder="Import from..."
+                />
+              </div>
+            </div>
+            {% if request.user.is_authenticated %}
+            <button
+              class="btn mt-auto btn-primary"
+              type="submit"
+              style="width: fit-content"
+            >
+              Create project
+            </button>
+            {% else %}
+            <button
+              class="btn mt-auto btn-primary"
+              type="submit"
+              style="width: fit-content"
+              disabled
+            >
+              Create project
+            </button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
