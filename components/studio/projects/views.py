@@ -89,21 +89,12 @@ def change_description(request, user, project_slug):
 
 @login_required
 def grant_access_to_project(request, user, project_slug):
-    project = Project.objects.filter(slug=project_slug).first()
+
+    project = Project.objects.get(slug=project_slug)
 
     if request.method == 'POST':
 
-        print(request.POST)
-        # if form.is_valid():
-        # print('Form valid:')
-        # print(form.is_valid())
-
-        selected_users = request.POST.getlist('selected_users') #form.cleaned_data.get('selected_users')
-        print('Selected users:')
-        print(request.POST.getlist('selected_users'))
-        print('....')
-        project.authorized.set(selected_users)
-        project.save()
+        selected_users = request.POST.getlist('selected_users')
 
         l = ProjectLog(project=project, module='PR', headline='New members',
                        description='{number} new members have been added to the Project'.format(
@@ -115,9 +106,37 @@ def grant_access_to_project(request, user, project_slug):
 
         for selected_user in selected_users:
             user_tmp = User.objects.get(pk=selected_user)
+            project.authorized.add(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
             kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def revoke_access_to_project(request, user, project_slug):
+
+    project = Project.objects.get(slug=project_slug)
+
+    if request.method == 'POST':
+
+        selected_users = request.POST.getlist('selected_users')
+
+        l = ProjectLog(project=project, module='PR', headline='Removed Project members',
+                       description='{number} of members have been removed from the Project'.format(
+                           number=len(selected_users)))
+        l.save()
+
+        if len(selected_users) == 1:
+            selected_users = list(selected_users)
+
+        for selected_user in selected_users:
+            user_tmp = User.objects.get(pk=selected_user)
+            project.authorized.remove(user_tmp)
+            username_tmp = user_tmp.username
+            logger.info('Trying to add user {} to project.'.format(username_tmp))
+            kc.keycloak_remove_role_from_user(project.slug, username_tmp, 'member')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
