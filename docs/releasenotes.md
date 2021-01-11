@@ -11,6 +11,8 @@
 
 ### Other
 
+- New improved functionality for adding users as members to your project
+
 ## v0.3.0
 
 ### New functionality
