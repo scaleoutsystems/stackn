@@ -283,9 +283,45 @@
                 </table>
             </div>
             <div class="col">
+                <form method="POST" id="recent_activity"
+                    recent-activity-url="{% url 'studio_admin:recent_activity' %}" novalidate>
+                    {% csrf_token %}
 
+                    <h4 class="d-flex justify-content-start">
+                        <span style="padding-top: 3px; padding-right: 15px;">
+                            Recent activity
+                        </span>
+                        <select id="id_time_period" class="form-control" style="width: 30%;">
+                            <option value="always">--</option>
+                            <option value="always">Always</option>
+                            <option value="month">Last month</option>
+                            <option value="week">Last week</option>
+                        </select>
+                    </h4>
+                    <div id="activity_logs">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extrascripts %}
+<script>
+    $("#id_time_period").change(function () {
+      var url = $("#recent_activity").attr("recent-activity-url");
+      var period = $(this).val();
+
+      $.ajax({
+        url: url,
+        data: {
+          'period': period
+        },
+        success: function (data) {
+          $("#activity_logs").html(data);
+        }
+      });
+    });
+</script>
 {% endblock %}
