@@ -302,7 +302,7 @@ def load_project_activity(request, user, project_slug):
     project = None
     try:
         member = User.objects.get(username=user)
-        project = Project.objects.get(Q(slug=project_slug), Q(owner=member) | Q(authorized=member))
+        project = Project.objects.get(slug=project_slug)
     except Exception as e:
         print(e)
 
