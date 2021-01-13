@@ -2,8 +2,8 @@ from rest_framework.permissions import BasePermission
 from django.http import QueryDict
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
-    DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer
+    DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, ResourceSerializer, \
+    DeploymentDefinitionSerializer, HelmResource
 import modules.keycloak_lib as keylib
 
 
@@ -29,3 +29,7 @@ class ProjectPermission(BasePermission):
 
         print('Is authorized: {}'.format(is_authorized))
         return is_authorized
+
+class AdminPermission(BasePermission):
+    def has_permission(self, request, view):
+        return True

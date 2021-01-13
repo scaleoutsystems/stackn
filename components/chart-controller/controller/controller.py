@@ -54,7 +54,7 @@ class Controller:
             print('Release option not specified.')
             return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
-        args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
+        args = ['helm', 'upgrade', '--install', '--kubeconfig', kubeconfig, options['release'], chart]
  
         for key in options:
             try:

@@ -89,6 +89,21 @@ def keycloak_init():
         print('Failed to init Keycloak auth')
         return False
 
+def keycloak_create_user(kc, user_data):
+    users_url =  '{}/admin/realms/{}/users'.format(kc.admin_url, kc.realm)
+    res = r.post(users_url,
+                 json=user_data,
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
+    if res:
+        print("Created user {}.".format(user_data['email']))
+        return True
+    else:
+        print('Failed to create user {}.'.format(user_data['email']))
+        print('Status code: '+str(res.status_code))
+        print(res.text)
+        return False
+
 def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expired=True):
     if not ('oidc_access_token' in request.session):
         logger.warn('No access token in request session -- unable to authorize user.')

@@ -8,9 +8,9 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from .APIpermissions import ProjectPermission
+from .APIpermissions import ProjectPermission, AdminPermission
 from deployments.helpers import build_definition
-from projects.helpers import create_project_resources
+from projects.helpers import create_project_resources, delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
@@ -21,7 +21,7 @@ from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer,
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
     DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
     DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer, \
-    ExperimentSerializer, Experiment
+    ExperimentSerializer, Experiment, ResourceSerializer, HelmResource
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -445,6 +445,64 @@ class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retriev
             print(err)
             return HttpResponse('Failed to delete volume', 400)
 
+class ResourceList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+
+    authentication_classes = ()
+    permission_classes = (AdminPermission, )
+    serializer_class = ResourceSerializer
+    filter_backends = [DjangoFilterBackend]
+    # queryset =  HelmResource.objects.all()
+    # filterset_fields = ['id', 'cluster']
+
+    def get_queryset(self):
+        print(self.request.query_params.get('cluster'))
+        resources = HelmResource.objects.filter(cluster=self.request.query_params.get('cluster'))
+        return resources
+
+    def create(self, request, *args, **kwargs):
+        resource_ids = request.data.keys()
+        print("Updating resource info for: ")
+        for resource_id in resource_ids:
+            status = request.data[resource_id]['ready']
+            info = request.data[resource_id]['info'] 
+            HelmResource.objects.filter(id=resource_id).update(status=status, info=info)
+            print(resource_id)
+        
+        return HttpResponse('ok', 200)
+
+    @action(detail=False, methods=['post'], permission_classes=[AdminPermission])
+    def delete_resources(self, request):
+        users = request.data['users']
+        for user in users:
+            resources = HelmResource.objects.filter(username=user)
+            for resource in resources:
+                resource.delete()
+
+        return HttpResponse('Ok', status=200)
+
+    
+
+class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+
+    authentication_classes = ()
+    permission_classes = (AdminPermission, )
+    serializer_class = UserSerializer
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        Users = Users.objects.all()
+        return resources
+
+    def create(self, request, *args, **kwargs):
+        users = request.data['users']
+        for user in users:
+            kcobj = kc.keycloak_init()
+            kc.keycloak_create_user(kcobj, user_data=user)
+            User.objects.create_user(user['email'], email=user['email'])
+        return HttpResponse('ok', 200)
+
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission, )
@@ -534,3 +592,61 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         if success:
             project.save()
             return HttpResponse('Ok', status=200)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def create_projects_bulk(self, request):
+        users = request.data['users']
+
+        for user in users:
+            owner = User.objects.get(username=user['username'])
+
+            # Check if project with the same  name already exists, and if so, don't create
+            proj_exists = Project.objects.filter(owner=owner, name=user['project_name']).count()
+            
+            if proj_exists == 0:
+                project = Project.objects.create_project(name=user['project_name'],
+                                                        owner=owner,
+                                                        description=user['description'],
+                                                        repository=user['repository'],
+                                                        cluster=user['cluster'])
+                success = True
+                try:
+                    create_project_resources(project, user['username'], user['cluster'], repository=user['repository'])
+                except Exception as e:
+                    print("ERROR: could not create project resources")
+                    print(e)
+                    success = False
+                    # return HttpResponse('Ok', status=400)
+
+                if success:
+                    project.save()
+                    print("Created project {} for user {}.".format(user['project_name'], user['username']))
+                    # return HttpResponse('Ok', status=200)
+        
+        return HttpResponse('Ok', status=200)
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def delete_projects(self, request):
+        users = request.data['users']
+        for user in users:
+            owner = User.objects.get(username=user)
+            projects = Project.objects.filter(owner=owner)
+
+            for project in projects:
+
+                retval = delete_project_resources(project)
+
+                if not retval:
+                    print("could not delete!")
+
+
+                print("PROJECT RESOURCES DELETED SUCCESFULLY!")
+
+                models = Model.objects.filter(project=project)
+                for model in models:
+                    model.status = 'AR'
+                    model.save()
+
+                project.delete()
+
+        return HttpResponse('Ok', status=200)

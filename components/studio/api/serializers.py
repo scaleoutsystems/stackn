@@ -3,11 +3,12 @@ from rest_framework.serializers import ModelSerializer
 from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
 from projects.models import Project, Volume
-from deployments.models import DeploymentInstance, DeploymentDefinition
+from deployments.models import DeploymentInstance, DeploymentDefinition, HelmResource
 from datasets.models import Dataset, FileModel
 from experiments.models import Experiment
 from labs.models import Session
 from django.contrib.auth.models import User
+
 class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
@@ -98,3 +99,8 @@ class ExperimentSerializer(ModelSerializer):
     class Meta:
         model = Experiment
         fields = ['id', 'username', 'command', 'environment', 'project', 'schedule', 'created_at', 'uploaded_at']
+
+class ResourceSerializer(ModelSerializer):
+    class Meta:
+        model = HelmResource
+        fields = ['id', 'name', 'cluster', 'namespace', 'chart', 'created', 'updated']

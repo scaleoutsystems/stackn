@@ -102,3 +102,21 @@ def create_dataset(ctx, name, directory=[], filenames=[], release_type='minor', 
                           directory,
                           description=description,
                           bucket=bucket)
+
+@create_cmd.command('users')
+@click.option('-f', '--userfile', required=True)
+@click.pass_context
+def create_users_cmd(ctx, userfile):
+    client = ctx.obj['CLIENT']
+    client.create_users(userfile)
+
+@create_cmd.command('projects')
+@click.option('-f', '--userfile', required=True)
+@click.option('-b', '--project-name', required=True)
+@click.option('-c', '--cluster', required=False, default="default")
+@click.pass_context
+def create_projects_cmd(ctx, userfile, project_name, cluster):
+    client = ctx.obj['CLIENT']
+    client.create_projects(userfile, project_name, cluster)
+
+

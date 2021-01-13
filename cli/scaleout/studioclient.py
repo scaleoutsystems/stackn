@@ -5,6 +5,9 @@ import subprocess
 import requests
 import json
 import uuid
+import pandas
+import secrets
+import string
 from urllib.parse import urljoin
 from datetime import datetime
 from .details import get_run_details
@@ -81,6 +84,9 @@ class StudioClient():
         self.endpoints['dataset'] = self.api_url+'/projects/{}/dataset'
         self.endpoints['volumes'] = self.api_url+'/projects/{}/volumes/'
         self.endpoints['jobs'] = self.api_url+'/projects/{}/jobs/'
+        self.endpoints['resources'] = self.api_url+'/resources/'
+        self.endpoints['admin'] = dict()
+        self.endpoints['admin']['users'] = self.api_url+'/admin/users/'
         self.reports_api = self.api_url+'/reports'
         self.endpoints['projects'] = self.api_url+'/projects/'
         self.generators_api = self.api_url+'/generators' #endpoints['generators']
@@ -134,6 +140,112 @@ class StudioClient():
             return None
         else:
             return json.loads(r.content)
+
+
+    ### Admin API ###
+
+    def create_users(self, userfile):
+        users = pandas.read_csv(userfile)
+        user_api = self.endpoints['admin']['users']
+        data = dict()
+        data['users'] = list()
+        alphabet = string.ascii_letters + string.digits
+        msg_out = dict()
+        for index, row in users.iterrows():
+            email = row['Email']
+            userisenabled = True
+            emailisverified = True
+            password = ''.join(secrets.choice(alphabet) for i in range(20))
+            passistemporary = False
+            user_data = {
+                "username": email,
+                "email": email,
+                "enabled": userisenabled,
+                "emailVerified": emailisverified,
+                "credentials": [{
+                    "type": "password",
+                    "value": password,
+                    "temporary": passistemporary
+                }]
+            }
+            msg_out[email] = password
+            data['users'].append(user_data)
+
+        res = requests.post(user_api, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Created users.')
+            print(msg_out)
+        else:
+            print('Failed to create users.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
+    def create_projects(self, userfile, project_name, cluster):
+        clusters = cluster.split(',')
+        users = pandas.read_csv(userfile)
+
+        num_clusters = len(clusters)
+        num_users = len(users.index)
+
+        users_per_cluster = int(round(num_users/num_clusters)) 
+
+        url = self.endpoints['projects']+'create_projects_bulk/'
+        data = dict()
+        data['users'] = list()
+        i = 0
+        j = 0
+        for index, row in users.iterrows():
+            if i >= users_per_cluster and j < num_clusters-1:
+                j = j+1
+                i = 0
+            user = dict()
+            user['project_name'] = project_name
+            user['username'] = row['Email']
+            user['description'] = ""
+            user['repository'] = ""
+            user['cluster'] = clusters[j]
+            data['users'].append(user)
+            i = i+1
+
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Created projects.')
+        else:
+            print('Failed to create projects.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
+    def delete_projects(self, userfile):
+        users = pandas.read_csv(userfile)
+        url = self.endpoints['projects']+'delete_projects/'
+        data = dict()
+        data['users'] = list()
+        for index, row in users.iterrows():
+            data['users'].append(row['Email'])
+
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Deleted projects.')
+        else:
+            print('Failed to delete projects.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
+    def delete_resources(self, userfile):
+        users = pandas.read_csv(userfile)
+        url = self.endpoints['resources']+'delete_resources/'
+        data = dict()
+        data['users'] = list()
+        for index, row in users.iterrows():
+            data['users'].append(row['Email'])
+
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Deleted resources.')
+        else:
+            print('Failed to delete resources.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
 
 
     ### Projects api  ####

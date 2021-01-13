@@ -236,10 +236,10 @@ def delete(request, user, project_slug):
 
     print("PROJECT RESOURCES DELETED SUCCESFULLY!")
 
-    models = Model.objects.filter(project=project)
-    for model in models:
-        model.status = 'AR'
-        model.save()
+    # models = Model.objects.filter(project=project)
+    # for model in models:
+    #     model.status = 'AR'
+    #     model.save()
     project.delete()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})

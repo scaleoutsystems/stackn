@@ -20,11 +20,12 @@ class HelmResource(models.Model):
     params = models.CharField(max_length=10000)
     username = models.CharField(max_length=512)
     status = models.CharField(max_length=20)
+    info = models.CharField(max_length=10000, default="")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{}".format(self.name)
+        return "{} ({})".format(self.name, self.status)
 
 
 @receiver(pre_save, sender=HelmResource, dispatch_uid='helmresource_pre_save_signal')
@@ -32,8 +33,8 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     update = HelmResource.objects.filter(name=instance.name)
     action = 'deploy'
     if update:
-        action = 'upgrade'
-
+        instance.params = eval(instance.params)
+    
     try:
         cluster = Cluster.objects.get(name=instance.cluster)
         instance.namespace = cluster.namespace
@@ -51,7 +52,7 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
     if retval:
         print('Resource: ' + instance.name)
         print('Action: ' + action)
-        instance.status = 'OK'
+        instance.status = False
     else:
         print('Failed to deploy resource: ' + instance.name)
         print('Reason: {}'.format(retval.text))
@@ -63,14 +64,14 @@ def pre_save_helmresource(sender, instance, using, **kwargs):
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
 def pre_delete_helmresource(sender, instance, using, **kwargs):
     print('Deleting helm resource.')
-    if instance.status == 'OK':
-        url = settings.CHART_CONTROLLER_URL + '/delete'
-        param_dict = eval(instance.params)
-        retval = requests.post(url, json=param_dict)
-        if retval:
-            print('Deleted resource: ' + instance.name)
-        else:
-            print('Failed to delete resource: ' + instance.name)
+    # if instance.status == 'OK':
+    url = settings.CHART_CONTROLLER_URL + '/delete'
+    param_dict = eval(instance.params)
+    retval = requests.post(url, json=param_dict)
+    if retval:
+        print('Deleted resource: ' + instance.name)
+    else:
+        print('Failed to delete resource: ' + instance.name)
 
 
 class DeploymentDefinition(models.Model):

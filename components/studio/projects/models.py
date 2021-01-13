@@ -109,7 +109,7 @@ class ProjectManager(models.Manager):
 class Project(models.Model):
     objects = ProjectManager()
 
-    name = models.CharField(max_length=512, unique=True)
+    name = models.CharField(max_length=512)
     cluster = models.CharField(max_length=512, default='Default')
     description = models.TextField(null=True, blank=True)
     slug = models.CharField(max_length=512, unique=True)
@@ -127,7 +127,7 @@ class Project(models.Model):
     repository_imported = models.BooleanField(default=False)
 
     def __str__(self):
-        return "Name: {} Description: {}".format(self.name, self.description)
+        return "Name: {} ({})".format(self.name, self.owner)
 
     clone_url = models.CharField(max_length=512, null=True, blank=True)
 

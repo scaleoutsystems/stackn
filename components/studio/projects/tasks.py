@@ -49,6 +49,7 @@ def create_helm_resources_task(project_slug, project_key, project_secret, cluste
     print(cluster.name)
     
     parameters = {'release': str(project_slug),
+                  'appname': str(project_slug),
                   'chart': 'project',
                   'minio.access_key': decrypt_key(project_key),
                   'minio.secret_key': decrypt_key(project_secret),

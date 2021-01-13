@@ -52,6 +52,22 @@ def delete_volume_cmd(ctx, name):
     client = ctx.obj['CLIENT']
     client.delete_volume(name)
 
+@delete_cmd.command('projects')
+@click.option('-f', '--userfile', required=True)
+@click.pass_context
+def delete_projects(ctx, userfile):
+    """ Delete a volume """
+    client = ctx.obj['CLIENT']
+    client.delete_projects(userfile)
+
+@delete_cmd.command('resources')
+@click.option('-f', '--userfile', required=True)
+@click.pass_context
+def delete_resources(ctx, userfile):
+    """ Delete a volume """
+    client = ctx.obj['CLIENT']
+    client.delete_resources(userfile)
+
 # @delete_cmd.command('deployments')
 # @click.pass_context
 # def delete_deployment_cmd(ctx):

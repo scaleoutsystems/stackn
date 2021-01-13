@@ -26,7 +26,8 @@ setup(
         "python-slugify",
         "prettytable",
         "pyjwt",
-        "psutil"
+        "psutil",
+        "pandas"
     ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,

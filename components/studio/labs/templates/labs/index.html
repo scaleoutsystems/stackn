@@ -59,33 +59,48 @@
                     <thead>
 
                     <tr>
-                        <th>#</th>
+                        <th></th>
                         <th>Ingress</th>
+                        <th>Status</th>
                         <th>Image</th>
-                        <th>Settings</th>
+                        
+                        <!-- <th>Settings</th>
                         <th>Chart</th>
-                        <th>Helm Repository</th>
+                        <th>Helm Repository</th> -->
+                        
                         <th>Created</th>
-                        <th>Updated</th>
+                        <!-- <th>Updated</th> -->
                     </tr>
                     </thead>
                     <tbody>
                     {% for session in sessions %}
                         <tr>
+                            {% if session.helmchart.status == "True" %}
                             <td>
-                                {{ session.id }}
+                                <!-- {{ session.id }} -->
                                 <a href="{% url 'labs:delete' request.user project.slug session.id %}">
                                     <button class="btn-sm btn-warning">Delete</button>
                                 </a>
                             </td>
                             <td><a href="http://{{ session.slug }}.{{ url }}"
                                    target="_blank">{{ session.slug }}.{{ url }}</a></td>
-                            <td>{{ session.image }}</td>
-                            <td>{{ session.settings }}</td>
+                            <td>Ready</td>
+                            {% else %}
+                            <td>
+                                <a href="{% url 'labs:delete' request.user project.slug session.id %}">
+                                <button class="btn-sm btn-warning">Delete</button>
+                                </a>
+                            </td>
+                            <td>{{ session.helmchart.info }}</td>
+                            <td>Not ready</td>
+                            {% endif %}
+                            <td>{{ session.environment_slug }}</td>
+                            
+                            <!-- <td>{{ session.settings }}</td>
                             <td>{{ session.chart }}</td>
-                            <td>{{ session.helm_repo }}</td>
+                            <td>{{ session.helm_repo }}</td> -->
                             <td>{{ session.created_at }}</td>
-                            <td>{{ session.updated_at }}</td>
+                            <!-- <td>{{ session.updated_at }}</td> -->
                         </tr>
                     {% endfor %}
                     </tbody>
