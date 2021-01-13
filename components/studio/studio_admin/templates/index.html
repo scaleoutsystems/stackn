@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-11">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Studio administration</h2>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <table class="table studio-table">
+                    <thead class="studio-table-header">
+                        <tr>
+                            <th scope="col">Authorization and authentication</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Groups</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#">
+                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}" alt="pencil">
+                                        Change
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Users</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#">
+                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}" alt="pencil">
+                                        Change
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

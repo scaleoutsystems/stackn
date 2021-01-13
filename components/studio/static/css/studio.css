@@ -163,3 +163,26 @@ h2 {
     width: 100%;
     background-color: white;
 }
+
+/*
+ * Tables
+ */
+
+.studio-table {
+    color: #424949;
+}
+
+.studio-table-header {
+    background-color: #79aec8;
+    color: #fdfefe;
+}
+
+.studio-table-actions-column {
+    text-align: right;
+}
+
+.studio-table-icon {
+    margin-right: 3px;
+    width: 15px;
+    height: 15px;
+}
