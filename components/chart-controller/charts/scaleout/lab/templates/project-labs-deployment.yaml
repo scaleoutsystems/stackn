@@ -105,7 +105,7 @@ spec:
             {{ end }}
         volumeMounts:
         - name: homedir
-          mountPath: /home/jovyan/common
+          mountPath: /home/jovyan/
         - name: dataset
           mountPath: /home/jovyan/dataset/
           mountPropagation: HostToContainer
