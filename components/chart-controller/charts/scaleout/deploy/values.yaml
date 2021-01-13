@@ -1,0 +1,60 @@
+replicas: 1
+appname: app-name
+namespace: default
+visibility: private
+
+resources:
+  limits:
+    cpu: 1000
+    memory: 4096
+  requests:
+    cpu: 700
+    memory: 2048
+
+global:
+  domain: global.domain
+
+registry:
+  secure: False
+  host: stack-docker-registry:5000
+
+imagePullSecret: regcred
+
+project:
+  slug: project-slug
+
+deployment:
+  version: version
+  name: deployment-name
+  endpoint: deployment-endpoint
+  path: deployment-path
+  port: 8501
+
+context:
+  image: context-image
+
+model:
+  bucket: models
+  file: model.tar.gz  
+
+minio:
+  mount: false
+  host: minio-host
+  access_key: access-key
+  secret_key: secret-key
+  buckets:
+    - dataset
+    - models
+
+
+gatekeeper:
+  realm: demo
+  client_secret: 15982a99-cf3b-4e65-82ab-03d7df84a25a
+  client_id: project_notebook
+  auth_endpoint: keycloak.domain/auth/realms
+  skip_tls: 0
+  rules: "default"
+
+extraEnv: |
+  - name: LICENSE_FILE
+    value: SOMESTRING

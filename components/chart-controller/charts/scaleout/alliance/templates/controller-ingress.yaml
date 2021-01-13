@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+  name: {{ .Release.Name }}-controller-ingress
+  namespace: default
+spec:
+  rules:
+    - host: {{ .Release.Name }}.controller.{{ .Values.global.domain }}
+      http:
+        paths:
+        - backend:
+            serviceName: {{ .Release.Name }}-controller
+            servicePort: grpc
+  tls:
+    # This secret must exist beforehand
+    # The cert must also contain the subj-name fortune-teller.stack.build
+    # https://github.com/kubernetes/ingress-nginx/blob/master/docs/examples/PREREQUISITES.md#tls-certificates
+    - secretName: tls-secret
+      hosts:
+        - {{ .Release.Name }}.controller.{{ .Values.global.domain }}

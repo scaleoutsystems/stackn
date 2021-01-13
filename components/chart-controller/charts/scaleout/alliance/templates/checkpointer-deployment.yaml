@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 ()
+  creationTimestamp: null
+  labels:
+    name: {{ .Release.Name }}-checkpointer
+  name: {{ .Release.Name }}-checkpointer
+spec:
+  replicas: 1
+  strategy: {}
+  selector:
+    matchLabels:
+      name: {{ .Release.Name }}-checkpointer
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 ()
+      creationTimestamp: null
+      labels:
+        name: {{ .Release.Name }}-checkpointer
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      initContainers:
+        - name: wait-for-delay
+          image: busybox:1.28
+          command: ['sh', '-c', "sleep 20"]
+      containers:
+      - args:
+        - python
+        - monitor.py
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: MONITOR_HOST
+          value: "{{ .Release.Name }}-controller"
+        - name: MONITOR_PORT
+          value: "12080"
+        - name: USER
+          value: "{{ .Values.alliance.user }}"
+        - name: PROJECT
+          value: "{{ .Values.alliance.project }}"
+        - name: ALLIANCE_UID
+          value: "{{ .Release.Name }}"
+        - name: API_URL
+          value: {{ .Values.alliance.apiUrl }}
+        image: "{{ .Values.checkpointer.image.repository }}:{{ .Values.checkpointer.image.tag }}"
+        imagePullPolicy: Always
+        name: {{ .Release.Name }}-checkpointer
+        #ports:
+        #- containerPort: 12080
+        #  name: grpc
+        resources: {}
+      restartPolicy: Always
+
+status: {}

@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}-keycloak-proxy-svc
+            servicePort: 80
+  tls:
+    - secretName: {{ .Values.ingress.secretName }}
+      hosts:
+        - {{ .Release.Name }}.{{ .Values.global.domain }}

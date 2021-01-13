@@ -1,0 +1,17 @@
+replicas: 1
+appname: app-name
+namespace: default
+image: scaleoutsystems/stackn-monitor:latest
+
+resources:
+  limits:
+    cpu: 500
+    memory: 1024
+  requests:
+    cpu: 500
+    memory: 1024
+
+resources_url: resources_url
+cluster_name: cluster_name
+cluster_config: cluster_config
+poll_pause: 3

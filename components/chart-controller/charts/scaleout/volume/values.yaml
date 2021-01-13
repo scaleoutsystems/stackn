@@ -1,0 +1,4 @@
+name: project-volume-name
+accessModes: ReadWriteMany
+storageClass: default
+size: 2Gi

@@ -1,0 +1,73 @@
+{{ if eq .Values.iscron 1 }}
+apiVersion: batch/v1beta1
+kind: CronJob
+{{ else }}
+apiVersion: batch/v1
+kind: Job
+{{ end }}
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    project: {{ .Values.project.slug }}
+    type: cronjob
+spec:
+{{ if eq .Values.iscron 1 }}
+  schedule: "{{ .Values.cronjob.schedule }}"
+  jobTemplate:
+    spec:
+{{ end }}
+      template:
+        metadata:
+          labels:
+            app: {{ .Release.Name }}
+            project: {{ .Values.project.slug }}
+            type: cronjob
+        spec:
+          {{ if .Values.resources.gpu.enabled }}
+          affinity:
+            {{ .Values.affinity | toYaml | nindent 12 | trim }}
+          {{ end }}
+          restartPolicy: OnFailure
+          containers:
+          - name: cronjob
+            image: {{ .Values.image }}
+            command: {{ .Values.command }}
+            volumeMounts:
+            - name: jobstorage
+              mountPath: /home/app/
+            - name: stacknconfig
+              mountPath: /home/jovyan/.scaleout/
+            - name: projectconfig
+              mountPath: /home/jovyan/.scaleout/stackn/projects/
+            - name: userconfig
+              mountPath: /home/jovyan/.scaleout/stackn/
+              readOnly: true
+            imagePullPolicy: Always  
+            resources:
+              limits:
+                cpu: {{ .Values.resources.limits.cpu }}
+                memory: {{ .Values.resources.limits.memory }}
+                {{if .Values.resources.gpu.enabled }}
+                nvidia.com/gpu: {{ .Values.resources.requests.gpu }}
+                {{ end }}
+              requests:
+                cpu: {{ .Values.resources.requests.cpu }}
+                memory: {{ .Values.resources.requests.memory }}
+                {{if .Values.resources.gpu.enabled }}
+                nvidia.com/gpu: {{ .Values.resources.requests.gpu }}
+                {{ end }}
+          volumes:
+          - name: jobstorage
+            persistentVolumeClaim:
+              claimName: {{ .Values.project.slug }}-project-files
+          - name: stacknconfig
+            configMap:
+              name: {{ .Values.project.slug }}-project-settings-configmap
+          - name: projectconfig
+            configMap:
+              name: {{ .Release.Name }}-project-stackn-settings
+          - name: userconfig
+            secret:
+              secretName: {{ .Release.Name }}-project-user-settings

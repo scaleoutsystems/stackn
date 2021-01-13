@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appname }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appname }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8501"
+      labels:
+        app: {{ .Values.appname }}
+        type: monitor
+    spec:
+      volumes:
+      - name: config
+        secret:
+          secretName: monitor-secret
+      containers:
+      - name: monitor
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}m
+            memory: {{ .Values.resources.limits.memory }}Mi
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}m
+            memory: {{ .Values.resources.requests.memory }}Mi
+        volumeMounts:
+        - name: config
+          mountPath: "/.kube/"
+          readOnly: true
+        env:
+          - name: RESOURCES_URL
+            value: {{ .Values.resources_url }}
+          - name: CLUSTER_NAME
+            value: {{ .Values.cluster_name }}
+          - name: POLL_PAUSE
+            value: "{{ .Values.poll_pause }}"
+        image: {{ .Values.image }}
+        imagePullPolicy: Always

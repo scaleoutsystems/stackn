@@ -40,15 +40,15 @@ class Controller:
             kubeconfig = 'kubeconfig'
             del options['stackn_cluster']
 
-        if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
-            if not 'chart' in options:
-                print('Chart option not specified.')
-                return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
-            chart = 'charts/scaleout/'+options['chart']
-        else:
-            refresh_charts(self.branch)
-            fname = self.branch.replace('/', '-')
-            chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
+        # if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
+        if not 'chart' in options:
+            print('Chart option not specified.')
+            return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
+        chart = 'charts/scaleout/'+options['chart']
+        # else:
+        #     refresh_charts(self.branch)
+        #     fname = self.branch.replace('/', '-')
+        #     chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
 
         if not 'release' in options:
             print('Release option not specified.')

@@ -1,0 +1,63 @@
+# Default values for alliance-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+model: init-model-id
+
+global:
+  domain: alliance.scaleout.se
+
+alliance:
+  user: morgan
+  project: test
+  apiUrl: "http://studio:8080"
+
+minio:
+  access_key: minio
+  secret_key: minio123
+
+controller:
+  image:
+    repository: scaleoutsystems/fedn-controller
+    tag: master
+    pullPolicy: Always
+
+monitor:
+  image:
+    repository: scaleoutsystems/fedn-monitor
+    tag: master
+    pullPolicy: Always
+
+orchestrator:
+  image:
+    repository: scaleoutsystems/fedn-orchestrator
+    tag: master
+    pullPolicy: Always
+
+checkpointer:
+  image:
+    repository: scaleoutsystems/fedn-checkpointer
+    tag: master
+    pullPolicy: Always
+
+#imagePullSecrets:
+#  - name: regcred
+
+nameOverride: ""
+fullnameOverride: ""
+
+
+service:
+  type: NodePort
+  controller: 30398
+  minio: 30397
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

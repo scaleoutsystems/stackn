@@ -1,0 +1,41 @@
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-orchestrator-configmap
+data:
+  # Configuration values can be set as key-value properties
+  project.yaml: |-
+    auth_url: http://{{ .Release.Name }}.{{ .Values.global.domain }}/api/api-token-auth
+    username: orchestrator
+    access_key: {{ .Values.minio.access_key | quote}}
+    password: {{ .Values.minio.secret_key | quote}}
+    so_domain_name: {{ .Values.global.domain | quote}}
+
+    Project:
+      project_name: {{ .Values.alliance.project | quote}}
+      project_id:
+
+    Alliance:
+      alliance_name: testalliance
+      controller_host: {{ .Release.Name }}-controller
+      controller_port: 12080
+      #{{ .Values.service.controller | quote }}
+
+      Repository:
+        minio_host: {{ .Values.alliance.project }}-minio.{{ .Values.global.domain }}
+        minio_port: 443
+        minio_bucket: alliance
+        minio_access_key: {{ .Values.minio.access_key | quote}}
+        minio_secret_key: {{ .Values.minio.secret_key | quote}}
+        minio_secure_mode: True
+
+      Member:
+        name: orchestrator
+        entry_points:
+          predict:
+            command: python3 predict.py
+          train:
+            command: python3 train.py
+          validate:
+            command: python3 validate.py

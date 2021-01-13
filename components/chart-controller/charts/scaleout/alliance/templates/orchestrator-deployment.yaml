@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 ()
+  creationTimestamp: null
+  labels:
+    name: {{ .Release.Name }}-orchestrator
+  name: {{ .Release.Name }}-orchestrator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: {{ .Release.Name }}-orchestrator
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 ()
+      creationTimestamp: null
+      labels:
+        name: {{ .Release.Name }}-orchestrator
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      #securityContext:
+      #  runAsUser: 65533  # to allow read of ssh key
+        #runAsUser: 1000
+        #runAsGroup: 3000
+        #fsGroup: 2000
+      #initContainers:
+      #  - name: wait-for-delay
+      #    image: busybox:1.28
+      #    command: ['sh', '-c', "sleep {{ .Values.sleep }}"]
+      containers:
+      - name: {{ .Release.Name }}-orchestrator
+        image: "{{ .Values.orchestrator.image.repository }}:{{ .Values.orchestrator.image.tag }}"
+        imagePullPolicy: Always
+        #workingDir: /app
+        command: ['sh','run.sh']
+        #args:
+        #- fedn
+        #- run
+        #- fedavg
+        #- -s
+        #- {{ .Values.model }}
+        #- -r
+        #- {{ .Values.rounds | quote }}
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        volumeMounts:
+        - name: project
+          mountPath: /app/project.yaml
+          subPath: project.yaml
+
+        #securityContext:
+        #  runAsUser: 0
+          #allowPrivilegeEscalation: false
+      restartPolicy: Always
+      volumes:
+      - name: project
+        configMap:
+          name: {{ .Release.Name }}-orchestrator-configmap
+          items:
+          - key: project.yaml
+            path: project.yaml
+
+
+status: {}

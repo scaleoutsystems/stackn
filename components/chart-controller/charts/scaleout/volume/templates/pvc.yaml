@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: {{ .Release.Name }}-project-files
+  name: {{ .Values.name }}
+spec:
+  accessModes:
+  - {{ .Values.accessModes }}
+  storageClassName: {{ .Values.storageClass | default "default" }}
+  resources:
+    requests:
+      storage: {{ .Values.size }}
+status: {}

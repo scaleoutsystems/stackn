@@ -1,0 +1,159 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.appname }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        app: {{ .Values.appname }}
+        project: {{ .Values.project.name }}
+        type: lab
+    spec:
+    {{ if .Values.labs.gpu.enabled }}
+      affinity:
+        {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      #securityContext:
+      #  runAsUser: 65533  # to allow read of ssh key
+      containers:
+      - name: gatekeeper
+        image: keycloak/keycloak-gatekeeper:latest #quay.io/gambol99/keycloak-proxy:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+      - name: s3-sync
+        image: scaleoutsystems/s3-sync:latest
+        imagePullPolicy: Always
+        securityContext:
+          #runAsUser: 1000
+          #runAsGroup: 100
+          privileged: true
+          capabilities:
+            add:
+              - SYS_ADMIN
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        #lifecycle:
+        #  postStart:
+        #    exec:
+        #      command: ["mkdir","/home/jovyan/dataset"]
+        env:
+        - name: BUCKET
+          value: {{ .Values.minio.bucket | default "dataset" }}
+        - name: MOUNTPOINT
+          value: /data
+        - name: REPOURL
+          value: "http://{{ .Values.project.name }}-minio:9000"
+        - name: AWSACCESSKEYID
+          value: {{ .Values.minio.access_key }}
+        - name: AWSSECRETACCESSKEY
+          value: {{ .Values.minio.secret_key }}
+        volumeMounts:
+        - name: dataset
+          mountPath: /data
+          mountPropagation: Bidirectional
+        - name: devfuse
+          mountPath: /dev/fuse
+      - name: notebook
+        image: {{ .Values.labs.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_ENABLE_LAB
+          value: "yes"
+        - name: NOTEBOOK_PASSWD_SHA1
+          value: ""
+        - name: NOTEBOOK_TOKEN
+          value: ""
+        resources:
+          requests:
+            memory: {{ .Values.labs.resources.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.labs.resources.requests.cpu | default "200m" }}
+            {{if .Values.labs.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+          limits:
+            memory: {{ .Values.labs.resources.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.labs.resources.limits.cpu | default "200m" }}
+            {{if .Values.labs.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+        volumeMounts:
+        - name: homedir
+          mountPath: /home/jovyan/common
+        - name: dataset
+          mountPath: /home/jovyan/dataset/
+          mountPropagation: HostToContainer
+        - name: jupyterconf
+          mountPath: /etc/jupyter/jupyter_notebook_config.py
+          subPath: jupyter_notebook_config.py
+        - name: stacknconfig
+          mountPath: /home/jovyan/.scaleout/
+        - name: projectconfig
+          mountPath: /home/jovyan/.scaleout/stackn/projects/
+        - name: userconfig
+          mountPath: /home/jovyan/.scaleout/stackn/
+          readOnly: true
+        - name: cli-working-dir
+          mountPath: /home/.scaleout/
+        {{- with .Values.extraVolumeMounts }}
+        {{- tpl . $ | nindent 8 }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: true
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+      - name: dataset
+        emptyDir: {}
+      - name: homedir
+        persistentVolumeClaim:
+          claimName: {{ .Values.project.name }}-project-files
+      - name: stacknconfig
+        configMap:
+          name: {{ .Values.project.name }}-project-settings-configmap
+      - name: projectconfig
+        configMap:
+          name: {{ .Release.Name }}-project-labs-stackn-settings
+      - name: userconfig
+        secret:
+          secretName: {{ .Release.Name }}-project-labs-user-settings
+      - name: cli-working-dir
+        emptyDir: {}
+      - name: devfuse
+        hostPath:
+          path: /dev/fuse
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      - name: jupyterconf
+        configMap:
+          name: {{ .Release.Name }}-jupyter-configmap
+      {{- with .Values.extraVolumes }}
+      {{- tpl . $ | nindent 6 }}
+      {{- end }}

@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appname }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appname }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8501"
+      labels:
+        app: {{ .Values.appname }}
+        project: {{ .Values.project.slug }}
+        type: deployment
+    spec:
+      volumes:
+      {{ if .Values.minio.mount }}
+      # - name: devfuse
+      #   hostPath:
+      #     path: /dev/fuse
+      {{- range $bucket := .Values.minio.buckets }}
+      - name: {{ $bucket }}
+        emptyDir: {}
+      {{- end }}
+      {{ end }}
+      - name: secret-vol
+        secret:
+          secretName: serve-secret
+          optional: true
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      {{- with .Values.extraVolumes }}
+      {{- tpl . $ | nindent 6 }}
+      {{- end }}
+      containers:
+      {{ if .Values.minio.mount }}
+      {{- $miniohost := .Values.minio.host -}}
+      {{- $accesskey := .Values.minio.access_key -}}
+      {{- $secretkey := .Values.minio.secret_key -}}
+      {{- range $bucket := .Values.minio.buckets }}
+      - name: {{ $bucket }}-s3-sync
+        image: scaleoutsystems/s3-sync:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - SYS_ADMIN
+        resources:
+          limits:
+            cpu: 300m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        env:
+        - name: BUCKET
+          value: {{ $bucket }}
+        - name: MOUNTPOINT
+          value: /data
+        - name: REPOURL
+          value: "http://{{ $miniohost }}"
+        - name: AWSACCESSKEYID
+          value: {{ $accesskey }}
+        - name: AWSSECRETACCESSKEY
+          value: {{ $secretkey }}
+        volumeMounts:
+        - name: {{ $bucket }}
+          mountPath: /data
+          mountPropagation: Bidirectional
+        # - name: devfuse
+        #   mountPath: /dev/fuse
+      {{- end }}
+      {{ end }}
+      - name: gatekeeper
+        image: keycloak/keycloak-gatekeeper:latest #quay.io/louketo/louketo-proxy:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+      - name: serve
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}m
+            memory: {{ .Values.resources.limits.memory }}Mi
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}m
+            memory: {{ .Values.resources.requests.memory }}Mi
+        volumeMounts:
+        {{ if .Values.minio.mount }}
+        {{- range $bucket := .Values.minio.buckets }}
+        - name: {{ $bucket }}
+          mountPath: /{{ $bucket }}/
+          mountPropagation: HostToContainer
+          {{- end }}
+        {{ end }}
+        - name: secret-vol
+          mountPath: license
+          readOnly: true
+        {{- with .Values.extraVolumeMounts }}
+        {{- tpl . $ | nindent 8 }}
+        {{- end }}
+        env:
+          - name: S3_ACCESS_KEY_ID
+            value: {{ .Values.minio.access_key }}
+          - name: S3_SECRET_ACCESS_KEY
+            value: {{ .Values.minio.secret_key }}
+          - name: AWS_REGION
+            value: us-east-1
+          - name: S3_ENDPOINT
+            value: http://{{ .Values.project.slug }}-minio:9000
+          - name: STACKN_MODEL_BUCKET
+            value: {{ .Values.model.bucket }}
+          - name: STACKN_MODEL_FILE
+            value: {{ .Values.model.file }}
+          {{- with .Values.extraEnv }}
+          {{- tpl . $ | nindent 10 }}
+          {{- end }}
+        command: ["/bin/bash"]
+        args: ["-c", "./mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;./mc cp projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE model.tar.gz;tar xvf model.tar.gz;[[ -f requirements.txt ]] && pip3 install -r requirements.txt;./deploy.sh"]
+        image: {{ .Values.context.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.deployment.port }}
