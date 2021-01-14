@@ -1,15 +1,42 @@
 # Release Notes
 
-## v0.3.0 _Upcoming Release_
+## v0.4.0 (upcoming release)
+
+### New functionality
+
+### Bug fixes
+
+- Project's detailed page is now listing only the related activity logs
+- Public models are no more shown after the corresponding project has been removed
+
+### Other
+
+- New improved functionality for adding users as members to your project
+
+## v0.3.0
 
 ### New functionality
 
 - You can now set environment variables in a model deployment
+- New CLI command `stackn get settings` for listing all the settings needed to set up the CLI client. 
+The keycloak host is now set automatically after providing the studio host.
+- Added a chart to the models module in STACKn to show how model metrics have changed over time and runs (draft)
+- Create and delete project volumes with the CLI
 
+```bash
+stackn create volume -s 10Mi -n example-vol
+stackn get volumes
+stackn delete volume -n example-vol
+stackn create lab -f medium -e jupyter-minimal -v example-vol1,example-vol2
+```
 
-### Bug fixes
+- A possibility to specify which buckets (arbitrary number) from the Minio instance should be mounted in the deployed container
+- A possibility to create jobs from command line
 
-
+```
+stackn create job -c job.json
+stackn get jobs
+```
 
 ### Other
 

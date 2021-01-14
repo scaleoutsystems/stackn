@@ -29,6 +29,7 @@ This is simply a reminder of what we are going to look for before merging your c
 - [ ] I have read the [CONTRIBUTING](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md) doc
 - [ ] I have included tests to complement my changes
 - [ ] I have updated the related documentation (if necessary) 
+- [ ] I have updated the release notes (docs/releasenotes.md)
 - [ ] I have added a reviewer for this pull request
 - [ ] I have added myself as an author for this pull request
 

@@ -47,10 +47,19 @@ class Controller:
             return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
         args = ['helm', action, '--kubeconfig', kubeconfig, options['release'], chart]
-
+ 
         for key in options:
-            args.append('--set')
-            args.append(key+"="+options[key].replace(',', '\,'))
+            try:
+                args.append('--set')
+                # If list, don't escape ,
+                if len(options[key]) > 0 and options[key][0] == '{' and options[key][-1] == '}':
+                    args.append(key+"="+options[key])
+                # And if not list, we should escape ,
+                else:
+                    args.append(key+"="+options[key].replace(',', '\,'))
+            except:
+                print('Failed to process input arguments.')
+                return json.dumps({"status": "failed", 'reason':'Failed to process input arguments.'})
 
         print(args)
         status = subprocess.run(args, cwd=self.cwd)

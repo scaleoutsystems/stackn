@@ -111,7 +111,7 @@ class ModelLog(models.Model):
     system_details = models.TextField(blank=True)
     cpu_details = models.TextField(blank=True)
     training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
-    
+
     class Meta:
         unique_together = ('run_id', 'trained_model')
 

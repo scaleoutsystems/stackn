@@ -137,3 +137,5 @@ media/visualisers/
 
 tele_settings.py
 tele_settings_worker.py
+
+.vscode/
