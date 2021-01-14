@@ -92,6 +92,9 @@ class Session(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return "{}, {}".format(self.name, self.project.owner)
+
 @receiver(pre_delete, sender=Session, dispatch_uid='session_pre_delete_signal')
 def pre_delete_labs(sender, instance, using, **kwargs):
     kc = keylib.keycloak_init()

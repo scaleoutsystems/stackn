@@ -159,6 +159,7 @@ class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModel
         lab_session.save()
         return HttpResponse('Ok.', 200)
 
+
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeploymentDefinitionSerializer
@@ -457,7 +458,7 @@ class ResourceList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retri
 
     def get_queryset(self):
         print(self.request.query_params.get('cluster'))
-        resources = HelmResource.objects.filter(cluster=self.request.query_params.get('cluster'))
+        resources = HelmResource.objects.filter(cluster=self.request.query_params.get('cluster'), status=False)
         return resources
 
     def create(self, request, *args, **kwargs):
@@ -623,6 +624,63 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                     print("Created project {} for user {}.".format(user['project_name'], user['username']))
                     # return HttpResponse('Ok', status=200)
         
+        return HttpResponse('Ok', status=200)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def create_labs_bulk(self, request):
+        users = request.data['users']
+        
+        for user in users:
+            project_name = user['project_name']
+            owner = User.objects.get(username=user['username'])
+            flavor_slug = user['flavor']
+            environment_slug = user['environment']
+
+            # We create one lab session for each project with this name, so could be several per user.
+            projects = Project.objects.filter(owner=owner, name=user['project_name'])
+            
+            for project in projects:
+                # First check if there already exists an identical lab session (env and flavor)
+                # Then do not create
+                lab_exists = Session.objects.filter(lab_session_owner=owner, project=project, flavor_slug=flavor_slug, environment_slug=environment_slug).count()
+                if lab_exists == 0:
+                    uid = uuid.uuid4()
+                    name = str(project.slug) + str(uid)[0:7]
+
+                    lab_session = Session(id=uid, name=name, flavor_slug=flavor_slug, environment_slug=environment_slug,
+                                        project=project, lab_session_owner=owner)
+                    lab_session.extraVols = []
+                    if 'extraVols' in user:
+                        lab_session.extraVols = user['extraVols']
+                    if 'cluster' in user:
+                        lab_session.cluster = user['cluster']
+
+                    lab_session.save()
+                else:
+                    print("User {} already has such a lab session in project {}.".format(owner, project))
+
+        return HttpResponse('Ok', status=200)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def delete_labs_bulk(self, request):
+        users = request.data['users']
+        
+        for user in users:
+            project_name = user['project_name']
+            owner = User.objects.get(username=user['username'])
+            flavor_slug = user['flavor']
+            environment_slug = user['environment']
+
+            # We create one lab session for each project with this name, so could be several per user.
+            projects = Project.objects.filter(owner=owner, name=user['project_name'])
+            
+            for project in projects:
+                # First check if there already exists an identical lab session (env and flavor)
+                # Then do not create
+                labs = Session.objects.filter(lab_session_owner=owner, project=project, flavor_slug=flavor_slug, environment_slug=environment_slug)
+                for lab in labs:
+                    lab.helmchart.delete()
+
         return HttpResponse('Ok', status=200)
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])

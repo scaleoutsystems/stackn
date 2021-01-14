@@ -29,13 +29,13 @@
                 Labs
             </a>
         </li>
-        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
             <a class="nav-link side-bar-text" href="{% url 'experiments:index' request.user project.slug %}">
                 Experiments
             </a>
-        </li>
+        </li> -->
         <!--
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <a class="nav-link" href="{% url 'workflows:workflows_index' request.user project.slug %}">
@@ -50,14 +50,14 @@
             </a>
         </li>
         -->
-        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/documents-alt.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
             <a class="nav-link side-bar-text" href="{% url 'datasets:page' request.user project.slug 1 %}">
                 Datasets
             </a>
-        </li>
-        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+        </li> -->
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/diamond.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
             <a class="nav-link side-bar-text" href="{% url 'models:list' request.user project.slug %}">
@@ -92,7 +92,7 @@
             <a class="nav-link side-bar-text" href="{% url 'projects:settings' request.user project.slug %}">
                 Settings
             </a>
-        </li>
+        </li> -->
     </ul>
 </div>
 {% endblock %}

@@ -19,8 +19,6 @@ router.register(r'projects', ProjectList, base_name='project')
 router.register(r'resources', ResourceList, base_name='resources')
 router.register(r'admin/users', UserList, base_name='users')
 
-# admin_router = routers.NestedSimpleRouter(router, r'admin', lookup='admin')
-# admin_router.register(r'users', UserList, base_name='users')
 
 models_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
 models_router.register(r'models', ModelList, base_name='model')

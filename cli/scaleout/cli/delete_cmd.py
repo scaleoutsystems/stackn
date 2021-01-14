@@ -68,6 +68,18 @@ def delete_resources(ctx, userfile):
     client = ctx.obj['CLIENT']
     client.delete_resources(userfile)
 
+@delete_cmd.command('labs')
+@click.option('-f', '--userfile', required=True)
+@click.option('-p', '--project-name', required=True)
+@click.option('-e', '--environment', required=True)
+@click.option('-t', '--flavor', required=True)
+@click.pass_context
+def delete_labs_cmd(ctx, project_name, userfile, environment, flavor):
+    client = ctx.obj['CLIENT']
+    client.bulk_manage_labs(userfile, project_name, environment, flavor, "delete")
+
+
+
 # @delete_cmd.command('deployments')
 # @click.pass_context
 # def delete_deployment_cmd(ctx):

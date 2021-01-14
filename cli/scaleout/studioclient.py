@@ -215,6 +215,30 @@ class StudioClient():
             print('Status code: {}'.format(res.status_code))
             print(res.text)
 
+    def bulk_manage_labs(self, userfile, project_name, environment, flavor, create_or_delete):
+        users = pandas.read_csv(userfile)
+        if create_or_delete == "create":
+            url = self.endpoints['projects']+'create_labs_bulk/'
+        else:
+            url = self.endpoints['projects']+'delete_labs_bulk/'
+        data = dict()
+        data['users'] = list()
+        for index, row in users.iterrows():
+            user = dict()
+            user['project_name'] = project_name
+            user['username'] = row['Email']
+            user['flavor'] = flavor
+            user['environment'] = environment
+            data['users'].append(user)
+
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Done.')
+        else:
+            print('Failed.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
     def delete_projects(self, userfile):
         users = pandas.read_csv(userfile)
         url = self.endpoints['projects']+'delete_projects/'

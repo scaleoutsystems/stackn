@@ -19,6 +19,15 @@ spec:
         project: {{ .Values.project.name }}
         type: lab
     spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: kubernetes.io/hostname
+      #           operator: In
+      #           values:
+      #           - limpar
     {{ if .Values.labs.gpu.enabled }}
       affinity:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
@@ -31,7 +40,7 @@ spec:
       #  runAsUser: 65533  # to allow read of ssh key
       containers:
       - name: gatekeeper
-        image: keycloak/keycloak-gatekeeper:latest #quay.io/gambol99/keycloak-proxy:latest
+        image: {{ .Values.gatekeeper.image }} #quay.io/gambol99/keycloak-proxy:latest
         imagePullPolicy: Always
         args:
           - --config=/etc/secrets/gatekeeper.yaml
@@ -40,44 +49,38 @@ spec:
         volumeMounts:
         - name: gatekeeper-config
           mountPath: /etc/secrets/
-      - name: s3-sync
-        image: scaleoutsystems/s3-sync:latest
-        imagePullPolicy: Always
-        securityContext:
-          #runAsUser: 1000
-          #runAsGroup: 100
-          privileged: true
-          capabilities:
-            add:
-              - SYS_ADMIN
-        resources:
-          limits:
-            cpu: 300m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
-        #lifecycle:
-        #  postStart:
-        #    exec:
-        #      command: ["mkdir","/home/jovyan/dataset"]
-        env:
-        - name: BUCKET
-          value: {{ .Values.minio.bucket | default "dataset" }}
-        - name: MOUNTPOINT
-          value: /data
-        - name: REPOURL
-          value: "http://{{ .Values.project.name }}-minio:9000"
-        - name: AWSACCESSKEYID
-          value: {{ .Values.minio.access_key }}
-        - name: AWSSECRETACCESSKEY
-          value: {{ .Values.minio.secret_key }}
-        volumeMounts:
-        - name: dataset
-          mountPath: /data
-          mountPropagation: Bidirectional
-        - name: devfuse
-          mountPath: /dev/fuse
+      # - name: s3-sync
+      #   image: {{ .Values.s3sync.image }}
+      #   imagePullPolicy: Always
+      #   securityContext:
+      #     privileged: true
+      #     capabilities:
+      #       add:
+      #         - SYS_ADMIN
+      #   resources:
+      #     limits:
+      #       cpu: 300m
+      #       memory: 256Mi
+      #     requests:
+      #       cpu: 100m
+      #       memory: 128Mi
+      #   env:
+      #   - name: BUCKET
+      #     value: {{ .Values.minio.bucket | default "dataset" }}
+      #   - name: MOUNTPOINT
+      #     value: /data
+      #   - name: REPOURL
+      #     value: "http://{{ .Values.project.name }}-minio:9000"
+      #   - name: AWSACCESSKEYID
+      #     value: {{ .Values.minio.access_key }}
+      #   - name: AWSSECRETACCESSKEY
+      #     value: {{ .Values.minio.secret_key }}
+      #   volumeMounts:
+      #   - name: dataset
+      #     mountPath: /data
+      #     mountPropagation: Bidirectional
+      #   - name: devfuse
+      #     mountPath: /dev/fuse
       - name: notebook
         image: {{ .Values.labs.image }}
         imagePullPolicy: Always
@@ -105,10 +108,10 @@ spec:
             {{ end }}
         volumeMounts:
         - name: homedir
-          mountPath: /home/jovyan/
-        - name: dataset
-          mountPath: /home/jovyan/dataset/
-          mountPropagation: HostToContainer
+          mountPath: /home/jovyan/work/
+        # - name: dataset
+        #   mountPath: /home/jovyan/dataset/
+        #   mountPropagation: HostToContainer
         - name: jupyterconf
           mountPath: /etc/jupyter/jupyter_notebook_config.py
           subPath: jupyter_notebook_config.py

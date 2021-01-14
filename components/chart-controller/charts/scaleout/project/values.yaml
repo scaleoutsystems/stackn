@@ -1,7 +1,7 @@
 appname: appname
 
 volume:
-  size: 2Gi
+  size: 30Gi
 
 labs:
   image: jupyter/minimal-notebook:latest
@@ -15,7 +15,7 @@ minio:
   access_key: minio
   secret_key: minio123
   volume:
-    size: 2Gi
+    size: 0.1Gi
 
 defaultBucket:
   enabled: True

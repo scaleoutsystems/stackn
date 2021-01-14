@@ -17,6 +17,7 @@ import base64
 from projects.helpers import get_minio_keys
 from clusters.models import Cluster
 from deployments.models import HelmResource
+
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
@@ -186,6 +187,12 @@ def details(request, user, project_slug):
     is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
     
     template = 'project.html'
+
+    from labs.models import Session
+    project = Project.objects.filter(Q(slug=project_slug), Q(owner=request.user) | Q(authorized=request.user)).first()
+    sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user)).order_by('-created_at')
+    cluster = Cluster.objects.get(name=project.cluster)
+    lab_url = cluster.base_url
 
     # url_domain = sett.DOMAIN
 
