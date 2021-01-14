@@ -1,9 +1,0 @@
-<ul class="timeline">
-    {% for log in activity_logs %}
-    <li>
-        <a target="_blank" href="#">{{ log.headline }}</a>
-        <a href="#" class="float-right">{{ log.created_at }}</a>
-        <p>{{ log.description }}</p>
-    </li>
-    {% endfor %}
-</ul>

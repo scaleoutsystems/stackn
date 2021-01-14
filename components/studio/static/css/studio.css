@@ -186,3 +186,24 @@ h2 {
     width: 15px;
     height: 15px;
 }
+
+/*
+ * Admin actions
+ */
+
+.recent-actions {
+    background-color: #f8f8f8;
+    color: #424949;
+}
+
+.recent-actions-h4 {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.recent-actions-h6 {
+    padding: 0 16px;
+    margin: 0 0 16px;
+    font-weight: bold;
+}
