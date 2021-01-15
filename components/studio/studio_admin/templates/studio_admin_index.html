@@ -283,22 +283,22 @@
                 </table>
             </div>
             <div class="col-md-2 recent-actions">
-                    <h4 class="recent-actions-h4">
-                        Recent actions
-                    </h4>
-                    <h6 class="recent-actions-h6">
-                        My actions
-                    </h6>
-                    <div id="activity_logs">
-                        <ul class="timeline">
-                            {% for log in activity_logs %}
-                            <li>
-                                <a target="_blank" href="#">{{ log.headline }}</a>
-                                <p>{{ log.description }}</p>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                <h4 class="recent-actions-h4">
+                    Recent actions
+                </h4>
+                <h6 class="recent-actions-h6">
+                    My actions
+                </h6>
+                <div id="activity_logs">
+                    <ul class="timeline">
+                        {% for log in activity_logs %}
+                        <li>
+                            <a target="_blank" href="#">{{ log.headline }}</a>
+                            <p>{{ log.description }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

@@ -33,7 +33,7 @@ urlpatterns = [
     path('<user>/<project>/reports/', include('reports.urls', namespace='reports')),
     path('<user>/<project>/experiments/', include('experiments.urls', namespace='experiments')),
     path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
-    path('studio/administration/', include('studio_admin.urls', namespace='studio_admin'))
+    path('studio/admin/', include('studio_admin.urls', namespace='studio_admin'))
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
