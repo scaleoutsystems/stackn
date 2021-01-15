@@ -21,10 +21,10 @@
                             <th scope="row">Definitions</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#">
+                                    <a href="#" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
-                                        Change
+                                        Edit
                                     </a>
                                 </span>
                             </td>
@@ -33,10 +33,10 @@
                             <th scope="row">Instances</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#">
+                                    <a href="#" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
-                                        Change
+                                        Edit
                                     </a>
                                 </span>
                             </td>
@@ -55,10 +55,10 @@
                             <th scope="row">Sessions</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#">
+                                    <a href="#" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
-                                        Change
+                                        Edit
                                     </a>
                                 </span>
                             </td>
@@ -77,10 +77,10 @@
                             <th scope="row">Models</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#">
+                                    <a href="#" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
-                                        Change
+                                        Edit
                                     </a>
                                 </span>
                             </td>
@@ -99,10 +99,10 @@
                             <th scope="row">Projects</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#">
+                                    <a href="{% url 'studio_admin:load_module_objects' projects %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
-                                        Change
+                                        Edit
                                     </a>
                                 </span>
                             </td>
@@ -121,7 +121,7 @@
                     <ul class="timeline">
                         {% for log in activity_logs %}
                         <li>
-                            <a target="_blank" href="#">{{ log.headline }}</a>
+                            <a target="_blank" href="#" class="studio-table-a">{{ log.headline }}</a>
                             <p>{{ log.description }}</p>
                         </li>
                         {% endfor %}

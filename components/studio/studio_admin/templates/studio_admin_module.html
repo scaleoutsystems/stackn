@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="col-md-11">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>{{ module }}</h2>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                {% if module == 'projects' %}
+                <table class="table studio-table">
+                    <thead class="studio-table-header">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Slug</th>
+                            <th scope="col">Owner</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Updated</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proj in objects %}
+                        <tr>
+                            <th scope="row">{{ proj.name }}</th>
+                            <th scope="row">{{ proj.slug }}</th>
+                            <th scope="row">{{ proj.owner.username }}</th>
+                            <th scope="row">{{ proj.created_at }}</th>
+                            <th scope="row">{{ proj.updated_at }}</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/pencil-square.svg"
+                                            alt="pencil">
+                                        View
+                                    </a>
+                                </span>
+                                <span>
+                                    <a href="#" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
+                                        Remove
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

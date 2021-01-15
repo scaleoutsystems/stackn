@@ -182,9 +182,13 @@ h2 {
 }
 
 .studio-table-icon {
-    margin-right: 3px;
     width: 15px;
     height: 15px;
+    margin: 0 3 0 3;
+}
+
+.studio-table-a {
+    color: #79aec8;
 }
 
 /*
