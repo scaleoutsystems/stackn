@@ -4,7 +4,9 @@
 <div class="col-md-11">
     <div
         class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>{{ module }}</h2>
+        {% if module == 'projects' %}
+        <h2>Projects</h2>
+        {% endif %}
     </div>
     <div class="container-fluid">
         <div class="row">
