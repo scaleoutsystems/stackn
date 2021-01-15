@@ -4,6 +4,7 @@ from .models import ActivityLog
 from projects.models import Project
 
 def index(request):
+    module = 'projects'
     activity_logs = ActivityLog.objects.filter(user=request.user).order_by('-created_at')[:5]
 
     return render(request, 'studio_admin_index.html', locals())
