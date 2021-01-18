@@ -3,6 +3,7 @@ import requests as r
 import logging
 import jwt
 import time
+import json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -103,6 +104,31 @@ def keycloak_create_user(kc, user_data):
         print('Status code: '+str(res.status_code))
         print(res.text)
         return False
+
+def keycloak_reset_password(kc, username):
+    user_id = keycloak_get_user_id(kc, username)
+    url = '{}/admin/realms/{}/users/{}/execute-actions-email'.format(kc.admin_url, kc.realm, user_id)
+    # data = ["UPDATE_PASSWORD"]
+    # data = json.dumps(data)
+    # print(url)
+    # print(data)
+    params = {"client_id": settings.OIDC_RP_CLIENT_ID,
+              "redirect_uri": settings.STUDIO_HOST.replace('https', 'http')}
+    print(json.dumps(['UPDATE_PASSWORD']))
+    res = r.put(url,
+                json=['UPDATE_PASSWORD'],
+                params=params,
+                headers={'Authorization': 'bearer '+kc.token},
+                verify=settings.OIDC_VERIFY_SSL)
+    if res:
+        print("Reset password for user {}.".format(username))
+        return True
+    else:
+        print('Failed to reset password for user {}.'.format(username))
+        print('Status code: '+str(res.status_code))
+        print(res.text)
+        return False
+
 
 def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expired=True):
     if not ('oidc_access_token' in request.session):

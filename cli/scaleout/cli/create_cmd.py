@@ -128,3 +128,11 @@ def create_projects_cmd(ctx, userfile, project_name, cluster):
 def create_labs_cmd(ctx, project_name, userfile, environment, flavor):
     client = ctx.obj['CLIENT']
     client.bulk_manage_labs(userfile, project_name, environment, flavor, "create")
+
+
+@create_cmd.command('passwords')
+@click.option('-f', '--user-file', required=True)
+@click.pass_context
+def passwords_cmd(ctx, user_file):
+    client = ctx.obj['CLIENT']
+    client.reset_passwords(user_file)

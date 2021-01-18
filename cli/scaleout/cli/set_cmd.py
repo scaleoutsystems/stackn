@@ -54,3 +54,4 @@ def project_cmd(ctx, project):
     from scaleout.studioclient import StudioClient
     client = StudioClient()
     client.set_project(project)
+

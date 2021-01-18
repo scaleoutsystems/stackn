@@ -18,14 +18,14 @@
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/house.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
-            <a class="nav-link side-bar-text" href="{% url 'projects:details' request.user project.slug %}">
+            <a class="nav-link side-bar-text" style="text-align:center" href="{% url 'projects:details' request.user project.slug %}">
                 Overview
             </a>
         </li>
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/laptop.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
-            <a class="nav-link side-bar-text" href="{% url 'labs:index' request.user project.slug %}">
+            <a class="nav-link side-bar-text" style="text-align:center" href="{% url 'labs:index' request.user project.slug %}">
                 Labs
             </a>
         </li>

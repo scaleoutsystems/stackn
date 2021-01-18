@@ -493,8 +493,8 @@ class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveM
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        Users = Users.objects.all()
-        return resources
+        users = User.objects.all()
+        return users
 
     def create(self, request, *args, **kwargs):
         users = request.data['users']
@@ -502,6 +502,19 @@ class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveM
             kcobj = kc.keycloak_init()
             kc.keycloak_create_user(kcobj, user_data=user)
             User.objects.create_user(user['email'], email=user['email'])
+    
+        return HttpResponse('ok', 200)
+
+    @action(detail=False, methods=['post'], permission_classes=[AdminPermission])
+    def resetpassword(self, request):
+        print("RESETTING PASSWORDS")
+        users = request.data['users']
+
+        for user in users:
+            kcobj = kc.keycloak_init()
+            print("Forcing reset of password for user {}".format(user))
+            kc.keycloak_reset_password(kcobj, user)
+
         return HttpResponse('ok', 200)
 
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
