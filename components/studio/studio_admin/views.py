@@ -8,7 +8,6 @@ from deployments.models import DeploymentInstance
 
 def index(request):
     str_projects = 'projects'
-    str_models = 'models'
     str_labs = 'labs'
     str_deployments = 'deployments'
 
@@ -23,9 +22,6 @@ def load_module_objects(request, module):
     if module == 'projects':
         objects = load_projects()
         template = "studio_admin_projects.html"
-    if module == 'models':
-        objects = load_models()
-        template = "studio_admin_models.html"
     if module == 'labs':
         objects = load_labs()
         template = "studio_admin_labs.html"
@@ -38,10 +34,6 @@ def load_module_objects(request, module):
 def load_projects():
     projects = Project.objects.all()
     return projects
-
-def load_models():
-    models = Model.objects.all()
-    return models
 
 def load_labs():
     labs = Session.objects.all()
