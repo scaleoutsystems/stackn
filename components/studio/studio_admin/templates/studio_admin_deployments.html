@@ -34,12 +34,73 @@
                             <th scope="row">{{ i.created_at }}</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#" class="studio-table-a">
+                                    <a href="#" class="studio-table-a" data-toggle="modal" data-target="#dplModal">
                                         <img class="studio-table-icon" src="/static/icons/pencil-square.svg"
                                             alt="pencil">
                                         View
                                     </a>
                                 </span>
+                                <!-- Modal -->
+                                <div class="modal fade" id="dplModal" tabindex="-1" role="dialog"
+                                    aria-labelledby="dplModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="dplModalLabel">{{ i.model.name }}-{{ i.model.version }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table studio-table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">Owner</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Model</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Version</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">CPU limit</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">CPU request</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory limit</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory request</th>
+                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light"
+                                                    data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-danger">Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <span>
                                     <a href="#" class="studio-table-a">
                                         <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
