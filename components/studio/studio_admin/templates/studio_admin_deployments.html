@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="col-md-11">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Deployment Instances</h2>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table studio-table">
+                    <thead class="studio-table-header">
+                        <tr>
+                            <th scope="col">Project</th>
+                            <th scope="col">Deployment</th>
+                            <th scope="col">Model</th>
+                            <th scope="col">Access</th>
+                            <th scope="col">Endpoint</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Created</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in objects %}
+                        <tr>
+                            <th scope="row">{{ i.deployment.project.name }}</th>
+                            <th scope="row">{{ i.deployment.name }}</th>
+                            <th scope="row">{{ i.model.name }}</th>
+                            <th scope="row">{{ i.access }}</th>
+                            <th scope="row">{{ i.endpoint }}</th>
+                            <th scope="row">{{ i.created_by }}</th>
+                            <th scope="row">{{ i.created_at }}</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/pencil-square.svg"
+                                            alt="pencil">
+                                        View
+                                    </a>
+                                </span>
+                                <span>
+                                    <a href="#" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
+                                        Remove
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

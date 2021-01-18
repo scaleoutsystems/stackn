@@ -7,7 +7,7 @@
         <h2>Studio administration</h2>
     </div>
     <div class="container-fluid">
-        <div class="row">
+        <div class="row" style="min-height: 500px;">
             <div class="col-md-4">
                 <table class="table studio-table">
                     <thead class="studio-table-header">
@@ -18,22 +18,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <th scope="row">Definitions</th>
-                            <td class="studio-table-actions-column">
-                                <span>
-                                    <a href="#" class="studio-table-a">
-                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
-                                            alt="pencil">
-                                        Edit
-                                    </a>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
                             <th scope="row">Instances</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:load_module_objects' str_deployments %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
@@ -55,7 +43,7 @@
                             <th scope="row">Sessions</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:load_module_objects' str_labs %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
@@ -77,7 +65,7 @@
                             <th scope="row">Models</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="#" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:load_module_objects' str_models %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
@@ -99,7 +87,7 @@
                             <th scope="row">Projects</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="{% url 'studio_admin:load_module_objects' module %}" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:load_module_objects' str_projects %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
