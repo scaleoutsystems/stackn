@@ -46,6 +46,15 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Volumes</label><br>
+                        {% for volume in volumes %}
+                           <input type="checkbox" name="volumes" value="{{ volume.slug }}"> {{ volume.name }} ({{ volume.size }})<br>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
 

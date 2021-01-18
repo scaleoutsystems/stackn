@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
 from projects.models import Project, ProjectLog
 from .models import Session
-from projects.models import Environment, Flavor
+from projects.models import Environment, Flavor, Volume
 from clusters.models import Cluster
 from django.contrib.auth.decorators import login_required
 import uuid
@@ -24,6 +24,7 @@ def index(request, user, project):
     environments = Environment.objects.all()
     cluster = Cluster.objects.get(name=project.cluster)
     url = cluster.base_url
+    volumes = Volume.objects.filter(project_slug=project.slug)
 
     return render(request, template, locals())
 

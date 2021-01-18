@@ -67,6 +67,30 @@
                 {% endfor %}
                 </tbody>
             </table>
+            <h3>Volumes</h3>
+            <table id="Volumes" class="table table-striped table-sm">
+                <thead>
+
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Cluster</th>
+                    <th>Created</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for volume in volumes %}
+                <tr>
+                    <td>{{ volume.name }}</td>
+                    <td>{{ volume.size }}</td>
+                    <td>{{ volume.helmchart.cluster }}</td>
+                    <td>{{ volume.created_on }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                
+            
 
 
 

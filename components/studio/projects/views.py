@@ -194,6 +194,9 @@ def details(request, user, project_slug):
     cluster = Cluster.objects.get(name=project.cluster)
     lab_url = cluster.base_url
 
+    from projects.models import Volume
+    volumes = Volume.objects.filter(project_slug=project.slug)
+
     # url_domain = sett.DOMAIN
 
     project = None
