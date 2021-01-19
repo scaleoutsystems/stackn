@@ -56,20 +56,6 @@ def load_project_resources(request):
     return render(request, template, locals())
 
 
-def get_resource_value(projects_resources, project_slug, args):
-    arg_list = [arg.strip() for arg in args.split(',')]
-
-    if len(arg_list) == 1:
-        total_x = arg_list[0]
-        return projects_resources[project_slug][total_x]
-
-    resource_type = arg_list[0]
-    q_type = arg_list[1]
-    r_type = arg_list[2]
-
-    return projects_resources[project_slug][resource_type][q_type][r_type]
-
-
 def load_lab_resources(request):
     template = "studio_admin_labs.html"
 
