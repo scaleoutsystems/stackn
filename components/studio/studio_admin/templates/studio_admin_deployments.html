@@ -25,13 +25,13 @@
                     <tbody>
                         {% for i in objects %}
                         <tr>
-                            <th scope="row">{{ i.deployment.project.name }}</th>
-                            <th scope="row">{{ i.deployment.name }}</th>
-                            <th scope="row">{{ i.model.name }}</th>
-                            <th scope="row">{{ i.access }}</th>
-                            <th scope="row">{{ i.endpoint }}</th>
-                            <th scope="row">{{ i.created_by }}</th>
-                            <th scope="row">{{ i.created_at }}</th>
+                            <th scope="row">{{ i.8 }}</th>
+                            <th scope="row">{{ i.9 }}</th>
+                            <th scope="row">{{ i.6 }}</th>
+                            <th scope="row">{{ i.10 }}</th>
+                            <th scope="row">{{ i.11 }}</th>
+                            <th scope="row">{{ i.0 }}</th>
+                            <th scope="row">{{ i.12 }}</th>
                             <td class="studio-table-actions-column">
                                 <span>
                                     <a href="#" class="studio-table-a" data-toggle="modal" data-target="#dplModal">
@@ -46,7 +46,7 @@
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="dplModalLabel">{{ i.model.name }}-{{ i.model.version }}</h5>
+                                                <h5 class="modal-title" id="dplModalLabel">{{ i.6 }}-{{ i.7 }}</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -57,37 +57,44 @@
                                                     <tbody>
                                                         <tr>
                                                             <th scope="row">Owner</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.0 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Model</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.6 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Version</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.7 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">CPU limit</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.1 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">CPU request</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.2 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory limit</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.3 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory request</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ i.4 }}
                                                             </th>
                                                         </tr>
                                                     </tbody>

@@ -127,13 +127,13 @@
           {% for dep in dep_list %}
             <tr>
               <td>{{ dep.0 }}</td>
+              <td>{{ dep.6 }}</td>
               <td>{{ dep.7 }}</td>
-              <td>{{ dep.8 }}</td>
+              <td>{{ dep.1 }}</td>
               <td>{{ dep.2 }}</td>
               <td>{{ dep.3 }}</td>
               <td>{{ dep.4 }}</td>
-              <td>{{ dep.5 }}</td>
-              <td><a href="{% url 'monitor:delete_deployment' request.user.username project.slug dep.6 %}">Delete</a></td>
+              <td><a href="{% url 'monitor:delete_deployment' request.user.username project.slug dep.5 %}">Delete</a></td>
             </tr>
           {% endfor %}
         </tbody>

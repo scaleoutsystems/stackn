@@ -25,13 +25,13 @@
                     <tbody>
                         {% for lab in objects %}
                         <tr>
-                            <th scope="row">{{ lab.id }}</th>
-                            <th scope="row">{{ lab.name }}</th>
-                            <th scope="row">{{ lab.project.name }}</th>
-                            <th scope="row">{{ lab.lab_session_owner }}</th>
-                            <th scope="row">{{ lab.status }}</th>
-                            <th scope="row">{{ lab.created_at }}</th>
-                            <th scope="row">{{ lab.updated_at }}</th>
+                            <th scope="row">{{ lab.6 }}</th>
+                            <th scope="row">{{ lab.7 }}</th>
+                            <th scope="row">{{ lab.8 }}</th>
+                            <th scope="row">{{ lab.0 }}</th>
+                            <th scope="row">{{ lab.9 }}</th>
+                            <th scope="row">{{ lab.10 }}</th>
+                            <th scope="row">{{ lab.11 }}</th>
                             <td class="studio-table-actions-column">
                                 <span>
                                     <a href="#" class="studio-table-a" data-toggle="modal"
@@ -47,7 +47,7 @@
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title" id="labSessionModalLabel">{{ lab.name }}</h5>
+                                                <h5 class="modal-title" id="labSessionModalLabel">{{ lab.7 }}</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
@@ -58,32 +58,38 @@
                                                     <tbody>
                                                         <tr>
                                                             <th scope="row">Owner</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.0 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Flavor</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.1 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">CPU limit</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.2 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">CPU request</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.3 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory limit</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.4 }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory request</th>
-                                                            <th scope="row" class="studio-table-actions-column">...
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.5 }}
                                                             </th>
                                                         </tr>
                                                     </tbody>

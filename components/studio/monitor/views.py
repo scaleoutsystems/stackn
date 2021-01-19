@@ -21,31 +21,46 @@ from modules.project_auth import get_permissions
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
     for resource in resources:
-        res_model = ''
-        res_version = ''
-        res_flavor = ''
-        res_id = ''
-        res_cpu_limit = get_resource(project_slug, resource_type, 'limits', 'cpu_cores', app_name=resource.appname)
+        res_cpu_limit = get_resource(
+            project_slug, resource_type, 'limits', 'cpu_cores', app_name=resource.appname)
         res_cpu_limit = "{:.2f}".format(float(res_cpu_limit))
-        res_cpu_request = get_resource(project_slug, resource_type, 'requests', 'cpu_cores', app_name=resource.appname)
+        res_cpu_request = get_resource(
+            project_slug, resource_type, 'requests', 'cpu_cores', app_name=resource.appname)
         res_cpu_limit = "{:.2f}".format(float(res_cpu_request))
-        res_mem_limit = get_resource(project_slug, resource_type, 'limits', 'memory_bytes', app_name=resource.appname)
+        res_mem_limit = get_resource(
+            project_slug, resource_type, 'limits', 'memory_bytes', app_name=resource.appname)
         res_mem_limit = "{:.2f}".format(float(res_mem_limit)/1e9*0.931323)
-        res_mem_request = get_resource(project_slug, resource_type, 'requests', 'memory_bytes', app_name=resource.appname)
+        res_mem_request = get_resource(
+            project_slug, resource_type, 'requests', 'memory_bytes', app_name=resource.appname)
         res_mem_request = "{:.2f}".format(float(res_mem_request)/1e9*0.931323)
-        
+
         if resource_type == 'lab':
             res_owner = resource.lab_session_owner.username
             res_flavor = resource.flavor_slug
             res_id = str(resource.id)
+            res_name = resource.name
+            res_project = resource.project.name
+            res_status = resource.status
+            res_created = resource.created_at
+            res_updated = resource.updated_at
+
+            res_list.append((res_owner, res_flavor, res_cpu_limit, res_cpu_request, res_mem_limit,
+                             res_mem_request, res_id, res_name, res_project, res_status, res_created, res_updated))
 
         elif resource_type == 'deployment':
             res_owner = resource.created_by
             res_model = resource.model.name
             res_version = resource.model.version
             res_id = resource.model.id
-            
-        res_list.append((res_owner, res_flavor, res_cpu_limit, res_cpu_request, res_mem_limit, res_mem_request, res_id, res_model, res_version))
+            res_project = resource.deployment.project.name
+            res_name = resource.deployment.name
+            res_access = resource.access
+            res_endpoint = resource.endpoint
+            res_created = resource.created_at
+
+            res_list.append((res_owner, res_cpu_limit, res_cpu_request, res_mem_limit, res_mem_request,
+                             res_id, res_model, res_version, res_project, res_name, res_access, res_endpoint, res_created))
+
     return res_list
 
 @login_required

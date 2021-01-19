@@ -21,7 +21,7 @@
                             <th scope="row">Deployment Instances</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="{% url 'studio_admin:load_module_objects' str_deployments %}" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:deployment_resources' %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
@@ -43,7 +43,7 @@
                             <th scope="row">Lab Sessions</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="{% url 'studio_admin:load_module_objects' str_labs %}" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:lab_resources' %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit
@@ -65,7 +65,7 @@
                             <th scope="row">Projects</th>
                             <td class="studio-table-actions-column">
                                 <span>
-                                    <a href="{% url 'studio_admin:load_module_objects' str_projects %}" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:project_resources' %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
                                             alt="pencil">
                                         Edit

@@ -5,5 +5,7 @@ app_name = 'studio_admin'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('<str:module>', views.load_module_objects, name='load_module_objects')
+    path('projects', views.load_project_resources, name='project_resources'),
+    path('labs', views.load_lab_resources, name='lab_resources'),
+    path('deployments', views.load_deployment_resources, name='deployment_resources')
 ]
