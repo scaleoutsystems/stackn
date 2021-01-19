@@ -65,19 +65,21 @@
                                                         <tr>
                                                             <th scope="row">CPU</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,requests,cpu_cores,"|add:proj.slug|stringformat:"s" }}
+                                                                {% with proj.slug|add:",lab,requests,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,limits,cpu_cores,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"lab,limits,cpu_cores,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,requests,memory_bytes,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"lab,requests,memory_bytes,"|add:proj.slug }}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,limits,memory_bytes,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"lab,limits,memory_bytes,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                     </tbody>
@@ -97,19 +99,19 @@
                                                         <tr>
                                                             <th scope="row">CPU</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,requests,cpu_cores,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"deployment,requests,cpu_cores,"|add:proj.slug }}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,limits,cpu_cores,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"deployment,limits,cpu_cores,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,requests,memory_bytes,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"deployment,requests,memory_bytes,"|add:proj.slug }}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,limits,memory_bytes,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"deployment,limits,memory_bytes,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                     </tbody>
@@ -129,19 +131,19 @@
                                                         <tr>
                                                             <th scope="row">CPU</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_cpu_req,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"total_cpu_req,"|add:proj.slug }}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_cpu,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"total_cpu,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_mem_req,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"total_mem_req,"|add:proj.slug }}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_mem,"|add:proj.slug|stringformat:"s" }}
+                                                                {{ projects_resources|get_resource_value:"total_mem,"|add:proj.slug }}
                                                             </th>
                                                         </tr>
                                                     </tbody>
