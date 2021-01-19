@@ -5,17 +5,19 @@ register = template.Library()
 
 @register.filter(name='get_resource_value')
 def get_resource_value(projects_resources, args):
-    print(args)
     arg_list = [arg.strip() for arg in args.split(',')]
-    print(arg_list)
-    # project_slug = arg_list[0]
 
-    # if len(arg_list) == 2:
-    #     total_x = arg_list[1]
-    #     return projects_resources[project_slug][total_x]
+    try:
+        project_slug = arg_list[0]
 
-    # resource_type = arg_list[1]
-    # q_type = arg_list[2]
-    # r_type = arg_list[3]
+        if len(arg_list) == 2:
+            total_x = arg_list[1]
+            return projects_resources[project_slug][total_x]
 
-    # return projects_resources[project_slug][resource_type][q_type][r_type]
+        resource_type = arg_list[1]
+        q_type = arg_list[2]
+        r_type = arg_list[3]
+
+        return projects_resources[project_slug][resource_type][q_type][r_type]
+    except Exception as e:
+        print(e)

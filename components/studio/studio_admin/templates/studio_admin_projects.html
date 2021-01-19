@@ -70,16 +70,24 @@
                                                                 {% endwith %}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,limits,cpu_cores,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",lab,limits,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,requests,memory_bytes,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",lab,requests,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"lab,limits,memory_bytes,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",lab,limits,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                         </tr>
                                                     </tbody>
@@ -99,19 +107,29 @@
                                                         <tr>
                                                             <th scope="row">CPU</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,requests,cpu_cores,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",deployment,requests,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,limits,cpu_cores,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",deployment,limits,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,requests,memory_bytes,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",deployment,requests,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"deployment,limits,memory_bytes,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",deployment,limits,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                         </tr>
                                                     </tbody>
@@ -131,19 +149,29 @@
                                                         <tr>
                                                             <th scope="row">CPU</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_cpu_req,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",total_cpu_req" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_cpu,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",total_cpu" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row">Memory</th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_mem_req,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",total_mem_req" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                             <th scope="row" class="studio-table-actions-column">
-                                                                {{ projects_resources|get_resource_value:"total_mem,"|add:proj.slug }}
+                                                                {% with proj.slug|add:",total_mem" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
                                                             </th>
                                                         </tr>
                                                     </tbody>
