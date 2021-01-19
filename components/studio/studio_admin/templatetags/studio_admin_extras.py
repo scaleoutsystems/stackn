@@ -2,6 +2,8 @@ from django import template
 
 register = template.Library()
 
+
+@register.filter(name='get_resource_value')
 def get_resource_value(projects_resources, args):
     arg_list = [arg.strip() for arg in args.split(',')]
 
