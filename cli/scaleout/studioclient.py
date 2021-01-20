@@ -795,8 +795,12 @@ class StudioClient():
         """ Run experiment and return date and time for training, and execution time """
 
         start_time = datetime.now()
-        for step, exp_file in data.items():
+        if data["Requirements"]:
+            print("Installing requirements")
+            subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
+        for file_name, exp_file in data["Pipeline"].items():
             try:
+                print("Running file '{}'".format(file_name))
                 subprocess.run(['python', exp_file, run_id])
             except Exception as e:
                 print("Experiment failed.")
@@ -815,8 +819,6 @@ class StudioClient():
         system_details, cpu_details, git_details = get_run_details()
         print('Starting experiment...')
         execution_time, experiment_status = self.run_experiment(model, run_id, data) 
-        #repo = self.get_repository()
-        #repo.bucket = 'experiment'
 
         experiment_data = {"run_id": run_id,
                          "trained_model": model,
@@ -833,6 +835,8 @@ class StudioClient():
         if r:
             print('Successfully created log for model experiment.')
             print('Model: {}'.format(model))
+            print('Version: {}'.format(model_version))
+            print('Experiment ID: {}'.format(run_id))
             print('Execution time: {}'.format(execution_time))
             self.retrieve_metadata(model, run_id)
             return True

@@ -75,7 +75,7 @@ def predict_cmd(ctx, model, version, inp):
 def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
     """ Train a model and log metadata """
     
-    if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): # Only checks locally. Should we check if there exists a log on Studio with the same ID as well?
+    if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): 
         run_id = new_id(run_id)
     print("Preparing to start training session with '{}' as unique ID.".format(run_id))
     if os.path.isfile(training_file):
@@ -99,14 +99,12 @@ def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
 @click.option('--log-off', flag_value='log-off', default=False)
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
 @click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
-@click.option('-f', '--config-file', required=False, default="workflow.json")
+@click.option('-f', '--config-file', required=False, default="pipeline.json")
 @click.option('-v', '--model-version', default='latest')
 @click.pass_context
 def run_cmd(ctx, log_off, model, run_id, config_file, model_version=[]):
     """ Conduct experiment according to details in workflow.json """
 
-    print("Preparing to start experiment session.")
-    print("Experiment ID: '{}'".format(run_id))
     try:
         with open(config_file) as f:
             data = json.load(f)
