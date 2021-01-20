@@ -217,15 +217,19 @@
                 <tbody>
                     {% for log in model_logs reversed %}
                     <tr>
-                        <!--<td style="text-align: center">{{ log.id }}</td>-->
                         <td style="text-align: center">{{ log.run_id|truncatechars:15 }}</td>
                         <td style="text-align: center">{{ log.training_started_at }}</td>
                         <td style="text-align: center">{{ model.project.owner }}</td>
-                        <!--<td style="text-align: center">{% if log.training_status == 'DO' %} Success {% else %} Failed {% endif %}</td>-->
                         <td style="text-align: center"><a href data-toggle="modal"
                                 data-target="#logModal{{log.id}}">Show info</a></td>
-                        <td style="text-align: center"><a href data-toggle="modal" data-target="#mdModal{{log.id}}">Show
-                                metadata</a></td>
+                        <td style="text-align: center">
+                            {% if log.metadata_exists %}
+                            <a href data-toggle="modal" data-target="#mdModal{{log.id}}">Show
+                                metadata</a>
+                            {% else %}
+                            --
+                            {% endif %}
+                        </td>
                         <div class="modal fade" id="logModal{{log.id}}" tabindex="-1" role="dialog"
                             aria-labelledby="logModalLabel{{log.id}}" aria-hidden="true">
                             <div class="modal-dialog" role="document">

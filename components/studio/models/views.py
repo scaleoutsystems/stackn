@@ -148,7 +148,17 @@ def details(request, user, project, id):
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model, model_version=model.version)
     model_logs = []
     for log in log_objects:
-        run_md = Metadata.objects.get(project=project.name, trained_model=model, run_id=log.run_id)
+        try:
+            run_md = Metadata.objects.get(project=project.name, trained_model=model, run_id=log.run_id)
+            params = ast.literal_eval(run_md.parameters)
+            metrics = ast.literal_eval(run_md.metrics)
+            model_details = ast.literal_eval(run_md.model_details)
+            metadata_exists = True
+        except Exception as e:
+            params = ""
+            metrics = ""
+            model_details = ""
+            metadata_exists = False
         model_logs.append({
             'id': log.id,
             'run_id': log.run_id,
@@ -160,9 +170,10 @@ def details(request, user, project, id):
             'latest_git_commit': log.latest_git_commit,
             'system_details': ast.literal_eval(log.system_details),
             'cpu_details': ast.literal_eval(log.cpu_details),
-            'params': ast.literal_eval(run_md.parameters),
-            'metrics': ast.literal_eval(run_md.metrics),
-            'model_details': ast.literal_eval(run_md.model_details)
+            'params': params,
+            'metrics': metrics,
+            'model_details': model_details,
+            'metadata_exists': metadata_exists
         })
         
     md_objects = Metadata.objects.filter(project=project.name, trained_model=model).order_by('id')
