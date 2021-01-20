@@ -704,9 +704,9 @@ class StudioClient():
             Collection.insert_one(data_to_log)
     """     
 
-
+    """
     def retrieve_metadata(self, model, run_id):
-        """ Retrieve metadata logged during model training """
+        #Retrieve metadata logged during model training
 
         md_file = 'src/models/tracking/metadata/{}.pkl'.format(run_id)
         if os.path.isfile(md_file):
@@ -746,6 +746,7 @@ class StudioClient():
         else:
             print("No metadata available for current training session.")
             return 
+    """
 
     def run_training_file(self, model, training_file, run_id):
         """ Run training file and return date and time for training, and execution time """
@@ -791,6 +792,55 @@ class StudioClient():
             return True
 
 
+    def retrieve_metadata(self, model, run_id):
+        """ Retrieve metadata logged during experiment """
+
+        md_dir = 'src/models/tracking/metadata/{}'.format(run_id)
+        if os.path.exists(md_dir):
+            print('Retrieving metadata for current experiment from local storage...')
+            try:
+                import pickle
+                metadata = {
+                    'params': {},
+                    'metrics': {},
+                    'model': {}
+                }
+                for md_file in os.listdir(md_dir):
+                    with open(md_dir + "/" + md_file, 'rb') as metadata_file:
+                        local_metadata = pickle.load(metadata_file)
+                    if 'params' in local_metadata:
+                        metadata['params'] = {**metadata['params'], **local_metadata['params']}
+                    if 'metrics' in local_metadata:
+                        metadata['metrics'] = {**metadata['metrics'], **local_metadata['metrics']}
+                    if 'model' in local_metadata:
+                        metadata['model'] = {**metadata['model'], **local_metadata['model']}
+                    print("Metadata was retrieved successfully from '{}'".format(md_file))
+                post_metadata = {
+                            "run_id": run_id,
+                            "trained_model": model,
+                            "model_details": metadata["model"],
+                            "parameters": metadata["params"],
+                            "metrics": metadata["metrics"]
+                }
+                url = self.endpoints['metadata'].format(self.project['id'])+'/'
+                r = requests.post(url, json=post_metadata, headers=self.auth_headers, verify=self.secure_mode)
+                if r:
+                    print('Successfully created Metadata object for model experiment.')
+                    return True
+                else:
+                    print('Failed to create Metadata object for model experiment.')
+                    print('Status code: {}'.format(r.status_code))
+                    print('Reason: {} - {}'.format(r.reason, r.text))
+                    return False
+            except Exception as e:
+                print("Could not extract metadata from local storage.")
+                print("Reason: {}".format(e))
+                return 
+        else:
+            print("No metadata available for current training session.")
+            return 
+
+
     def run_experiment(self, model, run_id, data):
         """ Run experiment and return date and time for training, and execution time """
 
@@ -833,15 +883,15 @@ class StudioClient():
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
         r = requests.post(url, json=experiment_data, headers=self.auth_headers, verify=self.secure_mode)
         if r:
-            print('Successfully created log for model experiment.')
+            print('Successfully created Log object for model experiment.')
+            self.retrieve_metadata(model, run_id)
             print('Model: {}'.format(model))
             print('Version: {}'.format(model_version))
             print('Experiment ID: {}'.format(run_id))
             print('Execution time: {}'.format(execution_time))
-            self.retrieve_metadata(model, run_id)
             return True
         else:
-            print('Failed to create log for model experiment.')
+            print('Failed to create Log object for model experiment.')
             print('Status code: {}'.format(r.status_code))
             print('Reason: {} - {}'.format(r.reason, r.text))
             return False
