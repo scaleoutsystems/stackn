@@ -82,9 +82,11 @@
                 <ul class="list-group d-flex">
 
                     <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
-                        <p class="d-flex justify-content-center">
-                            <img src="{% static 'img/stackn.png' %}" width="108" height="44">
-                        </p>
+                        <a href="{% url 'models:index' %}">
+                            <p class="d-flex justify-content-center">
+                                <img src="{% static 'img/stackn.png' %}" width="108" height="44">
+                            </p>
+                        </a>
                     </li>
                     <li class="list-inline">
                         <a class="nav-link" href="{% url 'models:index' %}" style="text-decoration: none; color:inherit;">
