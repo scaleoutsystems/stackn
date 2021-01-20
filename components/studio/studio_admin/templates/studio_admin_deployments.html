@@ -6,6 +6,7 @@
         class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Deployment Instances</h2>
     </div>
+    {% if request.user.is_superuser %}
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-9">
@@ -124,5 +125,12 @@
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="container-fluid">
+        <div class="row">
+            <p>You don't have permission to access this resource.</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

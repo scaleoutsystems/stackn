@@ -8,8 +8,10 @@ from deployments.models import DeploymentInstance
 from monitor.helpers import get_resource
 from django.template.defaulttags import register
 from monitor.views import get_cpu_mem
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def index(request):
     activity_logs = ActivityLog.objects.filter(
         user=request.user).order_by('-created_at')[:5]
@@ -17,7 +19,8 @@ def index(request):
     return render(request, 'studio_admin_index.html', locals())
 
 
-def load_project_resources(request): 
+@login_required
+def load_project_resources(request):
     template = "studio_admin_projects.html"
 
     objects = Project.objects.all()
@@ -56,6 +59,7 @@ def load_project_resources(request):
     return render(request, template, locals())
 
 
+@login_required
 def load_lab_resources(request):
     template = "studio_admin_labs.html"
 
@@ -69,6 +73,7 @@ def load_lab_resources(request):
     return render(request, template, {'objects': objects})
 
 
+@login_required
 def load_deployment_resources(request):
     template = "studio_admin_deployments.html"
 
