@@ -166,7 +166,7 @@ def details(request, user, project, id):
             'model_details': ast.literal_eval(run_md.model_details)
         })
         
-    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model).order_by('id')
     if md_objects:
         metrics = get_chart_data(md_objects, project, model)
 
