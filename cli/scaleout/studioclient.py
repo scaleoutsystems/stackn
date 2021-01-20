@@ -795,18 +795,18 @@ class StudioClient():
         """ Run experiment and return date and time for training, and execution time """
 
         start_time = datetime.now()
-        if data["Requirements"]:
+        if data["requirements"]:
             print("Installing requirements")
             subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
-        for file_name, exp_file in data["Pipeline"].items():
+        for file_name, exp_file in data["pipeline"].items():
             try:
                 print("Running file '{}'".format(file_name))
                 subprocess.run(['python', exp_file, run_id])
+                experiment_status = 'DO'
             except Exception as e:
                 print("Experiment failed.")
                 print("Reason: {}".format(e))
                 experiment_status = 'FA'
-            experiment_status = 'DO'
         end_time = datetime.now()
         execution_time = str(end_time - start_time)
         start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")

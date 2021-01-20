@@ -103,15 +103,23 @@ def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
 @click.option('-v', '--model-version', default='latest')
 @click.pass_context
 def run_cmd(ctx, log_off, model, run_id, config_file, model_version=[]):
-    """ Conduct experiment according to details in workflow.json """
+    """ Conduct experiment as specified in pipeline.json """
 
     try:
         with open(config_file) as f:
             data = json.load(f)
         if log_off:
             import subprocess
-            for key, value in data.items():
-                subprocess.run(['python', value])
+            if data["requirements"]:
+                print("Installing requirements")
+                subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
+            for file_name, exp_file in data["pipeline"].items():
+                try:
+                    print("Running file '{}'".format(file_name))
+                    subprocess.run(['python', exp_file])
+                except Exception as e:
+                    print("Experiment failed.")
+                    print("Reason: {}".format(e))
         else:
             model_exists = search_for_model(ctx, "models", model)
             if model_exists:

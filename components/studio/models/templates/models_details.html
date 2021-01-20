@@ -20,7 +20,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs"
-                aria-selected="false">Training Logs</a>
+                aria-selected="false">Logs</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="graphics-tab" data-toggle="tab" href="#graphics" role="tab" aria-controls="graphics"
@@ -200,13 +200,25 @@
             </div>
             {% endif %}
         </div>
-
-        <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+        <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab"
+            style="overflow-y: scroll; height:80%;">
             {% if model_logs %}
-            <table class="table table-hover">
+            <div class="get-started-header">
+                <p>
+                    Here you can investigate the details about each experiment that has been conducted with "{{model.name }} {{ model.version }}".
+                    Each experiment is tagged with a unique ID, date for when it was conducted, the user who initiated
+                    the experiment, general info and logged metadata. The information here enables tracking of model lineage and reproducibility of experiments. This
+                    enhances collaboration and reuse of models.
+                </p>
+                <p>
+                    The logs in the list are ordered by date and time, with the most recent experiment showing at the
+                    top of the list. Also note that the ID of each experiment is shown in truncated form; click on "Show
+                    info" to see the complete ID together with other relevant details.
+                </p>
+            </div>
+            <table class="table table-hover border-bottom" style="margin-top:30px;">
                 <thead>
                     <tr>
-                        <!--<th scope="col" style="text-align: center">ID</th>-->
                         <th scope="col" style="text-align: center">ID</th>
                         <th scope="col" style="text-align: center">Created</th>
                         <th scope="col" style="text-align: center">Initiated by</th>
@@ -233,11 +245,10 @@
                         <div class="modal fade" id="logModal{{log.id}}" tabindex="-1" role="dialog"
                             aria-labelledby="logModalLabel{{log.id}}" aria-hidden="true">
                             <div class="modal-dialog" role="document">
-                                <div class="modal-content">
+                                <div class="modal-content" style="border:#000000 2px solid; background-color: #f1f8ff;">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="logModalLabel{{log.id}}">
                                             General Information
-                                            <!--{% if forloop.first %} (Most Recent) {% endif %}-->
                                         </h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
@@ -247,7 +258,7 @@
                                         <b>Unique ID:</b> {{ log.run_id }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Training started at:</b> {{ log.training_started_at }}
+                                        <b>Date for experiment:</b> {{ log.training_started_at }}
                                     </div>
                                     <div class="modal-body">
                                         {% if log.training_status == 'DO' %}
@@ -257,10 +268,10 @@
                                         {% endif %} {{ log.execution_time }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>GIT repo:</b> {{ log.current_git_repo }}
+                                        <b>Git repo:</b> {{ log.current_git_repo }}
                                     </div>
                                     <div class="modal-body">
-                                        <b>GIT commit:</b> {{ log.latest_git_commit }}
+                                        <b>Git commit:</b> {{ log.latest_git_commit }}
                                     </div>
                                     <div class="modal-body">
                                         <div style="float:left;">
@@ -281,7 +292,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            style="background-color:#007bff; border-color:#007bff">Close
                                         </button>
                                     </div>
                                 </div>
@@ -290,7 +302,7 @@
                         <div class="modal fade" id="mdModal{{log.id}}" tabindex="-1" role="dialog"
                             aria-labelledby="mdModalLabel{{log.id}}" aria-hidden="true">
                             <div class="modal-dialog" role="document">
-                                <div class="modal-content">
+                                <div class="modal-content" style="border:#000000 2px solid; background-color: #f1f8ff;">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="mdModalLabel{{log.id}}">
                                             Metadata
@@ -300,31 +312,44 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <b>Metrics:</b>
-                                        <ul>
-                                            {% for key, value in log.metrics.items %}
-                                            <li>{{ key }}: {{ value }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                    <div class="modal-body">
-                                        <b>Parameters:</b>
+                                        <b>Parameters: </b>
+                                        {% if log.params %}
                                         <ul>
                                             {% for key, value in log.params.items %}
                                             <li>{{ key }}: {{ value }}</li>
                                             {% endfor %}
                                         </ul>
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
                                     </div>
                                     <div class="modal-body">
-                                        <b>Model details:</b>
+                                        <b>Metrics: </b>
+                                        {% if log.metrics %}
+                                        <ul>
+                                            {% for key, value in log.metrics.items %}
+                                            <li>{{ key }}: {{ value }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-body">
+                                        <b>Model details: </b>
+                                        {% if log.model_details %}
                                         <ul>
                                             {% for key, value in log.model_details.items %}
                                             <li>{{ key }}: {{ value }}</li>
                                             {% endfor %}
                                         </ul>
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            style="background-color:#007bff; border-color:#007bff">Close
                                         </button>
                                     </div>
                                 </div>
@@ -368,40 +393,11 @@
                     </select>
                 </div>
             </div>
-            <!-- Working here
-            <div style="margin-top:50px;">
-                <canvas id="metricChart" width=50 height=20></canvas>
-            </div>
-
-            <div style="margin-top:50px;">
-                <canvas id="testChart" width=50 height=20></canvas>
-            </div>
--->
-
             <div style="margin-top:50px;">
                 <canvas id="metricChart"
                     data-url="{% url 'models:metric-chart' request.user model.project.slug model.id %}" width=50
                     height=20></canvas>
             </div>
-
-
-            <!--
-            <div
-                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h4>Summary</h4>
-            </div>
-            <div class="row>">
-                <div class="col-sm-6" style="margin-top:20px;">
-                    <p><b>Highest value:</b> <text id="max"></text></p>
-                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_max"></text></p>
-                    <p><b>Lowest value:</b> <text id="min"></text></p>
-                    <p style="margin-top: -20px"><b>For run with ID: </b><text id="id_min"></text></p>
-                </div>
-                <div class="col-sm-6">
-        
-                </div>
-            </div>
-            -->
             <script type="text/javascript"
                 src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
             <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
