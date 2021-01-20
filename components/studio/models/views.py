@@ -156,7 +156,6 @@ def details(request, user, project, id):
             'training_status': log.training_status,
             'training_started_at': log.training_started_at,
             'execution_time': log.execution_time,
-            'code_version': log.code_version,
             'current_git_repo': log.current_git_repo,
             'latest_git_commit': log.latest_git_commit,
             'system_details': ast.literal_eval(log.system_details),

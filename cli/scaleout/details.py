@@ -78,7 +78,7 @@ def commit_helper(repo, exit_message): # This function needs to be tested and mo
         return True
 
 
-def get_git_details(code_version):
+def get_git_details():
     exit_message = "Aborting this training session. Please {} before running 'stackn train' again."
     try: 
         import git
@@ -92,10 +92,10 @@ def get_git_details(code_version):
         if current_repo.is_dirty(): # This should be true if uncommitted files exist
             is_committed = commit_helper(current_repo, exit_message)
         latest_commit = current_repo.head.object.hexsha
-        print("Code version {} will be tied to the Git commit hash '{}'.".format(code_version, latest_commit))
+        print("Code version for this experiment: '{}'.".format(latest_commit))
         if not is_committed:
-            print("Since uncommitted files exist in the current repo, it will be noted in the training log that the code " \
-                + "used to train the model in this run does not correspond to the recorded commit hash. " \
+            print("Uncommitted files exist in the current repo. It will be noted in the log that the code " \
+                + "used for this experiment does not correspond to the recorded commit hash. " \
                 + "This is done mainly for the purpose of appropriate code versioning and future reproducibility.")
     except (git.InvalidGitRepositoryError, ValueError):
         latest_commit = "No recent Git commit to log"
@@ -113,8 +113,8 @@ def get_git_details(code_version):
     return (current_repo, latest_commit)
 
 
-def get_run_details(code_version):
+def get_run_details():
     system_details = get_system_details({})
     cpu_details = get_cpu_details({})
-    git_details = get_git_details(code_version)
+    git_details = get_git_details()
     return system_details, cpu_details, git_details

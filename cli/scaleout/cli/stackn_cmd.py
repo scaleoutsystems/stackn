@@ -69,10 +69,10 @@ def predict_cmd(ctx, model, version, inp):
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
 @click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
 @click.option('-f', '--training-file', required=False, default="src/models/train.py")
-@click.option('-c', '--code-version', prompt=True, cls=Determinant, determinant='log_off')
+#@click.option('-c', '--code-version', prompt=True, cls=Determinant, determinant='log_off')
 @click.option('-v', '--model-version', default='latest')
 @click.pass_context
-def train_cmd(ctx, log_off, model, run_id, training_file, code_version, model_version=[]):
+def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
     """ Train a model and log metadata """
     
     if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): # Only checks locally. Should we check if there exists a log on Studio with the same ID as well?
@@ -86,10 +86,41 @@ def train_cmd(ctx, log_off, model, run_id, training_file, code_version, model_ve
             model_exists = search_for_model(ctx, "models", model) 
             if model_exists:
                 client = ctx.obj['CLIENT']
-                client.train(model, model_version, run_id, training_file, code_version)
+                client.train(model, model_version, run_id, training_file)
             else: 
                 print("The model '{}' does not exist in the active project and cannot be trained.".format(model))
     else:
         current_dir = os.getcwd()
         print("Could not start a training session. Check that you have initialized a model "\
-            + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))    
+            + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))
+
+
+@main.command('run')
+@click.option('--log-off', flag_value='log-off', default=False)
+@click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
+@click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
+@click.option('-f', '--config-file', required=False, default="workflow.json")
+@click.option('-v', '--model-version', default='latest')
+@click.pass_context
+def run_cmd(ctx, log_off, model, run_id, config_file, model_version=[]):
+    """ Conduct experiment according to details in workflow.json """
+
+    print("Preparing to start experiment session.")
+    print("Experiment ID: '{}'".format(run_id))
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+        if log_off:
+            import subprocess
+            for key, value in data.items():
+                subprocess.run(['python', value])
+        else:
+            model_exists = search_for_model(ctx, "models", model)
+            if model_exists:
+                client = ctx.obj['CLIENT']
+                client.run(model, model_version, run_id, data)
+            else: 
+                print("The model '{}' does not exist in the active project.".format(model)) 
+    except Exception as e:
+        print("Could not start experiment.")
+        print("Reason: {}".format(e))

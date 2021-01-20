@@ -763,10 +763,10 @@ class StudioClient():
         return (start_time, execution_time, training_status)
 
 
-    def train(self, model, model_version, run_id, training_file, code_version):
+    def train(self, model, model_version, run_id, training_file):
         """ Train a model and log corresponding data in Studio. """
         
-        system_details, cpu_details, git_details = get_run_details(code_version)
+        system_details, cpu_details, git_details = get_run_details()
         print('Running training script...')
         training_output = self.run_training_file(model, training_file, run_id) # Change output of run_training_file
         repo = self.get_repository()
@@ -776,7 +776,6 @@ class StudioClient():
                          "trained_model": model,
                          "model_version": model_version,
                          "execution_time": training_output[1],
-                         "code_version": code_version,
                          "current_git_repo": str(git_details[0]),
                          "latest_git_commit": git_details[1],
                          "system_details": system_details,
@@ -790,6 +789,58 @@ class StudioClient():
             print("Created training log for {}".format(model))
             self.retrieve_metadata(model, run_id)
             return True
+
+
+    def run_experiment(self, model, run_id, data):
+        """ Run experiment and return date and time for training, and execution time """
+
+        start_time = datetime.now()
+        for step, exp_file in data.items():
+            try:
+                subprocess.run(['python', exp_file, run_id])
+            except Exception as e:
+                print("Experiment failed.")
+                print("Reason: {}".format(e))
+                experiment_status = 'FA'
+            experiment_status = 'DO'
+        end_time = datetime.now()
+        execution_time = str(end_time - start_time)
+        start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        return execution_time, experiment_status
+
+
+    def run(self, model, model_version, run_id, data):
+        """ Start model experiment and log corresponding data in Studio. """
+        
+        system_details, cpu_details, git_details = get_run_details()
+        print('Starting experiment...')
+        execution_time, experiment_status = self.run_experiment(model, run_id, data) 
+        #repo = self.get_repository()
+        #repo.bucket = 'experiment'
+
+        experiment_data = {"run_id": run_id,
+                         "trained_model": model,
+                         "model_version": model_version,
+                         "execution_time": execution_time,
+                         "current_git_repo": str(git_details[0]),
+                         "latest_git_commit": git_details[1],
+                         "system_details": system_details,
+                         "cpu_details": cpu_details,
+                         "training_status": experiment_status
+        }
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        r = requests.post(url, json=experiment_data, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Successfully created log for model experiment.')
+            print('Model: {}'.format(model))
+            print('Execution time: {}'.format(execution_time))
+            self.retrieve_metadata(model, run_id)
+            return True
+        else:
+            print('Failed to create log for model experiment.')
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {} - {}'.format(r.reason, r.text))
+            return False
 
 
     def predict(self, model, inp, version=None):
