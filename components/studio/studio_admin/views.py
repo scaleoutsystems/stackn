@@ -1,14 +1,15 @@
 from django.shortcuts import render
-from datetime import datetime, timedelta
 from .models import ActivityLog
 from projects.models import Project
 from models.models import Model
 from labs.models import Session
 from deployments.models import DeploymentInstance
 from monitor.helpers import get_resource
-from django.template.defaulttags import register
 from monitor.views import get_cpu_mem
 from django.contrib.auth.decorators import login_required
+from projects.helpers import delete_project_resources
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 @login_required
@@ -85,3 +86,60 @@ def load_deployment_resources(request):
         objects += deployment_list
 
     return render(request, template, {'objects': objects})
+
+
+def remove_project(request, project_slug):
+    if request.user.is_superuser:
+        project = Project.objects.get(slug=project_slug)
+
+        if project:
+            project_id = project.pk
+            retval = delete_project_resources(project)
+
+            if not retval:
+                print("Couldn't delete project!")
+                return HttpResponseRedirect(reverse('studio_admin:project_resources'))
+            
+            models = Model.objects.filter(project=project)
+            for model in models:
+                model.status = 'AR'
+                model.save()
+            project.delete()
+
+            print('Successfully de-allocated project resources!')
+
+            log = ActivityLog(user=request.user, headline="Projects", description="Removed project #" + project_id)
+            log.save()
+
+    return HttpResponseRedirect(reverse('studio_admin:project_resources'))
+
+
+def remove_lab_session(request, session_uid):
+    if request.user.is_superuser:
+        session = Session.objects.get(id=session_uid)
+
+        if session:
+            session_id = session.pk
+            session.helmchart.delete()
+
+            log = ActivityLog(user=request.user, headline="Lab Sessions", description="Removed session #" + session_id)
+            log.save()
+
+    return HttpResponseRedirect(reverse('studio_admin:lab_resources'))
+
+
+def remove_deployment(request, model_id):
+    if request.user.is_superuser:
+        model = Model.objects.get(id=model_id)
+
+        if model:
+            di = DeploymentInstance.objects.get(model=model)
+
+            if di:
+                di_id = di.pk
+                di.helmchart.delete()
+                
+                log = ActivityLog(user=request.user, headline="Deployments", description="Removed deployment #" + di_id)
+                log.save()
+
+    return HttpResponseRedirect(reverse('studio_admin:deployment_resources'))

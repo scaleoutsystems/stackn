@@ -181,13 +181,14 @@
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-light"
                                                     data-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-danger">Remove</button>
+                                                <button type="button" class="btn btn-danger"
+                                                    href="{% url 'studio_admin:remove_project' proj.slug %}">Remove</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <span>
-                                    <a href="#" class="studio-table-a">
+                                    <a href="{% url 'studio_admin:remove_project' proj.slug %}" class="studio-table-a">
                                         <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
                                         Remove
                                     </a>
