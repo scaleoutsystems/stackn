@@ -108,7 +108,7 @@ def remove_project(request, project_slug):
 
             print('Successfully de-allocated project resources!')
 
-            log = ActivityLog(user=request.user, headline="Projects", description="Removed project #" + project_id)
+            log = ActivityLog(user=request.user, headline="Projects", description="Removed project #{}".format(project_id))
             log.save()
 
     return HttpResponseRedirect(reverse('studio_admin:project_resources'))
@@ -122,7 +122,7 @@ def remove_lab_session(request, session_uid):
             session_id = session.pk
             session.helmchart.delete()
 
-            log = ActivityLog(user=request.user, headline="Lab Sessions", description="Removed session #" + session_id)
+            log = ActivityLog(user=request.user, headline="Lab Sessions", description="Removed session #{}".format(session_id))
             log.save()
 
     return HttpResponseRedirect(reverse('studio_admin:lab_resources'))
@@ -139,7 +139,7 @@ def remove_deployment(request, model_id):
                 di_id = di.pk
                 di.helmchart.delete()
                 
-                log = ActivityLog(user=request.user, headline="Deployments", description="Removed deployment #" + di_id)
+                log = ActivityLog(user=request.user, headline="Deployments", description="Removed deployment #{}".format(di_id))
                 log.save()
 
     return HttpResponseRedirect(reverse('studio_admin:deployment_resources'))
