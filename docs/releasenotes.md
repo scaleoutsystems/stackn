@@ -1,5 +1,18 @@
 # Release Notes
 
+## v0.4.0
+
+### New functionality
+
+### Bug fixes
+
+- Project's detailed page is now listing only the related activity logs
+- Public models are no more shown after the corresponding project has been removed
+
+### Other
+
+- New improved functionality for adding users as members to your project
+
 ## v0.3.0
 
 ### New functionality
