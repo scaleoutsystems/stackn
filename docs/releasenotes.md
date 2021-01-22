@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.4.0 (upcoming release)
+## v0.4.0
 
 ### New functionality
 
