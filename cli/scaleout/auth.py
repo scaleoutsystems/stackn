@@ -8,6 +8,8 @@ import base64
 from getpass import getpass
 from scaleout.utils.file import dump_to_file, load_from_file
 import logging
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger('cli')
 
@@ -53,7 +55,8 @@ def write_stackn_config(updated_values):
     status = dump_to_file(stackn_config, 'stackn', dirpath)
     if not status:
         logger.info('Failed to update config -- could not write to file.')
-
+    if status:
+        print("Successfully wrote config to file at {}".format(dirpath+'stackn.json'))
     
 
 def write_tokens(deployment, token, refresh_token, public_key, keycloak_host, studio_host):
@@ -155,8 +158,11 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
     if not studio_host:
         studio_host = input('Studio host: ')
 
+    #remove trailing / if present
+    studio_host = studio_host.rstrip('/')
+
     url = "{}/api/settings".format(studio_host)
-    r = requests.get(url)
+    r = requests.get(url, verify=secure)
     if (r.status_code >= 200 or r.status_code <= 299):
         studio_settings = json.loads(r.content)["data"]
         keycloak_host = next(item for item in studio_settings if item["name"] == "keycloak_host")["value"]
@@ -176,7 +182,7 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
     return access_token
 
 
-def get_bearer_token(url, username, password):
+def get_bearer_token(url, username, password, secure=True):
     """ Exchange username,password for an auth token.
         TODO: extend to get creds from keyring. """
     data = {
@@ -184,7 +190,7 @@ def get_bearer_token(url, username, password):
         'password': password
     }
 
-    r = requests.post(url, data=data)
+    r = requests.post(url, data=data, verify=secure)
 
     if r.status_code == 200:
         return json.loads(r.content)['token']

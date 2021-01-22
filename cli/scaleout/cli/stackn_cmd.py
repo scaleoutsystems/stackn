@@ -18,13 +18,13 @@ from scaleout.details import get_run_details
 #               )
 
 @main.command('setup')
-@click.option('--secure/--insecure', default=True)
+@click.option('--secure/--insecure', is_flag=True, default=True)
 @click.pass_context
 def setup_cmd(ctx, secure):
     login(secure=secure)
 
 @main.command('login')
-@click.option('--secure/--insecure', default=True)
+@click.option('--secure/--insecure', is_flag=True, default=True)
 @click.pass_context
 def login_cmd(ctx, secure):
     stackn_config, load_status = get_stackn_config(secure=secure)
