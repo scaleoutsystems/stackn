@@ -131,22 +131,49 @@
     {% if user_permissions.add_member %}
     <div class="container-fluid" style="padding: 15px;">
         <h5>Grant access</h5>
-        <p>For granting access to this project, select one or more users from the list below.</p>
+        <p>For granting/revoking access to this project, select one or more users from the list below.</p>
         <p>Hold <b>ctrl</b> or <b>shift</b> (or drag with the mouse) to select more than one.</p>
+        {% if platform_users|length == project.authorized.all|length %}
+        <div class="get-started-header">
+            <p>All users have already been added as members to this project.</p>
+        </div>
+        {% else %}
         <form method="POST" action="{% url 'projects:grant_access' request.user project.slug %}">
             {% csrf_token %}
 
             <div class="form-group">
                 <select name="selected_users" required="" multiple="" class="form-control" id="id_selected_users">
                     {% for user in platform_users %}
-                    <option value="{{ user.pk }}"
-                            {% if user in project.authorized.all %} style="background-color: #D5F5E3;" {% endif %}>
+                    {% if user not in project.authorized.all %}
+                    <option value="{{ user.pk }}">
+                        {{ user.username }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Grant</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if user_permissions.add_member and project.authorized.all %}
+    <div class="container-fluid" style="padding: 15px;">
+        <h5>Revoke access</h5>
+        <form method="POST" action="{% url 'projects:revoke_access' request.user project.slug %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <select name="selected_users" required="" multiple="" class="form-control" id="id_selected_users">
+                    {% for user in project.authorized.all %}
+                    <option value="{{ user.pk }}">
                         {{ user.username }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-danger">Revoke</button>
         </form>
     </div>
     {% endif %}
