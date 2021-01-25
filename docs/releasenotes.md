@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.4.0 (upcoming release)
+## v0.4.0
 
 ### New functionality
 - Studio Administration module to monitor and manage resources as an alternative to Django Admin
