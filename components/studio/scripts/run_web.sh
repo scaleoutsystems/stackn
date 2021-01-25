@@ -1,12 +1,12 @@
 #!/bin/bash
 sleep 5
-cd modules
-echo "installing modules..."
-for d in */ ; do
-    echo "installing $d"
-    python3 -m pip install -e $d
-done
-cd ..
+# cd modules
+# echo "installing modules..."
+# for d in */ ; do
+#     echo "installing $d"
+#     python3 -m pip install -e $d
+# done
+# cd ..
 # If we are running telepresence, use the correct settings.
 [ ! -z "${TELEPRESENCE_ROOT}" ] &&  echo "Copy settings from Telepresence root directory" && \
     cp $TELEPRESENCE_ROOT/app/studio/settings.py studio/tele_settings.py && \

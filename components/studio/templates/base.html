@@ -82,9 +82,11 @@
                 <ul class="list-group d-flex">
 
                     <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
-                        <p class="d-flex justify-content-center">
-                            <img src="{% static 'img/stackn.png' %}" width="108" height="44">
-                        </p>
+                        <a href="{% url 'models:index' %}">
+                            <p class="d-flex justify-content-center">
+                                <img src="{% static 'img/stackn.png' %}" width="108" height="44">
+                            </p>
+                        </a>
                     </li>
                     <li class="list-inline">
                         <a class="nav-link" href="{% url 'models:index' %}" style="text-decoration: none; color:inherit;">
@@ -133,6 +135,16 @@
                         </a>
                     </li>
                     -->
+
+                    <li class="list-inline">
+                        <a class="nav-link" href="{% url 'studio_admin:index' %}" style="text-decoration: none; color:inherit;">
+                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
+                                                                          src="{% static '/icons/person-lines-fill.svg' %}"
+                                                                          alt="" width="24" height="24"
+                                                                          title=""></p>
+                            <p class="d-flex justify-content-center">Admin</p>
+                        </a>
+                    </li>
 
                     <li class="list-inline" style="margin-top: auto; margin-bottom: 25px; margin-left: auto; margin-right: auto;">
                         <a href="https://scaleoutsystems.github.io/stackn/" target="_blank">
