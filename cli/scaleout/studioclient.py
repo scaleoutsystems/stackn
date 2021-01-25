@@ -44,6 +44,8 @@ class StudioClient():
             self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
             if load_status:
                 self.found_project = True
+                if type(self.project) == list:
+                    self.project = self.project[0]
                 self.project_slug = self.project['slug']
                 # else:
                 #     print('Could not load project config for '+self.stackn_config['active_project'])
