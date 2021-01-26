@@ -194,6 +194,7 @@ class StudioClient():
         proj_path = project_dir+'/'+project_name+'.json'
         # Update STACKN config
         stackn_config['active_project'] = project_name
+        stackn_config['secure'] = self.secure_mode
         sauth.write_stackn_config(stackn_config)
         if not os.path.exists(proj_path):
             if not os.path.exists(project_dir):
