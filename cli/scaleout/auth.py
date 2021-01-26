@@ -76,17 +76,13 @@ def get_stackn_config(secure=True):
     # if not os.path.exists(os.path.expanduser('~/.scaleout/stackn.json')):
     #     print('You need to setup STACKn first.')
     #     login()
-    use_secure = secure
 
     stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
     if not load_status:
         print('Failed to load stackn config file.')
         print('You need to setup STACKn first.')
-        try:
-            use_secure = stackn_config['secure']
-        except Exception as e:
-            pass
-        login(secure=use_secure)
+
+        login(secure=secure)
         stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout'))
         # return None
 
