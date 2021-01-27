@@ -103,7 +103,7 @@ def get_remote_config():
         print('No active project: Create a new project or set an existing project.')
         return [], False
 
-def get_token(client_id='studio-api', realm='STACKn', secure=True):
+def get_token(client_id='studio-api', realm='STACKn', secure=True, do_refresh=False):
     # stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
     # if not load_status:
     #     print('Failed to load stackn config file.')
@@ -118,14 +118,17 @@ def get_token(client_id='studio-api', realm='STACKn', secure=True):
     
     access_token = token_config['access_token']
 
-    try:
-        public_key_full = '-----BEGIN PUBLIC KEY-----\n'+token_config['public_key']+'\n-----END PUBLIC KEY-----'
-        access_token_json = jwt.decode(access_token,
-                                    public_key_full,
-                                    algorithms='RS256',
-                                    audience='studio-api')
-        # print('Token valid for user '+access_token_json['preferred_username'])
-    except:
+    if do_refresh==False:
+        try:
+            public_key_full = '-----BEGIN PUBLIC KEY-----\n'+token_config['public_key']+'\n-----END PUBLIC KEY-----'
+            access_token_json = jwt.decode(access_token,
+                                        public_key_full,
+                                        algorithms='RS256',
+                                        audience='studio-api')
+            # print('Token valid for user '+access_token_json['preferred_username'])
+        except:
+            do_refresh = True
+    if do_refresh:
         # Try to refresh token
         token_url = os.path.join(token_config['keycloak_url'], 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
         req = {'grant_type': 'refresh_token',
