@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
 from projects.models import Environment
+from clusters.models import Cluster
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
@@ -534,3 +535,13 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         if success:
             project.save()
             return HttpResponse('Ok', status=200)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def base_url(self, request):
+        name = request.data['name']
+        project = Project.objects.filter(name=name,
+                                         owner=request.user).first()
+        cluster = Cluster.objects.get(name=project.cluster)
+        res = {'base_url': cluster.base_url}
+        print(res)
+        return HttpResponse(cluster.base_url, status=200)

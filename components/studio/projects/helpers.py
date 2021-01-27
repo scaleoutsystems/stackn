@@ -31,18 +31,42 @@ def create_project_resources(project, username, cluster, repository=None):
 
 
 def delete_project_resources(project):
-    retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
+    # retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
 
-    if retval:
-        # Delete Keycloak project client
-        kc = keylib.keycloak_init()
-        keylib.keycloak_delete_client(kc, project.slug)
+    # if retval:
+    #     # Delete Keycloak project client
+    #     kc = keylib.keycloak_init()
+    #     keylib.keycloak_delete_client(kc, project.slug)
         
-        scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
-        keylib.keycloak_delete_client_scope(kc, scope_id)
-        return True
+    #     scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+    #     keylib.keycloak_delete_client_scope(kc, scope_id)
+    #     return True
 
-    return False
+    # return False
+    try:
+        from deployments.models import HelmResource
+        helmresource = HelmResource.objects.get(name=str(project.slug))
+        helmresource.delete()
+    except Exception as e:
+        print("Failed to delete project helm resource object.")
+        print(e)
+
+    # if retval:
+        # Delete Keycloak project client
+    kc = keylib.keycloak_init()
+    keylib.keycloak_delete_client(kc, project.slug)
+    
+    scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+    keylib.keycloak_delete_client_scope(kc, scope_id)
+
+    from models.models import Model
+    models = Model.objects.filter(project=project)
+    for model in models:
+        model.status = 'AR'
+        model.save()
+    # project.delete()
+
+    return True
 
 
 def get_minio_keys(project):

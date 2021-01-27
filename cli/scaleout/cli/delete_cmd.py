@@ -28,7 +28,7 @@ def delete_model_cmd(ctx, name, version=None):
 
 @delete_cmd.command('deployment')
 @click.option('-n', '--name', required=True)
-@click.option('-v', '--version')
+@click.option('-v', '--version', required=True)
 @click.pass_context
 def delete_deployment_cmd(ctx, name, version=None):
     """ Delete a model """

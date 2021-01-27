@@ -100,7 +100,7 @@ class StudioClient():
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
             'minio_host': '{}-minio.{}'.format(self.project_slug,
-                                               self.token_config['studio_url'].replace('https://', '').replace('http://', '')),
+                                               project['base_url']),
             'minio_port': 9000,
             'minio_access_key': self.decrypt_key(project['project_key']),
             'minio_secret_key': self.decrypt_key(project['project_secret']),
@@ -183,6 +183,18 @@ class StudioClient():
             print('Reason: {}'.format(r.reason))
             return None
 
+    def get_project_base(self, params=[]):
+        url = self.endpoints['projects']+'base_url/'
+        r = requests.post(url, json=params, headers=self.auth_headers, verify=self.secure_mode)
+        # print(r.content)
+        if (r.status_code < 200 or r.status_code > 299):
+            print("Getting base url failed.")
+            print('Returned status code: {}'.format(r.status_code))
+            print('Reason: {}'.format(r.reason))
+            return None
+        else:
+            return {'base_url': r.content.decode('utf-8')}
+
     def set_project(self, project_name):
         # Set active project
         stackn_config, load_status = sauth.get_stackn_config()
@@ -202,6 +214,10 @@ class StudioClient():
             # Fetch and write project settings file
             print('Writing new project config file.')
             project = self.get_projects({'name': project_name})
+            base_url = self.get_project_base({'name': project_name})
+            # print(base_url)
+            # print(project)
+            project.update(base_url)
             status = dump_to_file(project, project_name, project_dir)
             if not status:
                 print('Failed to set project -- could not write to config.')

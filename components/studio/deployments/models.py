@@ -152,11 +152,19 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     deployment_name = slugify(model.name)
     deployment_version = slugify(model.version)
-    deployment_endpoint = '{}-{}.{}'.format(model.name,
-                                            model.version,
-                                            settings.DOMAIN)
+    
+    cluster_name = instance.model.project.cluster
+    cluster = Cluster.objects.get(name=cluster_name)
+    namespace = cluster.namespace
+    global_domain = cluster.base_url
+    # URL = 'https://'+RELEASE_NAME+'.'+cluster.base_url
 
-    deployment_endpoint = settings.DOMAIN
+
+    # deployment_endpoint = '{}-{}.{}'.format(model.name,
+    #                                         model.version,
+    #                                         cluster.base_url)
+
+    deployment_endpoint = 'studio.'+cluster.base_url
     deployment_path = '/{}/serve/{}/{}/'.format(model.project.slug,
                                                 slugify(model.name),
                                                 slugify(model.version))
@@ -178,9 +186,9 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     minio_host = project_slug + '-minio:9000'
 
-    global_domain = settings.DOMAIN
+    global_domain = cluster.base_url
 
-    HOST = settings.DOMAIN
+    HOST = cluster.base_url
     RELEASE_NAME = slugify(str(project_slug) + '-' + str(deployment_name) + '-' + str(deployment_version))
     burl = os.path.join('https://', HOST)
     eurl = os.path.join(deployment_endpoint, deployment_path)
@@ -233,7 +241,7 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     parameters = {'release': RELEASE_NAME,
                   'chart': 'deploy',
-                  'namespace': settings.NAMESPACE,
+                  'namespace': namespace,
                   'appname': instance.appname,
                   'replicas': '1',
                   'global.domain': global_domain,
@@ -274,10 +282,11 @@ def pre_save_deployment(sender, instance, using, **kwargs):
 
     print('creating chart')
     helmchart = HelmResource(name=RELEASE_NAME,
-                             namespace='Default',
+                             namespace=namespace,
                              chart='deploy',
                              params=parameters,
-                             username=instance.created_by)
+                             username=instance.created_by,
+                             cluster=cluster_name)
     helmchart.save()
     instance.helmchart = helmchart
 

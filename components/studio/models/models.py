@@ -165,6 +165,7 @@ def pre_delete_model(sender, instance, using, **kwargs):
         client.remove_object('models', instance.uid)
     except:
         print('Failed to delete model object {} from minio store.'.format(instance.uid))
+        pass
     # Check if model has been deployed, if so, delete deployment.
     if instance.status == 'DP':
         deployment = DeploymentInstance.objects.get(model=instance)
