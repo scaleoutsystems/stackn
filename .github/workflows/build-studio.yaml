@@ -20,11 +20,6 @@ jobs:
     
     - uses: actions/checkout@v2     
 
-    - name: Set MiniO credentials from secrets
-      working-directory: ${{ env.working-directory }}
-      run: |
-        python set_minio_keys.py ${{ secrets.MINIO_ACCESS_KEY }} ${{ secrets.MINIO_SECRET_KEY }}
-
     - name: Setup variables
       id: wf-vars
       env:
