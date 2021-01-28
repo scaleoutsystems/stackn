@@ -42,20 +42,6 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
-    #- name: Checkout alliance-admin
-    #  uses: actions/checkout@v2
-    #  with:
-    #    repository: scaleoutsystems/scaleout-studio-alliance-admin
-    #    ssh-key: ${{ secrets.ALLIANCE_ADMIN_KEY }}
-    #    path: modules/scaleout-studio-alliance-admin
-      
-    #- name: Checkout platform-module
-    #  uses: actions/checkout@v2
-    #  with:
-    #    repository: scaleoutsystems/scaleout-studio-platform-module
-    #    ssh-key: ${{ secrets.PLATFORM_KEY }}
-    #    path: modules/scaleout-studio-platform-module
-
     - name: docker build studio
       env:      
         DOCKER_URL: scaleoutsystems
