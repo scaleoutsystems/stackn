@@ -39,7 +39,7 @@ class MINIORepository(Repository):
             from urllib3.poolmanager import PoolManager
             manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
             minio_url = "{}".format(config['minio_host'])
-            print(minio_url)
+            # print(minio_url)
             # minio_url = 'af-bert-fzn-minio.demo.stackn.dev/'
             # access_key = 'DhIw6yYVYiX0PDCUVy6c'
             # secret_key = 'TnxHLG4WlfsozCSFNA450DlO3v1WI58wFGl48AhM'
@@ -48,10 +48,10 @@ class MINIORepository(Repository):
                                 secret_key=secret_key,
                                 http_client=manager)
         else:
-            print("SECURE MODE")
+            # print("SECURE MODE")
             
             minio_url = "{}".format(config['minio_host']).replace('.studio', '')
-            print(minio_url)
+            #print(minio_url)
             # print(minio_url)
             # print(access_key)
             # print(secret_key)
@@ -83,8 +83,6 @@ class MINIORepository(Repository):
             # print(bucks)
             # exit()
             self.client.make_bucket(bucket_name)
-        except Exception as err:
-            print(err)
         except BucketAlreadyOwnedByYou as err:
             pass
         except BucketAlreadyExists as err:
