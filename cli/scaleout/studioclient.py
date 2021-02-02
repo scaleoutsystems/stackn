@@ -260,6 +260,13 @@ class StudioClient():
             print('Status code: {}'.format(res.status_code))
             print(res.text)
 
+    def get_labs_bulk(self, flavor):
+        url = self.endpoints['projects']+'get_labs_bulk/'
+        data = {"flavor_slug": flavor}
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        print(res.content.decode('utf-8'))
+        # print(json.loads(res.content))
+
     def delete_projects(self, userfile):
         users = pandas.read_csv(userfile)
         url = self.endpoints['projects']+'delete_projects/'
