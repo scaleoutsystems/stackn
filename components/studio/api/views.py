@@ -707,7 +707,13 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                     lab.helmchart.delete()
 
         return HttpResponse('Ok', status=200)
-    
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def delete_labs_appname(self, request):
+        lab = Session.objects.get(appname=request.data['appname'])
+        lab.helmchart.delete()
+        return HttpResponse('Ok', status=200)
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
     def delete_projects(self, request):
         users = request.data['users']

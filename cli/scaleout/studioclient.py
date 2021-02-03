@@ -260,6 +260,17 @@ class StudioClient():
             print('Status code: {}'.format(res.status_code))
             print(res.text)
 
+    def delete_labs_appname(self, appname):
+        url = self.endpoints['projects']+'delete_labs_appname/'
+        data = {'appname': appname}
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Deleted lab with appname {}.'.format(appname))
+        else:
+            print('Failed.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
     def get_labs_bulk(self, flavor):
         url = self.endpoints['projects']+'get_labs_bulk/'
         data = {"flavor_slug": flavor}
