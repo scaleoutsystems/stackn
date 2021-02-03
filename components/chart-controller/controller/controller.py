@@ -58,14 +58,25 @@ class Controller:
  
         for key in options:
             try:
+                print('______parsing option______')
                 args.append('--set')
                 # If list, don't escape ,
+                if type(options[key]) != str:
+                    options[key] = str(options[key])
                 if len(options[key]) > 0 and options[key][0] == '{' and options[key][-1] == '}':
+                    print('json')
+                    print(key, flush=True)
+                    print(options[key], flush=True)
                     args.append(key+"="+options[key])
                 # And if not list, we should escape ,
                 else:
+                    print('not json')
+                    print(key, flush=True)
+                    print(options[key], flush=True)
                     args.append(key+"="+options[key].replace(',', '\,'))
-            except:
+                print('__________________')
+            except Exception as e:
+                print(e)
                 print('Failed to process input arguments.')
                 return json.dumps({"status": "failed", 'reason':'Failed to process input arguments.'})
 
