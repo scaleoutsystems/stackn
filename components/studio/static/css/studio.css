@@ -23,6 +23,17 @@ h2 {
     padding-bottom: 0px;
 }
 
+.sidebar-main {
+    width: 8%;
+    background: #F1F6F9;
+    color: #443742;
+}
+
+.sidebar-bottom-icon {
+    color: inherit;
+    padding: 0 2.5px 0 2.5px;
+}
+
 .sidebar {
     position: fixed;
     top: 0;
@@ -93,13 +104,21 @@ h2 {
     height: 100%;
 }
 
+.body-main {
+    width: 92%;
+    padding: 0 20 0 20;
+    color: #443742;
+}
+
 /*
  * Projects
  */
 
 .card-add-project {
     margin-bottom: 15px;
-    background-color: #EAF2F8;
+    background-color: #F1F6F9;
+    border: 0;
+    border-radius: 0;
 }
 
 .form-add-project {
@@ -107,9 +126,22 @@ h2 {
     margin-top: 14px;
 }
 
+.form-input {
+    border-radius: 0;
+}
+
 .card-project {
     margin-bottom: 15px;
     height: 302px;
+    border: 0;
+    border-radius: 0;
+    background: #F1F6F9;
+}
+
+.card-project-title {
+    border-bottom: 1px solid #C6DBE7;
+    padding-bottom: 15px;
+    margin: 0px;
 }
 
 /*
@@ -222,4 +254,18 @@ h2 {
     background: #79aec8;
     color: #fdfefe;
     font-weight: bold;
+}
+
+.button-orange {
+    width: fit-content;
+    background-color: #F5853F;
+    color: #ffffff;
+    border-radius: 0;
+}
+
+.button-blue {
+    width: fit-content;
+    background-color: #4281A4;
+    border-radius: 0;
+    color: #ffffff;
 }
