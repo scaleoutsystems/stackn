@@ -115,7 +115,13 @@ h2 {
 .body-main {
     width: 92%;
     padding: 0 20 0 20;
-    color: #443742;
+    color: #210124;
+}
+
+.body-project {
+    width: 80%;
+    padding: 0 15px 0 15px;
+    color: #210124;
 }
 
 /*
@@ -236,14 +242,15 @@ h2 {
  */
 
 .recent-actions {
-    background-color: #f8f8f8;
-    color: #424949;
+    background-color: #F1F6F9;
+    color: #210124;
+    margin: 0 0 0 15px;
 }
 
 .recent-actions-h4 {
     padding: 16px;
     margin-bottom: 16px;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid #C6DBE7;
 }
 
 .recent-actions-h6 {
