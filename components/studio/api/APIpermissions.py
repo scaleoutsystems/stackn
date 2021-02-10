@@ -25,7 +25,10 @@ class ProjectPermission(BasePermission):
 
         is_authorized = False
         if request.method in project_rules:
-            is_authorized = keylib.keycloak_verify_user_role(request, project.slug, project_rules[request.method])
+            is_authorized = keylib.keycloak_verify_user_role(request,
+                                                             project.slug,
+                                                             project_rules[request.method],
+                                                             aud=project.slug)
 
         print('Is authorized: {}'.format(is_authorized))
         return is_authorized

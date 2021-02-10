@@ -27,11 +27,16 @@ class Volume(models.Model):
 
 @receiver(pre_save, sender=Volume, dispatch_uid='volume_pre_save_signal')
 def pre_save_volume(sender, instance, using, **kwargs):
+
+    # TODO: Fix this for multicluster setup (deploy to cluster namespace, not Studio namespace)
+    NAMESPACE = settings.NAMESPACE
+
     instance.slug = slugify(instance.name+'-'+instance.project_slug)
     user = instance.created_by
     parameters = {'release': instance.slug,
                   'chart': 'volume',
                   'name': instance.slug,
+                  'namespace': NAMESPACE,
                   'accessModes': 'ReadWriteMany',
                   'storageClass': settings.STORAGECLASS,
                   'size': instance.size}

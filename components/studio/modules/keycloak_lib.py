@@ -106,6 +106,7 @@ def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expir
         return None
     try:
         # print('Decoding user token: {}'.format(request.user))
+        print(access_token)
         user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
         # print('Successfully decoded token.')
         # print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
@@ -215,7 +216,8 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
     client_rep = {'clientId': client_id,
                   'baseUrl': base_url,
                   'rootUrl': root_url,
-                  'redirectUris': redirectUris}
+                  'redirectUris': redirectUris,
+                  'fullScopeAllowed': "False"}
     logger.debug("Client rep: ")
     logger.debug(client_rep)
     res = r.post(create_client_url,
