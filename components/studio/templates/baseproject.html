@@ -13,7 +13,12 @@
 {% endblock %}
 
 {% block sidebar %}
-<div class="col-md-1 new-sidebar" style="min-width: 180px;">
+<div class="sidebar-project">
+    <div class="d-flex justify-content-center sidebar-project-title">
+        <p class="sidebar-project-title-p">
+            {{ project.name }}
+        </p>
+    </div>
     <ul class="nav flex-column list-group">
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/house.svg' %}" alt="" width="24" height="24" title="Bootstrap"

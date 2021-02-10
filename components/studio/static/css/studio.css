@@ -15,17 +15,26 @@ h2 {
  * Sidebar
  */
 
-.new-sidebar {
-    background-color: #FBFCFC;
-    padding-top: 10px;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
+.sidebar-project {
+    background-color: #F1F6F9;
+    width: 12%;
+}
+
+.sidebar-project-title {
+    margin: 25px 0 40px 0;
+}
+
+.sidebar-project-title-p {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-all;
+    padding: 0 15px 0 15px;
 }
 
 .sidebar-main {
     width: 8%;
-    background: #F1F6F9;
+    background: #E2EDF3;
     color: #443742;
 }
 
@@ -87,8 +96,7 @@ h2 {
 }
 
 .sidebar-item {
-
-    background-color: #FBFCFC;
+    background-color: #F1F6F9;
     border: 0px;
 }
 
