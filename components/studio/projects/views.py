@@ -224,7 +224,9 @@ def details(request, user, project_slug):
                 readme = md.convert(payload['readme'])
     except Exception as e:
         logger.error("Failed to get response from {} with error: {}".format(url, e))
-
+        
+    activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+    
     return render(request, template, locals())
 
 

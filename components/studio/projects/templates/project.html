@@ -1,131 +1,40 @@
-
 {% extends 'baseproject.html' %}
-
 {% load staticfiles %}
-
 {% block content %}
+
 {% if is_authorized %}
-<div class="col-md-9">
+<div class="body-project">
     <div class="d-flex flex-column pt-3 pb-3 mb-5 border-bottom">
-        <h3>{{ project.name }}</h3>
-        <h5>{{ project.description }}</h5>
+        <h3>Overview</h3>
     </div>
-    <div class="row">
-        <div class="col-sm-6">
-            {% if not readme %}
-            <h4>
-                Get started
+    <div class="row d-flex flex-row">
+        <div class="col-md-4 recent-actions">
+            <h4 class="recent-actions-h4">
+                description
             </h4>
-            <div>
-                <div class="get-started-header">
-                    <h3 style="font-size: 20px;">Quick setup — if you don't know where to start</h3>
-                    <p class="mb-0">
-                        This is a quick introduction to Scaleout Studio which will get you through the basics
-                        and help you spin up your own project by creating a Jupyter Notebook in a new
-                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> environment.
-                    </p>
-                </div>
-                <div class="get-started-box">
-                    <h3 style="font-size: 20px;">Create a new
-                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> session
-                    </h3>
-                    <p>
-                        Labs is the work area for experimentation and development of machine learning projects.
-                        It's based on Lab Session which is a provisioned Jupyter Notebook session running in a
-                        virtual environment.
-                    </p>
-                    <div class="d-flex flex-column">
-                        To create a Lab Session, do the following:
-                        <ol>
-                            <li>Go to <a href="{% url 'labs:index' request.user project.slug %}">Labs</a></li>
-                            <li>Select 1 CPU, 2 RAM to start an instance with 1 virtual CPU and 2 GB RAM from the
-                                Kubernestes cluster
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-                <div class="get-started-box">
-                    <h3 style="font-size: 20px;">Upload datasets to MinIO S3 storage</h3>
-                    <p class="mb-0">
-                        You can also upload files to a
-                        <a href="https://{{ project.slug }}-minio.{{ url_domain }}/">MinIO</a>
-                        S3 storage.
-                        You can find the access and secret keys on the
-                        <a href="{% url 'projects:settings' request.user project.slug %}">Settings</a>
-                        page.
-                    </p>
-                </div>
-                <div class="get-started-box">
-                    <h3 style="font-size: 20px;">Check out our example projects</h3>
-                    <p class="mb-0">
-                        We have several example projects available in our
-                        <a href="https://github.com/scaleoutsystems" target="_blank">GitHub</a> page.
-                    </p>
-                    <p class="mb-0">
-                        Start with exploring the
-                        <a href="https://github.com/scaleoutsystems/aml-example-project" target="_blank">AML</a>
-                        example project.
-                    </p>
-                </div>
-                <!-- Not available with the first release!
-
-                <div class="get-started-box">
-                    <h3 style="font-size: 20px;">Import code from another repository</h3>
-                    <p>You're seeing this quick set-up guide because you haven't imported files from an
-                        existing GitHub repository. If you have such repository, you can still import its files
-                        and use them in your project.</p>
-                    <a href="#">
-                        <button type="button" class="btn btn-light">Import</button>
-                    </a>
-                </div>
-                -->
-            </div>
-            {% else %}
-            <div class="readme-box">
-                {{ readme | safe }}
-            </div>
-            {% endif %}
+            <h6 class="recent-actions-h6">
+                {{ project.description }}
+            </h6>
         </div>
-        <div class="col-sm-6">
-            <form method="POST" id="project_activity"
-                  project-activity-url="{% url 'projects:project_activity' request.user project.slug %}" novalidate>
-                {% csrf_token %}
-
-                <h4 class="d-flex justify-content-start">
-                    <span style="padding-top: 3px; padding-right: 15px;">
-                        Project activity
-                    </span>
-                    <select id="id_time_period" class="form-control" style="width: 30%;">
-                        <option value="always">--</option>
-                        <option value="always">Always</option>
-                        <option value="month">Last month</option>
-                        <option value="week">Last week</option>
-                    </select>
-                </h4>
-                <div id="project_logs">
-                </div>
-            </form>
+        <div class="col-md-4 recent-actions">
+            <h4 class="recent-actions-h4">
+                Recent actions
+            </h4>
+            <h6 class="recent-actions-h6">{{ project.name }}</h6>
+            <div id="activity_logs">
+                <ul class="timeline">
+                    {% for log in activity_logs %}
+                    <li>
+                        <a target="_blank" href="#">{{ log.headline }}</a>
+                        <a href="#" class="float-right">{{ log.created_at }}</a>
+                        <p>{{ log.description }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 {% endif %}
-{% endblock %}
 
-{% block extrascripts %}
-<script>
-    $("#id_time_period").change(function () {
-      var url = $("#project_activity").attr("project-activity-url");
-      var period = $(this).val();
-
-      $.ajax({
-        url: url,
-        data: {
-          'period': period
-        },
-        success: function (data) {
-          $("#project_logs").html(data);
-        }
-      });
-    });
-</script>
 {% endblock %}
