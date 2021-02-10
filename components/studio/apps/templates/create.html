@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="col-md-11">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Create {{ app.name }}</h2>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <h3>Settings:</h3>
+            <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
+                {% csrf_token %}
+                <textarea name="settings" rows="30" cols="50">{{ app.settings }}</textarea><br>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+        
+    </div>
+
+</div>
+{% endblock %}
