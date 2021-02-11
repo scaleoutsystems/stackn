@@ -300,31 +300,3 @@ def publish_project(request, user, project_slug):
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
-
-
-@login_required
-def load_project_activity(request, user, project_slug):
-    template = 'project_activity.html'
-
-    member = None
-    project = None
-    try:
-        member = User.objects.get(username=user)
-        project = Project.objects.get(slug=project_slug)
-    except Exception as e:
-        print(e)
-
-    if member and project:
-        time_period = request.GET.get('period')
-        if time_period == 'week':
-            last_week = datetime.today() - timedelta(days=7)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_week).order_by('-created_at')
-        elif time_period == 'month':
-            last_month = datetime.today() - timedelta(days=30)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_month).order_by('-created_at')
-        else:
-            project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
-    else:
-        project_logs = ProjectLog.objects.none()
-
-    return render(request, template, {'project_logs': project_logs})
