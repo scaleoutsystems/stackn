@@ -10,7 +10,7 @@
     <div class="row d-flex flex-row">
         <div class="col-md-4 recent-actions">
             <h4 class="recent-actions-h4">
-                description
+                Description
             </h4>
             <h6 class="recent-actions-h6">
                 {{ project.description }}
@@ -33,6 +33,111 @@
                 </ul>
             </div>
         </div>
+    </div>
+    <div class="d-flex flex-column pt-4 pb-3">
+        <h4>Notebooks</h4>
+    </div>
+    <div class="row">
+        {% if labs %}
+        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+            <thead class="studio-table-header">
+                <tr>
+                    <th scope="col">UID</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lab in labs %}
+                <tr>
+                    <th scope="row">{{ lab.id }}</th>
+                    <td>{{ lab.lab_session_owner.username }}</td>
+                    <td>{{ lab.created_at }}</td>
+                    <td>{{ lab.get_status.display() }}</td>
+                    <td>
+                        <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
+                            <button class="btn mt-auto button-orange" style="width: fit-content;">
+                                Open
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="margin-left: 20px;">
+            No Lab Sessions have been created within this project yet.
+        </p>
+        {% endif %}
+    </div>
+    <div class="d-flex flex-column pt-4 pb-3">
+        <h4>Models</h4>
+    </div>
+    <div class="row">
+        {% if models %}
+        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+            <thead class="studio-table-header">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Version</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Accessability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in models %}
+                <tr>
+                    <th scope="row">{{ model.name }}</th>
+                    <td>{{ model.version }}</td>
+                    <td>{{ model.uploaded_at }}</td>
+                    <td>{{ model.get_status_display() }}</td>
+                    <td>{{ model.get_access_display() }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="margin-left: 20px;">
+            No models have been uploaded to this project yet.
+        </p>
+        {% endif %}
+    </div>
+    <div class="d-flex flex-column pt-4 pb-3">
+        <h4>Deployments</h4>
+    </div>
+    <div class="row">
+        {% if deployments %}
+        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+            <thead class="studio-table-header">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Deployed</th>
+                    <th scope="col">Deployed by</th>
+                    <th scope="col">Endpoint</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in deployments %}
+                <tr>
+                    <th scope="row">{{ d.pk }}</th>
+                    <td>{{ d.model.name }}:{{ d.model.version }}</td>
+                    <td>{{ d.created_at }}</td>
+                    <td>{{ d.created_by }}</td>
+                    <td>https://{{ d.endpoint }}{{ d.path }}{{ d.deployment.path_predict }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="margin-left: 20px;">
+            No models have been deployed within this project yet.
+        </p>
+        {% endif %}
     </div>
 </div>
 {% endif %}

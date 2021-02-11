@@ -19,7 +19,9 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-
+from labs.models import Session
+from models.models import Model
+from deployments.models import DeploymentInstance
 
 logger = logging.getLogger(__name__)
 
@@ -208,24 +210,28 @@ def details(request, user, project_slug):
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        message = 'No project found'
+        message = 'Project not found.'
 
-    filename = None
-    readme = None
-    url = 'http://{}-file-controller/readme'.format(project.slug)
-    try:
-        response = r.get(url)
-        if response.status_code == 200 or response.status_code == 203:
-            payload = response.json()
-            if payload['status'] == 'OK':
-                filename = payload['filename']
+    # filename = None
+    # readme = None
+    # url = 'http://{}-file-controller/readme'.format(project.slug)
+    # try:
+    #     response = r.get(url)
+    #     if response.status_code == 200 or response.status_code == 203:
+    #         payload = response.json()
+    #         if payload['status'] == 'OK':
+    #             filename = payload['filename']
 
-                md = markdown.Markdown(extensions=['extra'])
-                readme = md.convert(payload['readme'])
-    except Exception as e:
-        logger.error("Failed to get response from {} with error: {}".format(url, e))
+    #             md = markdown.Markdown(extensions=['extra'])
+    #             readme = md.convert(payload['readme'])
+    # except Exception as e:
+    #     logger.error("Failed to get response from {} with error: {}".format(url, e))
         
-    activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+    if project:
+        activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+        labs = Session.objects.filter(project=project).order_by('-created_at')[:5]
+        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:5]
+        deployments = DeploymentInstance.objects.filter(model__project=project).order_by('-created_at')[:5]
     
     return render(request, template, locals())
 
