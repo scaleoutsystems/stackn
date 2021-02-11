@@ -310,4 +310,4 @@ def project_readme(request, user, project_slug):
         except Exception as e:
             logger.error("Failed to get response from {} with error: {}".format(url, e))
     
-    return render(request, "project_readme.html", {'readme': readme})
+    return render(request, "project_readme.html", locals())
