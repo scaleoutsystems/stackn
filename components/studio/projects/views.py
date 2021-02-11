@@ -211,21 +211,6 @@ def details(request, user, project_slug):
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'Project not found.'
-
-    # filename = None
-    # readme = None
-    # url = 'http://{}-file-controller/readme'.format(project.slug)
-    # try:
-    #     response = r.get(url)
-    #     if response.status_code == 200 or response.status_code == 203:
-    #         payload = response.json()
-    #         if payload['status'] == 'OK':
-    #             filename = payload['filename']
-
-    #             md = markdown.Markdown(extensions=['extra'])
-    #             readme = md.convert(payload['readme'])
-    # except Exception as e:
-    #     logger.error("Failed to get response from {} with error: {}".format(url, e))
         
     if project:
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
@@ -300,3 +285,29 @@ def publish_project(request, user, project_slug):
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
+
+
+@login_required
+def project_readme(request, user, project_slug):
+    project = None
+    username = request.user.username
+    try:
+        owner = User.objects.get(username=username)
+        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
+    except Exception as e:
+        print('Project not found.')
+
+    if project:     
+        readme = None
+        url = 'http://{}-file-controller/readme'.format(project.slug)
+        try:
+            response = r.get(url)
+            if response.status_code == 200 or response.status_code == 203:
+                payload = response.json()
+                if payload['status'] == 'OK':
+                    md = markdown.Markdown(extensions=['extra'])
+                    readme = md.convert(payload['readme'])
+        except Exception as e:
+            logger.error("Failed to get response from {} with error: {}".format(url, e))
+    
+    return render(request, "project_readme.html", {'readme': readme})
