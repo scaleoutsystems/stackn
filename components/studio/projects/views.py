@@ -297,8 +297,8 @@ def project_readme(request, user, project_slug):
     except Exception as e:
         print('Project not found.')
 
+    readme = None
     if project:     
-        readme = None
         url = 'http://{}-file-controller/readme'.format(project.slug)
         try:
             response = r.get(url)
