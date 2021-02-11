@@ -101,7 +101,7 @@
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/file-earmark-code.svg' %}" alt="" width="24" height="24" title="Bootstrap"
                  class="side-bar-icon">
-            <a class="nav-link side-bar-text" href="#">
+            <a class="nav-link side-bar-text" href="{% url 'projects:project_readme' request.user project.slug %}">
                 README.md
             </a>
         </li>
