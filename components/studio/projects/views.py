@@ -289,6 +289,8 @@ def publish_project(request, user, project_slug):
 
 @login_required
 def project_readme(request, user, project_slug):
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    
     project = None
     username = request.user.username
     try:

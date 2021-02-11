@@ -8,38 +8,42 @@
         <h3>Overview</h3>
     </div>
     <div class="row d-flex flex-row">
-        <div class="col-md-4 recent-actions">
-            <h4 class="recent-actions-h4">
-                Description
-            </h4>
-            <h6 class="recent-actions-h6">
-                {{ project.description }}
-            </h6>
+        <div class="col-md-6">
+            <div class="recent-actions">
+                <h4 class="recent-actions-h4">
+                    Description
+                </h4>
+                <h6 class="recent-actions-h6">
+                    {{ project.description }}
+                </h6>
+            </div>
         </div>
-        <div class="col-md-4 recent-actions">
-            <h4 class="recent-actions-h4">
-                Recent actions
-            </h4>
-            <h6 class="recent-actions-h6">{{ project.name }}</h6>
-            <div id="activity_logs">
-                <ul class="timeline">
-                    {% for log in activity_logs %}
-                    <li>
-                        <a target="_blank" href="#">{{ log.headline }}</a>
-                        <a href="#" class="float-right">{{ log.created_at }}</a>
-                        <p>{{ log.description }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
+        <div class="col-md-6">
+            <div class="recent-actions">
+                <h4 class="recent-actions-h4">
+                    Recent actions
+                </h4>
+                <h6 class="recent-actions-h6">{{ project.name }}</h6>
+                <div id="activity_logs">
+                    <ul class="timeline">
+                        {% for log in activity_logs %}
+                        <li>
+                            <a target="_blank" href="#">{{ log.headline }}</a>
+                            <a href="#" class="float-right">{{ log.created_at }}</a>
+                            <p>{{ log.description }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
     <div class="d-flex flex-column pt-4 pb-3">
         <h4>Notebooks</h4>
     </div>
-    <div class="row">
+    <div class="row" style="padding: 10px 20px 10px 20px;">
         {% if labs %}
-        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+        <table class="table table-hover studio-table">
             <thead class="studio-table-header">
                 <tr>
                     <th scope="col">UID</th>
@@ -68,7 +72,7 @@
             </tbody>
         </table>
         {% else %}
-        <p style="margin-left: 20px;">
+        <p>
             No Lab Sessions have been created within this project yet.
         </p>
         {% endif %}
@@ -76,9 +80,9 @@
     <div class="d-flex flex-column pt-4 pb-3">
         <h4>Models</h4>
     </div>
-    <div class="row">
+    <div class="row" style="padding: 10px 20px 10px 20px;">
         {% if models %}
-        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+        <table class="table table-hover studio-table">
             <thead class="studio-table-header">
                 <tr>
                     <th scope="col">Name</th>
@@ -101,7 +105,7 @@
             </tbody>
         </table>
         {% else %}
-        <p style="margin-left: 20px;">
+        <p>
             No models have been uploaded to this project yet.
         </p>
         {% endif %}
@@ -109,9 +113,9 @@
     <div class="d-flex flex-column pt-4 pb-3">
         <h4>Deployments</h4>
     </div>
-    <div class="row">
+    <div class="row" style="padding: 10px 20px 10px 20px;">
         {% if deployments %}
-        <table class="table table-hover col-md-8 studio-table" style="margin: 0 0 0 22px;">
+        <table class="table table-hover studio-table">
             <thead class="studio-table-header">
                 <tr>
                     <th scope="col">ID</th>
@@ -134,7 +138,7 @@
             </tbody>
         </table>
         {% else %}
-        <p style="margin-left: 20px;">
+        <p>
             No models have been deployed within this project yet.
         </p>
         {% endif %}

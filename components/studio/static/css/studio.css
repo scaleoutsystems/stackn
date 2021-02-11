@@ -244,7 +244,7 @@ h2 {
 .recent-actions {
     background-color: #F1F6F9;
     color: #210124;
-    margin: 0 0 0 15px;
+    padding: 10 20 10 20;
 }
 
 .recent-actions-h4 {
