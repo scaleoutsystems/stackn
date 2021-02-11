@@ -55,7 +55,7 @@
                     <th scope="row">{{ lab.id }}</th>
                     <td>{{ lab.lab_session_owner.username }}</td>
                     <td>{{ lab.created_at }}</td>
-                    <td>{{ lab.get_status_display() }}</td>
+                    <td>{{ lab.get_status_display }}</td>
                     <td>
                         <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
                             <button class="btn mt-auto button-orange" style="width: fit-content;">
@@ -94,8 +94,8 @@
                     <th scope="row">{{ model.name }}</th>
                     <td>{{ model.version }}</td>
                     <td>{{ model.uploaded_at }}</td>
-                    <td>{{ model.get_status_display() }}</td>
-                    <td>{{ model.get_access_display() }}</td>
+                    <td>{{ model.get_status_display }}</td>
+                    <td>{{ model.get_access_display }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
