@@ -57,14 +57,17 @@
                     <h5 class="card-project-title">
                         <span style="font-weight:bolder;">{{ project.name }}</span>
                     </h5>
-                    <p class="card-text"> {{ project.description }}</p>
-                    <p class="card-text">Project started: {{ project.created_at }}</p>
-                    <p class="card-text">Owner {{ project.owner }}</p>
-                    <p class="card-text">Members
+                    <p class="card-project-description"> {{ project.description }}</p>
+                    <p>Project started: {{ project.created_at }}</p>
+                    <p>Owner: {{ project.owner }}</p>
+                    {% if project.authorized.all %}
+                    <p>Members: 
+                        {{ project.owner }}
                         {% for user in project.authorized.all %}
-                        {{ user.username }} ,
+                        , {{ user.username }}
                         {% endfor %}
                     </p>
+                    {% endif %}
                     <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto button-blue"
                        style="width: fit-content;">Open project</a>
                 </div>

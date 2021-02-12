@@ -155,7 +155,11 @@ h2 {
 .card-project-title {
     border-bottom: 1px solid #C6DBE7;
     padding-bottom: 15px;
-    margin: 0px;
+    margin: 0 0 15 0;
+}
+
+.card-project-description {
+    font-weight: bold;
 }
 
 /*
