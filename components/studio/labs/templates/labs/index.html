@@ -1,11 +1,6 @@
 {% extends 'baseproject.html' %}
 {% load static %}
 
-{% block extrascripts %}
-<link rel="stylesheet" type="text/css" href="{% static 'dt/datatables.min.css' %}" />
-<script type="text/javascript" src="{% static 'dt/datatables.min.js' %}"></script>
-{% endblock %}
-
 {% block content %}
 <div class="body-project">
     <div
@@ -17,7 +12,7 @@
     </div>
     <div class="row">
         <div class="col-sm-6">
-            <div class="card card-add-project">
+            <div class="card card-add-project" style="padding: 15px; margin-bottom: 30px;">
                 <form action="{% url 'labs:run' request.user project.slug %}" method="post">
                     {% csrf_token %}
                     <div class="row">
@@ -54,6 +49,8 @@
             </div>
         </div>
     </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-3" style="border-bottom: 1px solid #dee2e6;">
+    </div>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
         <h4>Active Lab Sessions</h4>
     </div>
@@ -77,7 +74,7 @@
                     <td>{{ session.created_at }}</td>
                     <td>{{ session.get_status_display }}</td>
                     <td>
-                        <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
+                        <a href="http://{{ session.slug }}.{{ url }}" target="_blank">
                             <button class="btn mt-auto button-blue" style="width: fit-content;">
                                 Open
                             </button>
