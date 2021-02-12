@@ -138,7 +138,7 @@ def pre_save_apps(sender, instance, using, **kwargs):
     instance.url = URL.strip('/')+'/'
     if instance.app.path:
         instance.url += str(instance.app.path)
-    if instance.app.port and instance.app.port != '':
+    if instance.app.port and instance.app.port != '' and int(instance.app.port) > 0:
         instance.url = instance.url.strip('/')+':'+str(instance.app.port)
     info = {"status": "OK", "release": str(RELEASE_NAME)}
     instance.info = str(info)
