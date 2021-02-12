@@ -289,3 +289,10 @@ h2 {
     border-radius: 0;
     color: #ffffff;
 }
+
+.button-red {
+    width: fit-content;
+    background-color: #CB2A5D;
+    border-radius: 0;
+    color: #ffffff;
+}
