@@ -4,7 +4,9 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 from deployments.models import HelmResource
+from models.models import Model
 from projects.models import Project, Volume
+from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
 from modules import keycloak_lib as keylib
 import uuid
@@ -74,6 +76,8 @@ def make_volume_param(instance):
 @receiver(pre_save, sender=AppInstance, dispatch_uid='appinstance_pre_save_signal')
 def pre_save_apps(sender, instance, using, **kwargs):
 
+    instance_settings = eval(instance.settings)
+
     RELEASE_NAME = instance.app.slug+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
     SERVICE_NAME = RELEASE_NAME
     # TODO: Fix for multicluster setup, look at e.g. labs
@@ -99,6 +103,9 @@ def pre_save_apps(sender, instance, using, **kwargs):
         skip_tls = 1
         print("WARNING: Skipping TLS verify.")
 
+
+
+
     parameters = {
         "release": RELEASE_NAME,
         "chart": str(instance.app.chart),
@@ -120,11 +127,37 @@ def pre_save_apps(sender, instance, using, **kwargs):
         's3sync.image': "scaleoutsystems/s3-sync:latest",
         'service.name': SERVICE_NAME
     }
+
+    # Check if input contains models.
+    if 'model' in instance_settings:
+        print(instance_settings['model'])
+        model_name = instance_settings['model']['name']
+        model_version = instance_settings['model']['version']
+        # Serialize models for input to helm chart
+        model_obj = Model.objects.get(name=model_name,
+                                      version=model_version,
+                                      project=instance.project)
+
+        model_json = dict()
+        # model_json['model'] = dict()
+        model_json['models.name'] = model_obj.name
+        model_json['models.version'] = model_obj.version
+        model_json['models.release_type'] = model_obj.release_type
+        model_json['models.description'] = model_obj.description
+        # TODO: Fix for multicluster setup
+        model_json['models.url'] = "https://minio-"+model_obj.project.slug+'.'+settings.DOMAIN
+        keys = get_minio_keys(model_obj.project)
+        model_json['models.access_key'] = keys['project_key']
+        model_json['models.secret_key'] = keys['project_secret']
+        model_json['models.bucket'] = 'models'
+        model_json['models.obj'] = model_obj.uid
+        parameters.update(model_json)
+
     volume_param = make_volume_param(instance)
     if volume_param:
         parameters.update(volume_param)
 
-    parameters.update(eval(instance.settings))
+    parameters.update(instance_settings)
 
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace=settings.NAMESPACE,
