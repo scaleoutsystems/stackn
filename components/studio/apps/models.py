@@ -12,10 +12,16 @@ from modules import keycloak_lib as keylib
 import uuid
 
 
+class AppCategories(models.Model):
+    name = models.CharField(max_length=512)
+    slug = models.CharField(max_length=512, default="")
+    def __str__(self):
+        return str(self.name)
 
 class Apps(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, blank=True, null=True)
+    category = models.ForeignKey('AppCategories', related_name="apps", on_delete=models.CASCADE, null=True)
     description = models.TextField(blank=True, null=True, default="")
     settings = models.TextField(blank=True, null=True)
     exposed = models.CharField(max_length=10, default="external")
@@ -31,52 +37,31 @@ class Apps(models.Model):
 
 
 class AppInstance(models.Model):
+    # TODO: Name, project should be unique combination
+    name = models.CharField(max_length=512, default="app_name")
     app = models.ForeignKey('Apps', on_delete=models.CASCADE, related_name='appinstance')
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='appinstance')
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE, null=True)
+    app_dependencies = models.ManyToManyField('apps.AppInstance')
+    vol_dependencies = models.ManyToManyField('projects.Volume')
+    model_dependencies = models.ManyToManyField('models.Model')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
     url = models.CharField(max_length=512, null=True)
     info = models.TextField(blank=True, null=True)
     settings = models.TextField(blank=True, null=True)
+    parameters = models.TextField(blank=True, null=True)
     keycloak_client_id = models.CharField(max_length=512, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
-def make_volume_param(instance):
-    dict_settings = eval(instance.settings)
-    
-    volume_param = []
+    def __str__(self):
+        return str(self.name)
 
-    if 'volumes' in dict_settings:
-        vols = dict_settings['volumes'].split(',')
-        extraVolumes = ""
-        extraVolumeMounts = ""
-        i = 1
-        for vol in vols:
-            volobject = Volume.objects.get(name=vol, project_slug=instance.project.slug)
-            if volobject:
-                print(volobject)
-                volume_name = 'extravol'+str(i)
-                extraVolumes += """
-- name: {}
-  persistentVolumeClaim:
-    claimName: {}
-                """.format(volume_name, volobject.slug)
-
-                extraVolumeMounts += """
-- name: {}
-  mountPath: /home/stackn/{}
-                """.format(volume_name, vol)
-                i = i+1
-        if i>1:
-            volume_param = {"extraVolumes": extraVolumes, "extraVolumeMounts": extraVolumeMounts}
-        
-    return volume_param
 
 @receiver(pre_save, sender=AppInstance, dispatch_uid='appinstance_pre_save_signal')
 def pre_save_apps(sender, instance, using, **kwargs):
 
-    instance_settings = eval(instance.settings)
+    # instance_settings = eval(instance.settings)
 
     RELEASE_NAME = instance.app.slug+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
     SERVICE_NAME = RELEASE_NAME
@@ -125,39 +110,12 @@ def pre_save_apps(sender, instance, using, **kwargs):
         'gatekeeper.auth_endpoint': settings.OIDC_OP_REALM_AUTH,
         'gatekeeper.skip_tls': str(skip_tls),
         's3sync.image': "scaleoutsystems/s3-sync:latest",
-        'service.name': SERVICE_NAME
+        'service.name': SERVICE_NAME,
+        'storageClass': settings.STORAGECLASS
     }
 
-    # Check if input contains models.
-    if 'model' in instance_settings:
-        print(instance_settings['model'])
-        model_name = instance_settings['model']['name']
-        model_version = instance_settings['model']['version']
-        # Serialize models for input to helm chart
-        model_obj = Model.objects.get(name=model_name,
-                                      version=model_version,
-                                      project=instance.project)
 
-        model_json = dict()
-        # model_json['model'] = dict()
-        model_json['models.name'] = model_obj.name
-        model_json['models.version'] = model_obj.version
-        model_json['models.release_type'] = model_obj.release_type
-        model_json['models.description'] = model_obj.description
-        # TODO: Fix for multicluster setup
-        model_json['models.url'] = "https://minio-"+model_obj.project.slug+'.'+settings.DOMAIN
-        keys = get_minio_keys(model_obj.project)
-        model_json['models.access_key'] = keys['project_key']
-        model_json['models.secret_key'] = keys['project_secret']
-        model_json['models.bucket'] = 'models'
-        model_json['models.obj'] = model_obj.uid
-        parameters.update(model_json)
-
-    volume_param = make_volume_param(instance)
-    if volume_param:
-        parameters.update(volume_param)
-
-    parameters.update(instance_settings)
+    parameters.update(eval(instance.parameters))
 
     helmchart = HelmResource(name=RELEASE_NAME,
                              namespace=settings.NAMESPACE,

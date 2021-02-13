@@ -3,19 +3,19 @@
 {% block content %}
 <div class="col-md-9">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Apps</h2>
+        <h2>{{ cat_obj.name }}</h2>
     </div>
     <div class="row">
         <div class="col-sm-12">
         {% if apps_installed %}
-        <h3>Installed Apps</h3>
+        <!-- <h3>Installed Apps</h3> -->
             <div class="table-responsive">
 
                 <table id="labsessions" class="table table-striped table-sm">
                     <thead>
 
                     <tr>
-                        <th>App</th>
+                        <th>Name</th>
                         <th>URL</th>
                         <th>Created</th>
                         <th></th>
@@ -24,7 +24,7 @@
                     <tbody>
                         {% for appinstance in appinstances %}
                         <tr>
-                            <td>{{ appinstance.app.name}}</td>
+                            <td>{{ appinstance.name}}</td>
                             {% if appinstance.app.schema == "http://" or appinstance.app.schema == "https://" %}
                             <td><a href="{{ appinstance.url }}">{{ appinstance.url }}</a></td>
                             {% else %}
