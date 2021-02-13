@@ -6,12 +6,88 @@
     </div>
     <div class="row">
         <div class="col-sm-6">
-            <h3>Settings:</h3>
+            <!-- <h3>Settings:</h3> -->
             <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
+                {% csrf_token %}
+                
+                <label for="app_name">Name</label>
+                <input type="text" id="app_name" name="app_name" value="" class="form-control">
+
+                {% if dep_model %}
+                <div class="form-group">
+                    <h5>Model</h5>
+                    <select name="model" id="model" class="form-control">
+                        {% for model in models %}
+                        <option value="{{ model.pk }}">{{ model.name }}:{{ model.version }}</option> 
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if dep_volumes %}
+                <div class="form-group">
+                    <h5>Volumes</h5>
+                    <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
+                        {% for volume in volumes %}
+                        <option value="{{ volume.pk }}">{{ volume.name }}</option> 
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+
+
+                {% if dep_apps %}
+                
+                    {% for app_name, appinstances in app_deps.items %}
+                    <div class="form-group">
+                        <h5>{{ app_name }}</h5>
+                        <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
+                        {% for appinstance in appinstances.instances %}
+                            <option value="{{ appinstance.pk }}">{{ appinstance.name }}</option> 
+                        {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                
+                {% for key, vals in primitives.items %}
+                <div class="form-group">
+                    <h5>{{ key }}</h5>
+                    
+                    {% for subkey, subval in vals.items %}
+                        
+                        {% if subval.type == "boolean" %}
+                        <label for="{{ subkey }}">{{ subval.title }}</label>
+                        <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
+                            <option value="True">True</option>
+                            <option value="False">False</option>
+                        </select>
+                        {% endif %}
+                        
+                        {% if subval.type == "string" %}
+                        <label for="{{ subkey }}">{{ subval.title }}</label>
+                        <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                        {% endif %}
+
+                        {% if subval.type == "number" %}
+                        <label for="{{ subkey }}">{{ subval.title }}</label>
+                        <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                        {% endif %}
+                    
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                
+                <button class="btn btn-primary" type="submit">Create</button>
+            </form>
+
+            <!-- <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
                 {% csrf_token %}
                 <textarea name="settings" rows="30" cols="50">{{ app.settings }}</textarea><br>
                 <button type="submit">Create</button>
-            </form>
+            </form> -->
         </div>
         
     </div>
