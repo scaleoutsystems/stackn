@@ -62,8 +62,12 @@ class AppInstance(models.Model):
 def pre_save_apps(sender, instance, using, **kwargs):
 
     # instance_settings = eval(instance.settings)
+    if instance.action == "create":
+        RELEASE_NAME = instance.app.slug+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+    else:
+        RELEASE_NAME = instance.helmchart.name
 
-    RELEASE_NAME = instance.app.slug+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+
     SERVICE_NAME = RELEASE_NAME
     # TODO: Fix for multicluster setup, look at e.g. labs
     HOST = settings.DOMAIN
@@ -80,8 +84,13 @@ def pre_save_apps(sender, instance, using, **kwargs):
         KC_URL = 'http://dummy.com'
     user = instance.owner
 
-    client_id, client_secret = keylib.keycloak_setup_base_client(KC_URL, RELEASE_NAME, str(user), ['owner'], ['owner'])
-    instance.keycloak_client_id = client_id
+    if instance.action == "create":
+        client_id, client_secret = keylib.keycloak_setup_base_client(KC_URL, RELEASE_NAME, str(user), ['owner'], ['owner'])
+        instance.keycloak_client_id = client_id
+    else:
+        existing_params = eval(instance.helmchart.params)
+        client_id = existing_params['gatekeeper.client_id']
+        client_secret = existing_params['gatekeeper.client_secret']
 
     skip_tls = 0
     if not settings.OIDC_VERIFY_SSL:
@@ -117,15 +126,24 @@ def pre_save_apps(sender, instance, using, **kwargs):
 
     parameters.update(eval(instance.parameters))
 
-    helmchart = HelmResource(name=RELEASE_NAME,
-                             namespace=settings.NAMESPACE,
-                             chart=instance.app.chart,
-                             params=parameters,
-                             username=str(user))
+    if instance.action == "create":
+        helmchart = HelmResource(name=RELEASE_NAME,
+                                namespace=settings.NAMESPACE,
+                                chart=instance.app.chart,
+                                params=parameters,
+                                username=str(user))
 
 
-    helmchart.save()
-    instance.helmchart = helmchart
+        helmchart.save()
+        instance.helmchart = helmchart
+
+    elif instance.action == "update":
+        helmchart = instance.helmchart
+        helmchart.params = parameters
+        helmchart.save()
+    else:
+        raise Exception("Incorrect action on app.")
+    
     instance.url = URL.strip('/')+'/'
     if instance.app.path:
         instance.url += str(instance.app.path)
