@@ -2,13 +2,14 @@ from django.shortcuts import render, HttpResponseRedirect, reverse
 from django.conf import settings
 from django.utils.text import slugify
 from .models import Apps, AppInstance, AppCategories
-from projects.models import Project, Volume
+from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
+import requests
 import flatten_json
 
 
-key_words = ['model', 'volumes', 'apps', 'csrfmiddlewaretoken']
+key_words = ['model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'csrfmiddlewaretoken']
 
 # Create your views here.
 def index(request, user, project):
@@ -21,6 +22,45 @@ def index(request, user, project):
     if appinstances:
         apps_installed = True
         
+    return render(request, template, locals())
+
+def logs(request, user, project, ai_id):
+    template = "logs.html"
+    app = AppInstance.objects.get(pk=ai_id)
+    project = Project.objects.get(slug=project)
+    app_settings = eval(app.app.settings)
+    containers = []
+    if 'logs' in app_settings:
+        containers = app_settings['logs']
+        container = containers[0]
+        print("default container: "+container)
+        if 'container' in request.GET:
+            container = request.GET.get('container')
+            print("Got container in request: "+container)
+        
+        logs = []
+        try:
+            url = settings.LOKI_SVC+'/loki/api/v1/query_range'
+            app_params = eval(app.helmchart.params)
+            print('{container="'+container+'",app="'+app_params['release']+'"}')
+            query = {
+            'query': '{container="'+container+'",app="'+app_params['release']+'"}',
+            'limit': 50,
+            'start': 0,
+            }
+            res = requests.get(url, params=query)
+            res_json = res.json()['data']['result']
+            
+            for item in res_json:
+                logs.append('----------BEGIN CONTAINER------------')
+                logline = ''
+                for iline in item['values']:
+                    logs.append(iline[1])
+                logs.append('----------END CONTAINER------------')
+
+        except Exception as e:
+            print(e)
+
     return render(request, template, locals())
 
 def filtered(request, user, project, category):
@@ -60,6 +100,33 @@ def serialize_model(form_selection):
         model_json['model.obj'] = obj[0].uid
     return model_json, obj
 
+def serialize_flavor(form_selection):
+    print("SERIALIZING FLAVOR")
+    flavor_json = dict()
+    if 'flavor' in form_selection:
+        flavor_id = form_selection.get('flavor', None)
+        flavor = Flavor.objects.get(pk=flavor_id)
+        flavor_json['flavor.requests.memory'] = flavor.mem
+        flavor_json['flavor.requests.cpu'] = flavor.cpu
+        flavor_json['flavor.limits.memory'] = flavor.mem
+        flavor_json['flavor.limits.cpu'] = flavor.cpu
+        flavor_json['flavor.gpu.enabled'] = "false"
+        if flavor.gpu and flavor.gpu > 0:
+            flavor_json['flavor.gpu'] = flavor.gpu
+            flavor_json['flavor.gpu.enabled'] = "true"
+    return flavor_json
+
+def serialize_environment(form_selection):
+    print("SERIALIZING ENVIRONMENT")
+    environment_json = dict()
+    if 'environment' in form_selection:
+        environment_id = form_selection.get('environment', None)
+        environment = Environment.objects.get(pk=environment_id)
+        environment_json['environment.image'] = environment.image
+
+    return environment_json
+
+
 def serialize_apps(form_selection):
     print("SERIALIZING DEPENDENT APPS")
     parameters = dict()
@@ -89,7 +156,6 @@ def make_volume_param(vols):
     
     parameters['volumes'] = dict()
     for volobject in vols:
-        
         if volobject:
             print(volobject)
             parameters['volumes'][volobject.name] = dict()
@@ -130,19 +196,107 @@ def serialize_primitives(form_selection):
 def serialize_app(form_selection):
     print("SERIALIZING APP")
     parameters = dict()
+
     model_params, model_deps = serialize_model(form_selection)
     parameters.update(model_params)
+
     app_params, app_deps = serialize_apps(form_selection)
     parameters.update(app_params)
+
     vol_params, vol_deps = serialize_volumes(form_selection)
     parameters.update(vol_params)
+
     prim_params = serialize_primitives(form_selection)
     parameters.update(prim_params)
+
+    flavor_params = serialize_flavor(form_selection)
+    parameters.update(flavor_params)
+
+    environment_params = serialize_environment(form_selection)
+    parameters.update(environment_params)
+
     return parameters, app_deps, vol_deps, model_deps
+
+def get_form_models(aset, project, appinstance=[]):
+    dep_model = False
+    models = []
+    if 'model' in aset:
+        print('app requires a model')
+        dep_model = True
+        models = Model.objects.filter(project=project)
+        
+        for model in models:
+            if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():
+                print(model)
+                model.selected = "selected"
+            else:
+                model.selected = ""
+    return dep_model, models
+
+def get_form_apps(aset, project, appinstance=[]):
+    dep_apps = False
+    app_deps = []
+    if 'apps' in aset:
+        dep_apps = True
+        app_deps = dict()
+        apps = aset['apps']
+        for app_name, option_type in apps.items():
+            print(app_name)
+            app_obj = Apps.objects.get(name=app_name)
+            app_instances = AppInstance.objects.filter(project=project, app=app_obj)
+            
+            for ain in app_instances:
+                if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
+                    ain.selected = "selected"
+                else:
+                    ain.selected = ""
+
+            if option_type == "one":
+                app_deps[app_name] = {"instances": app_instances, "option_type": ""}
+            else:
+                app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
+    return dep_apps, app_deps
+
+def get_form_primitives(aset, project, appinstance=[]):
+    all_keys = aset.keys()
+    print("PRIMITIVES")
+    primitives = dict()
+    if appinstance:
+        ai_vals = eval(appinstance.parameters)
+    for key in all_keys:
+        if key not in key_words:
+            primitives[key] = aset[key]
+            if appinstance:
+                for subkey, subval in aset[key].items():
+                    primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
+    print(primitives)
+    return primitives
+
+def appsettings(request, user, project, ai_id):
+    template = 'create.html'
+    app_action = "Settings"
+
+    project = Project.objects.get(slug=project)
+    appinstance = AppInstance.objects.get(pk=ai_id)
+    existing_app_name = appinstance.name
+    app = appinstance.app
+
+    aset = eval(appinstance.app.settings)
+    # get_form_models(aset, project, appinstance=appinstance)
+    dep_apps, app_deps = get_form_apps(aset, project, appinstance=appinstance)
+    dep_model, models = get_form_models(aset, project, appinstance=appinstance)
+    primitives = get_form_primitives(aset, project, appinstance=appinstance)
+
+    return render(request, template, locals())
 
 
 def create(request, user, project, app_slug):
     template = 'create.html'
+    app_action = "Create"
+
+
+
+    existing_app_name = ""
     project = Project.objects.get(slug=project)
     app = Apps.objects.get(slug=app_slug)
 
@@ -152,58 +306,68 @@ def create(request, user, project, app_slug):
 
     
 
-    dep_model = False
-    if 'model' in aset:
-        print('app requires a model')
-        dep_model = True
-        models = Model.objects.filter(project=project)
-        print(models)
-    
+    # dep_model = False
+    # if 'model' in aset:
+    #     print('app requires a model')
+    #     dep_model = True
+    #     models = Model.objects.filter(project=project)
+    #     print(models)
+    dep_model, models = get_form_models(aset, project, [])
 
-    dep_apps = False
-    if 'apps' in aset:
-        dep_apps = True
-        app_deps = dict()
-        apps = aset['apps']
-        for app_name, option_type in apps.items():
-            print(app_name)
-            app_obj = Apps.objects.get(name=app_name)
-            app_instances = AppInstance.objects.filter(project=project, app=app_obj)
-            if option_type == "one":
-                app_deps[app_name] = {"instances": app_instances, "option_type": ""}
-            else:
-                app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
-            # for app_instance in app_instances:
-                # app_deps[app_name].append(app_instance.app.name+'-'+str(app_instance.pk))
-    
+    # dep_apps = False
+    # if 'apps' in aset:
+    #     dep_apps = True
+    #     app_deps = dict()
+    #     apps = aset['apps']
+    #     for app_name, option_type in apps.items():
+    #         print(app_name)
+    #         app_obj = Apps.objects.get(name=app_name)
+    #         app_instances = AppInstance.objects.filter(project=project, app=app_obj)
+    #         if option_type == "one":
+    #             app_deps[app_name] = {"instances": app_instances, "option_type": ""}
+    #         else:
+    #             app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
+    dep_apps, app_deps = get_form_apps(aset, project, [])
+
+
     dep_vols = False
-    if 'volumes' in aset:
-        dep_vols = True
-        volumes = Volume.objects.filter(project_slug=project.slug)
-        volume_type = ""
-        if aset['volumes'] == "many":
-            volume_type = "multiple"
+    # if 'volumes' in aset:
+    #     dep_vols = True
+    #     volumes = Volume.objects.filter(project_slug=project.slug)
+    #     volume_type = ""
+    #     if aset['volumes'] == "many":
+    #         volume_type = "multiple"
             
-        print(volumes)
-        print(volume_type)
+    #     print(volumes)
+    #     print(volume_type)
 
-    all_keys = aset.keys()
-    print("PRIMITIVES")
-    primitives = dict()
-    for key in all_keys:
-        if key not in key_words:
-            primitives[key] = aset[key]
+    dep_flavor = False
+    if 'flavor' in aset:
+        dep_flavor = True
+        flavors = Flavor.objects.all()
+    
+    dep_environment = False
+    if 'environment' in aset:
+        dep_environment = True
+        environments = Environment.objects.all()
 
+    # all_keys = aset.keys()
+    # print("PRIMITIVES")
+    # primitives = dict()
+    # for key in all_keys:
+    #     if key not in key_words:
+    #         primitives[key] = aset[key]
 
+    primitives = get_form_primitives(aset, project, [])
 
 
     print("::::::::::::")
 
 
-    dep_volumes = False
-    if 'volumes' in aset:
-        dep_volumes = True
-        volumes = Volume.objects.filter(project_slug=project.slug)
+    # dep_volumes = False
+    # if 'volumes' in aset:
+    #     dep_volumes = True
+    #     volumes = Volume.objects.filter(project_slug=project.slug)
 
 
 
@@ -214,31 +378,42 @@ def create(request, user, project, app_slug):
         print("PARAMETERS OUT")
         print(parameters_out)
         print(".............")
-        instance = AppInstance(name=app_name,
-                               app=app,
-                               project=project,
-                               settings=str(request.POST),
-                               parameters=str(parameters_out),
-                               owner=request.user)
-        
-        instance.save()
-        instance.app_dependencies.set(app_deps)
-        instance.vol_dependencies.set(vol_deps)
-        instance.model_dependencies.set(model_deps)
+        print(request.POST.dict())
+
+        if request.POST.get('app_action') == "Create":
+            instance = AppInstance(name=app_name,
+                                app=app,
+                                project=project,
+                                settings=str(request.POST.dict()),
+                                parameters=str(parameters_out),
+                                owner=request.user)
+            instance.action = "create"
+            instance.save()
+            instance.app_dependencies.set(app_deps)
+            instance.vol_dependencies.set(vol_deps)
+            instance.model_dependencies.set(model_deps)
+        elif request.POST.get('app_action') == "Settings":
+            a=1
+            instance = AppInstance.objects.get(pk=request.POST.get('app_id'))
+            print("UPDATING APP DEPLOYMENT")
+            print(instance)
+            instance.name = app_name
+            instance.settings = str(request.POST.dict())
+            instance.parameters=str(parameters_out)
+            instance.action = "update"
+            instance.save()
+            instance.app_dependencies.set(app_deps)
+            instance.vol_dependencies.set(vol_deps)
+            instance.model_dependencies.set(model_deps)
+        else:
+            raise Exception("Incorrect action on app.")
 
         return HttpResponseRedirect(
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
-    # try:
-    #     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
-    # except TypeError as err:
-    #     projects = []
-    #     print(err)
-    
-    # request.session['next'] = '/projects/'
+
     return render(request, template, locals())
 
 def delete(request, user, project, ai_id):
-    # print(appinstance)
     appinstance = AppInstance.objects.get(pk=ai_id)
     appinstance.helmchart.delete()
     return HttpResponseRedirect(

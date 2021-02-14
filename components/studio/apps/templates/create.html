@@ -2,7 +2,7 @@
 {% block content %}
 <div class="col-md-11">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Create {{ app.name }}</h2>
+        <h2>{{ app_action }} {{ app.name }}</h2>
     </div>
     <div class="row">
         <div class="col-sm-6">
@@ -10,19 +10,45 @@
             <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
                 {% csrf_token %}
                 
+                <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">
+                <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
+
                 <label for="app_name">Name</label>
-                <input type="text" id="app_name" name="app_name" value="" class="form-control">
+                <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
 
                 {% if dep_model %}
                 <div class="form-group">
                     <h5>Model</h5>
                     <select name="model" id="model" class="form-control">
                         {% for model in models %}
-                        <option value="{{ model.pk }}">{{ model.name }}:{{ model.version }}</option> 
+                        <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
                         {% endfor %}
                     </select>
                 </div>
                 {% endif %}
+                
+                {% if dep_flavor %}
+                <div class="form-group">
+                    <h5>Flavors</h5>
+                    <select name="flavor" id="flavor" class="form-control">
+                        {% for flavor in flavors %}
+                        <option value="{{ flavor.pk }}">{{ flavor.name }}</option> 
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if dep_environment %}
+                <div class="form-group">
+                    <h5>Environment</h5>
+                    <select name="environment" id="environment" class="form-control">
+                        {% for environment in environments %}
+                        <option value="{{ environment.pk }}">{{ environment.name }}</option> 
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
 
                 {% if dep_volumes %}
                 <div class="form-group">
@@ -44,7 +70,7 @@
                         <h5>{{ app_name }}</h5>
                         <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
                         {% for appinstance in appinstances.instances %}
-                            <option value="{{ appinstance.pk }}">{{ appinstance.name }}</option> 
+                            <option value="{{ appinstance.pk }}" {{ appinstance.selected }}>{{ appinstance.name }}</option> 
                         {% endfor %}
                         </select>
                     </div>
@@ -61,8 +87,13 @@
                         {% if subval.type == "boolean" %}
                         <label for="{{ subkey }}">{{ subval.title }}</label>
                         <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
+                            {% if subval.default == "False" %}
                             <option value="True">True</option>
+                            <option value="False" selected>False</option>
+                            {% else %}
+                            <option value="True" selected>True</option>
                             <option value="False">False</option>
+                            {% endif %}
                         </select>
                         {% endif %}
                         
@@ -79,15 +110,13 @@
                     {% endfor %}
                 </div>
                 {% endfor %}
-                
+                {% if app_action == "Create" %}
                 <button class="btn btn-primary" type="submit">Create</button>
+                {% else %}
+                <button class="btn btn-primary" type="submit">Update</button>
+                {% endif %}
             </form>
 
-            <!-- <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
-                {% csrf_token %}
-                <textarea name="settings" rows="30" cols="50">{{ app.settings }}</textarea><br>
-                <button type="submit">Create</button>
-            </form> -->
         </div>
         
     </div>

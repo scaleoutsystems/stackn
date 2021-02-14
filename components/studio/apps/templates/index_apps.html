@@ -31,7 +31,11 @@
                             <td>{{ appinstance.url }}</td>
                             {% endif %}
                             <td>{{ appinstance.created_on }}</td>
-                            <td><a href="{% url 'apps:delete' request.user project.slug appinstance.pk %}">
+                            <td><a href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
+                                <button class="btn-sm">Logs</button></a>
+                                <a href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
+                                <button class="btn-sm">Settings</button></a>
+                                <a href="{% url 'apps:delete' request.user project.slug appinstance.pk %}">
                                 <button class="btn-sm btn-warning">Delete</button></a></td>
                         </tr>
                     {% endfor %}
