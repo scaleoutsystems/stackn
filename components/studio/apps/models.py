@@ -12,9 +12,13 @@ from modules import keycloak_lib as keylib
 import uuid
 
 
+class AppPermission(models.Model):
+    name = models.CharField(max_length=512)
+
+
 class AppCategories(models.Model):
     name = models.CharField(max_length=512)
-    slug = models.CharField(max_length=512, default="")
+    slug = models.CharField(max_length=512, default="", primary_key=True)
     def __str__(self):
         return str(self.name)
 
@@ -63,7 +67,8 @@ def pre_save_apps(sender, instance, using, **kwargs):
 
     # instance_settings = eval(instance.settings)
     if instance.action == "create":
-        RELEASE_NAME = instance.app.slug+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+        RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+        print("RELEASE_NAME: "+RELEASE_NAME)
     else:
         RELEASE_NAME = instance.helmchart.name
 
