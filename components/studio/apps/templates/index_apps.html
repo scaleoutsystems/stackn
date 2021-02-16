@@ -15,8 +15,9 @@
                     <thead>
 
                     <tr>
+                        <th>App</th>
                         <th>Name</th>
-                        <th>URL</th>
+                        <th></th>
                         <th>Created</th>
                         <th></th>
                     </tr>
@@ -24,6 +25,7 @@
                     <tbody>
                         {% for appinstance in appinstances %}
                         <tr>
+                            <td>{{ appinstance.app.name }}</td>
                             <td>{{ appinstance.name}}</td>
                             {% if appinstance.app.schema == "http://" or appinstance.app.schema == "https://" %}
                             <td><a href="{{ appinstance.url }}">{{ appinstance.url }}</a></td>
