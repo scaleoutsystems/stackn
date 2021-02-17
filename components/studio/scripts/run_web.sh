@@ -16,8 +16,8 @@ echo "loading seed data..."
 python3 manage.py loaddata projects/fixtures/fixtures.json
 python3 manage.py loaddata projects/fixtures/data.json
 python3 manage.py loaddata deployments/fixtures/data.json
-python3 manage.py loaddata appcats_fixtures.json
-python3 manage.py loaddata apps_fixtures.json
+# python3 manage.py loaddata appcats_fixtures.json
+# python3 manage.py loaddata apps_fixtures.json
 
 
 echo "starting serving..."

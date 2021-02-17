@@ -44,9 +44,9 @@ def logs(request, user, project, ai_id):
         try:
             url = settings.LOKI_SVC+'/loki/api/v1/query_range'
             app_params = eval(app.helmchart.params)
-            print('{container="'+container+'",app="'+app_params['release']+'"}')
+            print('{container="'+container+'",release="'+app_params['release']+'"}')
             query = {
-            'query': '{container="'+container+'",app="'+app_params['release']+'"}',
+            'query': '{container="'+container+'",release="'+app_params['release']+'"}',
             'limit': 50,
             'start': 0,
             }
