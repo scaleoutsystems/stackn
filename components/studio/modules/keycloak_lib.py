@@ -3,6 +3,7 @@ import requests as r
 import logging
 import jwt
 import time
+import json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -174,6 +175,18 @@ def keycloak_verify_user_role(request, resource, roles, aud='account'):
     
     return False
 
+def keycloak_update_client(kc, client_id, client_rep):
+    get_clients_url = '{}/admin/realms/{}/clients/{}'.format(kc.admin_url, kc.realm, client_id)
+    print(client_rep[0])
+    res = r.put(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, json=client_rep[0], verify=settings.OIDC_VERIFY_SSL)
+    if res:
+        print("UPDATED CLIENT")
+        return True
+    else:
+        print('Failed to update client.')
+        print('Request returned status: '+str(res.status_code))
+        print(res.text)
+        return False
 
 def keycloak_get_clients(kc, payload):
     get_clients_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
@@ -234,6 +247,34 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
         print(res.text)
         return False
 
+def keycloak_add_client_valid_redirect(kc, client_id, redirectUri):
+    print("GETTING CLIENT: {}".format(client_id))
+    clients = keycloak_get_clients(kc, {'clientId': client_id})
+    print(clients[0]['redirectUris'])
+    clients[0]['redirectUris'].append(redirectUri)
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    if res:
+        print("Added valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    else:
+        print("Failed to add valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    return res
+
+def keycloak_remove_client_valid_redirect(kc, client_id, redirectUri):
+    print("GETTING CLIENT: {}".format(client_id))
+    clients = keycloak_get_clients(kc, {'clientId': client_id})
+    print(clients[0]['redirectUris'])
+    try:
+        clients[0]['redirectUris'].remove(redirectUri)
+    except:
+        print("WARN: Client didn't contain redirect URI.")
+        return False
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    if res:
+        print("Removed redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    else:
+        print("Failed to remove valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    return res
+
 def keycloak_get_client_secret(kc, client_nid):
     get_client_secret_url = '{}/admin/realms/{}/clients/{}/client-secret'.format(kc.admin_url, kc.realm, client_nid)
     res = r.get(get_client_secret_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
@@ -244,6 +285,12 @@ def keycloak_get_client_secret(kc, client_nid):
     print('Failed to get client secret for client: '+client_nid)
     print('Status code: '+str(res.status_code))
     print(res.text)
+    return False
+
+def keycloak_get_client_secret_by_id(kc, client_id):
+    clients = keycloak_get_clients(kc, {'clientId': client_id})
+    client_nid = clients[0]['id']
+    return keycloak_get_client_secret(kc, client_nid)
 
 def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect', 
                                                  attributes={'include.in.token.scope': 'true',
