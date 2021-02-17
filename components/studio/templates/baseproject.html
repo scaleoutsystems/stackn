@@ -72,8 +72,7 @@
         <li class="nav-item list-group-item list-group-item-action sidebar-item">
             <img src="{% static '/icons/document-richtext.svg' %}" alt="" width="24" height="24"
                  title="Bootstrap" class="side-bar-icon">
-            <a class="nav-link side-bar-text" href="{% url 'reports:index' request.user project.slug %}"
-               style="text-align: center;">
+            <a class="nav-link side-bar-text" href="{% url 'reports:index' request.user project.slug %}">
                 Metrics
             </a>
         </li>

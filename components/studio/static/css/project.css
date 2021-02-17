@@ -6,10 +6,7 @@
 }
 
 .side-bar-text {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: fit-content;
+    text-align: center;
     color: #210124;
 }
 
