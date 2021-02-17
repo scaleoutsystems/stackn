@@ -58,6 +58,9 @@ class Flavor(models.Model):
     mem = models.TextField(blank=True, null=True)
     gpu = models.TextField(blank=True, null=True)
 
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE)
+
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -69,6 +72,11 @@ class Environment(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, blank=True, null=True)
     image = models.CharField(max_length=512)
+
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE)
+
+
     dockerfile = models.TextField(default='FROM jupyter/base-notebook')
     startup = models.TextField(null=True, blank=True)
     teardown = models.TextField(null=True, blank=True)
