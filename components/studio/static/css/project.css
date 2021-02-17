@@ -116,3 +116,10 @@ ul.timeline > li:before {
     width: 60%;
     font-size: 250%;
 }
+
+
+
+.experiment-logs {
+    font-weight: bold;
+    background-color: #fbfcfc;
+}

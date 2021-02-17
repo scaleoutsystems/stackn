@@ -16,7 +16,7 @@
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="command">Image</label>
+                            <label for="command">Command to run</label>
                             <input type="text" class="form-control form-input" id="command" name="command" required="">
                             <div class="invalid-feedback">
                                 Write a command to be run as an Experiment.
@@ -73,13 +73,17 @@
                 <tr>
                     <th scope="row">{{ experiment.pk }}</th>
                     <td>{{ experiment.command }}</td>
+                    {% if experiment.schedule %}
                     <td>{{ experiment.schedule }}</td>
+                    {% else %}
+                    <td>-</td>
+                    {% endif %}
                     <td>{{ experiment.environment }}</td>
                     <td>{{ experiment.created_at }}</td>
                     <td>
                         <a href="{% url 'experiments:details' request.user project.slug experiment.id|slugify %}">
                             <button class="btn mt-auto button-blue" style="width: fit-content;">
-                                Logs
+                                Output
                             </button>
                         </a>
                         {% if user_permissions.delete %}
