@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="body-main">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2>Projects</h2>
     </div>
     {% if request.user.is_authenticated %}
@@ -27,7 +28,7 @@
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <textarea class="form-control form-input" id="description" name="description" rows="3"
-                                        placeholder="Description"></textarea>
+                                    placeholder="Description"></textarea>
                             </div>
                         </div>
                         <div class="row">
@@ -44,7 +45,8 @@
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-3" style="border-bottom: 1px solid #dee2e6;">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-3"
+        style="border-bottom: 1px solid #dee2e6;">
     </div>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
         <h4>Active projects</h4>
@@ -61,19 +63,22 @@
                     <p>Project started: {{ project.created_at }}</p>
                     <p>Owner: {{ project.owner }}</p>
                     {% if project.authorized.all %}
-                    <p>Members: 
+                    <p>Members:
                         {{ project.owner }}
                         {% for user in project.authorized.all %}
                         , {{ user.username }}
                         {% endfor %}
                     </p>
                     {% endif %}
-                    <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto button-blue"
-                       style="width: fit-content;">Open project</a>
+                    <a href="{% url 'projects:details' request.user project.slug %}" class="mt-auto">
+                        <button class="btn mt-auto button-blue" style="width: fit-content !important;">
+                            Open project
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
-        {% endfor %} 
+        {% endfor %}
     </div>
     {% else %}
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
