@@ -54,6 +54,8 @@ class AppInstance(models.Model):
     app_dependencies = models.ManyToManyField('apps.AppInstance')
     vol_dependencies = models.ManyToManyField('projects.Volume')
     model_dependencies = models.ManyToManyField('models.Model')
+    env_dependencies = models.ManyToManyField('projects.Environment')
+    flavor_dependencies = models.ManyToManyField('projects.Flavor')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
     url = models.CharField(max_length=512, null=True)
     info = models.TextField(blank=True, null=True)
