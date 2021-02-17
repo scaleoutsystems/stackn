@@ -4,7 +4,7 @@
 <div class="body-project">
   <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
     <ol class="breadcrumb project-breadcrumb-ol">
-      <li class="breadcrumb-item"><a href="{% url 'experiments:index' %}">Experiments</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'experiments:index' request.user project.slug %}">Experiments</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ experiment.pk }}</li>
     </ol>
   </nav>
