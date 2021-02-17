@@ -1,15 +1,17 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
 from django.conf import settings
 from django.utils.text import slugify
-from .models import Apps, AppInstance, AppCategories
+from django.db.models import Q
+from .models import Apps, AppInstance, AppCategories, AppPermission
 from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
+import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
 
-key_words = ['model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'csrfmiddlewaretoken']
+key_words = ['model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
 
 # Create your views here.
 def index(request, user, project):
@@ -68,8 +70,8 @@ def filtered(request, user, project, category):
     cat_obj = AppCategories.objects.get(slug=category)
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
-
-    appinstances = AppInstance.objects.filter(owner=request.user, app__category=cat_obj)
+    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
+ 
     apps_installed = False
     if appinstances:
         apps_installed = True
@@ -193,6 +195,19 @@ def serialize_primitives(form_selection):
     print(parameters)
     return parameters
 
+def serialize_permissions(form_selection):
+    print("SERIALIZING PERMISSIONS")
+    parameters = dict()
+    parameters = {
+        "permissions.public": "false",
+        "permissions.project": "false",
+        "permissions.private": "false"
+    }
+    permission = form_selection.get('permission', None)
+    parameters['permissions.'+permission] = "true"
+    print(parameters)
+    return parameters
+
 def serialize_app(form_selection):
     print("SERIALIZING APP")
     parameters = dict()
@@ -214,6 +229,9 @@ def serialize_app(form_selection):
 
     environment_params = serialize_environment(form_selection)
     parameters.update(environment_params)
+
+    permission_params = serialize_permissions(form_selection)
+    parameters.update(permission_params)
 
     return parameters, app_deps, vol_deps, model_deps
 
@@ -272,6 +290,29 @@ def get_form_primitives(aset, project, appinstance=[]):
     print(primitives)
     return primitives
 
+def get_form_permission(aset, project, appinstance=[]):
+    form_permissions = {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"false", "option": "false"},
+        "private": {"value":"true", "option": "true"}
+    }
+    dep_permissions = True
+    if 'permissions' in aset:
+        form_permissions = aset['permissions']
+        # if not form_permissions:
+        #     dep_permissions = False
+
+        if appinstance:
+            try:
+                ai_vals = eval(appinstance.parameters)
+                form_permissions['public']['value'] = ai_vals['permissions.public']
+                form_permissions['project']['value'] = ai_vals['permissions.project']
+                form_permissions['private']['value'] = ai_vals['permissions.private']
+            except:
+                print("Permissions not set for app instance, using default.")
+    return dep_permissions, form_permissions
+
+
 def appsettings(request, user, project, ai_id):
     template = 'create.html'
     app_action = "Settings"
@@ -286,6 +327,7 @@ def appsettings(request, user, project, ai_id):
     dep_apps, app_deps = get_form_apps(aset, project, appinstance=appinstance)
     dep_model, models = get_form_models(aset, project, appinstance=appinstance)
     primitives = get_form_primitives(aset, project, appinstance=appinstance)
+    dep_permissions, form_permissions = get_form_permission(aset, project, appinstance=appinstance)
 
     return render(request, template, locals())
 
@@ -304,42 +346,13 @@ def create(request, user, project, app_slug):
 
     # Set up form
 
-    
-
-    # dep_model = False
-    # if 'model' in aset:
-    #     print('app requires a model')
-    #     dep_model = True
-    #     models = Model.objects.filter(project=project)
-    #     print(models)
     dep_model, models = get_form_models(aset, project, [])
 
-    # dep_apps = False
-    # if 'apps' in aset:
-    #     dep_apps = True
-    #     app_deps = dict()
-    #     apps = aset['apps']
-    #     for app_name, option_type in apps.items():
-    #         print(app_name)
-    #         app_obj = Apps.objects.get(name=app_name)
-    #         app_instances = AppInstance.objects.filter(project=project, app=app_obj)
-    #         if option_type == "one":
-    #             app_deps[app_name] = {"instances": app_instances, "option_type": ""}
-    #         else:
-    #             app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
     dep_apps, app_deps = get_form_apps(aset, project, [])
 
 
     dep_vols = False
-    # if 'volumes' in aset:
-    #     dep_vols = True
-    #     volumes = Volume.objects.filter(project_slug=project.slug)
-    #     volume_type = ""
-    #     if aset['volumes'] == "many":
-    #         volume_type = "multiple"
-            
-    #     print(volumes)
-    #     print(volume_type)
+
 
     dep_flavor = False
     if 'flavor' in aset:
@@ -351,23 +364,13 @@ def create(request, user, project, app_slug):
         dep_environment = True
         environments = Environment.objects.all()
 
-    # all_keys = aset.keys()
-    # print("PRIMITIVES")
-    # primitives = dict()
-    # for key in all_keys:
-    #     if key not in key_words:
-    #         primitives[key] = aset[key]
 
     primitives = get_form_primitives(aset, project, [])
-
+    dep_permissions, form_permissions = get_form_permission(aset, project, [])
 
     print("::::::::::::")
 
 
-    # dep_volumes = False
-    # if 'volumes' in aset:
-    #     dep_volumes = True
-    #     volumes = Volume.objects.filter(project_slug=project.slug)
 
 
 
@@ -380,9 +383,39 @@ def create(request, user, project, app_slug):
         print(".............")
         print(request.POST.dict())
 
+
         if request.POST.get('app_action') == "Create":
+            permission = AppPermission(name=app_name)
+            permission.save()
+        elif request.POST.get('app_action') == "Settings":
+            instance = AppInstance.objects.get(pk=request.POST.get('app_id'))
+            permission = instance.permission
+
+        if parameters_out['permissions.public'] == "true":
+            permission.public = True
+        elif parameters_out['permissions.project'] == "true":
+            client_id = project.slug
+            parameters_out['project.client_id'] = client_id
+            kc = keylib.keycloak_init()
+            client_secret = keylib.keycloak_get_client_secret_by_id(kc, client_id)
+            print(client_id)
+            print(client_secret)
+
+            parameters_out['project.client_secret'] = client_secret
+            permission.projects.set([project])
+        elif parameters_out['permissions.private'] == "true":
+            permission.users.set([request.user])
+        permission.save()
+
+        if request.POST.get('app_action') == "Create":
+            
+            
+            
+            
+            print(permission)
             instance = AppInstance(name=app_name,
                                 app=app,
+                                permission=permission,
                                 project=project,
                                 settings=str(request.POST.dict()),
                                 parameters=str(parameters_out),
@@ -393,8 +426,8 @@ def create(request, user, project, app_slug):
             instance.vol_dependencies.set(vol_deps)
             instance.model_dependencies.set(model_deps)
         elif request.POST.get('app_action') == "Settings":
-            a=1
-            instance = AppInstance.objects.get(pk=request.POST.get('app_id'))
+            
+            
             print("UPDATING APP DEPLOYMENT")
             print(instance)
             instance.name = app_name

@@ -16,6 +16,23 @@
 
                 <label for="app_name">Name</label>
                 <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
+                
+                {% if dep_permissions %}
+                <div class="form-group">
+                    <h5>Permissions</h5>
+                    <select name="permission" id="permission" class="form-control">
+                        {% for name, value in form_permissions.items %}
+                            {% if value.option == "true" %}
+                                {% if value.value == "false" %}
+                                <option value="{{ name }}">{{ name }}</option>
+                                {% else %}
+                                <option value="{{ name }}" selected>{{ name }}</option> 
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
 
                 {% if dep_model %}
                 <div class="form-group">

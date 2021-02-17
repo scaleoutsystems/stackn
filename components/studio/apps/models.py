@@ -13,8 +13,12 @@ import uuid
 
 
 class AppPermission(models.Model):
-    name = models.CharField(max_length=512)
-
+    name = models.CharField(max_length=512, default="permission_name")
+    public = models.BooleanField(default=False)
+    projects = models.ManyToManyField('projects.Project')
+    users = models.ManyToManyField(User)
+    def __str__(self):
+        return str(self.name)
 
 class AppCategories(models.Model):
     name = models.CharField(max_length=512)
@@ -43,6 +47,7 @@ class Apps(models.Model):
 class AppInstance(models.Model):
     # TODO: Name, project should be unique combination
     name = models.CharField(max_length=512, default="app_name")
+    permission = models.OneToOneField('apps.AppPermission', on_delete=models.DO_NOTHING, null=True)
     app = models.ForeignKey('Apps', on_delete=models.CASCADE, related_name='appinstance')
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='appinstance')
     helmchart = models.OneToOneField('deployments.HelmResource', on_delete=models.CASCADE, null=True)
@@ -77,6 +82,18 @@ def pre_save_apps(sender, instance, using, **kwargs):
     # TODO: Fix for multicluster setup, look at e.g. labs
     HOST = settings.DOMAIN
     NAMESPACE = settings.NAMESPACE
+    if instance.action == "create":
+        # Add redirect URI to project client
+        if settings.OIDC_VERIFY_SSL:
+            URI =  'https://'+RELEASE_NAME+'.'+HOST
+        else:
+            URI =  'http://'+RELEASE_NAME+'.'+HOST
+        kc = keylib.keycloak_init()
+        res = keylib.keycloak_add_client_valid_redirect(kc, instance.project.slug, URI.strip('/')+'/*')
+        if res:
+            print("Added app URI to project client list of valid redirects.")
+        else:
+            print("Failed to add app URI to project client list of valid redirects.")
 
     if instance.app.exposed == 'external':
         URL = instance.app.schema+RELEASE_NAME+'.'+HOST
@@ -161,10 +178,14 @@ def pre_save_apps(sender, instance, using, **kwargs):
 def pre_delete_appinstance(sender, instance, using, **kwargs):
     try:
         kc = keylib.keycloak_init()
-        keylib.keycloak_delete_client(kc, instance.keycloak_client_id)
-        
+        params = eval(instance.helmchart.params)
+        # TODO: Fix for multicluster setup
+        URI =  'https://'+params['release']+'.'+settings.DOMAIN
+        keylib.keycloak_remove_client_valid_redirect(kc, instance.project.slug, URI.strip('/')+'/*')
+        keylib.keycloak_delete_client(kc, instance.keycloak_client_id) 
         scope_id = keylib.keycloak_get_client_scope_id(kc, instance.keycloak_client_id+'-scope')
         keylib.keycloak_delete_client_scope(kc, scope_id)
+        instance.permission.delete()
     except Exception as err:
         print("Failed to delete keycloak client and client scope.")
         print(err)
