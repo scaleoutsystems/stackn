@@ -11,7 +11,7 @@ import requests
 import flatten_json
 
 
-key_words = ['model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
 
 # Create your views here.
 def index(request, user, project):
@@ -191,7 +191,7 @@ def serialize_primitives(form_selection):
     keys = form_selection.keys()
     for key in keys:
         if key not in key_words and 'app:' not in key:
-            parameters[key] = form_selection[key]
+            parameters[key] = form_selection[key].replace('\r\n', '\n')
     print(parameters)
     return parameters
 
@@ -205,6 +205,19 @@ def serialize_permissions(form_selection):
     }
     permission = form_selection.get('permission', None)
     parameters['permissions.'+permission] = "true"
+    print(parameters)
+    return parameters
+
+def serialize_appobjs(form_selection):
+    print("SERIALIZING APPOBJS")
+    parameters = dict()
+    appobjs = []
+    if 'appobj' in form_selection:
+        appobjs = form_selection.getlist('appobj')
+        parameters['appobj'] = dict()
+        for obj in appobjs:
+            app = Apps.objects.get(pk=obj)
+            parameters['appobj'+'.'+app.slug] = "true"
     print(parameters)
     return parameters
 
@@ -233,6 +246,9 @@ def serialize_app(form_selection):
     permission_params = serialize_permissions(form_selection)
     parameters.update(permission_params)
 
+    appobj_params = serialize_appobjs(form_selection)
+    parameters.update(appobj_params)
+
     return parameters, app_deps, vol_deps, model_deps
 
 def get_form_models(aset, project, appinstance=[]):
@@ -251,7 +267,7 @@ def get_form_models(aset, project, appinstance=[]):
                 model.selected = ""
     return dep_model, models
 
-def get_form_apps(aset, project, appinstance=[]):
+def get_form_apps(aset, project, myapp, appinstance=[]):
     dep_apps = False
     app_deps = []
     if 'apps' in aset:
@@ -261,7 +277,14 @@ def get_form_apps(aset, project, appinstance=[]):
         for app_name, option_type in apps.items():
             print(app_name)
             app_obj = Apps.objects.get(name=app_name)
+
+            # TODO: Only get app instances that we have permission to list.
             app_instances = AppInstance.objects.filter(project=project, app=app_obj)
+            # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
+            # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
+            if app_name == "Environment":
+                key = 'appobj'+'.'+myapp.slug
+                app_instances = AppInstance.objects.filter(project=project, app=app_obj, parameters__contains=key+"': "+"'true'")
             
             for ain in app_instances:
                 if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
@@ -312,6 +335,20 @@ def get_form_permission(aset, project, appinstance=[]):
                 print("Permissions not set for app instance, using default.")
     return dep_permissions, form_permissions
 
+def get_form_appobj(aset, project, appinstance=[]):
+    print("CHECKING APP OBJ")
+    dep_appobj = False
+    appobjs = dict()
+    if 'appobj' in aset:
+        print("NEEDS APP OBJ")
+        dep_appobj = True
+        appobjs['objs'] = Apps.objects.all()
+        appobjs['title'] = aset['appobj']['title']
+        appobjs['type'] = aset['appobj']['type']
+
+    print(appobjs)
+    return dep_appobj, appobjs
+
 
 def appsettings(request, user, project, ai_id):
     template = 'create.html'
@@ -324,7 +361,7 @@ def appsettings(request, user, project, ai_id):
 
     aset = eval(appinstance.app.settings)
     # get_form_models(aset, project, appinstance=appinstance)
-    dep_apps, app_deps = get_form_apps(aset, project, appinstance=appinstance)
+    dep_apps, app_deps = get_form_apps(aset, project, app, appinstance=appinstance)
     dep_model, models = get_form_models(aset, project, appinstance=appinstance)
     primitives = get_form_primitives(aset, project, appinstance=appinstance)
     dep_permissions, form_permissions = get_form_permission(aset, project, appinstance=appinstance)
@@ -348,8 +385,9 @@ def create(request, user, project, app_slug):
 
     dep_model, models = get_form_models(aset, project, [])
 
-    dep_apps, app_deps = get_form_apps(aset, project, [])
+    dep_apps, app_deps = get_form_apps(aset, project, app, [])
 
+    dep_appobj, appobjs = get_form_appobj(aset, project, [])
 
     dep_vols = False
 
