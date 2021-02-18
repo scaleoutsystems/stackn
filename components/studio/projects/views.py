@@ -15,6 +15,8 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
+from .models import Project
+from apps.models import Apps
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
@@ -33,6 +35,23 @@ def index(request):
         print(err)
 
     request.session['next'] = '/projects/'
+    return render(request, template, locals())
+
+@login_required
+def create_environment(request, user, project_slug):
+    template = 'create_environment.html'
+    project = Project.objects.get(slug=project_slug)
+    action = "Create"
+
+    apps = Apps.objects.all()
+
+    return render(request, template, locals())
+
+@login_required
+def environments(request, user, project_slug):
+    template = 'environments.html'
+    project = Project.objects.get(slug=project_slug)
+
     return render(request, template, locals())
 
 

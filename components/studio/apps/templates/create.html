@@ -120,6 +120,11 @@
                         <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
                         {% endif %}
 
+                        {% if subval.type == "textfield" %}
+                        <label for="{{ subkey }}">{{ subval.title }}</label>
+                        <textarea id="{{ subkey }}" name="{{ key }}.{{ subkey }}" class="form-control" rows="20">{{ subval.default }}</textarea>
+                        {% endif %}
+
                         {% if subval.type == "number" %}
                         <label for="{{ subkey }}">{{ subval.title }}</label>
                         <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
@@ -128,6 +133,18 @@
                     {% endfor %}
                 </div>
                 {% endfor %}
+
+                {% if dep_appobj %}
+                <div class="form-group">
+                    <h5>{{ appobjs.title }}</h5>
+                    <select name="appobj" id="appobj" class="form-control" {{ appobjs.type }}>
+                    {% for app in appobjs.objs %}
+                    <option value="{{ app.pk }}">{{ app.name }}</option> 
+                    {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
                 {% if app_action == "Create" %}
                 <button class="btn btn-primary" type="submit">Create</button>
                 {% else %}
