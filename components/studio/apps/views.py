@@ -267,7 +267,7 @@ def get_form_models(aset, project, appinstance=[]):
                 model.selected = ""
     return dep_model, models
 
-def get_form_apps(aset, project, myapp, appinstance=[]):
+def get_form_apps(aset, project, myapp, user, appinstance=[]):
     dep_apps = False
     app_deps = []
     if 'apps' in aset:
@@ -279,12 +279,12 @@ def get_form_apps(aset, project, myapp, appinstance=[]):
             app_obj = Apps.objects.get(name=app_name)
 
             # TODO: Only get app instances that we have permission to list.
-            app_instances = AppInstance.objects.filter(project=project, app=app_obj)
+            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), project=project, app=app_obj)
             # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
                 key = 'appobj'+'.'+myapp.slug
-                app_instances = AppInstance.objects.filter(project=project, app=app_obj, parameters__contains=key+"': "+"'true'")
+                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), project=project, app=app_obj, parameters__contains=key+"': "+"'true'")
             
             for ain in app_instances:
                 if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
@@ -361,7 +361,7 @@ def appsettings(request, user, project, ai_id):
 
     aset = eval(appinstance.app.settings)
     # get_form_models(aset, project, appinstance=appinstance)
-    dep_apps, app_deps = get_form_apps(aset, project, app, appinstance=appinstance)
+    dep_apps, app_deps = get_form_apps(aset, project, app, request.user, appinstance=appinstance)
     dep_model, models = get_form_models(aset, project, appinstance=appinstance)
     primitives = get_form_primitives(aset, project, appinstance=appinstance)
     dep_permissions, form_permissions = get_form_permission(aset, project, appinstance=appinstance)
@@ -385,7 +385,7 @@ def create(request, user, project, app_slug):
 
     dep_model, models = get_form_models(aset, project, [])
 
-    dep_apps, app_deps = get_form_apps(aset, project, app, [])
+    dep_apps, app_deps = get_form_apps(aset, project, app, request.user, [])
 
     dep_appobj, appobjs = get_form_appobj(aset, project, [])
 
@@ -429,9 +429,15 @@ def create(request, user, project, app_slug):
             instance = AppInstance.objects.get(pk=request.POST.get('app_id'))
             permission = instance.permission
 
+        permission.public = False
+        permission.projects.set([])
+        permission.users.set([])
+        
+
         if parameters_out['permissions.public'] == "true":
             permission.public = True
         elif parameters_out['permissions.project'] == "true":
+
             client_id = project.slug
             parameters_out['project.client_id'] = client_id
             kc = keylib.keycloak_init()
