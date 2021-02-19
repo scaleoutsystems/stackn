@@ -16,4 +16,4 @@ cd ..
 
 sleep 1
 
-celery -A studio worker -l info
+watchmedo auto-restart -R --patterns="*.py" -- celery -A studio worker -l info

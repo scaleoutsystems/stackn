@@ -1,0 +1,49 @@
+namespace: default
+appname: vscode
+project:
+  name: test
+  slug: slug
+
+app:
+
+  resources:
+    requests:
+      memory: 1024Mi
+      cpu: 1.0
+    limits:
+      memory: 1024Mi
+      cpu: 1.0
+
+  gpu:
+    enabled: false
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: acceleration
+            operator: In
+            values:
+            - gpu
+
+global:
+  domain: local.stackn.dev
+
+imagePullSecrets:
+  - name: regcred
+
+
+ingress:
+  secretName: prod-ingress
+
+gatekeeper:
+  image: registry.local.stackn.dev/gatekeeper:latest #registry.scilifelab.stackn.dev/keycloak-gatekeeper:latest #keycloak/keycloak-gatekeeper:latest
+  realm: STACKn
+  client_secret: 75ffdab1-605a-49a9-9544-4807072d0908
+  client_id: wetty-test
+  auth_endpoint: https://keycloak.local.stackn.dev/auth/realms
+  skip_tls: 0
+
+s3sync:
+  image: registry.scilifelab.stackn.dev/s3-sync:latest #scaleoutsystems/s3-sync:latest

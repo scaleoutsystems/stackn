@@ -1,0 +1,6 @@
+accessModes: ReadWriteMany
+storageClass: default
+namespace: default
+
+volume:
+  size: 2Gi

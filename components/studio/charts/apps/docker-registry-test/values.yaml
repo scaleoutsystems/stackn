@@ -1,0 +1,17 @@
+namespace: default
+volumes: {}
+
+credentials:
+  username: admin
+  password: password
+
+ingress:
+  secretName: prod-ingress
+
+gatekeeper:
+  image: scaleoutsystems/gatekeeper:latest
+  client_secret: client_secret
+  client_id: client_id
+  auth_endpoint: https://keycloak-domain.com/auth/realms
+  skip_tls: 0
+  port: 9090

@@ -9,5 +9,5 @@ urlpatterns = [
     path('create/<app_slug>', views.create, name='create'),
     path('logs/<ai_id>', views.logs, name='logs'),
     path('settings/<ai_id>', views.appsettings, name='appsettings'),
-    path('delete/<ai_id>', views.delete, name='delete'),
+    path('delete/<category>/<ai_id>', views.delete, name='delete'),
 ]

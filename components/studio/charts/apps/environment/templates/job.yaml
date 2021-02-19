@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+  labels:
+    release: {{ .Release.Name }}
+    app: environment
+    project: {{ .Values.project.slug }}
+    type: app
+    pod: environment
+spec:
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: environment
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: environment
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=/build/Dockerfile"
+        - "--context=dir://build/"
+        {{- range $key, $value := .Values.apps.docker_registry }}
+        - "--destination={{ $value.release }}.{{ $.Values.global.domain }}/{{ $.Values.container.name }}:{{ $.Values.container.tag }}"
+        {{- end }}
+        volumeMounts:
+        - name: dockerfile
+          mountPath: /build
+        - name: auth
+          mountPath: /kaniko/.docker
+        imagePullPolicy: Always  
+        resources:
+          limits:
+            cpu: {{ .Values.flavor.limits.cpu }}
+            memory: {{ .Values.flavor.limits.memory }}
+          requests:
+            cpu: {{ .Values.flavor.requests.cpu }}
+            memory: {{ .Values.flavor.requests.memory }}
+      volumes:
+      - name: dockerfile
+        configMap:
+          name: {{ .Release.Name }}-df
+      - name: auth
+        configMap:
+          name: {{ .Release.Name }}-auth

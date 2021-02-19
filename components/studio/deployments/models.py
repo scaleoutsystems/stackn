@@ -7,13 +7,16 @@ from projects.helpers import get_minio_keys
 import os
 import requests
 import modules.keycloak_lib as keylib
+import chartcontroller.controller as controller
+# from chartcontroller.tasks import deploy_resource, delete_resource
+import json
 
 
 class HelmResource(models.Model):
     name = models.CharField(max_length=512, unique=True)
     namespace = models.CharField(max_length=512)
     chart = models.CharField(max_length=512)
-    params = models.CharField(max_length=100000)
+    params = models.JSONField() #models.CharField(max_length=100000)
     username = models.CharField(max_length=512)
     status = models.CharField(max_length=20)
     created = models.DateTimeField(auto_now_add=True)
@@ -26,34 +29,39 @@ class HelmResource(models.Model):
 @receiver(pre_save, sender=HelmResource, dispatch_uid='helmresource_pre_save_signal')
 def pre_save_helmresource(sender, instance, using, **kwargs):
     update = HelmResource.objects.filter(name=instance.name)
-    action = 'deploy'
-    if update:
-        action = 'upgrade'
-    url = settings.CHART_CONTROLLER_URL + '/' + action
-    print(instance.params)
-    retval = requests.get(url, instance.params)
-    if retval:
-        print('Resource: ' + instance.name)
-        print('Action: ' + action)
-        instance.status = 'OK'
-    else:
-        print('Failed to deploy resource: ' + instance.name)
-        print('Reason: {}'.format(retval.text))
-        print('Status code: {}'.format(retval.status_code))
-        instance.status = 'Failed'
+    # action = 'install'
+    # if update:
+    #     action = 'upgrade'
+
+    # retval = controller.deploy(instance.params)
+    # deploy_resource.delay(instance.params)
+    # print(retval)
+    # url = settings.CHART_CONTROLLER_URL + '/' + action
+    # print(instance.params)
+    # retval = requests.get(url, instance.params)
+    # if retval:
+    #     print('Resource: ' + instance.name)
+    #     print('Action: ' + action)
+    #     instance.status = 'OK'
+    # else:
+    #     print('Failed to deploy resource: ' + instance.name)
+    #     print('Reason: {}'.format(retval.text))
+    #     print('Status code: {}'.format(retval.status_code))
+    #     instance.status = 'Failed'
 
 
 @receiver(pre_delete, sender=HelmResource, dispatch_uid='helmresource_pre_delete_signal')
 def pre_delete_helmresource(sender, instance, using, **kwargs):
     print('Deleting helm resource.')
-    if instance.status == 'OK':
-        parameters = {'release': instance.name}
-        url = settings.CHART_CONTROLLER_URL + '/delete'
-        retval = requests.get(url, parameters)
-        if retval:
-            print('Deleted resource: ' + instance.name)
-        else:
-            print('Failed to delete resource: ' + instance.name)
+    # if instance.status == 'OK':
+    parameters = {'release': instance.name, 'namespace': instance.params['namespace']}
+    retval = controller.delete(parameters)
+        # url = settings.CHART_CONTROLLER_URL + '/delete'
+        # retval = requests.get(url, parameters)
+        # if retval:
+        #     print('Deleted resource: ' + instance.name)
+        # else:
+        #     print('Failed to delete resource: ' + instance.name)
 
 
 class DeploymentDefinition(models.Model):

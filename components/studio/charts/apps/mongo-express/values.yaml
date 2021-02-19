@@ -1,0 +1,71 @@
+namespace: default
+appname: vscode
+project:
+  name: test
+  slug: slug
+
+gatekeeper:
+  image: scaleoutsystems/gatekeeper:latest #registry.scilifelab.stackn.dev/keycloak-gatekeeper:latest #keycloak/keycloak-gatekeeper:latest
+  realm: STACKn
+  client_secret: 75ffdab1-605a-49a9-9544-4807072d0908
+  client_id: wetty-test
+  auth_endpoint: https://keycloak.local.stackn.dev/auth/realms
+  skip_tls: 0
+
+s3sync:
+  image: registry.scilifelab.stackn.dev/s3-sync:latest #scaleoutsystems/s3-sync:latest
+
+global:
+  domain: local.stackn.dev
+
+imagePullSecrets:
+  - name: regcred
+
+
+ingress:
+  secretName: prod-ingress
+
+apps:
+  mongodb:
+    app_name:
+      release: release-name
+      volumes:
+        vol_name:
+          name: vol_name
+          claim: vol_claim_name
+      credentials:
+        username: admin
+        password: password
+
+
+
+# mongodb:
+#   server: mongo-server
+#   port: mongo-port
+#   username: admin
+#   password: password
+
+
+# app:
+
+#   resources:
+#     requests:
+#       memory: 1024Mi
+#       cpu: 1.0
+#     limits:
+#       memory: 1024Mi
+#       cpu: 1.0
+
+#   gpu:
+#     enabled: false
+
+#   affinity:
+#     nodeAffinity:
+#       requiredDuringSchedulingIgnoredDuringExecution:
+#         nodeSelectorTerms:
+#         - matchExpressions:
+#           - key: acceleration
+#             operator: In
+#             values:
+#             - gpu
+

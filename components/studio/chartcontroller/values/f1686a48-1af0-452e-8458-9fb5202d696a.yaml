@@ -1,0 +1,28 @@
+app_action: Create
+app_id: ''
+app_name: prosilico
+appname: prostudio-test2-zrd-a34b
+apps: {}
+chart: apps/prostudio
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: prostudio-test2-zrd-a34b
+  client_secret: 881bba60-3d84-46d0-af00-f25f0d9161e2
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: prostudio-test2-zrd-a34b
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: prostudio-test2-zrd-a34b
+storageClass: microk8s-hostpath

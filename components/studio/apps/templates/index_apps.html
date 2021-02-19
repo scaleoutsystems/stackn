@@ -27,17 +27,13 @@
                         <tr>
                             <td>{{ appinstance.app.name }}</td>
                             <td>{{ appinstance.name}}</td>
-                            {% if appinstance.app.schema == "http://" or appinstance.app.schema == "https://" %}
-                            <td><a href="{{ appinstance.url }}">{{ appinstance.url }}</a></td>
-                            {% else %}
-                            <td>{{ appinstance.url }}</td>
-                            {% endif %}
+                            <td>{{ appinstance.table_field | safe }}</td>
                             <td>{{ appinstance.created_on }}</td>
                             <td><a href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
                                 <button class="btn-sm">Logs</button></a>
                                 <a href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
                                 <button class="btn-sm">Settings</button></a>
-                                <a href="{% url 'apps:delete' request.user project.slug appinstance.pk %}">
+                                <a href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
                                 <button class="btn-sm btn-warning">Delete</button></a></td>
                         </tr>
                     {% endfor %}
@@ -54,7 +50,7 @@
                         <span style="font-weight:bolder;">{{ app.name }}</span>
                     </h5>
                     <p class="card-text"> {{ app.description }}</p>
-                    <a href="{% url 'apps:create' request.user project.slug app.slug %}" class="btn mt-auto btn-info"
+                    <a href="{% url 'apps:create' request.user project.slug app.slug  %}" class="btn mt-auto btn-info"
                     style="width: fit-content;">Create</a>
                 </div>
             </div>

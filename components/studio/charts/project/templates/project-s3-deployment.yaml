@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: {{ .Release.Name }}-minio
+    name: {{ .Release.Name }}-minio
+  name: {{ .Release.Name }}-minio
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: {{ .Release.Name }}-minio
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 ()
+      creationTimestamp: null
+      labels:
+        io.kompose.service: {{ .Release.Name }}-minio
+        name: {{ .Release.Name }}-minio
+    spec:
+      containers:
+      - args:
+        - server
+        - /data
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: {{ .Values.minio.access_key }}
+        - name: MINIO_SECRET_KEY
+          value: {{ .Values.minio.secret_key }}
+        image: minio/minio:latest
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - http://{{ .Release.Name }}-minio:9000/minio/health/live
+          failureThreshold: 3
+          periodSeconds: 30
+          timeoutSeconds: 20
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "mkdir -p data/dataset data/reports data/models data/deploy"]
+        name: {{ .Release.Name }}-minio
+        ports:
+        - containerPort: 9000
+        resources: {}
+        volumeMounts:
+        - mountPath: /data
+          name: {{ .Release.Name }}-minio-data
+      hostname: {{ .Release.Name }}-minio
+      restartPolicy: Always
+      volumes:
+      - name: {{ .Release.Name }}-minio-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-minio-data
+status: {}

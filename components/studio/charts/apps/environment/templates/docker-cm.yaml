@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-df
+  namespace: {{ .Values.namespace }}
+data:
+  Dockerfile: |- 
+{{ .Values.image.dockerfile | indent 4 }}

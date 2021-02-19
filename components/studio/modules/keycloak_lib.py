@@ -190,13 +190,17 @@ def keycloak_update_client(kc, client_id, client_rep):
 
 def keycloak_get_clients(kc, payload):
     get_clients_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
-    res = r.get(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, params=payload, verify=settings.OIDC_VERIFY_SSL)
+    res = r.get(get_clients_url, headers={'Authorization': 'Bearer '+kc.token}, params=payload, verify=settings.OIDC_VERIFY_SSL)
     if res:
         clients = res.json() 
         return clients
     else:
         print('Failed to fetch clients.')
         print('Request returned status: '+str(res.status_code))
+        print(get_clients_url)
+        print('Payload: ')
+        print(payload)
+        print({'Authorization': 'Bearer '+kc.token})
         print(res.text)
 
 def keycloak_delete_client(kc, client_id):
@@ -399,7 +403,9 @@ def keycloak_get_user_id(kc, username):
                 verify=settings.OIDC_VERIFY_SSL).json()
     if not res:
         print('Failed to get user id.')
-        print('Status code: '+str(res.status_code))
+        # print('Status code: ')
+        # print(res.status_code)
+        print(res)
         print(res.text)
         return False
     if len(res) != 1:

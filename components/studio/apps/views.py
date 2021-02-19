@@ -7,8 +7,11 @@ from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
+from .serialize import serialize_app
+from .tasks import deploy_resource, delete_resource
 import requests
 import flatten_json
+import uuid
 
 
 key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
@@ -30,7 +33,7 @@ def logs(request, user, project, ai_id):
     template = "logs.html"
     app = AppInstance.objects.get(pk=ai_id)
     project = Project.objects.get(slug=project)
-    app_settings = eval(app.app.settings)
+    app_settings = app.app.settings
     containers = []
     if 'logs' in app_settings:
         containers = app_settings['logs']
@@ -43,7 +46,7 @@ def logs(request, user, project, ai_id):
         logs = []
         try:
             url = settings.LOKI_SVC+'/loki/api/v1/query_range'
-            app_params = eval(app.helmchart.params)
+            app_params = app.parameters
             print('{container="'+container+'",release="'+app_params['release']+'"}')
             query = {
             'query': '{container="'+container+'",release="'+app_params['release']+'"}',
@@ -71,185 +74,25 @@ def filtered(request, user, project, category):
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
- 
+    
+
+
+    # from django.template import engines
+
+    # django_engine = engines['django']
+    # c = {"project": {"slug":"abc"}}
+    # info_field = django_engine.from_string("Hello {{ project.slug }}!").render(c)
+    # print(info_field)
+    # c = {"project": project}
+    # print(dir(info_string))
+    # print(info_string.render(c))
+
     apps_installed = False
     if appinstances:
         apps_installed = True
         
     return render(request, template, locals())
 
-def serialize_model(form_selection):
-    print("SERIALIZING MODEL")
-    model_json = dict()
-    obj = []
-    if 'model' in form_selection:
-        model_id = form_selection.get('model', None)
-        obj = Model.objects.filter(pk=model_id)
-        print("Fetching selected model:")
-
-        
-        # model_json['model'] = dict()
-        model_json['model.name'] = obj[0].name
-        model_json['model.version'] = obj[0].version
-        model_json['model.release_type'] = obj[0].release_type
-        model_json['model.description'] = obj[0].description
-        # TODO: Fix for multicluster setup
-        model_json['model.url'] = "https://minio-"+obj[0].project.slug+'.'+settings.DOMAIN
-        keys = get_minio_keys(obj[0].project)
-        model_json['model.access_key'] = keys['project_key']
-        model_json['model.secret_key'] = keys['project_secret']
-        model_json['model.bucket'] = 'models'
-        model_json['model.obj'] = obj[0].uid
-    return model_json, obj
-
-def serialize_flavor(form_selection):
-    print("SERIALIZING FLAVOR")
-    flavor_json = dict()
-    if 'flavor' in form_selection:
-        flavor_id = form_selection.get('flavor', None)
-        flavor = Flavor.objects.get(pk=flavor_id)
-        flavor_json['flavor.requests.memory'] = flavor.mem
-        flavor_json['flavor.requests.cpu'] = flavor.cpu
-        flavor_json['flavor.limits.memory'] = flavor.mem
-        flavor_json['flavor.limits.cpu'] = flavor.cpu
-        flavor_json['flavor.gpu.enabled'] = "false"
-        if flavor.gpu and flavor.gpu > 0:
-            flavor_json['flavor.gpu'] = flavor.gpu
-            flavor_json['flavor.gpu.enabled'] = "true"
-    return flavor_json
-
-def serialize_environment(form_selection):
-    print("SERIALIZING ENVIRONMENT")
-    environment_json = dict()
-    if 'environment' in form_selection:
-        environment_id = form_selection.get('environment', None)
-        environment = Environment.objects.get(pk=environment_id)
-        environment_json['environment.image'] = environment.image
-
-    return environment_json
-
-
-def serialize_apps(form_selection):
-    print("SERIALIZING DEPENDENT APPS")
-    parameters = dict()
-    parameters['apps'] = dict()
-    app_deps = []
-    for key in form_selection.keys():
-        if "app:" in key and key[0:4] == "app:":
-            
-            app_name = key[4:]
-            app = Apps.objects.get(name=app_name)
-            parameters['apps'][app.slug] = dict()
-            print(app_name)
-            print('id: '+str(form_selection[key]))
-            objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
-
-            for obj in objs:
-                app_deps.append(obj)
-                parameters['apps'][app.slug][slugify(obj.name)] = eval(obj.helmchart.params)
-    print("APP PARAMS:")
-    print(flatten_json.flatten(parameters, '.'))
-    return flatten_json.flatten(parameters, '.'), app_deps
-
-## SERIALIZE VOLUMES
-def make_volume_param(vols):
-    
-    parameters = dict()
-    
-    parameters['volumes'] = dict()
-    for volobject in vols:
-        if volobject:
-            print(volobject)
-            parameters['volumes'][volobject.name] = dict()
-            parameters['volumes'][volobject.name]['name'] = volobject.name
-            parameters['volumes'][volobject.name]['claim'] = volobject.slug
-    print(flatten_json.flatten(parameters, '.'))
-    return flatten_json.flatten(parameters, '.')
-
-        
-    return volume_param
-
-def serialize_volumes(form_selection):
-    print("SERIALIZING VOLUMES")
-    parameters = dict()
-    volumes = []
-    if 'volumes' in form_selection:
-        print("VOLUMES PRESENT")
-        vol_ids = form_selection.getlist('volumes', None)
-        volumes = Volume.objects.filter(pk__in=vol_ids)
-        if not volumes:
-            volumes = Volume.objects.filter(pk=vol_ids)
-        print(volumes)
-        parameters = make_volume_param(volumes)
-    print(parameters)
-    return parameters, volumes
-## ------------------------------------------
-
-def serialize_primitives(form_selection):
-    print("SERIALIZING PRIMITIVES")
-    parameters = dict()
-    keys = form_selection.keys()
-    for key in keys:
-        if key not in key_words and 'app:' not in key:
-            parameters[key] = form_selection[key].replace('\r\n', '\n')
-    print(parameters)
-    return parameters
-
-def serialize_permissions(form_selection):
-    print("SERIALIZING PERMISSIONS")
-    parameters = dict()
-    parameters = {
-        "permissions.public": "false",
-        "permissions.project": "false",
-        "permissions.private": "false"
-    }
-    permission = form_selection.get('permission', None)
-    parameters['permissions.'+permission] = "true"
-    print(parameters)
-    return parameters
-
-def serialize_appobjs(form_selection):
-    print("SERIALIZING APPOBJS")
-    parameters = dict()
-    appobjs = []
-    if 'appobj' in form_selection:
-        appobjs = form_selection.getlist('appobj')
-        parameters['appobj'] = dict()
-        for obj in appobjs:
-            app = Apps.objects.get(pk=obj)
-            parameters['appobj'+'.'+app.slug] = "true"
-    print(parameters)
-    return parameters
-
-def serialize_app(form_selection):
-    print("SERIALIZING APP")
-    parameters = dict()
-
-    model_params, model_deps = serialize_model(form_selection)
-    parameters.update(model_params)
-
-    app_params, app_deps = serialize_apps(form_selection)
-    parameters.update(app_params)
-
-    vol_params, vol_deps = serialize_volumes(form_selection)
-    parameters.update(vol_params)
-
-    prim_params = serialize_primitives(form_selection)
-    parameters.update(prim_params)
-
-    flavor_params = serialize_flavor(form_selection)
-    parameters.update(flavor_params)
-
-    environment_params = serialize_environment(form_selection)
-    parameters.update(environment_params)
-
-    permission_params = serialize_permissions(form_selection)
-    parameters.update(permission_params)
-
-    appobj_params = serialize_appobjs(form_selection)
-    parameters.update(appobj_params)
-
-    return parameters, app_deps, vol_deps, model_deps
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
@@ -284,7 +127,15 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
                 key = 'appobj'+'.'+myapp.slug
-                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), project=project, app=app_obj, parameters__contains=key+"': "+"'true'")
+
+                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+                                                           project=project,
+                                                           app=app_obj,
+                                                           parameters__contains={
+                                                               "appobj": {
+                                                                    myapp.slug: True
+                                                                }
+                                                           })
             
             for ain in app_instances:
                 if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
@@ -303,7 +154,7 @@ def get_form_primitives(aset, project, appinstance=[]):
     print("PRIMITIVES")
     primitives = dict()
     if appinstance:
-        ai_vals = eval(appinstance.parameters)
+        ai_vals = flatten_json.flatten(appinstance.parameters, '.')
     for key in all_keys:
         if key not in key_words:
             primitives[key] = aset[key]
@@ -359,7 +210,7 @@ def appsettings(request, user, project, ai_id):
     existing_app_name = appinstance.name
     app = appinstance.app
 
-    aset = eval(appinstance.app.settings)
+    aset = appinstance.app.settings
     # get_form_models(aset, project, appinstance=appinstance)
     dep_apps, app_deps = get_form_apps(aset, project, app, request.user, appinstance=appinstance)
     dep_model, models = get_form_models(aset, project, appinstance=appinstance)
@@ -368,6 +219,65 @@ def appsettings(request, user, project, ai_id):
 
     return render(request, template, locals())
 
+
+
+def create_instance_params(instance, action="create"):
+    # instance_settings = eval(instance.settings)
+    if action == "create":
+        RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+        print("RELEASE_NAME: "+RELEASE_NAME)
+    else:
+        print(instance.parameters)
+        RELEASE_NAME = instance.parameters['release']
+
+
+    SERVICE_NAME = RELEASE_NAME
+    # TODO: Fix for multicluster setup, look at e.g. labs
+    HOST = settings.DOMAIN
+    NAMESPACE = settings.NAMESPACE
+
+    user = instance.owner
+
+    skip_tls = 0
+    if not settings.OIDC_VERIFY_SSL:
+        skip_tls = 1
+        print("WARNING: Skipping TLS verify.")
+
+    # Add some generic parameters.
+    parameters = {
+        "release": RELEASE_NAME,
+        "chart": str(instance.app.chart),
+        "namespace": NAMESPACE,
+        "appname": RELEASE_NAME,
+        "project": {
+            "name": instance.project.name,
+            "slug": instance.project.slug
+        },
+        "global": {
+            "domain": HOST,
+        },
+        "s3sync": {
+            "image": "scaleoutsystems/s3-sync:latest"
+        },
+        "gatekeeper": {
+            "skip_tls": str(skip_tls)
+        },
+        "service": {
+            "name": SERVICE_NAME
+        },
+        "storageClass": settings.STORAGECLASS
+    }
+
+    instance.parameters.update(parameters)
+
+
+    # Add field for table.    
+    if instance.app.table_field and instance.app.table_field != "":
+        django_engine = engines['django']
+        info_field = django_engine.from_string(instance.app.table_field).render(parameters)
+        instance.table_field = info_field
+    else:
+        instance.table_field = ""
 
 def create(request, user, project, app_slug):
     template = 'create.html'
@@ -379,19 +289,14 @@ def create(request, user, project, app_slug):
     project = Project.objects.get(slug=project)
     app = Apps.objects.get(slug=app_slug)
 
-    aset = eval(app.settings)
+    aset = app.settings
 
     # Set up form
-
     dep_model, models = get_form_models(aset, project, [])
-
     dep_apps, app_deps = get_form_apps(aset, project, app, request.user, [])
-
     dep_appobj, appobjs = get_form_appobj(aset, project, [])
 
     dep_vols = False
-
-
     dep_flavor = False
     if 'flavor' in aset:
         dep_flavor = True
@@ -413,14 +318,8 @@ def create(request, user, project, app_slug):
 
 
     if request.method == "POST":
-        print(request.POST)
         app_name = request.POST.get('app_name')
-        parameters_out, app_deps, vol_deps, model_deps = serialize_app(request.POST)
-        print("PARAMETERS OUT")
-        print(parameters_out)
-        print(".............")
-        print(request.POST.dict())
-
+        parameters_out, app_deps, model_deps = serialize_app(request.POST)
 
         if request.POST.get('app_action') == "Create":
             permission = AppPermission(name=app_name)
@@ -434,54 +333,51 @@ def create(request, user, project, app_slug):
         permission.users.set([])
         
 
-        if parameters_out['permissions.public'] == "true":
+        if parameters_out['permissions']['public']:
             permission.public = True
-        elif parameters_out['permissions.project'] == "true":
+        elif parameters_out['permissions']['project']:
 
             client_id = project.slug
-            parameters_out['project.client_id'] = client_id
             kc = keylib.keycloak_init()
             client_secret = keylib.keycloak_get_client_secret_by_id(kc, client_id)
-            print(client_id)
-            print(client_secret)
-
-            parameters_out['project.client_secret'] = client_secret
+            if not 'project' in parameters_out:
+                parameters_out['project'] = dict()
+            parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
             permission.projects.set([project])
-        elif parameters_out['permissions.private'] == "true":
+        elif parameters_out['permissions']['private']:
             permission.users.set([request.user])
         permission.save()
 
+
+
         if request.POST.get('app_action') == "Create":
-            
-            
-            
-            
-            print(permission)
             instance = AppInstance(name=app_name,
                                 app=app,
                                 permission=permission,
                                 project=project,
                                 settings=str(request.POST.dict()),
-                                parameters=str(parameters_out),
+                                parameters=parameters_out,
                                 owner=request.user)
-            instance.action = "create"
+            # instance.action = "create"
+            create_instance_params(instance, "create")
             instance.save()
             instance.app_dependencies.set(app_deps)
-            instance.vol_dependencies.set(vol_deps)
             instance.model_dependencies.set(model_deps)
+            
+            deploy_resource.delay(instance.pk, "create")
+
         elif request.POST.get('app_action') == "Settings":
-            
-            
             print("UPDATING APP DEPLOYMENT")
             print(instance)
             instance.name = app_name
             instance.settings = str(request.POST.dict())
-            instance.parameters=str(parameters_out)
-            instance.action = "update"
+            instance.parameters.update(parameters_out)
+            create_instance_params(instance, "update")
             instance.save()
             instance.app_dependencies.set(app_deps)
-            instance.vol_dependencies.set(vol_deps)
             instance.model_dependencies.set(model_deps)
+
+            deploy_resource.delay(instance.pk, "update")
         else:
             raise Exception("Incorrect action on app.")
 
@@ -490,8 +386,25 @@ def create(request, user, project, app_slug):
 
     return render(request, template, locals())
 
-def delete(request, user, project, ai_id):
-    appinstance = AppInstance.objects.get(pk=ai_id)
-    appinstance.helmchart.delete()
+def delete(request, user, project, category, ai_id):
+    print("PK="+str(ai_id))
+    appinstance = []
+    try:
+        appinstance = AppInstance.objects.get(pk=ai_id)
+    except:
+        print("WARN: AppInstance doesn't exist.")
+    
+    release = ''
+    namespace = ''
+    if appinstance:
+        print(appinstance)
+        release = appinstance.parameters['release']
+        namespace = appinstance.parameters['namespace']
+        appinstance.delete()
+        print("BOTTOM")
+    
+    print("Uninstalling resources")
+    delete_resource.delay({"release": release, "namespace": namespace})
+
     return HttpResponseRedirect(
-                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': appinstance.app.category.slug}))
+                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))

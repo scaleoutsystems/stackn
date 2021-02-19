@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name | replace "_" "-" }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # nginx.ingress.kubernetes.io/proxy-redirect-from: /oauth
+    # nginx.ingress.kubernetes.io/proxy-redirect-to: /registry/oauth
+spec:
+  rules:
+    - host: {{ .Release.Name | replace "_" "-" }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}
+            servicePort: 80
+  tls:
+    - secretName: {{ .Values.ingress.secretName }}
+      hosts:
+        - {{ .Values.global.domain }}

@@ -1,0 +1,56 @@
+
+settings_file: project-settings
+user_settings_file: user-settings
+namespace: default
+appname: app-name
+project:
+  name: test
+  slug: slug
+labs:
+  image: pharmbio/pharmbio-notebook:tf-2.1.0-gpu
+  #image: jupyter/minimal-notebook:latest
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 0.2
+    limits:
+      memory: 512Mi
+      cpu: 0.2
+
+  gpu:
+    enabled: false
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: acceleration
+            operator: In
+            values:
+            - gpu
+
+global:
+  domain: platform.local
+
+imagePullSecrets:
+  - name: regcred
+
+minio:
+  access_key: minio
+  secret_key: minio123
+  bucket: dataset
+
+ingress:
+  secretName: prod-ingress
+
+gatekeeper:
+  realm: demo
+  client_secret: 15982a99-cf3b-4e65-82ab-03d7df84a25a
+  client_id: project_notebook
+  auth_endpoint: keycloak.domain/auth/realms
+  skip_tls: 0
+
+environment:
+  image: rocker/rstudio

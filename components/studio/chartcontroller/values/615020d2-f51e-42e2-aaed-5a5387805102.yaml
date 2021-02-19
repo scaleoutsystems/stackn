@@ -1,0 +1,63 @@
+app_action: Create
+app_id: ''
+app_name: minio
+appname: minio-test2-zrd-48d1
+apps:
+  volume:
+    mnist:
+      app_action: Create
+      app_id: ''
+      app_name: mnist
+      appname: volume-test2-zrd-af26
+      apps: {}
+      chart: apps/volume
+      gatekeeper:
+        auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+        client_id: volume-test2-zrd-af26
+        client_secret: d4518295-0048-449d-9d37-d7ae6012d24c
+        realm: STACKn
+      global:
+        domain: studio-dev.local.stackn.dev
+      namespace: studio-develop
+      permission: private
+      permissions:
+        private: true
+        project: false
+        public: false
+      project:
+        name: test2
+        slug: test2-zrd
+      release: volume-test2-zrd-af26
+      s3sync:
+        image: scaleoutsystems/s3-sync:latest
+      service:
+        name: volume-test2-zrd-af26
+      storageClass: microk8s-hostpath
+      volume:
+        size: 3Gi
+chart: apps/minio
+credentials:
+  access_key: accesskey
+  secret_key: secretkey123
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: minio-test2-zrd-48d1
+  client_secret: 1986677b-2f30-42fc-ae12-65e563b0ad64
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: minio-test2-zrd-48d1
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: minio-test2-zrd-48d1
+storageClass: microk8s-hostpath
