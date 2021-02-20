@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect, reverse
 from django.conf import settings
 from django.utils.text import slugify
 from django.db.models import Q
+from django.template import engines
 from .models import Apps, AppInstance, AppCategories, AppPermission
 from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
@@ -74,18 +75,6 @@ def filtered(request, user, project, category):
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
-    
-
-
-    # from django.template import engines
-
-    # django_engine = engines['django']
-    # c = {"project": {"slug":"abc"}}
-    # info_field = django_engine.from_string("Hello {{ project.slug }}!").render(c)
-    # print(info_field)
-    # c = {"project": project}
-    # print(dir(info_string))
-    # print(info_string.render(c))
 
     apps_installed = False
     if appinstances:
@@ -353,14 +342,14 @@ def create(request, user, project, app_slug):
         if request.POST.get('app_action') == "Create":
             instance = AppInstance(name=app_name,
                                 app=app,
-                                permission=permission,
                                 project=project,
                                 settings=str(request.POST.dict()),
                                 parameters=parameters_out,
                                 owner=request.user)
-            # instance.action = "create"
             create_instance_params(instance, "create")
             instance.save()
+            permission.appinstance = instance
+            permission.save()
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)
             
@@ -388,23 +377,43 @@ def create(request, user, project, app_slug):
 
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
+
+    # Check that the app instance actually exists.
     appinstance = []
     try:
         appinstance = AppInstance.objects.get(pk=ai_id)
     except:
         print("WARN: AppInstance doesn't exist.")
+
     
-    release = ''
-    namespace = ''
     if appinstance:
-        print(appinstance)
+        # The instance does exist.
+        # TODO: Check that the user has the permission required to delete it.
+
+        # Clean up in Keycloak.
+        kc = keylib.keycloak_init()
+        # TODO: Fix for multicluster setup
+        # TODO: We are assuming this URI here, but we should allow for other forms.
+        # The instance should store information about this.
+        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+        
+        keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+        keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
+        scope_id = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        keylib.keycloak_delete_client_scope(kc, scope_id)
+        
+        # Delete installed resources on the cluster.
         release = appinstance.parameters['release']
         namespace = appinstance.parameters['namespace']
+        delete_resource.delay({"release": release, "namespace": namespace})
+
+        # Delete the instance
+        # appinstance.permission.delete()
         appinstance.delete()
+
         print("BOTTOM")
     
-    print("Uninstalling resources")
-    delete_resource.delay({"release": release, "namespace": namespace})
+        
 
     return HttpResponseRedirect(
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
