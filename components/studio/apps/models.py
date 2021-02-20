@@ -20,6 +20,7 @@ class AppPermission(models.Model):
     public = models.BooleanField(default=False)
     projects = models.ManyToManyField('projects.Project')
     users = models.ManyToManyField(User)
+    appinstance = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE, null=True, related_name="permission")
     def __str__(self):
         return str(self.name)
 
@@ -47,13 +48,10 @@ class Apps(models.Model):
 class AppInstance(models.Model):
     # TODO: Name, project should be unique combination
     name = models.CharField(max_length=512, default="app_name")
-    permission = models.OneToOneField('apps.AppPermission', on_delete=models.DO_NOTHING, null=True)
     app = models.ForeignKey('Apps', on_delete=models.CASCADE, related_name='appinstance')
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='appinstance')
     app_dependencies = models.ManyToManyField('apps.AppInstance')
     model_dependencies = models.ManyToManyField('models.Model')
-    # env_dependencies = models.ManyToManyField('projects.Environment')
-    # flavor_dependencies = models.ManyToManyField('projects.Flavor')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
     url = models.CharField(max_length=512, null=True)
     info = models.TextField(blank=True, null=True)
@@ -66,31 +64,3 @@ class AppInstance(models.Model):
 
     def __str__(self):
         return str(self.name)
-
-
-@receiver(pre_delete, sender=AppInstance, dispatch_uid='appinstance_pre_delete_signal')
-def pre_delete_appinstance(sender, instance, using, **kwargs):
-    try:
-        kc = keylib.keycloak_init()
-        # TODO: Fix for multicluster setup
-        URI =  'https://'+instance.parameters['release']+'.'+settings.DOMAIN
-        
-        # Clean up in Keycloak.
-        print("Delete Keycloak objects.")
-        print("Model: remove client redirect.")
-        keylib.keycloak_remove_client_valid_redirect(kc, instance.project.slug, URI.strip('/')+'/*')
-        print("Model: delete client.")
-        print("client: {}".format(instance.parameters['gatekeeper']['client_id']))
-        keylib.keycloak_delete_client(kc, instance.parameters['gatekeeper']['client_id']) 
-        print("Model: get client scope.")
-        scope_id = keylib.keycloak_get_client_scope_id(kc, instance.parameters['gatekeeper']['client_id']+'-scope')
-        keylib.keycloak_delete_client_scope(kc, scope_id)
-        
-        # Uninstall resources
-        # print("Uninstalling resources.")
-        # delete_resource.delay(instance.parameters)
-        
-        instance.permission.delete()
-    except Exception as err:
-        print("Failed to delete AppInstance.")
-        print(err)
