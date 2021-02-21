@@ -15,16 +15,6 @@ def deploy(options):
     kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
     chart = 'charts/'+options['chart']
 
-    # if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true':
-    #     if not 'chart' in options:
-    #         print('Chart option not specified.')
-    #         return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
-    #     chart = 'charts/scaleout/'+options['chart']
-    # else:
-    #     refresh_charts(self.branch)
-    #     fname = self.branch.replace('/', '-')
-    #     chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
-
     if not 'release' in options:
         print('Release option not specified.')
         return json.dumps({'status':'failed', 'reason':'Option release not set.'})
@@ -42,9 +32,9 @@ def deploy(options):
 
     
 
-    status = subprocess.run(args)
-    print(status, flush=True)
-    return status
+    result = subprocess.run(args, capture_output=True)
+    print(result, flush=True)
+    return result
 
 def delete(options):
     volume_root = "/"
@@ -55,8 +45,8 @@ def delete(options):
     # print(options)
     # args = 'helm --kubeconfig '+str(kubeconfig)+' delete {release}'.format(release=options['release']) #.split(' ')
     args = ['helm', '--kubeconfig', str(kubeconfig), '-n', options['namespace'], 'delete', options['release']]
-    status = subprocess.run(args)
+    result = subprocess.run(args, capture_output=True)
     print("DELETE STATUS FROM CONTROLLER")
-    print(status, flush=True)
-    return status
+    print(result, flush=True)
+    return result
     # return json.dumps({'helm': {'command': args, 'cwd': str(self.cwd), 'status': str(status)}})

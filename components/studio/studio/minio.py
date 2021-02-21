@@ -1,4 +1,4 @@
-from minio import Minio, ResponseError
+from minio import Minio
 import pickle
 
 

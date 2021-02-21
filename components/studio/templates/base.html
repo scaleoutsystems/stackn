@@ -1,9 +1,8 @@
 {% load static %}
-
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,190 +11,181 @@
 
     <title>Scaleout</title>
 
-    <link rel="canonical" href="">
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+	<link href="{% static 'css/light.css' %}" rel="stylesheet">
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    <script src="{% static 'js/settings.js' %}"></script>
 
-    <!-- Custom styles for this template -->
-    <link href="{% static 'css/studio.css' %}" rel="stylesheet">
-    <link href="{% static 'css/project.css' %}" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-            crossorigin="anonymous"></script>
+	<!-- <link href="css/light.css" rel="stylesheet"> -->
+	<!-- <link href="css/dark.css" rel="stylesheet"> -->
 
-    <style type="text/css">
-        /* Chart.js */
-        @-webkit-keyframes chartjs-render-animation {
-            from {
-                opacity: 0.99
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-
-        @keyframes chartjs-render-animation {
-            from {
-                opacity: 0.99
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-
-        .chartjs-render-monitor {
-            -webkit-animation: chartjs-render-animation 0.001s;
-            animation: chartjs-render-animation 0.001s;
-        }
-    </style>
-
-    <style type="text/css">
-        #container {
-            max-width: 1150px;
-            height: 500px;
-
-        }
-
-        body {
-            padding: 0;
-            margin: 0;
-        }
-    </style>
-
-    {% block extra_head %} {% endblock %}
 </head>
+<!--
+  HOW TO USE: 
+  data-theme: default (default), dark, light
+  data-layout: fluid (default), boxed
+  data-sidebar-position: left (default), right
+  data-sidebar-behavior: sticky (default), fixed, compact
+-->
 
-<body>
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+	<div class="wrapper">
+		
+		{% block sidebar %} {% endblock %}
 
-<main role="main">
+		<div class="main">
+			{% block topbar %} {% endblock %}
 
-    <div class="container-fluid" style="height: inherit;">
-        <div class="row" style="height: inherit;">
-            {% block topnav %}
-            <div class="col-md-1 d-flex justify-content-center" style="background:#F3F3F3;">
-                <ul class="list-group d-flex">
+			<main class="content">
+				<div class="container-fluid p-0">
+					{% block toprow %} {% endblock %}
 
-                    <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
-                        <a href="{% url 'models:index' %}">
-                            <p class="d-flex justify-content-center">
-                                <img src="{% static 'img/stackn.png' %}" width="108" height="44">
-                            </p>
-                        </a>
-                    </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'models:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center">Models</p>
-                        </a>
-                    </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'projects:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
-                                                                          src="{% static '/icons/folder.svg' %}"
-                                                                          alt="" width="24" height="24"
-                                                                          title=""></p>
-                            <p class="d-flex justify-content-center">Projects</p>
-                        </a>
+					{% block content %} {% endblock %}
 
-                    </li>
+					
+				</div>
+			</main>
 
-                    <!-- Functionality not available with the first release!
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-left">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Terms of Service</a>
+								</li>
+							</ul>
+						</div>
+						<div class="col-6 text-right">
+							<p class="mb-0">
+								&copy; 2020 - <a href="index.html" class="text-muted">AppStack</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
 
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'deployments:index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center">Environments</p>
-                        </a>
-                    </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'workflows:workflows_definition_index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center" align="center">
-                                Workflow Definitions</p>
-                        </a>
-                    </li>
-                    <li class="list-inline mb-auto">
-                        <a class="nav-link" href="{% url 'deployments:deployment_definition_index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
-                        </a>
-                    </li>
-                    -->
+	<script src="{% static '/js/app.js' %}"></script>
 
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'studio_admin:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
-                                                                          src="{% static '/icons/person-lines-fill.svg' %}"
-                                                                          alt="" width="24" height="24"
-                                                                          title=""></p>
-                            <p class="d-flex justify-content-center">Admin</p>
-                        </a>
-                    </li>
-
-                    <li class="list-inline" style="margin-top: auto; margin-bottom: 25px; margin-left: auto; margin-right: auto;">
-                        <a href="https://scaleoutsystems.github.io/stackn/" target="_blank">
-                            <img src="{% static '/icons/question-circle.svg' %}" alt="" width="24" height="24" title="">
-                        </a>
-                        {% if request.user.is_authenticated %}
-                        <a class="dropdown-toggle" href="#" id="auth_dropdown_id" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img src="{% static '/icons/people-circle.svg' %}" alt="" width="24" height="24" title="">
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="auth_dropdown_id">
-                            <p class="d-flex justify-content-center">
-                                {{ request.user }}
-                            </p>
-                            <form action="{% url 'oidc_logout' %}" method="post">
-                              {% csrf_token %}
-
-                              <input type="submit" value="Sign out">
-                            </form>
-                        </div>
-                        {% else %}
-                        <a href="{% url 'oidc_authentication_init' %}">
-                            <img src="{% static '/icons/person.svg' %}" alt="" width="24" height="24" title="">
-                        </a>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-            {% endblock %}
-
-            {% block sidebar %} {% endblock %}
-
-            {% block content %} {% endblock %}
-        </div>
-    </div>
-
-</main>
-
-{% block footer %} {% endblock %}
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
-
-{% block extrascripts %} {% endblock %}
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Bar chart
+			new Chart(document.getElementById("chartjs-dashboard-bar"), {
+				type: "bar",
+				data: {
+					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+					datasets: [{
+						label: "Last year",
+						backgroundColor: window.theme.primary,
+						borderColor: window.theme.primary,
+						hoverBackgroundColor: window.theme.primary,
+						hoverBorderColor: window.theme.primary,
+						data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
+						barPercentage: .325,
+						categoryPercentage: .5
+					}, {
+						label: "This year",
+						backgroundColor: window.theme["primary-light"],
+						borderColor: window.theme["primary-light"],
+						hoverBackgroundColor: window.theme["primary-light"],
+						hoverBorderColor: window.theme["primary-light"],
+						data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68],
+						barPercentage: .325,
+						categoryPercentage: .5
+					}]
+				},
+				options: {
+					maintainAspectRatio: false,
+					cornerRadius: 15,
+					legend: {
+						display: false
+					},
+					scales: {
+						yAxes: [{
+							gridLines: {
+								display: false
+							},
+							stacked: false,
+							ticks: {
+								stepSize: 20
+							},
+							stacked: true,
+						}],
+						xAxes: [{
+							stacked: false,
+							gridLines: {
+								color: "transparent"
+							},
+							stacked: true,
+						}]
+					}
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			$("#datetimepicker-dashboard").datetimepicker({
+				inline: true,
+				sideBySide: false,
+				format: "L"
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Pie chart
+			new Chart(document.getElementById("chartjs-dashboard-pie"), {
+				type: "pie",
+				data: {
+					labels: ["Direct", "Affiliate", "E-mail", "Other"],
+					datasets: [{
+						data: [2602, 1253, 541, 1465],
+						backgroundColor: [
+							window.theme.primary,
+							window.theme.warning,
+							window.theme.danger,
+							"#E8EAED"
+						],
+						borderWidth: 5,
+						borderColor: window.theme.white
+					}]
+				},
+				options: {
+					responsive: !window.MSInputMethodContext,
+					maintainAspectRatio: false,
+					cutoutPercentage: 70,
+					legend: {
+						display: false
+					}
+				}
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			$("#datatables-dashboard-projects").DataTable({
+				pageLength: 6,
+				lengthChange: false,
+				bFilter: false,
+				autoWidth: false
+			});
+		});
+	</script>
 
 </body>
+
 </html>

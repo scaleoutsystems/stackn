@@ -70,7 +70,8 @@ def logs(request, user, project, ai_id):
     return render(request, template, locals())
 
 def filtered(request, user, project, category):
-    template = 'index_apps.html'
+    # template = 'index_apps.html'
+    template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
@@ -212,12 +213,12 @@ def appsettings(request, user, project, ai_id):
 
 def create_instance_params(instance, action="create"):
     # instance_settings = eval(instance.settings)
-    if action == "create":
-        RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
-        print("RELEASE_NAME: "+RELEASE_NAME)
-    else:
-        print(instance.parameters)
-        RELEASE_NAME = instance.parameters['release']
+    # if action == "create":
+    RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+    print("RELEASE_NAME: "+RELEASE_NAME)
+    # else:
+    #     print(instance.parameters)
+    #     RELEASE_NAME = instance.parameters['release']
 
 
     SERVICE_NAME = RELEASE_NAME
@@ -267,6 +268,7 @@ def create_instance_params(instance, action="create"):
         instance.table_field = info_field
     else:
         instance.table_field = ""
+
 
 def create(request, user, project, app_slug):
     template = 'create.html'
@@ -343,25 +345,25 @@ def create(request, user, project, app_slug):
             instance = AppInstance(name=app_name,
                                 app=app,
                                 project=project,
-                                settings=str(request.POST.dict()),
+                                info={},
                                 parameters=parameters_out,
                                 owner=request.user)
             create_instance_params(instance, "create")
+            instance.state = "Waiting"
             instance.save()
             permission.appinstance = instance
             permission.save()
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)
-            
+
+            # Setting up Keycloak and deploying resources.
             deploy_resource.delay(instance.pk, "create")
 
         elif request.POST.get('app_action') == "Settings":
             print("UPDATING APP DEPLOYMENT")
             print(instance)
             instance.name = app_name
-            instance.settings = str(request.POST.dict())
             instance.parameters.update(parameters_out)
-            create_instance_params(instance, "update")
             instance.save()
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)

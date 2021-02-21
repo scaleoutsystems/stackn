@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from projects.models import Project
-from studio.minio import MinioRepository, ResponseError
+from studio.minio import MinioRepository
 from django.conf import settings as sett
 from projects.helpers import get_minio_keys
 from .forms import DatasheetForm
@@ -32,7 +32,7 @@ def page(request, user, project, page_index):
                              'size': round(obj.size / 1000000, 2),
                              'location': 'minio',
                              'modified': obj.last_modified})
-    except ResponseError as err:
+    except Exception as err:
         print(err)
 
     previous_page = 1
@@ -75,7 +75,7 @@ def path_page(request, user, project, path_name, page_index):
 
         import math
         pages = list(map(lambda x: x + 1, range(math.ceil(len(datasets) / 10))))
-    except ResponseError as err:
+    except Exception as err:
         print(err)
 
     datasets = datasets[page_index * 10 - 10:page_index * 10]
@@ -133,7 +133,7 @@ def datasheet(request, user, project, page_index):
                              'size': round(obj.size / 1000000, 2),
                              'location': 'minio',
                              'modified': obj.last_modified})
-    except ResponseError as err:
+    except Exception as err:
         print(err)
 
     previous_page = 1

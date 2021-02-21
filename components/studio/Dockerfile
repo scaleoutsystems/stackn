@@ -1,4 +1,4 @@
-FROM python:3.6 as pybuild1
+FROM python:3.7 as pybuild1
 #-alpine
 LABEL maintainer="morgan@scaleoutsystems.com"
 #RUN apk update
@@ -25,6 +25,12 @@ RUN ./get_helm.sh
 #     rm -rf linux-amd64 && \
 #     apt remove curl -y && \
 #     rm -f /var/cache/apk/*
+
+RUN apt update && apt install -y apt-transport-https gnupg2 curl
+RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+RUN apt update
+RUN apt install -y kubectl
 
 
 

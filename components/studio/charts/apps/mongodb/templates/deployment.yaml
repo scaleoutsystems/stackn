@@ -15,6 +15,7 @@ spec:
       type: app
       pod: mongodb
   template:
+    metadata:
       labels:
         release: {{ .Release.Name }}
         app: mongodb
