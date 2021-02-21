@@ -641,7 +641,19 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                     # return HttpResponse('Ok', status=200)
         
         return HttpResponse('Ok', status=200)
-
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def get_labs_bulk(self, request):
+        sessions= Session.objects.filter(flavor_slug=request.data['flavor_slug'])
+        print(sessions)
+        labs = ""
+        i = 1
+        for session in sessions:
+            if session.flavor_slug == request.data['flavor_slug']:
+                labs += str(i)+': '+str(session.flavor_slug)+', '+str(session.lab_session_owner)+', '+str(session.project.slug)+', '+session.helmchart.status+'\n'
+                i = i+1
+        return HttpResponse(labs, status=200)
+    
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
     def create_labs_bulk(self, request):
         users = request.data['users']
@@ -698,7 +710,13 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                     lab.helmchart.delete()
 
         return HttpResponse('Ok', status=200)
-    
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
+    def delete_labs_appname(self, request):
+        lab = Session.objects.get(appname=request.data['appname'])
+        lab.helmchart.delete()
+        return HttpResponse('Ok', status=200)
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
     def delete_projects(self, request):
         users = request.data['users']

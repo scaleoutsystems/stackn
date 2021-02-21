@@ -42,8 +42,12 @@ class StudioClient():
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
             self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            if not load_status:
+                self.project, load_status = load_from_file('project', project_dir)
             if load_status:
                 self.found_project = True
+                if type(self.project) == list:
+                    self.project = self.project[0]
                 self.project_slug = self.project['slug']
                 # else:
                 #     print('Could not load project config for '+self.stackn_config['active_project'])
@@ -256,6 +260,24 @@ class StudioClient():
             print('Failed.')
             print('Status code: {}'.format(res.status_code))
             print(res.text)
+
+    def delete_labs_appname(self, appname):
+        url = self.endpoints['projects']+'delete_labs_appname/'
+        data = {'appname': appname}
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        if res:
+            print('Deleted lab with appname {}.'.format(appname))
+        else:
+            print('Failed.')
+            print('Status code: {}'.format(res.status_code))
+            print(res.text)
+
+    def get_labs_bulk(self, flavor):
+        url = self.endpoints['projects']+'get_labs_bulk/'
+        data = {"flavor_slug": flavor}
+        res = requests.post(url, headers=self.auth_headers, json=data, verify=self.secure_mode)
+        print(res.content.decode('utf-8'))
+        # print(json.loads(res.content))
 
     def delete_projects(self, userfile):
         users = pandas.read_csv(userfile)

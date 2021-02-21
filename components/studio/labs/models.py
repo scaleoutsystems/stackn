@@ -221,11 +221,27 @@ def pre_save_labs(sender, instance, using, **kwargs):
     flavor = Flavor.objects.filter(slug=instance.flavor_slug).first()
     environment = Environment.objects.filter(slug=instance.environment_slug).first()
 
+    cpu_rl = str(flavor.cpu).split(',')
+    if len(cpu_rl) == 1:
+        cpu_req = cpu_rl[0]
+        cpu_lim = cpu_rl[0]
+    else:
+        cpu_req = cpu_rl[0]
+        cpu_lim = cpu_rl[1]
+
+    mem_rl = str(flavor.mem).split(',')
+    if len(mem_rl) == 1:
+        mem_req = mem_rl[0]
+        mem_lim = mem_rl[0]
+    else:
+        mem_req = mem_rl[0]
+        mem_lim = mem_rl[1]
+
     prefs = {'namespace': namespace,
-              'labs.resources.requests.cpu': str(flavor.cpu),
-              'labs.resources.limits.cpu': str(flavor.cpu),
-              'labs.resources.requests.memory': str(flavor.mem),
-              'labs.resources.limits.memory': str(flavor.mem),
+              'labs.resources.requests.cpu': cpu_req,
+              'labs.resources.limits.cpu': cpu_lim,
+              'labs.resources.requests.memory': mem_req,
+              'labs.resources.limits.memory': mem_lim,
               'labs.resources.requests.gpu': str(flavor.gpu),
               'labs.resources.limits.gpu': str(flavor.gpu),
               'labs.gpu.enabled': str("true" if flavor.gpu else "false"),

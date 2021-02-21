@@ -59,6 +59,7 @@ class Controller:
         for key in options:
             try:
                 args.append('--set')
+                options[key] = str(options[key])
                 # If list, don't escape ,
                 if len(options[key]) > 0 and options[key][0] == '{' and options[key][-1] == '}':
                     args.append(key+"="+options[key])

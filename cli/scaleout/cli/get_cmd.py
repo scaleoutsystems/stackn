@@ -115,6 +115,16 @@ def dataset_list_cmd(ctx):
     keys = ["name", "version", "release_type", "project_slug", "created_on", "created_by"]
     create_table(ctx, "dataset", names, keys)
 
+@get_cmd.command('alllabs')
+@click.option('-f', '--flavor', required=True)
+@click.pass_context
+def alllabs_list(ctx, flavor):
+    """ List all Lab Sessions. """
+    names = ["Name", "Flavor", "Environment", "Status", "Created"]
+    keys = ["name", "flavor_slug", "environment_slug", "status", "created_at"]
+    client = ctx.obj['CLIENT']
+    client.get_labs_bulk(flavor)
+
 # alliance
 
 # dataset

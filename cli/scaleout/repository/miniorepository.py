@@ -32,18 +32,35 @@ class MINIORepository(Repository):
             self.secure_mode = False
 
         if not self.secure_mode:
-            # print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
+            print("\n\n\nWARNING : RUNNING IN **INSECURE** MODE! THIS IS NOT FOR PRODUCTION!\n\n\n")
             import urllib3
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         if not self.secure_mode:
             from urllib3.poolmanager import PoolManager
             manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
-            self.client = Minio("{}".format(config['minio_host']),
+            minio_url = "{}".format(config['minio_host'])
+            # print(minio_url)
+            # minio_url = 'af-bert-fzn-minio.demo.stackn.dev/'
+            # access_key = 'DhIw6yYVYiX0PDCUVy6c'
+            # secret_key = 'TnxHLG4WlfsozCSFNA450DlO3v1WI58wFGl48AhM'
+            self.client = Minio(minio_url,
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 http_client=manager)
         else:
-            minio_url = "{}".format(config['minio_host'])
+            # print("SECURE MODE")
+            
+            minio_url = "{}".format(config['minio_host']).replace('.studio', '')
+            #print(minio_url)
+            # print(minio_url)
+            # print(access_key)
+            # print(secret_key)
+            # minio_url = 'af-bert-fzn-minio.demo.stackn.dev/'
+            # access_key = 'DhIw6yYVYiX0PDCUVy6c'
+            # secret_key = 'TnxHLG4WlfsozCSFNA450DlO3v1WI58wFGl48AhM'
+            # print(minio_url)
+            # print(access_key)
+            # print(secret_key)
             self.client = Minio(minio_url,
                                 access_key=access_key,
                                 secret_key=secret_key)
@@ -53,6 +70,18 @@ class MINIORepository(Repository):
 
     def create_bucket(self, bucket_name):
         try:
+            # print("Listing buckets")
+            # minio_url = 'af-bert-fzn-minio.demo.stackn.dev/'
+            # access_key = 'DhIw6yYVYiX0PDCUVy6c'
+            # secret_key = 'TnxHLG4WlfsozCSFNA450DlO3v1WI58wFGl48AhM'
+            # print(self.client)
+            # client = Minio(minio_url,
+            #          access_key=access_key,
+            #          secret_key=secret_key)
+
+            # bucks = self.client.list_buckets()
+            # print(bucks)
+            # exit()
             self.client.make_bucket(bucket_name)
         except BucketAlreadyOwnedByYou as err:
             pass

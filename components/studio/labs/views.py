@@ -20,7 +20,18 @@ def index(request, user, project):
     template = 'labs/index.html'
     project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
     sessions = Session.objects.filter(Q(project=project), Q(lab_session_owner=request.user)).order_by('-created_at')
+    all_user_sess = Session.objects.filter(Q(lab_session_owner=request.user))
+
+    # exclude_gpu = False
+    # for user_sess in all_user_sess:
+    #     if user_sess.flavor_slug == 'gpu':
+    #         exclude_gpu = True
+    #         message = "You are only allowed to have one GPU session running at a time. You will not be able to create a new GPU session until you delete your existing GPU session."
+
+    # if not exclude_gpu:
     flavors = Flavor.objects.all()
+    # else:
+    #     flavors = Flavor.objects.filter(Q(name=='CPU'))
     environments = Environment.objects.all()
     cluster = Cluster.objects.get(name=project.cluster)
     url = cluster.base_url

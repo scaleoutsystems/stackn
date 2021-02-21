@@ -12,6 +12,13 @@
             to be able to create a project.
         </p>
         {% endif %}
+        <p class="col-md-12" style="font-size: 17px;font-weight:500;">
+            For week 3: If you have been assigned to the Pharmbio-cluster, create a Jupyter Lab session in your project on the Pharmbio cluster, and if you have been assigned the Scilifelab-cluster (or datacenter-cluster), create a Jupyter Lab session in your "Scilifelab" project.
+            <br><br>
+            For this week, you should select the image "week-3", and the flavor "GPU".
+            <br><br>
+            <span style="font-weight:600">Each group is only allowed to use one GPU.</span>
+        </p>
         {% for project in projects %}
         <div class="col-sm-6">
             <div class="card card-project">
@@ -21,13 +28,13 @@
                     </h5>
                     <p class="card-text"> {{ project.description }}</p>
                     <p class="card-text">Project started: {{ project.created_at }}</p>
-                    <p class="card-text">Owner {{ project.owner }}</p>
+                    <!-- <p class="card-text">Owner {{ project.owner }}</p>
                     <p class="card-text">Members
                         {% for user in project.authorized.all %}
                         {{ user.username }} ,
                         {% endfor %}
-                    </p>
-                    <p class="card-text">Cluster: {{ project.cluster }}</p>
+                    </p> -->
+                    <p class="card-text" style="font-size: 17px;font-weight:600;">Cluster: {{ project.cluster }}</p>
                     <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
                        style="width: fit-content;">Open project</a>
                 </div>
