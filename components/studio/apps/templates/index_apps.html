@@ -18,6 +18,7 @@
                         <th>App</th>
                         <th>Name</th>
                         <th></th>
+                        <th>State</th>
                         <th>Created</th>
                         <th></th>
                     </tr>
@@ -28,6 +29,7 @@
                             <td>{{ appinstance.app.name }}</td>
                             <td>{{ appinstance.name}}</td>
                             <td>{{ appinstance.table_field | safe }}</td>
+                            <td>{{ appinstance.state }}</td>
                             <td>{{ appinstance.created_on }}</td>
                             <td><a href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
                                 <button class="btn-sm">Logs</button></a>
@@ -36,26 +38,26 @@
                                 <a href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
                                 <button class="btn-sm btn-warning">Delete</button></a></td>
                         </tr>
-                    {% endfor %}
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% endif %}
         </div>
-        {% for app in apps %}
-        <div class="col-sm-4">
-            <div class="card card-project">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">
-                        <span style="font-weight:bolder;">{{ app.name }}</span>
-                    </h5>
-                    <p class="card-text"> {{ app.description }}</p>
-                    <a href="{% url 'apps:create' request.user project.slug app.slug  %}" class="btn mt-auto btn-info"
-                    style="width: fit-content;">Create</a>
+            {% for app in apps %}
+            <div class="col-sm-4">
+                <div class="card card-project">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <span style="font-weight:bolder;">{{ app.name }}</span>
+                        </h5>
+                        <p class="card-text"> {{ app.description }}</p>
+                        <a href="{% url 'apps:create' request.user project.slug app.slug  %}" class="btn mt-auto btn-info"
+                        style="width: fit-content;">Create</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
     </div>
 </div>
 {% endblock %}

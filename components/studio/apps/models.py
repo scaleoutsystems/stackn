@@ -54,13 +54,13 @@ class AppInstance(models.Model):
     model_dependencies = models.ManyToManyField('models.Model')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
     url = models.CharField(max_length=512, null=True)
-    info = models.TextField(blank=True, null=True)
-    settings = models.TextField(blank=True, null=True)
+    info = models.JSONField(blank=True, null=True)
     parameters = models.JSONField(blank=True, null=True)
+    state = models.CharField(max_length=50, null=True)
     table_field = models.CharField(max_length=512, null=True)
     keycloak_client_id = models.CharField(max_length=512, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name)+' ({})'.format(self.state)

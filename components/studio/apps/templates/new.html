@@ -1,0 +1,63 @@
+{% extends 'baseproject.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="card flex-fill">
+    <div class="card-header">
+        <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+    </div>
+    <table id="datatables-dashboard-projects" class="table table-striped my-0">
+        <thead>
+            <tr>
+                <th>App</th>
+                <th>Name</th>
+                <th></th>
+                <th>State</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appinstance in appinstances %}
+            <tr>
+                <td>{{ appinstance.app.name }}</td>
+                <td>{{ appinstance.name}}</td>
+                <td>{{ appinstance.table_field | safe }}</td>
+                <td><span class="badge badge-success">{{ appinstance.state }}</span></td>
+                <td>{{ appinstance.created_on }}</td>
+                <td><a href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
+                    <button class="btn-sm">Logs</button></a>
+                    <a href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
+                    <button class="btn-sm">Settings</button></a>
+                    <a href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
+                    <button class="btn-sm btn-warning">Delete</button></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+
+<div class="row">
+    {% for app in apps %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ app.name }}</h5>
+            </div>
+            <div class="card-body">
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                <a href="{% url 'apps:create' request.user project.slug app.slug  %}" class="btn btn-primary">Create</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+
+{% endblock %}
