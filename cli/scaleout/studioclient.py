@@ -183,19 +183,20 @@ class StudioClient():
     def reset_passwords(self, user_file):
         users = pandas.read_csv(user_file)
         user_api = self.endpoints['admin']['users']+'resetpassword/'
-        data = dict()
-        data['users'] = list()
+        
         for index, row in users.iterrows():
+            data = dict()
+            data['users'] = list()
             email = row['Email']
             data['users'].append(email)
 
-        res = requests.post(user_api, headers=self.auth_headers, json=data, verify=self.secure_mode)
-        if res:
-            print('Reset passwords.')
-        else:
-            print('Failed to reset passwords.')
-            print('Status code: {}'.format(res.status_code))
-            print(res.text)
+            res = requests.post(user_api, headers=self.auth_headers, json=data, verify=self.secure_mode)
+            if res:
+                print('Reset password: {}'.format(email))
+            else:
+                print('Failed to reset password: {}'.format(email))
+                print('Status code: {}'.format(res.status_code))
+                print(res.text)
 
     def create_projects(self, userfile, project_name, cluster):
         clusters = cluster.split(',')

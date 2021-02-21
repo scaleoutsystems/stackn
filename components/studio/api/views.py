@@ -450,11 +450,9 @@ class ResourceList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retri
                   ListModelMixin):
 
     authentication_classes = ()
-    permission_classes = (AdminPermission, )
+    permission_classes = ()
     serializer_class = ResourceSerializer
     filter_backends = [DjangoFilterBackend]
-    # queryset =  HelmResource.objects.all()
-    # filterset_fields = ['id', 'cluster']
 
     def get_queryset(self):
         print(self.request.query_params.get('cluster'))
@@ -463,12 +461,12 @@ class ResourceList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retri
 
     def create(self, request, *args, **kwargs):
         resource_ids = request.data.keys()
-        print("Updating resource info for: ")
+        # print("Updating resource info for: ")
         for resource_id in resource_ids:
             status = request.data[resource_id]['ready']
             info = request.data[resource_id]['info'] 
             HelmResource.objects.filter(id=resource_id).update(status=status, info=info)
-            print(resource_id)
+            # print(resource_id)
         
         return HttpResponse('ok', 200)
 
@@ -487,8 +485,7 @@ class ResourceList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retri
 class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
 
-    authentication_classes = ()
-    permission_classes = (AdminPermission, )
+    permission_classes = (IsAuthenticated, AdminPermission, )
     serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
 
@@ -505,7 +502,7 @@ class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveM
     
         return HttpResponse('ok', 200)
 
-    @action(detail=False, methods=['post'], permission_classes=[AdminPermission])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, AdminPermission])
     def resetpassword(self, request):
         print("RESETTING PASSWORDS")
         users = request.data['users']
@@ -513,9 +510,15 @@ class UserList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveM
         for user in users:
             kcobj = kc.keycloak_init()
             print("Forcing reset of password for user {}".format(user))
-            kc.keycloak_reset_password(kcobj, user)
+            res = kc.keycloak_reset_password(kcobj, user)
+            if res:
+                print('Reset password.')
+                return HttpResponse('ok', 200)
+            else:
+                print('Failed to reset password.')
+                return HttpResponse('Failed to reset.', 400)
 
-        return HttpResponse('ok', 200)
+        
 
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):

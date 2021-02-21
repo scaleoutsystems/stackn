@@ -32,4 +32,12 @@ class ProjectPermission(BasePermission):
 
 class AdminPermission(BasePermission):
     def has_permission(self, request, view):
-        return True
+        print("USERNAME:")
+        print(request.user.username)
+        # kc = keylib.keycloak_init()
+        # token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, request.user.username)
+        # request.session['oidc_access_token'] = token
+        user_info = keylib.keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expired=True)
+        print(user_info)
+        is_authorized = keylib.keycloak_verify_user_role(request, 'studio', ['admin'])
+        return is_authorized

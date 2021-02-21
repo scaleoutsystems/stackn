@@ -9,6 +9,7 @@ import modules.keycloak_lib as keylib
 
 class KeycloakAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
+        print("AUTHENTICATING")
         token_str = request.META['HTTP_AUTHORIZATION']
         access_token = token_str.replace('Token ', '')
         discovery_url = settings.OIDC_OP_REALM_AUTH+'/'+settings.KC_REALM
