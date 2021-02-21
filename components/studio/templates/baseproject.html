@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block topbar %}
+{% include 'topbar.html' %} 
+{% endblock %}
 
 {% block sidebar %}
 <nav id="sidebar" class="sidebar">
@@ -22,29 +25,42 @@
 
         <ul class="sidebar-nav">
             <li class="sidebar-header">
-                Resources
+                Project
             </li>
-            <li class="sidebar-item">
-                <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
-                    <i class="align-middle" data-feather="circle"></i> <span class="align-middle">Overview</span>
+            <li class="sidebar-item {{ menu.models }}">
+                <a href="{% url 'models:list' request.user project.slug %}" class="sidebar-link">
+                    <i class="align-middle" data-feather="circle"></i> <span class="align-middle">Models</span>
                 </a>
             </li>
-            <li class="sidebar-item active">
+            <li class="sidebar-item {{ menu.environments }}">
+                <a href="#" class="sidebar-link">
+                    <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Environments</span>
+                </a>
+            </li>
+            <li class="sidebar-header">
+                Resources
+            </li>
+            <!-- <li class="sidebar-item">
+                <a href="{% url 'apps:index' request.user project.slug %}" class="sidebar-link">
+                    <i class="align-middle" data-feather="circle"></i> <span class="align-middle">Overview</span>
+                </a>
+            </li> -->
+            <li class="sidebar-item {{ menu.compute }}">
                 <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
                     <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Compute</span>
                 </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item {{ menu.serve }}">
                 <a href="{% url 'apps:filtered' request.user project.slug 'serve' %}" class="sidebar-link">
                     <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
                 </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item {{ menu.store }}">
                 <a href="{% url 'apps:filtered' request.user project.slug 'store' %}" class="sidebar-link">
                     <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
                 </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item {{ menu.misc }}">
                 <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
                     <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
                 </a>

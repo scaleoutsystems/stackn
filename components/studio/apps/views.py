@@ -19,14 +19,18 @@ key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'log
 
 # Create your views here.
 def index(request, user, project):
+    print("hello")
+    category = 'store'
     template = 'index_apps.html'
-    apps = Apps.objects.all()
-    project = Project.objects.get(slug=project)
+    status_success = ['Running', 'Succeeded', 'Success']
+    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
 
-    appinstances = AppInstance.objects.filter(owner=request.user)
-    apps_installed = False
-    if appinstances:
-        apps_installed = True
+    # template = 'new.html'
+    cat_obj = AppCategories.objects.get(slug=category)
+    apps = Apps.objects.filter(category=cat_obj)
+    project = Project.objects.get(slug=project)
+    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
+
         
     return render(request, template, locals())
 
@@ -71,8 +75,13 @@ def logs(request, user, project, ai_id):
 
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
+    menu = dict()
+    status_success = ['Running', 'Succeeded', 'Success']
+    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
+
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
+    menu[category] = 'active'
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
