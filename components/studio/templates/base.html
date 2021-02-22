@@ -18,7 +18,7 @@
     {% block extra_head %} {% endblock %}
 </head>
 
-<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+<body data-theme="light" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
@@ -48,7 +48,7 @@
                         Administration
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{% url 'models:index' %}">
+                        <a class="sidebar-link" href="{% url 'studio_admin:index' %}">
                             <i class="align-middle" data-feather="users"></i>
                             <span class="align-middle">Studio Admin</span>
                         </a>
@@ -94,7 +94,7 @@
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="#">Settings & Privacy</a>
 								<a class="dropdown-item" href="#">Help</a>
-								<a class="dropdown-item" href="#">Sign out</a>
+								<a class="dropdown-item" href="{% url 'oidc_logout' %}">Sign out</a>
 							</div>
 						</li>
                         {% else %}
@@ -129,7 +129,7 @@
 						</div>
 						<div class="col-6 text-end">
 							<p class="mb-0">
-								&copy; 2020 - <a href="https://scaleoutsystems.com/" class="text-muted">Scaleout Systems</a>
+								&copy; 2020 - <a href="https://scaleoutsystems.com/" class="text-muted" target="_blank">Scaleout Systems</a>
 							</p>
 						</div>
 					</div>
