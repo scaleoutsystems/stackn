@@ -13,7 +13,7 @@ from .tasks import deploy_resource, delete_resource
 import requests
 import flatten_json
 import uuid
-
+from datetime import datetime, timedelta
 
 key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
 
@@ -84,7 +84,10 @@ def filtered(request, user, project, category):
     menu[category] = 'active'
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
-    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
+    time_threshold = datetime.now() - timedelta(minutes=5)
+    print(time_threshold)
+    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj)
 
     apps_installed = False
     if appinstances:
@@ -389,40 +392,46 @@ def create(request, user, project, app_slug):
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
 
+
+    delete_resource.delay(ai_id)
+
     # Check that the app instance actually exists.
-    appinstance = []
-    try:
-        appinstance = AppInstance.objects.get(pk=ai_id)
-    except:
-        print("WARN: AppInstance doesn't exist.")
+    # appinstance = []
+    # try:
+    #     appinstance = AppInstance.objects.get(pk=ai_id)
+    # except:
+    #     print("WARN: AppInstance doesn't exist.")
 
     
-    if appinstance:
-        # The instance does exist.
-        # TODO: Check that the user has the permission required to delete it.
+    # if appinstance and appinstance.state != "Deleted":
+    #     # The instance does exist.
+    #     # TODO: Check that the user has the permission required to delete it.
 
-        # Clean up in Keycloak.
-        kc = keylib.keycloak_init()
-        # TODO: Fix for multicluster setup
-        # TODO: We are assuming this URI here, but we should allow for other forms.
-        # The instance should store information about this.
-        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+    #     # Clean up in Keycloak.
+    #     kc = keylib.keycloak_init()
+    #     # TODO: Fix for multicluster setup
+    #     # TODO: We are assuming this URI here, but we should allow for other forms.
+    #     # The instance should store information about this.
+    #     URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
         
-        keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-        keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
-        scope_id = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-        keylib.keycloak_delete_client_scope(kc, scope_id)
+    #     keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+    #     keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
+    #     scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
         
-        # Delete installed resources on the cluster.
-        release = appinstance.parameters['release']
-        namespace = appinstance.parameters['namespace']
-        delete_resource.delay({"release": release, "namespace": namespace})
+    #     if not res_json['success']:
+    #         print("Failed to get client scope.")
+    #     else:
+    #         keylib.keycloak_delete_client_scope(kc, scope_id)
+        
+    #     # Delete installed resources on the cluster.
+    #     release = appinstance.parameters['release']
+    #     namespace = appinstance.parameters['namespace']
+    #     delete_resource.delay({"release": release, "namespace": namespace})
+    #     # Delete the instance
+    #     # appinstance.permission.delete()
+    #     # appinstance.delete()
 
-        # Delete the instance
-        # appinstance.permission.delete()
-        appinstance.delete()
-
-        print("BOTTOM")
+        # print("BOTTOM")
     
         
 

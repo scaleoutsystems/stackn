@@ -13,6 +13,7 @@ from modules import keycloak_lib as keylib
 # from .tasks import add_valid_redirect_uri, deploy_resource, delete_resource
 import uuid
 import flatten_json
+from datetime import datetime, timedelta
 
 
 class AppPermission(models.Model):
@@ -40,6 +41,7 @@ class Apps(models.Model):
     table_field = models.TextField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return str(self.name)
@@ -58,9 +60,16 @@ class AppInstance(models.Model):
     parameters = models.JSONField(blank=True, null=True)
     state = models.CharField(max_length=50, null=True)
     table_field = models.CharField(max_length=512, null=True)
-    keycloak_client_id = models.CharField(max_length=512, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
+    deleted_on = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.name)+' ({})'.format(self.state)
+
+class ResourceData(models.Model):
+    appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="resourcedata")
+    cpu = models.IntegerField('cpu')
+    mem = models.IntegerField('memory')
+    gpu = models.IntegerField('gpu')
+    time = models.IntegerField('timestamp')
