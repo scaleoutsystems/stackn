@@ -1,99 +1,99 @@
 {% extends 'baseproject.html' %}
 {% load static %}
-{% block extrascripts %}
 
-    <link rel="stylesheet" type="text/css" href="{% static 'dt/datatables.min.css' %}"/>
-
-    <script type="text/javascript" src="{% static 'dt/datatables.min.js' %}"></script>
-
-{% endblock %}
 {% block content %}
-    <div class="col-md-9">
-        <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
-            <ol class="breadcrumb project-breadcrumb-ol">
-                <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-            </ol>
-        </nav>
-
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h3>Labs</h3>
-        </div>
-
-        <div class="container-fluid">
-            <form action="{% url 'labs:run' request.user project.slug %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label>Start a labs session</label>
-                    <label>Image</label>
-                    <select name="environment" class="form-control">
-                        {% for environment in environments %}
-                            <option value="{{ environment.slug }}">{{ environment.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <input type="hidden" value="{{ project.id }}" name="project">
-                <div class="form-group">
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-sm-6">
-                        <label>Flavor</label>
-                        <select name="flavor" class="form-control">
-                        {% for flavor in flavors %}
-                           <option value="{{flavor.slug }}">{{ flavor.name}}</option>
-                        {% endfor %}
-                        </select>
+<div class="body-project">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+        <h3>Lab Sessions</h3>
+    </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
+        <h4>Start a new Lab Session</h4>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card card-add-project" style="padding: 15px; margin-bottom: 30px;">
+                <form action="{% url 'labs:run' request.user project.slug %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="environment">Image</label>
+                            <select class="form-control form-input" id="environment" name="environment" required="">
+                                {% for environment in environments %}
+                                <option value="{{ environment.slug }}">{{ environment.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Select an Image for the Lab Session.
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-
-        </div>
-        <div class="container-fluid" style="margin-top:100px;">
-            <h3>Lab Session</h3>
-            <div class="divider"></div>
-            <div class="table-responsive">
-
-                <table id="labsessions" class="table table-striped table-sm">
-                    <thead>
-
-                    <tr>
-                        <th>#</th>
-                        <th>Ingress</th>
-                        <th>Image</th>
-                        <th>Settings</th>
-                        <th>Chart</th>
-                        <th>Helm Repository</th>
-                        <th>Created</th>
-                        <th>Updated</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for session in sessions %}
-                        <tr>
-                            <td>
-                                {{ session.id }}
-                                <a href="{% url 'labs:delete' request.user project.slug session.id %}">
-                                    <button class="btn-sm btn-warning">Delete</button>
-                                </a>
-                            </td>
-                            <td><a href="http://{{ session.slug }}.{{ url }}"
-                                   target="_blank">{{ session.slug }}.{{ url }}</a></td>
-                            <td>{{ session.image }}</td>
-                            <td>{{ session.settings }}</td>
-                            <td>{{ session.chart }}</td>
-                            <td>{{ session.helm_repo }}</td>
-                            <td>{{ session.created_at }}</td>
-                            <td>{{ session.updated_at }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <script>$(document).ready(function () {
-                    $('#labsessions').DataTable();
-                });</script>
+                    <input type="hidden" value="{{ project.id }}" name="project" />
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="flavor">Flavor</label>
+                            <select class="form-control form-input" id="flavor" name="flavor" required="">
+                                {% for flavor in flavors %}
+                                <option value="{{ flavor.slug }}">{{ flavor.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Select a Flavor for the Lab Session.
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn mt-auto button-orange" type="submit" style="width: fit-content;">
+                        Start
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-3" style="border-bottom: 1px solid #dee2e6;">
+    </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
+        <h4>Active Lab Sessions</h4>
+    </div>
+    <div class="row" style="padding: 5px 15px 5px 15px;">
+        {% if sessions %}
+        <table class="table table-hover studio-table">
+            <thead class="studio-table-header">
+                <tr>
+                    <th scope="col">UID</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <th scope="row">{{ session.id }}</th>
+                    <td>{{ session.lab_session_owner.username }}</td>
+                    <td>{{ session.created_at }}</td>
+                    <td>{{ session.get_status_display }}</td>
+                    <td>
+                        <a href="http://{{ session.slug }}.{{ url }}" target="_blank">
+                            <button class="btn mt-auto button-blue" style="width: fit-content;">
+                                Open
+                            </button>
+                        </a>
+                        <a href="{% url 'labs:delete' request.user project.slug session.id %}">
+                            <button class="btn mt-auto button-red" style="width: fit-content;">
+                                Delete
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>
+            No Lab Sessions have been created within this project yet.
+        </p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

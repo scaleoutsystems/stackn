@@ -39,6 +39,8 @@ class StudioClient():
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
             self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            if not load_status:
+                self.project, load_status = load_from_file('project', project_dir)
             if load_status:
                 self.found_project = True
                 self.project_slug = self.project['slug']
