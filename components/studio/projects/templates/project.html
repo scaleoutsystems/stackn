@@ -5,8 +5,8 @@
 <h1 class="h3 mb-3">Overview</h1>
 
 <div class="row">
-    <div class="col-12 col-md-6 col-lg-4">
-        <div class="card">
+    <div class="col-12 col-md-6 col-lg-4" style="padding-bottom: 24px;">
+        <div class="card" style="height: 100%;">
             <div class="card-header">
                 <h5 class="card-title mb-0">Description</h5>
             </div>
@@ -27,7 +27,7 @@
                     {% for log in activity_logs %}
                     <li class="timeline-item">
                         <strong>{{ log.headline }}</strong>
-                        <span class="float-end text-muted text-sm">30m ago</span>
+                        <span class="float-end text-muted text-sm">{{ log.created_at }}</span>
                         <p>{{ log.description }}</p>
                     </li>
                     {% endfor %}
