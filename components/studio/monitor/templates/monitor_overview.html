@@ -11,6 +11,21 @@
     </div>
     {% if is_authorized %}
     <div>
+      <div class="col-12 col-lg-6">
+        <div class="card flex-fill w-100">
+          <div class="card-header">
+            <h5 class="card-title">Line Chart</h5>
+            <h6 class="card-subtitle text-muted">A line chart is a way of plotting data points on a line.</h6>
+          </div>
+          <div class="card-body">
+            <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+              <canvas id="chartjs-line" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <h3>Project Quota</h3>
       <table class="table table-sm">
         <thead>
@@ -150,6 +165,72 @@
     {% endif %}
 </div>
 <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Line chart
+    new Chart(document.getElementById("chartjs-line"), {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+          label: "Sales ($)",
+          fill: true,
+          backgroundColor: "transparent",
+          borderColor: window.theme.primary,
+          data: [2115, 1562, 1584, 1892, 1487, 2223, 2966, 2448, 2905, 3838, 2917, 3327]
+        }, {
+          label: "Orders",
+          fill: true,
+          backgroundColor: "transparent",
+          borderColor: window.theme["primary-dark"],
+          borderDash: [4, 4],
+          data: [958, 724, 629, 883, 915, 1214, 1476, 1212, 1554, 2128, 1466, 1827]
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        legend: {
+          display: false
+        },
+        tooltips: {
+          intersect: false
+        },
+        hover: {
+          intersect: true
+        },
+        plugins: {
+          filler: {
+            propagate: false
+          }
+        },
+        scales: {
+          xAxes: [{
+            reverse: true,
+            gridLines: {
+              color: "rgba(0,0,0,0.05)"
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              stepSize: 500
+            },
+            display: true,
+            borderDash: [5, 5],
+            gridLines: {
+              color: "rgba(0,0,0,0)",
+              fontColor: "#fff"
+            }
+          }]
+        }
+      }
+    });
+  });
+</script>
+
+
+
+
 <script>
 
   function cpuchart(chart_id) {

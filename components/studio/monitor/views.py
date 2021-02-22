@@ -6,6 +6,9 @@ from django.conf import settings as sett
 import logging
 
 from datetime import datetime
+import time
+from django.db.models import Count, Sum, F
+import itertools
 
 from projects.models import Project
 from .helpers import get_total_labs_cpu_usage_60s, get_total_labs_memory_usage_60s
@@ -15,6 +18,7 @@ from .helpers import get_resource, get_all
 from labs.models import Session
 from deployments.models import DeploymentInstance
 from models.models import Model
+from apps.models import AppInstance, ResourceData
 from modules.project_auth import get_permissions
 
 
@@ -72,7 +76,7 @@ def overview(request, user, project):
         request.session.save()
         # return HttpResponse('Not authorized', status=401)
         is_authorized = False
-    template = 'monitor_overview.html'
+    template = 'monitor_new.html'
     project = Project.objects.filter(slug=project).first()
 
     resource_types = ['lab', 'deployment']
@@ -161,4 +165,51 @@ def cpuchart(request, user, project, resource_type):
     return JsonResponse(data={
         'labels': labels,
         'data': data,
+    })
+
+
+
+def usage(request, user, project):
+    
+
+    curr_timestamp = time.time()
+    points = ResourceData.objects.filter(time__gte=curr_timestamp-100*3600, appinstance__project__slug=project).order_by('time')
+    all_cpus = list()
+    for point in points:
+        all_cpus.append(point.cpu)
+    print("NUMBER OF POINTS")
+    print(len(all_cpus))
+    # print("MAX:")
+    # print(max(all_cpus))
+    print(all_cpus)
+    total = points.annotate(timeP=F('time')).values('timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
+    print(total)
+
+    labels = list(total.values_list('timeP'))
+    labels = list(itertools.chain.from_iterable(labels))
+    step = 1
+    np = 200
+    if len(labels) > np:
+        step = round(len(labels)/np)
+    labels = labels[::step]
+    x_data = list()
+    for label in labels:
+        x_data.append(datetime.fromtimestamp(label).strftime('%H:%M:%S'))
+
+    total_mem = list(total.values_list('total_mem'))
+    total_mem = list(itertools.chain.from_iterable(total_mem))[::step]
+    
+    total_cpu= list(total.values_list('total_cpu'))
+    print("MAX CPU")
+    print(max(total_cpu))
+    total_cpu = list(itertools.chain.from_iterable(total_cpu))[::step]
+    print("MAX CPU")
+    print(max(total_cpu))
+    
+    print(len(total_cpu))
+
+    return JsonResponse(data={
+        'labels': x_data,
+        'data_cpu': total_cpu,
+        'data_mem': total_mem
     })
