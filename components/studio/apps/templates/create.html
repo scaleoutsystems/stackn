@@ -16,12 +16,12 @@
                     
                     <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">
                     <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Name</label>
                         <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
                     </div>
                     {% if dep_permissions %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Permissions</label>
                         <select name="permission" id="permission" class="form-control">
                             {% for name, value in form_permissions.items %}
@@ -38,7 +38,7 @@
                     {% endif %}
 
                     {% if dep_model %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Model</label>
                         <select name="model" id="model" class="form-control">
                             {% for model in models %}
@@ -49,7 +49,7 @@
                     {% endif %}
                     
                     {% if dep_flavor %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Flavors</label>
                         <select name="flavor" id="flavor" class="form-control">
                             {% for flavor in flavors %}
@@ -60,7 +60,7 @@
                     {% endif %}
 
                     {% if dep_environment %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Environment</label>
                         <select name="environment" id="environment" class="form-control">
                             {% for environment in environments %}
@@ -72,7 +72,7 @@
 
 
                     {% if dep_volumes %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Volumes</label>
                         <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
                             {% for volume in volumes %}
@@ -87,7 +87,7 @@
                     {% if dep_apps %}
                     
                         {% for app_name, appinstances in app_deps.items %}
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label class="form-label">{{ app_name }}</label>
                             <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
                             {% for appinstance in appinstances.instances %}
@@ -104,7 +104,7 @@
                         <!-- <label class="form-label">{{ key }}</label> -->
                         <h6>{{ key }}</h6>
                         {% for subkey, subval in vals.items %}
-                        <div class="form-group">
+                        <div class="mb-3">
                             {% if subval.type == "boolean" %}
                             <label class="form-label">{{ subval.title }}</label>
                             <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
@@ -138,7 +138,7 @@
                     {% endfor %}
 
                     {% if dep_appobj %}
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">{{ appobjs.title }}</label>
                         <select name="appobj" id="appobj" class="form-control" {{ appobjs.type }}>
                         {% for app in appobjs.objs %}
