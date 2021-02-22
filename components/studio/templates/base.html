@@ -1,201 +1,144 @@
 {% load static %}
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <link rel="icon" href="{% static 'img/favicon_6.ico' %}" type="image/x-icon">
-
     <title>Scaleout</title>
 
-    <link rel="canonical" href="">
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="{% static 'css/studio.css' %}" rel="stylesheet">
-    <link href="{% static 'css/project.css' %}" rel="stylesheet">
-
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-            crossorigin="anonymous"></script>
-
-    <style type="text/css">
-        /* Chart.js */
-        @-webkit-keyframes chartjs-render-animation {
-            from {
-                opacity: 0.99
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-
-        @keyframes chartjs-render-animation {
-            from {
-                opacity: 0.99
-            }
-
-            to {
-                opacity: 1
-            }
-        }
-
-        .chartjs-render-monitor {
-            -webkit-animation: chartjs-render-animation 0.001s;
-            animation: chartjs-render-animation 0.001s;
-        }
-    </style>
-
-    <style type="text/css">
-        #container {
-            max-width: 1150px;
-            height: 500px;
-
-        }
-
-        body {
-            padding: 0;
-            margin: 0;
-        }
-    </style>
+    <link rel="icon" href="{% static 'img/favicon_6.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
 
     {% block extra_head %} {% endblock %}
 </head>
 
-<body>
-
-<main role="main">
-
-    <div class="container-fluid" style="height: inherit;">
-        <div class="row" style="height: inherit;">
-            {% block topnav %}
-            <div class="sidebar-main d-flex justify-content-center">
-                <ul class="list-group d-flex">
-
-                    <li class="list-inline" style="padding-top:10px;padding-bottom:30px;">
-                        <a href="{% url 'models:index' %}">
-                            <p class="d-flex justify-content-center">
-                                <img src="{% static 'img/stackn.png' %}" width="108" height="44">
-                            </p>
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" href="{% url 'models:index' %}">
+                    <img src="{% static 'img/stackn.png' %}" width="108" height="44">
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
+                        Catalogs
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'models:index' %}">
+                            <i class="align-middle" data-feather="layers"></i>
+                            <span class="align-middle">Models</span>
                         </a>
                     </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'models:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/lightning.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center">Models</p>
-                        </a>
-                    </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'projects:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
-                                                                          src="{% static '/icons/folder.svg' %}"
-                                                                          alt="" width="24" height="24"
-                                                                          title=""></p>
-                            <p class="d-flex justify-content-center">Projects</p>
-                        </a>
-
-                    </li>
-
-                    <!-- Functionality not available with the first release!
-
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'deployments:index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center">Environments</p>
-                        </a>
-                    </li>
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'workflows:workflows_definition_index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <p class="d-flex justify-content-center" align="center">
-                                Workflow Definitions</p>
-                        </a>
-                    </li>
-                    <li class="list-inline mb-auto">
-                        <a class="nav-link" href="{% url 'deployments:deployment_definition_index' %}">
-                            <p class="d-flex justify-content-center"><img
-                                    src="{% static '/icons/file-code.svg' %}" alt="" width="24" height="24"
-                                    title=""></p>
-                            <div class="d-flex justify-content-center" align="center">Deployment Definitions</div>
-                        </a>
-                    </li>
-                    -->
-
-                    <li class="list-inline">
-                        <a class="nav-link" href="{% url 'studio_admin:index' %}" style="text-decoration: none; color:inherit;">
-                            <p class="d-flex justify-content-center"><img class="d-flex justify-content-center"
-                                                                          src="{% static '/icons/person-lines-fill.svg' %}"
-                                                                          alt="" width="24" height="24"
-                                                                          title=""></p>
-                            <p class="d-flex justify-content-center">Admin</p>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'projects:index' %}">
+                            <i class="align-middle" data-feather="folder"></i>
+                            <span class="align-middle">Projects</span>
                         </a>
                     </li>
 
-                    <li class="list-inline" style="margin-top: auto; margin-bottom: 25px; margin-left: auto; margin-right: auto;">
-                        <a class="sidebar-bottom-icon" href="https://scaleoutsystems.github.io/stackn/" target="_blank">
-                            <img src="{% static '/icons/question-circle.svg' %}" alt="" width="24" height="24" title="">
-                        </a>
-                        {% if request.user.is_authenticated %}
-                        <a class="sidebar-bottom-icon dropdown-toggle" href="#" id="auth_dropdown_id" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img src="{% static '/icons/people-circle.svg' %}" alt="" width="24" height="24" title="">
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="auth_dropdown_id">
-                            <p class="d-flex justify-content-center">
-                                {{ request.user }}
-                            </p>
-                            <form action="{% url 'oidc_logout' %}" method="post">
-                              {% csrf_token %}
+                    {% block extra_sidebar_items %} {% endblock %}
 
-                              <input type="submit" value="Sign out">
-                            </form>
-                        </div>
-                        {% else %}
-                        <a class="sidebar-bottom-icon" href="{% url 'oidc_authentication_init' %}">
-                            <img src="{% static '/icons/person.svg' %}" alt="" width="24" height="24" title="">
+                    <li class="sidebar-header">
+                        Administration
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'models:index' %}">
+                            <i class="align-middle" data-feather="users"></i>
+                            <span class="align-middle">Studio Admin</span>
                         </a>
-                        {% endif %}
                     </li>
                 </ul>
             </div>
-            {% endblock %}
+        </nav>
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle">
+					<i class="hamburger align-self-center"></i>
+				</a>
+                <form class="d-none d-sm-inline-block">
+					<div class="input-group input-group-navbar">
+						<input type="text" class="form-control" placeholder="Search projects…" aria-label="Search">
+						<button class="btn" type="button">
+							<i class="align-middle" data-feather="search"></i>
+						</button>
+					</div>
+				</form>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+                        {% if request.user.is_authenticated %}
 
-            {% block sidebar %} {% endblock %}
+                        {% block extra_topnav_items %} {% endblock %}
+                        
+                        <li class="nav-item dropdown">
+							<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#"
+								data-bs-toggle="dropdown">
+								<i class="align-middle" data-feather="settings"></i>
+							</a>
 
-            {% block content %} {% endblock %}
+							<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#"
+								data-bs-toggle="dropdown">
+								<img src="{% static 'dist/img/avatars/avatar-default.png' %}" class="avatar img-fluid rounded-circle me-1"
+									alt="{{ request.user }}" /> <span class="text-dark">{{ request.user }}</span>
+							</a>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="#"><i class="align-middle me-1"
+										data-feather="user"></i> Profile</a>
+								<a class="dropdown-item" href="#"><i class="align-middle me-1"
+										data-feather="pie-chart"></i> Analytics</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="#">Settings & Privacy</a>
+								<a class="dropdown-item" href="#">Help</a>
+								<a class="dropdown-item" href="#">Sign out</a>
+							</div>
+						</li>
+                        {% else %}
+                        <a href="{% url 'oidc_authentication_init' %}">Sign in</a>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+            <main class="content">
+                <div class="container-fluid p-0">
+                {% block content %} {% endblock %}
+                </div>
+            </main>
+            <footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="#">Terms of Service</a>
+								</li>
+							</ul>
+						</div>
+						<div class="col-6 text-end">
+							<p class="mb-0">
+								&copy; 2020 - <a href="https://scaleoutsystems.com/" class="text-muted">Scaleout Systems</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
         </div>
     </div>
 
-</main>
-
-{% block footer %} {% endblock %}
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
-
-{% block extrascripts %} {% endblock %}
-
+    <script src="{% static 'dist/js/app.js' %}"></script>
 </body>
+
 </html>
