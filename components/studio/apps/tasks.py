@@ -1,13 +1,16 @@
 import os
 import subprocess
 import json
+import time
 from celery import shared_task
 # from celery.decorators import periodic_task
 from django.conf import settings
+from django.db import transaction
+from datetime import datetime
 import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
-from .models import AppInstance
+from .models import AppInstance, ResourceData
 from studio.celery import app
 
 def get_URI(parameters):
@@ -54,9 +57,10 @@ def process_helm_result(results):
     return res_json
 
 @shared_task
+@transaction.atomic
 def deploy_resource(instance_pk, action='create'):
 
-    instance = AppInstance.objects.get(pk=instance_pk)
+    instance = AppInstance.objects.select_for_update().get(pk=instance_pk)
     username = str(instance.owner)
     # If app is new, we need to create a Keycloak client.
     keycloak_success = True
@@ -131,14 +135,57 @@ def deploy_resource(instance_pk, action='create'):
 
 
 @shared_task
-def delete_resource(parameters):
-    print("Uninstalling resource.")
-    results = controller.delete(parameters)
-    return results.returncode, results.stdout.decode('utf-8')
+@transaction.atomic
+def delete_resource(pk):
+    appinstance = AppInstance.objects.select_for_update().get(pk=pk)
+    
 
-@app.task
-def test(arg):
-    print(arg, flush=True)
+    if appinstance and appinstance.state != "Deleted":
+        # The instance does exist.
+        parameters = appinstance.parameters
+        # TODO: Check that the user has the permission required to delete it.
+
+        # Clean up in Keycloak.
+        kc = keylib.keycloak_init()
+        # TODO: Fix for multicluster setup
+        # TODO: We are assuming this URI here, but we should allow for other forms.
+        # The instance should store information about this.
+        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+        
+        keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+        keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
+        scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        
+        if not res_json['success']:
+            print("Failed to get client scope.")
+        else:
+            keylib.keycloak_delete_client_scope(kc, scope_id)
+        
+        # Delete installed resources on the cluster.
+        release = appinstance.parameters['release']
+        namespace = appinstance.parameters['namespace']
+
+
+
+    results = controller.delete(parameters)
+    if results.returncode == 0:
+        appinstance.state = "Deleted"
+        appinstance.deleted_on = datetime.now()
+    elif 'release: not found' in results.stderr.decode('utf-8'):
+        appinstance.state = "Deleted"
+        appinstance.deleted_on = datetime.now()
+    else:
+        appinstance.state = "FailedToDelete"
+
+    # print("NEW STATE:")
+    # print(appinstance.state)
+    appinstance.save()
+    # for i in range(0,15):
+    #     appinstance =  AppInstance.objects.get(pk=pk)
+    #     print("FETCHED STATE:")
+    #     print(appinstance.state)
+    #     appinstance.save()
+    # return results.returncode, results.stdout.decode('utf-8')
 
 @app.task
 def check_status():
@@ -149,7 +196,7 @@ def check_status():
 
     # TODO: Fix for multicluster setup.
     args = ['kubectl', '--kubeconfig', kubeconfig, '-n', settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
-    print(args)
+    # print(args)
     results = subprocess.run(args, capture_output=True)
     # print(results)
     res_json = json.loads(results.stdout.decode('utf-8'))
@@ -170,13 +217,84 @@ def check_status():
         }
     instances = AppInstance.objects.all()
     for instance in instances:
-        try:
-            release = instance.parameters['release']
-            instance.state = app_statuses[release]['phase']
-            instance.save()
-        except:
-            instance.state = "UnknownError"
-            print("Release {} not in namespace.".format(release))
+        if instance.state != "Deleted":
+            try:
+                release = instance.parameters['release']
+                instance.state = app_statuses[release]['phase']
+                instance.save()
+            except:
+                if instance.app.slug != 'volume':
+                    instance.state = "Deleted"
+                    instance.save()
+            # print("Release {} not in namespace.".format(release))
     # instances.save()
-    print(app_statuses)
+    # print(app_statuses)
+
+@app.task
+def get_resource_usage():
+
+    volume_root = "/"
+    if "TELEPRESENCE_ROOT" in os.environ:
+        volume_root = os.environ["TELEPRESENCE_ROOT"]
+    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
+
+    timestamp = time.time()
+
+    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
+    results = subprocess.run(args, capture_output=True)
+    res_json = json.loads(results.stdout.decode('utf-8'))
+    pods = res_json['items']
+
+    resources = dict()
+
+    args_pod = ['kubectl', '--kubeconfig', kubeconfig, 'get', 'po', '-o', 'json']
+    results_pod = subprocess.run(args_pod, capture_output=True)
+    results_pod_json = json.loads(results_pod.stdout.decode('utf-8'))
+    for pod in results_pod_json['items']:
+        if 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
+    #         pod_release = pod['metadata']['labels']['release']
+    #         for label in pod['metadata']['labels']:
+    #             resources[label] = pod['metadata']['labels'][label]
+            pod_name = pod['metadata']['name']
+            resources[pod_name] = dict()
+            resources[pod_name]['labels'] = pod['metadata']['labels']
+            resources[pod_name]['cpu'] = 0.0
+            resources[pod_name]['memory'] = 0.0
+            resources[pod_name]['gpu'] = 0
+
+    for pod in pods:
+        
+        podname = pod['metadata']['name']
+        if podname in resources:
+            containers = pod['containers']
+            cpu = 0
+            mem = 0
+            for container in containers:
+                cpun = container['usage']['cpu']
+                memki = container['usage']['memory']
+                cpu += int(cpun.replace('n', ''))/1e6
+                if 'Ki' in memki:
+                    mem += int(memki.replace('Ki', ''))/1000
+                elif 'Mi' in memki:
+                    mem += int(memki.replace('Mi', ''))
+                elif 'Gi' in memki:
+                    mem += int(memki.replace('Mi', ''))*1000
+
+            resources[podname]['cpu'] = cpu
+            resources[podname]['memory'] = mem
+            
+    # print(json.dumps(resources, indent=2))
+
+    for key in resources.keys():
+        entry = resources[key]
+        # print(entry['labels']['release'])
+        appinstance = AppInstance.objects.get(parameters__contains={"release": entry['labels']['release']})
+        # print(timestamp)
+        # print(appinstance)
+        # print(entry)
+        datapoint = ResourceData(appinstance=appinstance, cpu=entry['cpu'], mem=entry['memory'], gpu=entry['gpu'], time=timestamp)
+        datapoint.save()
+
+    # print(timestamp)
+    # print(json.dumps(resources, indent=2))  
 

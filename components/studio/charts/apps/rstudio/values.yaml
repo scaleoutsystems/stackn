@@ -43,6 +43,7 @@ minio:
   bucket: dataset
 
 ingress:
+  v1beta1: false
   secretName: prod-ingress
 
 gatekeeper:

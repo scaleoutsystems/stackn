@@ -34,7 +34,7 @@ spec:
       #securityContext:
       #  runAsUser: 65533  # to allow read of ssh key
       containers:
-      - name: {{ .Release.Name }}-gatekeeper
+      - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest
         imagePullPolicy: Always
         args:
@@ -44,7 +44,7 @@ spec:
         volumeMounts:
         - name: gatekeeper-config
           mountPath: /etc/secrets/
-      - name: {{ .Release.Name }}-labs-app
+      - name: labs
         {{- range $key, $value := .Values.apps.environment }}
         {{- range $subkey, $subvalue := $value.apps.docker_registry }}
         image: {{ $subvalue.release }}.{{ $subvalue.global.domain }}/{{ $value.container.name }}:{{ $value.container.tag }}

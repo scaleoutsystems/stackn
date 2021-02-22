@@ -70,7 +70,7 @@
                 Monitor
             </li>
             <li class="sidebar-item ">
-                <a href="#dashboards" class="sidebar-link">
+                <a href="{% url 'monitor:overview' request.user project.slug %}" class="sidebar-link">
                     <i class="align-middle" data-feather="server"></i> <span class="align-middle">Project</span>
                 </a>
             </li>

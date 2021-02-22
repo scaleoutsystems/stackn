@@ -57,6 +57,8 @@ gatekeeper:
   skip_tls: 0
   port: 9090
 
+ingress:
+  v1beta1: false
 
 # extraEnv: |
 #   - name: LICENSE_FILE

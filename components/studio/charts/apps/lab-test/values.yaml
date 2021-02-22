@@ -51,3 +51,6 @@ gatekeeper:
   client_id: project_notebook
   auth_endpoint: keycloak.domain/auth/realms
   skip_tls: 0
+
+ingress:
+  v1beta1: false

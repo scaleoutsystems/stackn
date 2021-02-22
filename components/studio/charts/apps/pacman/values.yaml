@@ -47,3 +47,6 @@ gatekeeper:
 
 s3sync:
   image: registry.scilifelab.stackn.dev/s3-sync:latest #scaleoutsystems/s3-sync:latest
+
+ingress:
+  v1beta1: false

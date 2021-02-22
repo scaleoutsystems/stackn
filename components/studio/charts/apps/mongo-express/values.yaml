@@ -23,6 +23,7 @@ imagePullSecrets:
 
 
 ingress:
+  v1beta1: false
   secretName: prod-ingress
 
 apps:
@@ -36,36 +37,3 @@ apps:
       credentials:
         username: admin
         password: password
-
-
-
-# mongodb:
-#   server: mongo-server
-#   port: mongo-port
-#   username: admin
-#   password: password
-
-
-# app:
-
-#   resources:
-#     requests:
-#       memory: 1024Mi
-#       cpu: 1.0
-#     limits:
-#       memory: 1024Mi
-#       cpu: 1.0
-
-#   gpu:
-#     enabled: false
-
-#   affinity:
-#     nodeAffinity:
-#       requiredDuringSchedulingIgnoredDuringExecution:
-#         nodeSelectorTerms:
-#         - matchExpressions:
-#           - key: acceleration
-#             operator: In
-#             values:
-#             - gpu
-

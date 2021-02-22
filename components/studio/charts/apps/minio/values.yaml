@@ -6,5 +6,5 @@ credentials:
   access_key: accesskey
   secret_key: secretkey123
 
-
-
+ingress:
+  v1beta1: false
