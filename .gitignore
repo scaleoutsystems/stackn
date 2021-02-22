@@ -127,9 +127,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Fonts and icons
-static/open-iconic/
-
 repos/
 media/datasets/
 media/generators/
