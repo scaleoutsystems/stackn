@@ -145,7 +145,7 @@ def revoke_access_to_project(request, user, project_slug):
 
 @login_required
 def create(request):
-    template = 'index_projects.html'
+    template = 'project_create.html'
 
     if request.method == 'POST':
 
