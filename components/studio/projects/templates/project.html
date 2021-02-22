@@ -1,149 +1,286 @@
-{% extends 'baseproject.html' %}
-{% load staticfiles %}
+{% extends 'base.html' %}
+
+{% block extra_sidebar_items %}
+
+<li class="sidebar-header">
+    {{ project.name }}
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
+        <i class="align-middle" data-feather="home"></i>
+        <span class="align-middle">Overview</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'labs:index' request.user project.slug %}">
+        <i class="align-middle" data-feather="tool"></i>
+        <span class="align-middle">Labs</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug 1 %}">
+        <i class="align-middle" data-feather="hard-drive"></i>
+        <span class="align-middle">Datasets</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
+        <i class="align-middle" data-feather="layers"></i>
+        <span class="align-middle">Models</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
+        <i class="align-middle" data-feather="file-text"></i>
+        <span class="align-middle">Metrics</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
+        <i class="align-middle" data-feather="trending-up"></i>
+        <span class="align-middle">Monitor</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
+        <i class="align-middle" data-feather="settings"></i>
+        <span class="align-middle">Settings</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:project_readme' request.user project.slug %}">
+        <i class="align-middle" data-feather="code"></i>
+        <span class="align-middle">README.md</span>
+    </a>
+</li>
+{% endblock %}
+
+{% block extra_topnav_items %}
+
+<li class="nav-item dropdown">
+    <a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
+        <div class="position-relative">
+            <i class="align-middle" data-feather="bell-off"></i>
+        </div>
+    </a>
+    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
+        <div class="dropdown-menu-header">
+            4 New Notifications
+        </div>
+        <div class="list-group">
+            <a href="#" class="list-group-item">
+                <div class="row g-0 align-items-center">
+                    <div class="col-2">
+                        <i class="text-danger" data-feather="alert-circle"></i>
+                    </div>
+                    <div class="col-10">
+                        <div class="text-dark">Update completed</div>
+                        <div class="text-muted small mt-1">Restart server 12 to complete the
+                            update.</div>
+                        <div class="text-muted small mt-1">2h ago</div>
+                    </div>
+                </div>
+            </a>
+            <a href="#" class="list-group-item">
+                <div class="row g-0 align-items-center">
+                    <div class="col-2">
+                        <i class="text-warning" data-feather="bell"></i>
+                    </div>
+                    <div class="col-10">
+                        <div class="text-dark">Lorem ipsum</div>
+                        <div class="text-muted small mt-1">Aliquam ex eros, imperdiet vulputate
+                            hendrerit et.</div>
+                        <div class="text-muted small mt-1">6h ago</div>
+                    </div>
+                </div>
+            </a>
+            <a href="#" class="list-group-item">
+                <div class="row g-0 align-items-center">
+                    <div class="col-2">
+                        <i class="text-primary" data-feather="home"></i>
+                    </div>
+                    <div class="col-10">
+                        <div class="text-dark">Login from 192.186.1.1</div>
+                        <div class="text-muted small mt-1">8h ago</div>
+                    </div>
+                </div>
+            </a>
+            <a href="#" class="list-group-item">
+                <div class="row g-0 align-items-center">
+                    <div class="col-2">
+                        <i class="text-success" data-feather="user-plus"></i>
+                    </div>
+                    <div class="col-10">
+                        <div class="text-dark">New connection</div>
+                        <div class="text-muted small mt-1">Anna accepted your request.</div>
+                        <div class="text-muted small mt-1">12h ago</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="dropdown-menu-footer">
+            <a href="#" class="text-muted">Show all notifications</a>
+        </div>
+    </div>
+</li>
+{% endblock %}
+
 {% block content %}
 
-{% if is_authorized %}
-<div class="body-project">
-    <div class="d-flex flex-column pt-3 pb-3 mb-4 border-bottom">
-        <h3>Overview</h3>
-    </div>
-    <div class="row d-flex flex-row">
-        <div class="col-md-6">
-            <div class="recent-actions">
-                <h4 class="recent-actions-h4">
-                    Description
-                </h4>
-                <h6 class="recent-actions-h6">
+<h1 class="h3 mb-3">Overview</h1>
+
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Description</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
                     {{ project.description }}
-                </h6>
+                </p>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="recent-actions">
-                <h4 class="recent-actions-h4">
-                    Recent actions
-                </h4>
-                <h6 class="recent-actions-h6">{{ project.name }}</h6>
-                <div id="activity_logs">
-                    <ul class="timeline">
-                        {% for log in activity_logs %}
-                        <li>
-                            <a target="_blank" href="#">{{ log.headline }}</a>
-                            <a href="#" class="float-right">{{ log.created_at }}</a>
-                            <p>{{ log.description }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
+    </div>
+    <div class="col-12 col-lg-6 col-xl-4 d-flex">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent activity</h5>
+            </div>
+            <div class="card-body">
+                <ul class="timeline">
+                    {% for log in activity_logs %}
+                    <li class="timeline-item">
+                        <strong>{{ log.headline }}</strong>
+                        <span class="float-end text-muted text-sm">30m ago</span>
+                        <p>{{ log.description }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="card flex-fill">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Notebooks</h5>
+        </div>
+        {% if labs %}
+        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="row">
+                <div class="col-sm-12 col-md-6"></div>
+                <div class="col-sm-12 col-md-6"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                        role="grid" aria-describedby="datatables-dashboard-projects_info">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                    aria-label="UID: activate to sort column descending">UID</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Owner: activate to sort column ascending">Owner</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Created: activate to sort column ascending">Created</th>
+                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                    Status</th>
+                                <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Actions: activate to sort column ascending">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lab in labs %}
+                            <tr role="row" class="odd">
+                                <td class="sorting_1">{{ lab.id }}</td>
+                                <td class="d-none d-xl-table-cell">{{ lab.lab_session_owner.username }}</td>
+                                <td class="d-none d-xl-table-cell">{{ lab.created_at }}</td>
+                                <td><span class="badge 
+                                    {% if lab.status == 'CR' %}bg-warning
+                                    {% elif lab.status == 'ST' or lab.status == 'FN' %}bg-success
+                                    {% elif model.status == 'SP' or lab.status == 'AB' %}bg-danger
+                                    {% endif %}">{{ lab.get_status_display }}</span></td>
+                                <td class="d-none d-md-table-cell">
+                                    <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
+                                        <button class="btn btn-square btn-primary">Open</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="d-flex flex-column pt-4 pb-3">
-        <h4>Notebooks</h4>
-    </div>
-    <div class="row" style="padding: 5px 15px 5px 15px;">
-        {% if labs %}
-        <table class="table table-hover studio-table">
-            <thead class="studio-table-header">
-                <tr>
-                    <th scope="col">UID</th>
-                    <th scope="col">Owner</th>
-                    <th scope="col">Created</th>
-                    <th scope="col">Status</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lab in labs %}
-                <tr>
-                    <th scope="row">{{ lab.id }}</th>
-                    <td>{{ lab.lab_session_owner.username }}</td>
-                    <td>{{ lab.created_at }}</td>
-                    <td>{{ lab.get_status_display }}</td>
-                    <td>
-                        <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
-                            <button class="btn mt-auto button-blue" style="width: fit-content;">
-                                Open
-                            </button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
         {% else %}
-        <p>
-            No Lab Sessions have been created within this project yet.
-        </p>
-        {% endif %}
-    </div>
-    <div class="d-flex flex-column pt-4 pb-3">
-        <h4>Models</h4>
-    </div>
-    <div class="row" style="padding: 5px 15px 5px 15px;">
-        {% if models %}
-        <table class="table table-hover studio-table">
-            <thead class="studio-table-header">
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Version</th>
-                    <th scope="col">Created</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Accessability</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for model in models %}
-                <tr>
-                    <th scope="row">{{ model.name }}</th>
-                    <td>{{ model.version }}</td>
-                    <td>{{ model.uploaded_at }}</td>
-                    <td>{{ model.get_status_display }}</td>
-                    <td>{{ model.get_access_display }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>
-            No models have been uploaded to this project yet.
-        </p>
-        {% endif %}
-    </div>
-    <div class="d-flex flex-column pt-4 pb-3">
-        <h4>Deployments</h4>
-    </div>
-    <div class="row" style="padding: 5px 15px 5px 15px;">
-        {% if deployments %}
-        <table class="table table-hover studio-table">
-            <thead class="studio-table-header">
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Deployed</th>
-                    <th scope="col">Deployed by</th>
-                    <th scope="col">Endpoint</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for d in deployments %}
-                <tr>
-                    <th scope="row">{{ d.pk }}</th>
-                    <td>{{ d.model.name }}:{{ d.model.version }}</td>
-                    <td>{{ d.created_at }}</td>
-                    <td>{{ d.created_by }}</td>
-                    <td>https://{{ d.endpoint }}{{ d.path }}{{ d.deployment.path_predict }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>
-            No models have been deployed within this project yet.
-        </p>
+        <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p>
         {% endif %}
     </div>
 </div>
-{% endif %}
 
+<div class="row">
+    <div class="card flex-fill">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Models</h5>
+        </div>
+        {% if models %}
+        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="row">
+                <div class="col-sm-12 col-md-6"></div>
+                <div class="col-sm-12 col-md-6"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                        role="grid" aria-describedby="datatables-dashboard-projects_info">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                    aria-label="Name: activate to sort column descending">Name</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Version: activate to sort column ascending">Version</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Created: activate to sort column ascending">Created</th>
+                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                    Status</th>
+                                <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Accessability: activate to sort column ascending">Accessability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model in models %}
+                            <tr role="row" class="odd">
+                                <td class="sorting_1">{{ model.name }}</td>
+                                <td class="d-none d-xl-table-cell">{{ model.version }}</td>
+                                <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
+                                <td><span class="badge 
+                                    {% if model.status == 'CR' %}bg-warning
+                                    {% elif model.status == 'DP' %}bg-success
+                                    {% elif model.status == 'AR' %}bg-danger
+                                    {% endif %}">{{ model.get_status_display }}</span></td>
+                                <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p style="margin-left: 25px;">No models have been uploaded to this project yet.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
