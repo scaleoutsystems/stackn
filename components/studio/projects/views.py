@@ -214,9 +214,8 @@ def details(request, user, project_slug):
         
     if project:
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
-        labs = Session.objects.filter(project=project).order_by('-created_at')[:5]
-        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:5]
-        deployments = DeploymentInstance.objects.filter(model__project=project).order_by('-created_at')[:5]
+        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())
 
