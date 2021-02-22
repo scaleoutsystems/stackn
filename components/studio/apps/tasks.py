@@ -188,6 +188,7 @@ def delete_resource(pk):
     # return results.returncode, results.stdout.decode('utf-8')
 
 @app.task
+@transaction.atomic
 def check_status():
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
@@ -215,7 +216,7 @@ def check_status():
             "num_cont": num_containers,
             "num_cont_ready": num_cont_ready
         }
-    instances = AppInstance.objects.all()
+    instances = AppInstance.objects.select_for_update().all()
     for instance in instances:
         if instance.state != "Deleted":
             try:

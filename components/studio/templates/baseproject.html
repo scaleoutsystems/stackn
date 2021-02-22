@@ -11,10 +11,27 @@
         <span class="align-middle">Overview</span>
     </a>
 </li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'labs:index' request.user project.slug %}">
-        <i class="align-middle" data-feather="tool"></i>
-        <span class="align-middle">Labs</span>
+<li class="sidebar-header">
+    Resources
+</li>
+<li class="sidebar-item {{ menu.compute }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Compute</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.serve }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'serve' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.store }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'store' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.misc }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
     </a>
 </li>
 <li class="sidebar-item">
