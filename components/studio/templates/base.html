@@ -69,6 +69,38 @@
                         </button>
                     </div>
                 </form>
+                <ul class="navbar-nav">
+                    <li class="nav-item px-2 dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Help Center
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-start dropdown-mega" aria-labelledby="servicesDropdown">
+                            <div class="d-md-flex align-items-start justify-content-start">
+                                <div class="dropdown-mega-list">
+                                    <div class="dropdown-header">Installation</div>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=mac">Mac OS</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=linux">Linux</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=windows-10">Windows 10</a>
+                                </div>
+                                <div class="dropdown-mega-list">
+                                    <div class="dropdown-header">Tutorials</div>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=getting-started">Getting started</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=deploy-a-model">Deploy a model</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=cli">STACKn CLI</a>
+                                    <a class="dropdown-item" href="#">STACKn API</a>
+                                </div>
+                                <div class="dropdown-mega-list">
+                                    <div class="dropdown-header">Release notes</div>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v040">v0.4.0</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v030">v0.3.0</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v020">v0.2.0</a>
+                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v010">v0.1.0</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav navbar-align">
                         {% if request.user.is_authenticated %}
@@ -119,16 +151,25 @@
                         <div class="col-6 text-start">
                             <ul class="list-inline">
                                 <li class="list-inline-item">
-                                    <a class="text-muted" href="#">Support</a>
+                                    <a class="text-muted" href="#">
+                                        <button class="btn mb-1 btn-twitter">
+                                            <i class="align-middle fab my-1 fa-twitter"></i>
+                                        </button>
+                                    </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a class="text-muted" href="#">Help Center</a>
+                                    <a class="text-muted" href="#">
+                                        <button class="btn mb-1 btn-youtube">
+                                            <i class="align-middle fab my-1 fa-youtube"></i>
+                                        </button>
+                                    </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a class="text-muted" href="#">Privacy</a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-muted" href="#">Terms of Service</a>
+                                    <a class="text-muted" href="#">
+                                        <button class="btn mb-1 btn-github">
+                                            <i class="align-middle fab my-1 fa-github"></i>
+                                        </button>
+                                    </a>
                                 </li>
                             </ul>
                         </div>

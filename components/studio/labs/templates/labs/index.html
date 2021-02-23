@@ -39,7 +39,7 @@
                             Select a Flavor for the notebook.
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Start</button>
+                    <button type="submit" class="btn btn-square btn-primary">Start</button>
                 </form>
             </div>
         </div>
@@ -92,7 +92,7 @@
                                     {% elif model.status == 'SP' or session.status == 'AB' %}bg-danger
                                     {% endif %}">{{ session.get_status_display }}</span></td>
                                 <td class="d-none d-md-table-cell">
-                                    <a href="http://{{ session.slug }}.{{ url_domain }}" target="_blank">
+                                    <a href="http://{{ session.slug }}.{{ url }}" target="_blank">
                                         <button class="btn btn-square btn-primary">Open</button>
                                     </a>
                                     <a href="{% url 'labs:delete' request.user project.slug session.id %}">
