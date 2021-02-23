@@ -15,12 +15,12 @@
         <td>{{ appinstance.app.name }}</td>
         <td>{{ appinstance.name}}</td>
         <td>{{ appinstance.table_field | safe }}</td>
-        {% if appinstance.state in status_success %}
-        <td><span class="badge bg-success">{{ appinstance.state }}</span></td>
-        {% elif appinstance.state in status_warning %}
-        <td><span class="badge bg-warning">{{ appinstance.state }}</span></td>
+        {% if appinstance.status.latest.status_type in status_success %}
+        <td><span class="badge bg-success">{{ appinstance.status.latest.status_type }}</span></td>
+        {% elif appinstance.status.latest.status_type in status_warning %}
+        <td><span class="badge bg-warning">{{ appinstance.status.latest.status_type }}</span></td>
         {% else %}
-        <td><span class="badge bg-danger">{{ appinstance.state }}</span></td>
+        <td><span class="badge bg-danger">{{ appinstance.status.latest.status_type }}</span></td>
         {% endif %}
         <td>{{ appinstance.created_on }}</td>
         <td class="table-action">
