@@ -223,12 +223,15 @@
                                 back.
                             </div>
                         </div>
-                        <form class="row row-cols-md-auto align-items-center">
+                        <form class="row row-cols-md-auto align-items-center"
+                            action="{% url 'projects:delete' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
                             <div class="col-12">
                                 <label for="id_delete_button">Delete anyway?</label>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-danger btn-square" id="id_delete_button"
+                                <button type="button" class="btn btn-danger btn-square" id="id_delete_button"
                                     data-bs-toggle="modal" data-bs-target="#deleteModal">
                                     Delete
                                 </button>
@@ -248,9 +251,7 @@
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-square btn-secondary"
                                                     data-bs-dismiss="modal">Close</button>
-                                                <a href="{% url 'projects:delete' request.user project.slug %}">
-                                                    <button class="btn btn-square btn-danger">Delete</button>
-                                                </a>
+                                                <button type="submit" class="btn btn-square btn-danger">Confirm</button>
                                             </div>
                                         </div>
                                     </div>
