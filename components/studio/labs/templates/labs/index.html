@@ -1,98 +1,113 @@
 {% extends 'baseproject.html' %}
-{% load static %}
 
 {% block content %}
-<div class="body-project">
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-        <h3>Lab Sessions</h3>
-    </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
-        <h4>Start a new Lab Session</h4>
-    </div>
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card card-add-project" style="padding: 15px; margin-bottom: 30px;">
+
+<h1 class="h3 mb-3">Labs</h1>
+
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Start a new Lab Session</h5>
+                <h6 class="card-subtitle text-muted">Select parameters in the form below to spin up a Jupyter Notebook.
+                </h6>
+            </div>
+            <div class="card-body">
                 <form action="{% url 'labs:run' request.user project.slug %}" method="post">
                     {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="environment">Image</label>
-                            <select class="form-control form-input" id="environment" name="environment" required="">
-                                {% for environment in environments %}
-                                <option value="{{ environment.slug }}">{{ environment.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="invalid-feedback">
-                                Select an Image for the Lab Session.
-                            </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="environment">Image</label>
+                        <select class="form-control" id="environment" name="environment" required>
+                            {% for environment in environments %}
+                            <option value="{{ environment.slug }}">{{ environment.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Select an Image for the notebook.
                         </div>
                     </div>
                     <input type="hidden" value="{{ project.id }}" name="project" />
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="flavor">Flavor</label>
-                            <select class="form-control form-input" id="flavor" name="flavor" required="">
-                                {% for flavor in flavors %}
-                                <option value="{{ flavor.slug }}">{{ flavor.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="invalid-feedback">
-                                Select a Flavor for the Lab Session.
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="flavor">Flavor</label>
+                        <select class="form-control" id="flavor" name="flavor" required>
+                            {% for flavor in flavors %}
+                            <option value="{{ flavor.slug }}">{{ flavor.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Select a Flavor for the notebook.
                         </div>
                     </div>
-                    <button class="btn mt-auto button-orange" type="submit" style="width: fit-content;">
-                        Start
-                    </button>
+                    <button type="submit" class="btn btn-primary">Start</button>
                 </form>
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-2 mb-3" style="border-bottom: 1px solid #dee2e6;">
-    </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2">
-        <h4>Active Lab Sessions</h4>
-    </div>
-    <div class="row" style="padding: 5px 15px 5px 15px;">
+</div>
+
+<div class="row">
+    <div class="card flex-fill">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Notebooks</h5>
+        </div>
         {% if sessions %}
-        <table class="table table-hover studio-table">
-            <thead class="studio-table-header">
-                <tr>
-                    <th scope="col">UID</th>
-                    <th scope="col">Owner</th>
-                    <th scope="col">Created</th>
-                    <th scope="col">Status</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                <tr>
-                    <th scope="row">{{ session.id }}</th>
-                    <td>{{ session.lab_session_owner.username }}</td>
-                    <td>{{ session.created_at }}</td>
-                    <td>{{ session.get_status_display }}</td>
-                    <td>
-                        <a href="http://{{ session.slug }}.{{ url }}" target="_blank">
-                            <button class="btn mt-auto button-blue" style="width: fit-content;">
-                                Open
-                            </button>
-                        </a>
-                        <a href="{% url 'labs:delete' request.user project.slug session.id %}">
-                            <button class="btn mt-auto button-red" style="width: fit-content;">
-                                Delete
-                            </button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="row">
+                <div class="col-sm-12 col-md-6"></div>
+                <div class="col-sm-12 col-md-6"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                        role="grid" aria-describedby="datatables-dashboard-projects_info">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                    aria-label="UID: activate to sort column descending">UID</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Owner: activate to sort column ascending">Owner</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Created: activate to sort column ascending">Created</th>
+                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                    Status</th>
+                                <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Actions: activate to sort column ascending">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr role="row" class="odd">
+                                <td class="sorting_1">{{ session.id }}</td>
+                                <td class="d-none d-xl-table-cell">{{ session.lab_session_owner.username }}</td>
+                                <td class="d-none d-xl-table-cell">{{ session.created_at }}</td>
+                                <td><span class="badge 
+                                    {% if session.status == 'CR' %}bg-warning
+                                    {% elif session.status == 'ST' or session.status == 'FN' %}bg-success
+                                    {% elif model.status == 'SP' or session.status == 'AB' %}bg-danger
+                                    {% endif %}">{{ session.get_status_display }}</span></td>
+                                <td class="d-none d-md-table-cell">
+                                    <a href="http://{{ session.slug }}.{{ url_domain }}" target="_blank">
+                                        <button class="btn btn-square btn-primary">Open</button>
+                                    </a>
+                                    <a href="{% url 'labs:delete' request.user project.slug session.id %}">
+                                        <button class="btn btn-square btn-danger">Remove</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         {% else %}
-        <p>
-            No Lab Sessions have been created within this project yet.
-        </p>
+        <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p>
         {% endif %}
     </div>
 </div>

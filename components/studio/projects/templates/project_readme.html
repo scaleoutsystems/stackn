@@ -1,21 +1,23 @@
 {% extends 'baseproject.html' %}
-{% load staticfiles %}
-{% block content %}
 
-{% if is_authorized %}
-<div class="body-project">
-    <div class="d-flex flex-column pt-3 pb-3 mb-4 border-bottom">
-        <h3>README.md</h3>
+{% block content %}
+{% if readme %}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">README.md</h5>
+            <h6 class="card-subtitle text-muted">The content of your README.md file is presented below.</h6>
+        </div>
+        <div class="card-body">
+            {{ readme | safe }}
+        </div>
     </div>
-    {% if readme %}
-    <div class="readme-box">
-        {{ readme | safe }}
-    </div>
-    {% else %}
-    <p style="padding-left: 10px;">
-        No README.md file added for this project.
-    </p>
-    {% endif %}
+</div>
+{% else %}
+
+<div class="row">
+    <p>No README.md file added for this project.</p>
 </div>
 {% endif %}
 
