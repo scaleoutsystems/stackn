@@ -6,11 +6,12 @@ from celery import shared_task
 # from celery.decorators import periodic_task
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from datetime import datetime
 import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
-from .models import AppInstance, ResourceData
+from .models import AppInstance, ResourceData, AppStatus
 from studio.celery import app
 
 def get_URI(parameters):
@@ -45,16 +46,17 @@ def add_valid_redirect_uri(instance):
 
 def process_helm_result(results):
     stdout = results.stdout.decode('utf-8')
-    stdout = stdout.split('\n')
-    res_json = dict()
-    print("PROCESSING STDOUT")
-    for line in stdout:
-        if line != '':
-            print(line)
-            tmp = line.split(':')
-            if len(tmp) == 2:
-                res_json[tmp[0]] = tmp[1]
-    return res_json
+    stderr = results.stderr.decode('utf-8')
+    # stdout = stdout.split('\n')
+    # res_json = dict()
+    # print("PROCESSING STDOUT")
+    # for line in stdout:
+    #     if line != '':
+    #         print(line)
+    #         tmp = line.split(':')
+    #         if len(tmp) == 2:
+    #             res_json[tmp[0]] = tmp[1]
+    return stdout, stderr
 
 @shared_task
 @transaction.atomic
@@ -67,6 +69,11 @@ def deploy_resource(instance_pk, action='create'):
     if action == "create":
 
         parameters = instance.parameters
+        
+        status = AppStatus(appinstance=instance)
+        status.status_type = 'Failed'
+        status.info = parameters['release']
+
         URI = get_URI(parameters)
         # Set up Keycloak:
         # Add valid redirect URI to project client (for permission: project to work)
@@ -88,9 +95,9 @@ def deploy_resource(instance_pk, action='create'):
         if not keycloak_success:
             print("Failed to setup Keycloak client for resource.")
             print(instance.info['keycloak'])
-            instance.state = "Failed"
-        else:
-            instance.state = "Installing"
+            status.status_type = "Failed"
+        # else:
+        #     instance.state = "Installing"
 
         gatekeeper = {
             "gatekeeper": {
@@ -110,28 +117,31 @@ def deploy_resource(instance_pk, action='create'):
         instance.info['keycloak'].update({"success": True})
         print("Deploying resource")
         results = controller.deploy(instance.parameters)
-        res_json = process_helm_result(results)
+        stdout, stderr = process_helm_result(results)
         if results.returncode == 0:
             print("Helm install succeeded")
-            instance.state = "Installed"
+            status.status_type = "Installed"
             helm_info = {
                 "success": True,
                 "info": {
-                    "stdout": res_json
+                    "stdout": stdout,
+                    "stderr": stderr
                 }
             }
         else:
             print("Helm install failed")
-            instance.state = "Failed"
+            status.status_type = "Failed"
             helm_info = {
                 "success": False,
                 "info": {
-                    "stdout": res_json
+                    "stdout": stdout,
+                    "stderr": stderr
                 }
             }
 
         instance.info["helm"] = helm_info
         instance.save()
+        status.save()
 
 
 @shared_task
@@ -152,14 +162,18 @@ def delete_resource(pk):
         # The instance should store information about this.
         URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
         
-        keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-        keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
-        scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        try:
+            keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
+            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+            if not res_json['success']:
+                print("Failed to get client scope.")
+            else:
+                keylib.keycloak_delete_client_scope(kc, scope_id)
+        except:
+            print("Failed to clean up in Keycloak.")
         
-        if not res_json['success']:
-            print("Failed to get client scope.")
-        else:
-            keylib.keycloak_delete_client_scope(kc, scope_id)
+        
         
         # Delete installed resources on the cluster.
         release = appinstance.parameters['release']
@@ -168,18 +182,19 @@ def delete_resource(pk):
 
 
     results = controller.delete(parameters)
-    if results.returncode == 0:
-        appinstance.state = "Deleted"
-        appinstance.deleted_on = datetime.now()
-    elif 'release: not found' in results.stderr.decode('utf-8'):
-        appinstance.state = "Deleted"
-        appinstance.deleted_on = datetime.now()
+    if results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8'):
+        status = AppStatus(appinstance=appinstance)
+        status.status_type = "Terminated"
+        status.save()
     else:
-        appinstance.state = "FailedToDelete"
+        status = AppStatus(appinstance=appinstance)
+        status.status_type = "FailedToDelete"
+        status.save()
+        # appinstance.state = "FailedToDelete"
 
     # print("NEW STATE:")
     # print(appinstance.state)
-    appinstance.save()
+    # appinstance.save()
     # for i in range(0,15):
     #     appinstance =  AppInstance.objects.get(pk=pk)
     #     print("FETCHED STATE:")
@@ -205,27 +220,64 @@ def check_status():
     for item in res_json['items']:
         release = item['metadata']['labels']['release']
         phase = item['status']['phase']
+        
+        deletion_timestamp = []
+        if 'deletionTimestamp' in item['metadata']:
+            deletion_timestamp = item['metadata']['deletionTimestamp']
         num_containers = len(item['status']['containerStatuses'])
         num_cont_ready = 0
-        for container in item['status']['containerStatuses']:
-            if container['ready']:
-                num_cont_ready += 1
+        if 'containerStatuses' in item['status']:
+            for container in item['status']['containerStatuses']:
+                if container['ready']:
+                    num_cont_ready += 1
         app_statuses[release] = {
             "phase": phase,
             "num_cont": num_containers,
-            "num_cont_ready": num_cont_ready
+            "num_cont_ready": num_cont_ready,
+            "deletion_status": deletion_timestamp
         }
-    instances = AppInstance.objects.all()
+
+
+    instances = AppInstance.objects.filter(~Q(state="Deleted"))
     for instance in instances:
-        if instance.state != "Deleted":
+        release = instance.parameters['release']
+        if release in app_statuses:
+            current_status = app_statuses[release]['phase']
             try:
-                release = instance.parameters['release']
-                instance.state = app_statuses[release]['phase']
-                instance.save()
+                latest_status = AppStatus.objects.filter(appinstance=instance).latest('time').status_type
             except:
-                if instance.app.slug != 'volume':
-                    instance.state = "Deleted"
-                    instance.save()
+                latest_status = "Unknown"
+            if current_status != latest_status:
+                print("New status for release {}".format(release))
+                print("Current status: {}".format(current_status))
+                print("Previous status: {}".format(latest_status))
+                status = AppStatus(appinstance=instance)
+                if app_statuses[release]['deletion_status']:
+                    status.status_type = "Terminated"
+                else:
+                    status.status_type = app_statuses[release]['phase']
+                # status.info = app_statuses[release]
+                status.save()
+            # else:
+            #     print("No update for release: {}".format(release))
+        else:
+            delete_exists = AppStatus.objects.filter(appinstance=instance, status_type="Terminated").exists()
+            if delete_exists:
+                status = AppStatus(appinstance=instance)
+                status.status_type = "Deleted"
+                status.save()                
+                instance.state = "Deleted"
+                instance.deleted_on = datetime.now()
+                instance.save()
+        # if instance.state != "Deleted":
+        #     try:
+        #         release = instance.parameters['release']
+        #         instance.state = app_statuses[release]['phase']
+        #         instance.save()
+        #     except:
+        #         if instance.app.slug != 'volume':
+        #             instance.state = "Deleted"
+        #             instance.save()
             # print("Release {} not in namespace.".format(release))
     # instances.save()
     # print(app_statuses)
@@ -272,7 +324,11 @@ def get_resource_usage():
             for container in containers:
                 cpun = container['usage']['cpu']
                 memki = container['usage']['memory']
-                cpu += int(cpun.replace('n', ''))/1e6
+                try:
+                    cpu += int(cpun.replace('n', ''))/1e6
+                except:
+                    print("Failed to parse CPU usage:")
+                    print(cpun)
                 if 'Ki' in memki:
                     mem += int(memki.replace('Ki', ''))/1000
                 elif 'Mi' in memki:
