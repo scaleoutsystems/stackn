@@ -225,6 +225,7 @@ def check_status():
         deletion_timestamp = []
         if 'deletionTimestamp' in item['metadata']:
             deletion_timestamp = item['metadata']['deletionTimestamp']
+            phase = "Terminated"
         num_containers = len(item['status']['containerStatuses'])
         num_cont_ready = 0
         if 'containerStatuses' in item['status']:
@@ -253,10 +254,10 @@ def check_status():
                 print("Current status: {}".format(current_status))
                 print("Previous status: {}".format(latest_status))
                 status = AppStatus(appinstance=instance)
-                if app_statuses[release]['deletion_status']:
-                    status.status_type = "Terminated"
-                else:
-                    status.status_type = app_statuses[release]['phase']
+                # if app_statuses[release]['deletion_status']:
+                #     status.status_type = "Terminated"
+                # else:
+                status.status_type = app_statuses[release]['phase']
                 # status.info = app_statuses[release]
                 status.save()
             # else:

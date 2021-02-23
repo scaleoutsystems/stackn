@@ -20,11 +20,11 @@
                         <label class="form-label">Name</label>
                         <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
                     </div>
-                    {% if dep_permissions %}
+                    {% if form.dep_permissions %}
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
                         <select name="permission" id="permission" class="form-control">
-                            {% for name, value in form_permissions.items %}
+                            {% for name, value in form.form_permissions.items %}
                                 {% if value.option == "true" %}
                                     {% if value.value == "false" %}
                                     <option value="{{ name }}">{{ name }}</option>
@@ -37,33 +37,33 @@
                     </div>
                     {% endif %}
 
-                    {% if dep_model %}
+                    {% if form.dep_model %}
                     <div class="mb-3">
                         <label class="form-label">Model</label>
                         <select name="model" id="model" class="form-control">
-                            {% for model in models %}
+                            {% for model in form.models %}
                             <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
                             {% endfor %}
                         </select>
                     </div>
                     {% endif %}
                     
-                    {% if dep_flavor %}
+                    {% if form.dep_flavor %}
                     <div class="mb-3">
                         <label class="form-label">Flavors</label>
                         <select name="flavor" id="flavor" class="form-control">
-                            {% for flavor in flavors %}
+                            {% for flavor in form.flavors %}
                             <option value="{{ flavor.pk }}">{{ flavor.name }}</option> 
                             {% endfor %}
                         </select>
                     </div>
                     {% endif %}
 
-                    {% if dep_environment %}
+                    {% if form.dep_environment %}
                     <div class="mb-3">
                         <label class="form-label">Environment</label>
                         <select name="environment" id="environment" class="form-control">
-                            {% for environment in environments %}
+                            {% for environment in form.environments %}
                             <option value="{{ environment.pk }}">{{ environment.name }}</option> 
                             {% endfor %}
                         </select>
@@ -71,11 +71,11 @@
                     {% endif %}
 
 
-                    {% if dep_volumes %}
+                    {% if form.dep_volumes %}
                     <div class="mb-3">
                         <label class="form-label">Volumes</label>
                         <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
-                            {% for volume in volumes %}
+                            {% for volume in form.volumes %}
                             <option value="{{ volume.pk }}">{{ volume.name }}</option> 
                             {% endfor %}
                         </select>
@@ -84,9 +84,9 @@
 
 
 
-                    {% if dep_apps %}
+                    {% if form.dep_apps %}
                     
-                        {% for app_name, appinstances in app_deps.items %}
+                        {% for app_name, appinstances in form.app_deps.items %}
                         <div class="mb-3">
                             <label class="form-label">{{ app_name }}</label>
                             <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
@@ -99,7 +99,7 @@
                     {% endif %}
                     
                     
-                    {% for key, vals in primitives.items %}
+                    {% for key, vals in form.primitives.items %}
                     
                         <!-- <label class="form-label">{{ key }}</label> -->
                         <h6>{{ key }}</h6>
@@ -137,11 +137,11 @@
                     
                     {% endfor %}
 
-                    {% if dep_appobj %}
+                    {% if form.dep_appobj %}
                     <div class="mb-3">
-                        <label class="form-label">{{ appobjs.title }}</label>
+                        <label class="form-label">{{ form.appobjs.title }}</label>
                         <select name="appobj" id="appobj" class="form-control" {{ appobjs.type }}>
-                        {% for app in appobjs.objs %}
+                        {% for app in form.appobjs.objs %}
                         <option value="{{ app.pk }}">{{ app.name }}</option> 
                         {% endfor %}
                         </select>
