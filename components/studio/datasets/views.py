@@ -9,7 +9,7 @@ from .forms import DatasheetForm
 
 
 @login_required
-def page(request, user, project, page_index):
+def page(request, user, project):
     template = 'dataset_page.html'
     project = Project.objects.get(slug=project)
     url_domain = sett.DOMAIN
