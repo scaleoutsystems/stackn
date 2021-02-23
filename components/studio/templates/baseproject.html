@@ -11,8 +11,44 @@
         <span class="align-middle">Overview</span>
     </a>
 </li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
+        <i class="align-middle" data-feather="trending-up"></i>
+        <span class="align-middle">Monitor</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
+        <i class="align-middle" data-feather="settings"></i>
+        <span class="align-middle">Settings</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:project_readme' request.user project.slug %}">
+        <i class="align-middle" data-feather="code"></i>
+        <span class="align-middle">README.md</span>
+    </a>
+</li>
 <li class="sidebar-header">
     Resources
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
+        <i class="align-middle" data-feather="layers"></i>
+        <span class="align-middle">Models</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug 1 %}">
+        <i class="align-middle" data-feather="hard-drive"></i>
+        <span class="align-middle">Datasets</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
+        <i class="align-middle" data-feather="file-text"></i>
+        <span class="align-middle">Metrics</span>
+    </a>
 </li>
 <li class="sidebar-item {{ menu.compute }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
@@ -34,42 +70,8 @@
         <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
     </a>
 </li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug 1 %}">
-        <i class="align-middle" data-feather="hard-drive"></i>
-        <span class="align-middle">Datasets</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
-        <i class="align-middle" data-feather="layers"></i>
-        <span class="align-middle">Models</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
-        <i class="align-middle" data-feather="file-text"></i>
-        <span class="align-middle">Metrics</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
-        <i class="align-middle" data-feather="trending-up"></i>
-        <span class="align-middle">Monitor</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
-        <i class="align-middle" data-feather="settings"></i>
-        <span class="align-middle">Settings</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'projects:project_readme' request.user project.slug %}">
-        <i class="align-middle" data-feather="code"></i>
-        <span class="align-middle">README.md</span>
-    </a>
-</li>
+
+
 {% endblock %}
 
 {% block extra_topnav_items %}

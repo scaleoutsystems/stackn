@@ -1,8 +1,10 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
+from django.http import JsonResponse
 from django.conf import settings
 from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
+from django.views.decorators.csrf import csrf_exempt
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
@@ -14,16 +16,21 @@ import requests
 import flatten_json
 import uuid
 from datetime import datetime, timedelta
+from .generate_form import generate_form
+from .helpers import create_instance_params
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
+def get_status_defs():
+    status_success = ['Running', 'Succeeded', 'Success']
+    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
+    return status_success, status_warning
 
 # Create your views here.
 def index(request, user, project):
     print("hello")
     category = 'store'
     template = 'index_apps.html'
-    status_success = ['Running', 'Succeeded', 'Success']
-    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
+    # status_success = ['Running', 'Succeeded', 'Success']
+    # status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
 
     # template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
@@ -75,9 +82,9 @@ def logs(request, user, project, ai_id):
 
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
+    status_success, status_warning = get_status_defs()
     menu = dict()
-    status_success = ['Running', 'Succeeded', 'Success']
-    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
+    
 
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
@@ -88,120 +95,48 @@ def filtered(request, user, project, category):
     print(time_threshold)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                               ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj)
-
+    pk_list = ''
+    for instance in appinstances:
+        pk_list += str(instance.pk)+','
+    pk_list = pk_list[:-1]
+    pk_list = "'"+pk_list+"'"
     apps_installed = False
     if appinstances:
         apps_installed = True
         
     return render(request, template, locals())
 
-
-def get_form_models(aset, project, appinstance=[]):
-    dep_model = False
-    models = []
-    if 'model' in aset:
-        print('app requires a model')
-        dep_model = True
-        models = Model.objects.filter(project=project)
-        
-        for model in models:
-            if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():
-                print(model)
-                model.selected = "selected"
-            else:
-                model.selected = ""
-    return dep_model, models
-
-def get_form_apps(aset, project, myapp, user, appinstance=[]):
-    dep_apps = False
-    app_deps = []
-    if 'apps' in aset:
-        dep_apps = True
-        app_deps = dict()
-        apps = aset['apps']
-        for app_name, option_type in apps.items():
-            print(app_name)
-            app_obj = Apps.objects.get(name=app_name)
-
-            # TODO: Only get app instances that we have permission to list.
-            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), project=project, app=app_obj)
-            # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
-            # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
-            if app_name == "Environment":
-                key = 'appobj'+'.'+myapp.slug
-
-                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                                           project=project,
-                                                           app=app_obj,
-                                                           parameters__contains={
-                                                               "appobj": {
-                                                                    myapp.slug: True
-                                                                }
-                                                           })
+@csrf_exempt
+def get_status(request, user, project):
+    status_success, status_warning = get_status_defs()
+    print("GET_STATUS")
+    print(request.POST)
+    pk = request.POST.get('pk')
+    # print(pk)
+    pk = pk.split(',')
+    appinstances = AppInstance.objects.filter(pk__in=pk)
+    print(appinstances)
+    res = dict()
+    for instance in appinstances:
+        try:
+            status = instance.status.latest().status_type
             
-            for ain in app_instances:
-                if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
-                    ain.selected = "selected"
-                else:
-                    ain.selected = ""
-
-            if option_type == "one":
-                app_deps[app_name] = {"instances": app_instances, "option_type": ""}
-            else:
-                app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
-    return dep_apps, app_deps
-
-def get_form_primitives(aset, project, appinstance=[]):
-    all_keys = aset.keys()
-    print("PRIMITIVES")
-    primitives = dict()
-    if appinstance:
-        ai_vals = flatten_json.flatten(appinstance.parameters, '.')
-    for key in all_keys:
-        if key not in key_words:
-            primitives[key] = aset[key]
-            if appinstance:
-                for subkey, subval in aset[key].items():
-                    primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
-    print(primitives)
-    return primitives
-
-def get_form_permission(aset, project, appinstance=[]):
-    form_permissions = {
-        "public": {"value":"false", "option": "false"},
-        "project": {"value":"false", "option": "false"},
-        "private": {"value":"true", "option": "true"}
-    }
-    dep_permissions = True
-    if 'permissions' in aset:
-        form_permissions = aset['permissions']
-        # if not form_permissions:
-        #     dep_permissions = False
-
-        if appinstance:
-            try:
-                ai_vals = eval(appinstance.parameters)
-                form_permissions['public']['value'] = ai_vals['permissions.public']
-                form_permissions['project']['value'] = ai_vals['permissions.project']
-                form_permissions['private']['value'] = ai_vals['permissions.private']
-            except:
-                print("Permissions not set for app instance, using default.")
-    return dep_permissions, form_permissions
-
-def get_form_appobj(aset, project, appinstance=[]):
-    print("CHECKING APP OBJ")
-    dep_appobj = False
-    appobjs = dict()
-    if 'appobj' in aset:
-        print("NEEDS APP OBJ")
-        dep_appobj = True
-        appobjs['objs'] = Apps.objects.all()
-        appobjs['title'] = aset['appobj']['title']
-        appobjs['type'] = aset['appobj']['type']
-
-    print(appobjs)
-    return dep_appobj, appobjs
-
+        except:
+            status = instance.state
+        if status in status_success:
+            span_class = 'bg-success'
+        elif status in status_warning:
+            span_class = 'bg-warning'
+        else:
+            span_class = 'bg-danger'
+        res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
+        print(status)
+    print(pk)
+    return JsonResponse(res)
+    # if 'pk' in request.POST:
+    #     pk = request.POST['pk']
+    #     appinstances = AppInstance.objects.filter(pk__in=pk)
+    #     print(appinstances)
 
 def appsettings(request, user, project, ai_id):
     template = 'create.html'
@@ -213,73 +148,9 @@ def appsettings(request, user, project, ai_id):
     app = appinstance.app
 
     aset = appinstance.app.settings
-    # get_form_models(aset, project, appinstance=appinstance)
-    dep_apps, app_deps = get_form_apps(aset, project, app, request.user, appinstance=appinstance)
-    dep_model, models = get_form_models(aset, project, appinstance=appinstance)
-    primitives = get_form_primitives(aset, project, appinstance=appinstance)
-    dep_permissions, form_permissions = get_form_permission(aset, project, appinstance=appinstance)
 
+    form = generate_form(aset, project, app, request.user, appinstance)
     return render(request, template, locals())
-
-
-
-def create_instance_params(instance, action="create"):
-    # instance_settings = eval(instance.settings)
-    # if action == "create":
-    RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
-    print("RELEASE_NAME: "+RELEASE_NAME)
-    # else:
-    #     print(instance.parameters)
-    #     RELEASE_NAME = instance.parameters['release']
-
-
-    SERVICE_NAME = RELEASE_NAME
-    # TODO: Fix for multicluster setup, look at e.g. labs
-    HOST = settings.DOMAIN
-    NAMESPACE = settings.NAMESPACE
-
-    user = instance.owner
-
-    skip_tls = 0
-    if not settings.OIDC_VERIFY_SSL:
-        skip_tls = 1
-        print("WARNING: Skipping TLS verify.")
-
-    # Add some generic parameters.
-    parameters = {
-        "release": RELEASE_NAME,
-        "chart": str(instance.app.chart),
-        "namespace": NAMESPACE,
-        "appname": RELEASE_NAME,
-        "project": {
-            "name": instance.project.name,
-            "slug": instance.project.slug
-        },
-        "global": {
-            "domain": HOST,
-        },
-        "s3sync": {
-            "image": "scaleoutsystems/s3-sync:latest"
-        },
-        "gatekeeper": {
-            "skip_tls": str(skip_tls)
-        },
-        "service": {
-            "name": SERVICE_NAME
-        },
-        "storageClass": settings.STORAGECLASS
-    }
-
-    instance.parameters.update(parameters)
-
-
-    # Add field for table.    
-    if instance.app.table_field and instance.app.table_field != "":
-        django_engine = engines['django']
-        info_field = django_engine.from_string(instance.app.table_field).render(parameters)
-        instance.table_field = info_field
-    else:
-        instance.table_field = ""
 
 
 def create(request, user, project, app_slug):
@@ -295,30 +166,7 @@ def create(request, user, project, app_slug):
     aset = app.settings
 
     # Set up form
-    dep_model, models = get_form_models(aset, project, [])
-    dep_apps, app_deps = get_form_apps(aset, project, app, request.user, [])
-    dep_appobj, appobjs = get_form_appobj(aset, project, [])
-
-    dep_vols = False
-    dep_flavor = False
-    if 'flavor' in aset:
-        dep_flavor = True
-        flavors = Flavor.objects.all()
-    
-    dep_environment = False
-    if 'environment' in aset:
-        dep_environment = True
-        environments = Environment.objects.all()
-
-
-    primitives = get_form_primitives(aset, project, [])
-    dep_permissions, form_permissions = get_form_permission(aset, project, [])
-
-    print("::::::::::::")
-
-
-
-
+    form = generate_form(aset, project, app, request.user, [])
 
     if request.method == "POST":
         app_name = request.POST.get('app_name')
@@ -402,48 +250,7 @@ def create(request, user, project, app_slug):
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
 
-
-    delete_resource.delay(ai_id)
-
-    # Check that the app instance actually exists.
-    # appinstance = []
-    # try:
-    #     appinstance = AppInstance.objects.get(pk=ai_id)
-    # except:
-    #     print("WARN: AppInstance doesn't exist.")
-
-    
-    # if appinstance and appinstance.state != "Deleted":
-    #     # The instance does exist.
-    #     # TODO: Check that the user has the permission required to delete it.
-
-    #     # Clean up in Keycloak.
-    #     kc = keylib.keycloak_init()
-    #     # TODO: Fix for multicluster setup
-    #     # TODO: We are assuming this URI here, but we should allow for other forms.
-    #     # The instance should store information about this.
-    #     URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
-        
-    #     keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-    #     keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id']) 
-    #     scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-        
-    #     if not res_json['success']:
-    #         print("Failed to get client scope.")
-    #     else:
-    #         keylib.keycloak_delete_client_scope(kc, scope_id)
-        
-    #     # Delete installed resources on the cluster.
-    #     release = appinstance.parameters['release']
-    #     namespace = appinstance.parameters['namespace']
-    #     delete_resource.delay({"release": release, "namespace": namespace})
-    #     # Delete the instance
-    #     # appinstance.permission.delete()
-    #     # appinstance.delete()
-
-        # print("BOTTOM")
-    
-        
+    delete_resource.delay(ai_id)        
 
     return HttpResponseRedirect(
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
