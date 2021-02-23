@@ -27,11 +27,9 @@ data:
     {{ end }}
     discovery-url: {{ .Values.gatekeeper.auth_endpoint }}/{{ .Values.gatekeeper.realm }}
     {{ if .Values.permissions.project }}
-    here: 2
     client-id: {{ .Values.project.client_id }}
     client-secret: {{ .Values.project.client_secret }}
     {{ else }}
-    here: 1
     client-id: {{ .Values.gatekeeper.client_id }}
     client-secret: {{ .Values.gatekeeper.client_secret }}
     {{ end }}

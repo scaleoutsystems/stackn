@@ -41,9 +41,7 @@ minio:
   access_key: minio
   secret_key: minio123
   bucket: dataset
-
-ingress:
-  secretName: prod-ingress
+  
 
 gatekeeper:
   realm: demo
@@ -54,3 +52,4 @@ gatekeeper:
 
 ingress:
   v1beta1: false
+  secretName: prod-ingress
