@@ -173,17 +173,17 @@ def usage(request, user, project):
     
 
     curr_timestamp = time.time()
-    points = ResourceData.objects.filter(time__gte=curr_timestamp-100*3600, appinstance__project__slug=project).order_by('time')
+    points = ResourceData.objects.filter(time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
     all_cpus = list()
     for point in points:
         all_cpus.append(point.cpu)
-    print("NUMBER OF POINTS")
-    print(len(all_cpus))
+    # print("NUMBER OF POINTS")
+    # print(len(all_cpus))
     # print("MAX:")
     # print(max(all_cpus))
-    print(all_cpus)
+    # print(all_cpus)
     total = points.annotate(timeP=F('time')).values('timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
-    print(total)
+    # print(total)
 
     labels = list(total.values_list('timeP'))
     labels = list(itertools.chain.from_iterable(labels))
@@ -200,13 +200,13 @@ def usage(request, user, project):
     total_mem = list(itertools.chain.from_iterable(total_mem))[::step]
     
     total_cpu= list(total.values_list('total_cpu'))
-    print("MAX CPU")
-    print(max(total_cpu))
+    # print("MAX CPU")
+    # print(max(total_cpu))
     total_cpu = list(itertools.chain.from_iterable(total_cpu))[::step]
-    print("MAX CPU")
-    print(max(total_cpu))
+    # print("MAX CPU")
+    # print(max(total_cpu))
     
-    print(len(total_cpu))
+    # print(len(total_cpu))
 
     return JsonResponse(data={
         'labels': x_data,
