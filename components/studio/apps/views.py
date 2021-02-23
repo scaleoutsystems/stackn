@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
-from .models import Apps, AppInstance, AppCategories, AppPermission
+from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Volume, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
@@ -77,7 +77,7 @@ def filtered(request, user, project, category):
     # template = 'index_apps.html'
     menu = dict()
     status_success = ['Running', 'Succeeded', 'Success']
-    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
+    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
 
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
@@ -360,9 +360,19 @@ def create(request, user, project, app_slug):
                                 info={},
                                 parameters=parameters_out,
                                 owner=request.user)
+            
+            
+            
             create_instance_params(instance, "create")
-            instance.state = "Waiting"
+            
+            # instance.state = "Waiting"
+            status = AppStatus(appinstance=instance)
+            status.status_type = 'Created'
+            status.info = instance.parameters['release']
             instance.save()
+            status.save()
+            
+            
             permission.appinstance = instance
             permission.save()
             instance.app_dependencies.set(app_deps)

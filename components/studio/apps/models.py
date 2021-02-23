@@ -65,11 +65,25 @@ class AppInstance(models.Model):
     deleted_on = models.DateTimeField(null=True)
 
     def __str__(self):
-        return str(self.name)+' ({})'.format(self.state)
+        return str(self.name)+' ({})-{}'.format(self.state, self.owner)
+
+class AppStatus(models.Model):
+    appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="status")
+    status_type = models.CharField(max_length=15, default="app_name")
+    time = models.DateTimeField(auto_now_add=True)
+    info = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        get_latest_by = 'time'
+
+    def __str__(self):
+        return str(self.appinstance.name)+"({})".format(self.time)
+    
+
 
 class ResourceData(models.Model):
     appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="resourcedata")
-    cpu = models.IntegerField('cpu')
-    mem = models.IntegerField('memory')
-    gpu = models.IntegerField('gpu')
-    time = models.IntegerField('timestamp')
+    cpu = models.IntegerField()
+    mem = models.IntegerField()
+    gpu = models.IntegerField()
+    time = models.IntegerField()
