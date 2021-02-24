@@ -12,6 +12,7 @@ import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus
+from projects.models import S3
 from studio.celery import app
 
 def get_URI(parameters):
@@ -57,6 +58,37 @@ def process_helm_result(results):
     #         if len(tmp) == 2:
     #             res_json[tmp[0]] = tmp[1]
     return stdout, stderr
+
+def post_create_hooks(instance):
+    # hard coded hooks for now, we can make this dynamic and loaded from the app specs
+    if instance.app.slug == 'minio':
+        # Create project S3 object
+        # TODO: If the instance is being updated, update the existing S3 object.
+        access_key = instance.parameters['credentials']['access_key']
+        secret_key = instance.parameters['credentials']['secret_key']
+        host = '{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain'])
+        try:
+            s3obj = instance.s3obj
+            s3obj.access_key = access_key
+            s3obj.secret_key = secret_key
+            s3obj.host = host
+        except:
+            s3obj = S3(name=instance.name,
+                        project=instance.project,
+                        host=host,
+                        access_key=access_key,
+                        secret_key=secret_key,
+                        app=instance,
+                        owner=instance.owner)
+        s3obj.save()
+
+def post_delete_hooks(instance):
+    if instance.app.slug == 'minio':
+        try:
+            s3obj = instance.s3obj
+            s3obj.delete()
+        except:
+            print("S3 object not connected to a Minio App")
 
 @shared_task
 @transaction.atomic
@@ -142,6 +174,7 @@ def deploy_resource(instance_pk, action='create'):
         instance.info["helm"] = helm_info
         instance.save()
         status.save()
+        post_create_hooks(instance)
 
 
 @shared_task
@@ -186,6 +219,7 @@ def delete_resource(pk):
         status = AppStatus(appinstance=appinstance)
         status.status_type = "Terminated"
         status.save()
+        post_delete_hooks(appinstance)
     else:
         status = AppStatus(appinstance=appinstance)
         status.status_type = "FailedToDelete"
