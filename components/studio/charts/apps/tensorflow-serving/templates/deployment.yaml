@@ -59,7 +59,7 @@ spec:
         - name: AWS_REGION
           value: us-east-1
         - name: S3_ENDPOINT
-          value: http://{{ .Values.project.slug }}-minio:9000
+          value: {{ .Values.model.url }}
         - name: STACKN_MODEL_BUCKET
           value: {{ .Values.model.bucket }}
         - name: STACKN_MODEL_FILE

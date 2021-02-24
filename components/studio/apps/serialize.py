@@ -29,9 +29,9 @@ def serialize_model(form_selection):
                 "version": obj[0].version,
                 "release_type": obj[0].release_type,
                 "description": obj[0].description,
-                "url": "https://minio-"+obj[0].project.slug+'.'+settings.DOMAIN,
-                "access_key": keys['project_key'],
-                "secret_key": keys['project_secret'],
+                "url": "https://{}".format(obj[0].s3.host),
+                "access_key": obj[0].s3.access_key,
+                "secret_key": obj[0].s3.secret_key,
                 "bucket": "models",
                 "obj": obj[0].uid
             }
