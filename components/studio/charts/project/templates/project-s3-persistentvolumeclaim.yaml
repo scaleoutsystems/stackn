@@ -1,14 +1,14 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  creationTimestamp: null
-  labels:
-    io.kompose.service: {{ .Release.Name }}-minio-data
-  name: {{ .Release.Name }}-minio-data
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.minio.volume.size }}
-status: {}
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   creationTimestamp: null
+#   labels:
+#     io.kompose.service: {{ .Release.Name }}-minio-data
+#   name: {{ .Release.Name }}-minio-data
+# spec:
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: {{ .Values.minio.volume.size }}
+# status: {}

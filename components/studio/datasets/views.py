@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from projects.models import Project
 from studio.minio import MinioRepository
+from minio import Minio
 from django.conf import settings as sett
 from projects.helpers import get_minio_keys
 from .forms import DatasheetForm
@@ -14,16 +15,21 @@ def page(request, user, project):
     project = Project.objects.get(slug=project)
     url_domain = sett.DOMAIN
 
-    minio_keys = get_minio_keys(project)
-    decrypted_key = minio_keys['project_key']
-    decrypted_secret = minio_keys['project_secret']
+    # minio_keys = get_minio_keys(project)
+    # decrypted_key = minio_keys['project_key']
+    # decrypted_secret = minio_keys['project_secret']
 
     datasets = []
     try:
-        minio_repository = MinioRepository('{}-minio:9000'.format(project.slug), decrypted_key,
-                                           decrypted_secret)
-
-        objects = minio_repository.client.list_objects_v2('dataset', recursive=True)
+        host = project.s3storage.host
+        access_key = project.s3storage.access_key
+        secret_key = project.s3storage.secret_key
+        print(host)
+        print(access_key)
+        print(secret_key)
+        minio_repository = Minio(host.strip('/'), access_key, secret_key)
+        print(minio_repository)
+        objects = minio_repository.list_objects('dataset', recursive=True)
         for obj in objects:
             datasets.append({'name': obj.object_name,
                              'datasheet': 'datasheet',

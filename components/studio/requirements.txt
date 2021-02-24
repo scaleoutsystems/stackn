@@ -92,3 +92,4 @@ flatten_json
 watchdog
 argh
 django-celery-beat
+django-cryptography

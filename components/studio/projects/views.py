@@ -15,7 +15,8 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
-from .models import Project
+from .models import Project, S3
+from apps.models import AppInstance
 from apps.models import Apps
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
@@ -67,9 +68,11 @@ def settings(request, user, project_slug):
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.all()
 
-    minio_keys = get_minio_keys(project)
-    decrypted_key = minio_keys['project_key']
-    decrypted_secret = minio_keys['project_secret']
+    s3instances = S3.objects.filter(project=project)
+
+    # minio_keys = get_minio_keys(project)
+    # decrypted_key = minio_keys['project_key']
+    # decrypted_secret = minio_keys['project_secret']
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -107,6 +110,21 @@ def change_description(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
+
+@login_required
+def set_s3storage(request, user, project_slug):
+    # TODO: Ensure that the user has the correct permissions to set this specific
+    # s3 object to storage in this project (need to check that the user has access to the
+    # project as well.)
+    if request.method == 'POST':
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('s3storage')
+        print(pk)
+        s3obj = S3.objects.get(pk=pk)
+        project.s3storage = s3obj
+        project.save()
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
 def grant_access_to_project(request, user, project_slug):

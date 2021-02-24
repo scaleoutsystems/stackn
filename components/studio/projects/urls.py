@@ -11,6 +11,7 @@ urlpatterns = [
     path('<user>/<project_slug>/environments/create', views.create_environment, name='create_environment'),
     path('<user>/<project_slug>/settings', views.settings, name='settings'),
     path('<user>/<project_slug>/delete', views.delete, name='delete'),
+    path('<user>/<project_slug>/setS3storage', views.set_s3storage, name='set_s3storage'),
     path('<user>/<project_slug>/details/change', views.change_description, name='change_description'),
     path('<user>/<project_slug>/project/publish', views.publish_project, name='publish_project'),
     path('<user>/<project_slug>/project/access/grant', views.grant_access_to_project, name='grant_access'),
