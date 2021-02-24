@@ -158,10 +158,10 @@ def pre_delete_model(sender, instance, using, **kwargs):
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)
     try:
-        client = Minio(minio_url,
-                      access_key=minio_keys['project_key'],
-                      secret_key=minio_keys['project_secret'],
-                      secure=True)
+        client = Minio(instance.project.s3storage.host,
+                      access_key=instance.project.s3storage.access_key,
+                      secret_key=instance.project.s3storage.secret_key,
+                      secure=settings.OIDC_VERIFY_SSL)
         client.remove_object('models', instance.uid)
     except:
         print('Failed to delete model object {} from minio store.'.format(instance.uid))
