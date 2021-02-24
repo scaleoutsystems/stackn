@@ -105,6 +105,10 @@ def serialize_primitives(form_selection):
     for key in keys:
         if key not in key_words and 'app:' not in key:
             parameters[key] = form_selection[key].replace('\r\n', '\n')
+            if parameters[key] == "False":
+                parameters[key] = False
+            elif parameters[key] == "True":
+                parameters[key] = True
     print(parameters)
     return flatten_json.unflatten(parameters, '.')
 

@@ -58,6 +58,8 @@ def create_instance_params(instance, action="create"):
     }
 
     instance.parameters.update(parameters)
+    if 'project' not in instance.parameters:
+        instance.parameters['project'] = dict()
     instance.parameters['project'].update({'name': instance.project.name, 'slug': instance.project.slug})
 
 

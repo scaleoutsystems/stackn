@@ -266,6 +266,8 @@ def check_status():
             for container in item['status']['containerStatuses']:
                 if container['ready']:
                     num_cont_ready += 1
+        if phase=="Running" and num_cont_ready != num_containers:
+            phase = "Waiting"
         app_statuses[release] = {
             "phase": phase,
             "num_cont": num_containers,
