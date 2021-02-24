@@ -38,10 +38,10 @@ def create_instance_params(instance, action="create"):
         "chart": str(instance.app.chart),
         "namespace": NAMESPACE,
         "appname": RELEASE_NAME,
-        "project": {
-            "name": instance.project.name,
-            "slug": instance.project.slug
-        },
+        # "project": {
+        #     "name": instance.project.name,
+        #     "slug": instance.project.slug
+        # },
         "global": {
             "domain": HOST,
         },
@@ -58,6 +58,7 @@ def create_instance_params(instance, action="create"):
     }
 
     instance.parameters.update(parameters)
+    instance.parameters['project'].update({'name': instance.project.name, 'slug': instance.project.slug})
 
 
     # Add field for table.    
