@@ -41,35 +41,6 @@ def list(request, user, project):
 
 
 @login_required
-def create(request, user, project):
-    template = 'models_upload.html'
-
-    project = Project.objects.filter(slug=project).first()
-    uid = uuid.uuid4()
-
-    if request.method == 'POST':
-        obj = None
-
-        form = ModelForm(request.POST, request.FILES)
-        if form.is_valid():
-            obj = form.save()
-
-            l = ProjectLog(project=project, module='MO', headline='Model',
-                           description='A new Model {name} has been added'.format(name=obj.name))
-            l.save()
-
-            url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
-        else:
-            url = '/{}/{}/models/'.format(user, project.slug)
-
-        return HttpResponseRedirect(url)
-    else:
-        form = ModelForm()
-
-        return render(request, template, locals())
-
-
-@login_required
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
