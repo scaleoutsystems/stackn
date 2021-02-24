@@ -193,7 +193,9 @@ def create(request, user, project, app_slug):
             client_secret, res_json = keylib.keycloak_get_client_secret_by_id(kc, client_id)
             if not 'project' in parameters_out:
                 parameters_out['project'] = dict()
-            parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
+            parameters_out['project']['client_id'] = client_id
+            parameters_out['project']['client_secret'] = client_secret
+            # parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
             print(parameters_out)
             permission.projects.set([project])
         elif parameters_out['permissions']['private']:

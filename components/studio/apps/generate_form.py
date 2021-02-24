@@ -45,7 +45,10 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             app_obj = Apps.objects.get(name=app_name)
 
             # TODO: Only get app instances that we have permission to list.
-            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), project=project, app=app_obj)
+            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+                                                      ~Q(state="Deleted"),
+                                                      project=project,
+                                                      app=app_obj)
             # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
