@@ -56,7 +56,8 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
                           release_type=release_type,
                           description=description,
                           uid=model_uid,
-                          project=project)
+                          project=project,
+                          s3=project.s3storage)
         new_model.save()
         return HttpResponse('ok', 200)
 
