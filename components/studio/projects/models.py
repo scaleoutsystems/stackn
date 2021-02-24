@@ -8,9 +8,13 @@ from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 import string
 import random
+from django_cryptography.fields import encrypt
 
 from deployments.models import HelmResource
 
+# -------------------------------------------
+# --- The volume model should be deleted. ---
+# -------------------------------------------
 class Volume(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, blank=True, null=True)
@@ -50,6 +54,11 @@ def pre_save_volume(sender, instance, using, **kwargs):
     l = ProjectLog(project=Project.objects.get(slug=instance.project_slug), module='PR', headline='Volume',
                                description='A new volume {name} has been created'.format(name=instance.name))
     l.save()
+# -------------------------------------------
+# -------------------------------------------
+# -------------------------------------------
+
+
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512)
@@ -118,6 +127,19 @@ class ProjectManager(models.Manager):
 
         return project
 
+class S3(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='s3_project')
+    host = models.CharField(max_length=512)
+    access_key = models.CharField(max_length=512)
+    secret_key = models.CharField(max_length=512)
+    region = models.CharField(max_length=512, blank=True, default="")
+    app = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True, related_name="s3obj")
+    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.project.slug)
 
 class Project(models.Model):
     objects = ProjectManager()
@@ -127,10 +149,16 @@ class Project(models.Model):
     slug = models.CharField(max_length=512, unique=True)
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='owner')
     authorized = models.ManyToManyField(User, blank=True)
-    image = models.CharField(max_length=2048, blank=True, null=True)
 
+    s3storage = models.OneToOneField(S3, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_s3')
+
+
+
+    # These fields should be removed.
+    image = models.CharField(max_length=2048, blank=True, null=True)
     project_key = models.CharField(max_length=512)
     project_secret = models.CharField(max_length=512)
+    # ----------------------
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
