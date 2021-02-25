@@ -221,18 +221,14 @@ def details_public(request, id):
 
 @login_required
 def delete(request, user, project, id):
-    template = 'model_confirm_delete.html'
 
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
-    if request.method == "POST":
-        l = ProjectLog(project=project, module='MO', headline='Model',
-                       description='Model {name} has been removed'.format(name=model.name))
-        l.save()
+    l = ProjectLog(project=project, module='MO', headline='Model',
+                    description='Model {name} has been removed'.format(name=model.name))
+    l.save()
 
-        model.delete()
+    model.delete()
 
-        return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
-
-    return render(request, template, locals())
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
