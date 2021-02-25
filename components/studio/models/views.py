@@ -28,13 +28,8 @@ def index(request):
 @login_required
 def list(request, user, project):
     template = 'models_list.html'
-    project = Project.objects.filter(slug=project).first()
-
+    project = Project.objects.get(slug=project)
     models = Model.objects.filter(project=project)
-    
-    # model_logs = ModelLog.objects.all()
-
-    # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
