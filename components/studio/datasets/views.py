@@ -5,7 +5,6 @@ from projects.models import Project
 from studio.minio import MinioRepository, ResponseError
 from django.conf import settings as sett
 from projects.helpers import get_minio_keys
-from .forms import DatasheetForm
 
 
 @login_required
