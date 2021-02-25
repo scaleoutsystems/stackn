@@ -1,53 +1,95 @@
 {% extends 'baseproject.html' %}
 
 {% block content %}
-<div class="col-md-9">
-    <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
-        <ol class="breadcrumb project-breadcrumb-ol">
-            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-        </ol>
-    </nav>
 
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Metrics</h2>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'reports:add' request.user project.slug %}">
-                <button id="create" class="btn btn-large btn-primary">Add new</button>
-            </a>
+<a href="{% url 'reports:add' request.user project.slug %}" class="btn btn-square btn-primary float-end mt-n1"><i class="fas fa-plus"></i> New config</a>
+<h1 class="h3 mb-3">Metrics</h1>
+
+<div class="row">
+    <div class="card flex-fill">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Metrics</h5>
         </div>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <tr>
-                <th scope="col" style="width: 5%;text-align: center;">#</th>
-                <th scope="col" style="width: 35%;text-align: left;">Description</th>
-                <th scope="col" style="width: 20%;text-align: left;">Generator File</th>
-                <th scope="col" style="width: 20%;text-align: left;">Custom Visualizer</th>
-                <th scope="col" style="width: 10%;text-align: left;">Uploaded</th>
-                <th scope="col" style="width: 10%;text-align: center;">Actions</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            {% for report in reports %}
-            <tr>
-                <td style="text-align: center;">{{ report.id }}</td>
-                <td>{{ report.description }}</td>
-                <td>{{ report.generator }}</td>
-                <td>{{ report.visualiser }}</td>
-                <td>{{ report.created_at }}</td>
-                <td style="text-align: center;">
-                    <a href="{% url 'reports:delete_generator' request.user project.slug report.id %}">
-                        <button id="delete" class="btn btn-sm btn-outline-warning">Delete</button>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        {% if reports %}
+        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="row">
+                <div class="col-sm-12 col-md-6"></div>
+                <div class="col-sm-12 col-md-6"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                        role="grid" aria-describedby="datatables-dashboard-projects_info">
+                        <thead>
+                            <tr role="row">
+                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                    aria-label="ID: activate to sort column descending">ID</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Description: activate to sort column ascending">Description</th>
+                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Generator: activate to sort column ascending">Generator</th>
+                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-label="Visualizer: activate to sort column ascending">
+                                    Visualizer</th>
+                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                    rowspan="1" colspan="1" aria-label="Uploaded: activate to sort column ascending">
+                                    Uploaded</th>
+                                <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Actions: activate to sort column ascending">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr role="row" class="odd">
+                                <td class="sorting_1">{{ report.id }}</td>
+                                <td class="d-none d-xl-table-cell">{{ report.description }}</td>
+                                <td class="d-none d-xl-table-cell">{{ report.generator }}</td>
+                                <td>{{ report.visualiser }}</td>
+                                <td class="d-none d-xl-table-cell">{{ report.created_at }}</td>
+                                <td class="d-none d-md-table-cell">
+                                    <button type="button" class="btn btn-square btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#delModal{{ report.id }}">
+                                        Remove
+                                    </button>
+                                    <div class="modal fade" id="#delModal{{ report.id }}" tabindex="-1" role="dialog"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Remove config</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body m-3">
+                                                    <p class="mb-0">Are you sure you want to remove metrics configuration with id 
+                                                        {{ report.id }}?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-square btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                    <a
+                                                        href="{% url 'reports:delete_generator' request.user project.slug report.id %}">
+                                                        <button type="button" class="btn btn-square btn-danger">Confirm</button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p style="margin-left: 25px;">No Metrics configurations have been added to this project yet.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
