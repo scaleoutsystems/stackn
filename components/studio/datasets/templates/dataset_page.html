@@ -38,7 +38,6 @@
                         <tr>
                             <th>Location</th>
                             <th>Name</th>
-                            <th>Datasheet</th>
                             <th>Size</th>
                             <th>Last Modified</th>
                         </tr>
@@ -48,9 +47,6 @@
                         <tr>
                             <td>{{ entry.location }}</td>
                             <td>{{ entry.name }}</td>
-                            <td><a href="{% url 'datasets:datasheet' request.user project.slug 1 %}"
-                                    class="btn btn-square btn-primary">{{ entry.datasheet }}</a>
-                            </td>
                             <td>{{ entry.size }} MB</td>
                             <td>{{ entry.modified }}</td>
                         </tr>

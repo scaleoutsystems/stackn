@@ -5,4 +5,4 @@ app_name = 'datasets'
 
 urlpatterns = [
     path('', views.page, name='page'),
-    path('<int:page_index>/datasheet', views.datasheet, name='datasheet'),]
+]

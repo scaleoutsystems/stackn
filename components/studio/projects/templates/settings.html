@@ -110,7 +110,7 @@
                         </form>
                         {% endif %}
                         {% if project.authorized.all %}
-                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" method="post">
+                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" method="post" style="margin-top: 24px;">
                             {% csrf_token %}
 
                             <div class="mb-3">

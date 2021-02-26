@@ -1,64 +1,83 @@
 {% extends 'baseproject.html' %}
 
 {% block content %}
-<div class="col-md-9">
-    <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
-        <ol class="breadcrumb project-breadcrumb-ol">
-            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-        </ol>
-    </nav>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Metrics</h2>
-    </div>
-    <div class="col-md-6" style="padding: 15px;">
-        <p>Type in a description for your new configuration so that it's easier for you to distinguish them.</p>
-        <p>Choose a .py file for a generator. This is simply a file containing the algorithm for the metrics
-            generation. In the drop-down menu below, you will see all the files available under <b>reports</b> folder
-            in your lab session.
-        </p>
-        <p>
-            We support different visualization methods. If you have a .py file that plots your metrics,
-            simply select it from the drop-down menu below. It will, as well, list all the files available under the
-             <b>reports</b> folder in your lab session.
-        </p>
-    </div>
-    <div style="min-height:400px;">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
 
-            <input type="hidden" name="project" value="{{ project.id }}" id="id_project">
-            <div class="form-group">
-                <label for="id_description">
-                    Description:
-                </label>
-                <textarea class="form-control col-md-6" name="description" cols="40" rows="10"
-                          id="id_description"></textarea>
+<h1 class="h3 mb-3">New config</h1>
+
+<div class="col-12">
+    <div class="tab tab-vertical">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" href="#vertical-icon-tab-1" data-bs-toggle="tab" role="tab"
+                    aria-selected="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-home align-middle">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#vertical-icon-tab-2" data-bs-toggle="tab" role="tab" aria-selected="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-settings align-middle">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="vertical-icon-tab-1" role="tabpanel">
+                <h4 class="tab-title">General</h4>
+                <p>Type in a description for your new configuration so that it's easier for you to distinguish them.</p>
+                <p>Choose a .py file for a generator. This is simply a file containing the algorithm for the metrics
+                    generation. In the drop-down menu below, you will see all the files available under <b>reports</b>
+                    folder
+                    in your lab session.
+                </p>
+                <p>
+                    We support different visualization methods. If you have a .py file that plots your metrics,
+                    simply select it from the drop-down menu below. It will, as well, list all the files available under
+                    the
+                    <b>reports</b> folder in your lab session.
+                </p>
             </div>
-            <div class="form-group">
-                <label for="id_generator">
-                    Generator file:
-                </label>
-                <select class="form-control col-md-6" name="generator" required="" id="id_generator">
-                    <option>--</option>
-                    {% for file in report_generators %}
-                    <option value="{{ file }}">{{ file }}</option>
-                    {% endfor %}
-                </select>
+            <div class="tab-pane" id="vertical-icon-tab-2" role="tabpanel">
+                <h4 class="tab-title">New configuration</h4>
+                <form method="post" enctype="multipart/form-data" style="margin-top: 16px;">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_description">Description</label>
+                        <textarea class="form-control" rows="10" id="id_description" name="description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="id_generator">Generator file</label>
+                        <select class="form-control" name="generator" id="id_generator" required>
+                            <option>--</option>
+                            {% for file in report_generators %}
+                            <option value="{{ file }}">{{ file }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="id_visualiser">Visualizer file</label>
+                        <select class="form-control" name="visualiser" id="id_visualiser" required>
+                            <option>--</option>
+                            {% for file in report_generators %}
+                            <option value="{{ file }}">{{ file }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-square btn-primary">Add</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="id_visualiser">
-                    Visualiser file:
-                </label>
-                <select class="form-control col-md-6" name="visualiser" required="" id="id_visualiser">
-                    <option>--</option>
-                    {% for file in report_generators %}
-                    <option value="{{ file }}">{{ file }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Add</button>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
