@@ -1,1 +1,637 @@
-[{"model": "apps.apps", "pk": 1, "fields": {"name": "VSCode", "slug": "vscode", "category": "misc", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Persistent Volume\":\"many\"\r\n    }\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/vscode", "updated_on": "2021-02-15T12:34:31.032Z", "created_on": "2021-02-09T10:18:04.425Z"}}, {"model": "apps.apps", "pk": 2, "fields": {"name": "Ubuntu Tensorflow", "slug": "ubuntu-tensorflow", "category": "compute", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Persistent Volume\":\"many\"\r\n    },\r\n    \"resources\": {\r\n        \"requests.cpu\": {\"type\": \"string\", \"default\": \"500m\", \"title\": \"Requests CPU\"},\r\n        \"requests.mem\": {\"type\": \"string\", \"default\": \"1Gi\", \"title\": \"Requests Memory\"},\r\n        \"limits.cpu\": {\"type\": \"string\", \"default\": \"1000m\", \"title\": \"Limit CPU\"},\r\n        \"limits.mem\": {\"type\": \"string\", \"default\": \"4Gi\", \"title\": \"Limit Memory\"}\r\n    }\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": "wetty/", "chart": "apps/wetty", "updated_on": "2021-02-15T12:34:22.434Z", "created_on": "2021-02-09T10:18:38.278Z"}}, {"model": "apps.apps", "pk": 3, "fields": {"name": "Prostudio", "slug": "prostudio", "category": "misc", "description": "", "settings": "{}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/prostudio", "updated_on": "2021-02-15T12:34:15.149Z", "created_on": "2021-02-09T10:18:54.522Z"}}, {"model": "apps.apps", "pk": 4, "fields": {"name": "Minio", "slug": "minio", "category": "store", "description": "Minio is an open-source S3-compatible object store.", "settings": "{\r\n    \"apps\":{\r\n        \"Persistent Volume\":\"one\"\r\n     },\r\n    \"credentials\": {\r\n        \"access_key\": {\"type\": \"string\", \"default\":\"accesskey\", \"title\": \"Access Key\"},\r\n        \"secret_key\": {\"type\": \"string\", \"default\": \"secretkey123\", \"title\": \"Secret Key\"}\r\n    }\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/minio", "updated_on": "2021-02-15T12:34:05.697Z", "created_on": "2021-02-09T15:58:00.232Z"}}, {"model": "apps.apps", "pk": 5, "fields": {"name": "Dask Cluster", "slug": "dask-cluster", "category": "compute", "description": "", "settings": "{\r\n    \"workers\": {\r\n        \"replicas\": {\"type\": \"number\", \"title\": \"Replicas\", \"default\":\"3\"},\r\n        \"requests.cpu\": {\"type\": \"string\", \"default\": \"100m\", \"title\": \"Requests CPU\"},\r\n        \"requests.mem\": {\"type\": \"string\", \"default\": \"0.5Gi\", \"title\": \"Requests Memory\"},\r\n        \"limits.cpu\": {\"type\": \"string\", \"default\": \"1000m\", \"title\": \"Limit CPU\"},\r\n        \"limits.mem\": {\"type\": \"string\", \"default\": \"4Gi\", \"title\": \"Limit Memory\"}\r\n    },\r\n    \"scheduler\": {\r\n        \"requests.cpu\": {\"type\": \"string\", \"default\": \"100m\", \"title\": \"Requests CPU\"},\r\n        \"requests.mem\": {\"type\": \"string\", \"default\": \"0.5Gi\", \"title\": \"Requests Memory\"},\r\n        \"limits.cpu\": {\"type\": \"string\", \"default\": \"1000m\", \"title\": \"Limit CPU\"},\r\n        \"limits.mem\": {\"type\": \"string\", \"default\": \"1Gi\", \"title\": \"Limit Memory\"}\r\n    },\r\n    \"logs\":[\"scheduler\",\"worker\"]\r\n}", "exposed": "internal", "schema": "tcp://", "port": "8786", "path": null, "chart": "apps/dask", "updated_on": "2021-02-15T12:34:00.564Z", "created_on": "2021-02-09T18:46:14.667Z"}}, {"model": "apps.apps", "pk": 6, "fields": {"name": "MongoDB", "slug": "mongodb", "category": "store", "description": "", "settings": "{\r\n    \"apps\":{\r\n        \"Persistent Volume\":\"one\"\r\n     },\r\n    \"credentials\": {\r\n    \"username\": {\"type\": \"string\", \"default\":\"admin\",\"title\":\"Username\"},\r\n    \"password\": {\"type\": \"string\", \"default\":\"password\",\"title\":\"Password\"},\r\n    }\r\n}", "exposed": "internal", "schema": "mongodb://", "port": "27017", "path": null, "chart": "apps/mongodb", "updated_on": "2021-02-15T12:33:48.489Z", "created_on": "2021-02-09T20:24:33.590Z"}}, {"model": "apps.apps", "pk": 7, "fields": {"name": "Tetris", "slug": "tetris", "category": "misc", "description": "", "settings": "{}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/tetris", "updated_on": "2021-02-15T12:33:43.087Z", "created_on": "2021-02-10T08:40:59.112Z"}}, {"model": "apps.apps", "pk": 8, "fields": {"name": "Mongo Express", "slug": "mongo-express", "category": "store", "description": "", "settings": "{\r\n\"apps\":{\r\n   \"MongoDB\":\"one\"\r\n}\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/mongo-express", "updated_on": "2021-02-15T12:33:32.468Z", "created_on": "2021-02-10T10:54:43.947Z"}}, {"model": "apps.apps", "pk": 9, "fields": {"name": "Pacman", "slug": "pacman", "category": "misc", "description": "", "settings": "{}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/pacman", "updated_on": "2021-02-15T12:33:26.462Z", "created_on": "2021-02-10T20:17:02.133Z"}}, {"model": "apps.apps", "pk": 10, "fields": {"name": "Python Model Deployment", "slug": "fastapi-model-deploy", "category": "serve", "description": "Deploy a Python model with FastAPI.", "settings": "{\r\n    \"model\":\"one\",\r\n    \"model_card\": {\r\n        \"enabled\": {\"type\":\"boolean\", \"default\":\"False\", \"title\":\"Enabled\"},\r\n        \"path\": {\"type\":\"string\", \"default\":\"model-card\", \"title\": \"Path to model card\"}\r\n     },\r\n     \"resources\": {\r\n        \"requests.cpu\": {\"type\": \"string\", \"default\": \"200m\", \"title\": \"Requests CPU\"},\r\n         \"requests.memory\": {\"type\": \"string\", \"default\": \"0.5Gi\", \"title\": \"Request Mem\"},\r\n         \"limits.cpu\": {\"type\": \"string\", \"default\": \"400m\", \"title\": \"Limits CPU\"},\r\n         \"limits.memory\": {\"type\": \"string\", \"default\": \"1Gi\", \"title\": \"Limits Mem\"}\r\n     },\r\n    \"logs\": [\"serve\", \"gatekeeper\"]\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": "docs", "chart": "apps/fastapi-serve", "updated_on": "2021-02-15T12:33:21.931Z", "created_on": "2021-02-12T14:04:52.206Z"}}, {"model": "apps.apps", "pk": 11, "fields": {"name": "Persistent Volume", "slug": "volume", "category": "store", "description": "", "settings": "{\r\n    \"volume\": {\r\n        \"size\": {\"type\":\"string\", \"default\":\"1Gi\", \"title\":\"Size\"}\r\n    }\r\n}", "exposed": "internal", "schema": "/", "port": "-1", "path": null, "chart": "apps/volume", "updated_on": "2021-02-15T12:33:14.279Z", "created_on": "2021-02-13T19:19:04.121Z"}}, {"model": "apps.apps", "pk": 12, "fields": {"name": "Jupyter Lab", "slug": "jupyter-lab", "category": "compute", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Persistent Volume\":\"many\"\r\n    },\r\n    \"flavor\": \"one\",\r\n    \"environment\": \"one\"\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/lab", "updated_on": "2021-02-15T12:33:08.230Z", "created_on": "2021-02-13T20:32:35.144Z"}}, {"model": "apps.apps", "pk": 13, "fields": {"name": "Jobs", "slug": "jobs", "category": "compute", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Persistent Volume\":\"many\"\r\n    },\r\n    \"flavor\": \"one\",\r\n    \"environment\": \"one\",\r\n    \"job\": {\r\n        \"command\": {\"type\":\"string\", \"default\": \"\", \"title\":\"Command\"},\r\n        \"schedule\": {\"type\":\"string\", \"default\": \"\", \"title\":\"Schedule\"}\r\n    },\r\n    \"logs\": [\"cronjob\"]\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/job", "updated_on": "2021-02-15T12:33:02.670Z", "created_on": "2021-02-14T09:10:55.058Z"}}, {"model": "apps.apps", "pk": 18, "fields": {"name": "Docker Registry", "slug": "docker_registry", "category": "store", "description": "", "settings": "{\r\n    \"apps\":{\r\n        \"Persistent Volume\":\"one\"\r\n     },\r\n    \"credentials\": {\r\n    \"username\": {\"type\": \"string\", \"default\":\"admin\",\"title\":\"Username\"},\r\n    \"password\": {\"type\": \"string\", \"default\":\"password\",\"title\":\"Password\"},\r\n    },\r\n   \"logs\":[\"registry\"]\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": "registry/", "chart": "apps/docker-registry", "updated_on": "2021-02-15T22:28:42.818Z", "created_on": "2021-02-15T13:01:43.029Z"}}, {"model": "apps.apps", "pk": 19, "fields": {"name": "Build Model Image", "slug": "build-model", "category": "serve", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Docker Registry\":\"one\"\r\n    },\r\n    \"model\": \"one\",\r\n    \"container\": {\r\n       \"name\": {\"type\":\"string\",\"title\":\"Name\",\"default\":\"\"},\r\n       \"tag\": {\"type\":\"string\",\"title\":\"Tag\",\"default\":\"\"}\r\n    },\r\n    \"logs\": [\"kaniko\"]\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/fastapi-push-model", "updated_on": "2021-02-15T19:00:23.204Z", "created_on": "2021-02-15T14:59:21.234Z"}}, {"model": "apps.apps", "pk": 20, "fields": {"name": "RStudio", "slug": "rstudio", "category": "compute", "description": "", "settings": "{\r\n    \"apps\": {\r\n        \"Persistent Volume\":\"many\"\r\n    },\r\n    \"flavor\": \"one\"\r\n}", "exposed": "external", "schema": "https://", "port": "-1", "path": null, "chart": "apps/rstudio", "updated_on": "2021-02-16T10:48:57.949Z", "created_on": "2021-02-16T10:48:57.949Z"}}]
+[
+{
+  "model": "apps.apps",
+  "pk": 23,
+  "fields": {
+    "name": "Dask Cluster",
+    "slug": "dask-cluster",
+    "category": "compute",
+    "settings": {
+      "workers": {
+        "replicas": {
+          "type": "number",
+          "title": "Replicas",
+          "default": "3"
+        },
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "4Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "100m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "0.5Gi"
+        }
+      },
+      "scheduler": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "1Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "100m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "0.5Gi"
+        }
+      }
+    },
+    "chart": "apps/dask",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:33:18.241Z",
+    "created_on": "2021-02-19T21:32:55.588Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 24,
+  "fields": {
+    "name": "Docker Registry",
+    "slug": "docker_registry",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "default": "password"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": "admin"
+        }
+      }
+    },
+    "chart": "apps/docker-registry",
+    "description": "",
+    "table_field": "Registry URL: https://{{ release }}.{{ global.domain }}, <a href=\"https://{{ release }}.{{ global.domain }}/registry/\">View</a>",
+    "updated_on": "2021-02-20T11:12:31.073Z",
+    "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 25,
+  "fields": {
+    "name": "Environment",
+    "slug": "environment",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Docker Registry": "one"
+      },
+      "logs": [
+        "kaniko"
+      ],
+      "image": {
+        "dockerfile": {
+          "type": "textfield",
+          "title": "Dockerfile",
+          "default": "FROM jupyter/minimal-notebook:latest"
+        }
+      },
+      "appobj": {
+        "type": "",
+        "title": "Applies to app:"
+      },
+      "container": {
+        "tag": {
+          "type": "string",
+          "title": "Tag",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "default": ""
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/environment",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:35:14.408Z",
+    "created_on": "2021-02-19T21:35:14.408Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 26,
+  "fields": {
+    "name": "Build Model Image",
+    "slug": "build-model",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Docker Registry": "one"
+      },
+      "logs": [
+        "kaniko"
+      ],
+      "model": "one",
+      "container": {
+        "tag": {
+          "type": "string",
+          "title": "Tag",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/fastapi-push-model",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:36:23.182Z",
+    "created_on": "2021-02-19T21:35:53.056Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 27,
+  "fields": {
+    "name": "Python Model Deployment",
+    "slug": "fastapi-serve",
+    "category": "serve",
+    "settings": {
+      "model": "one",
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limits CPU",
+          "default": "400m"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "200m"
+        },
+        "limits.memory": {
+          "type": "string",
+          "title": "Limits Mem",
+          "default": "1Gi"
+        },
+        "requests.memory": {
+          "type": "string",
+          "title": "Request Mem",
+          "default": "0.5Gi"
+        }
+      },
+      "model_card": {
+        "path": {
+          "type": "string",
+          "title": "Path to model card",
+          "default": "model-card"
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled",
+          "default": "False"
+        }
+      }
+    },
+    "chart": "apps/fastapi-serve",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:37:13.384Z",
+    "created_on": "2021-02-19T21:37:13.384Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 28,
+  "fields": {
+    "name": "Jobs",
+    "slug": "jobs",
+    "category": "compute",
+    "settings": {
+      "job": {
+        "command": {
+          "type": "string",
+          "title": "Command",
+          "default": ""
+        },
+        "schedule": {
+          "type": "string",
+          "title": "Schedule",
+          "default": ""
+        }
+      },
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "logs": [
+        "cronjob"
+      ],
+      "flavor": "one",
+      "environment": "one"
+    },
+    "chart": "apps/job",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-20T21:50:11.737Z",
+    "created_on": "2021-02-19T21:37:43.835Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 29,
+  "fields": {
+    "name": "Lab",
+    "slug": "lab",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Environment": "one",
+        "Persistent Volume": "many"
+      },
+      "flavor": "one",
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "true",
+          "option": "true"
+        },
+        "project": {
+          "value": "false",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/lab-test",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-23T09:40:30.675Z",
+    "created_on": "2021-02-19T21:38:15.625Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 30,
+  "fields": {
+    "name": "Minio",
+    "slug": "minio",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "access_key": {
+          "type": "string",
+          "title": "Access Key",
+          "default": "accesskey"
+        },
+        "secret_key": {
+          "type": "string",
+          "title": "Secret Key",
+          "default": "secretkey123"
+        }
+      }
+    },
+    "chart": "apps/minio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-21T12:30:30.471Z",
+    "created_on": "2021-02-19T21:38:39.532Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 31,
+  "fields": {
+    "name": "Mongo Express",
+    "slug": "mongo-express",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "MongoDB": "one"
+      }
+    },
+    "chart": "apps/mongo-express",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-25T12:59:16.994Z",
+    "created_on": "2021-02-19T21:39:01.597Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 32,
+  "fields": {
+    "name": "MongoDB",
+    "slug": "mongodb",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "default": "password"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": "admin"
+        }
+      }
+    },
+    "chart": "apps/mongodb",
+    "description": "",
+    "table_field": "mongodb://{{ release }}:27017",
+    "updated_on": "2021-02-25T13:18:26.150Z",
+    "created_on": "2021-02-19T21:39:36.578Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 33,
+  "fields": {
+    "name": "RStudio",
+    "slug": "rstudio",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "flavor": "one"
+    },
+    "chart": "apps/rstudio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-19T22:19:09.897Z",
+    "created_on": "2021-02-19T21:40:06.039Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 34,
+  "fields": {
+    "name": "Tensorflow Serving",
+    "slug": "tensorflow-serving",
+    "category": "serve",
+    "settings": {
+      "logs": [
+        "serve",
+        "gatekeeper"
+      ],
+      "model": "one",
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limits CPU",
+          "default": "400m"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "200m"
+        },
+        "limits.memory": {
+          "type": "string",
+          "title": "Limits Mem",
+          "default": "1Gi"
+        },
+        "requests.memory": {
+          "type": "string",
+          "title": "Request Mem",
+          "default": "0.5Gi"
+        }
+      },
+      "model_card": {
+        "path": {
+          "type": "string",
+          "title": "Path to model card",
+          "default": "model-card"
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled",
+          "default": "False"
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/tensorflow-serving",
+    "description": "",
+    "table_field": "http://{{ release }}.{{ global.domain }}/v1/models/models:predict",
+    "updated_on": "2021-02-25T19:30:33.026Z",
+    "created_on": "2021-02-19T21:40:28.051Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 35,
+  "fields": {
+    "name": "Ubuntu Tensorflow",
+    "slug": "ubuntu-tensorflow",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "4Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "500m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "1Gi"
+        }
+      }
+    },
+    "chart": "apps/wetty",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}/wetty/\">Open</a>",
+    "updated_on": "2021-02-19T22:20:50.471Z",
+    "created_on": "2021-02-19T21:40:50.169Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 36,
+  "fields": {
+    "name": "Persistent Volume",
+    "slug": "volume",
+    "category": "store",
+    "settings": {
+      "volume": {
+        "size": {
+          "type": "string",
+          "title": "Size",
+          "default": "1Gi"
+        }
+      }
+    },
+    "chart": "apps/volume",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:57:55.369Z",
+    "created_on": "2021-02-19T21:41:19.466Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 37,
+  "fields": {
+    "name": "VSCode",
+    "slug": "vscode",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      }
+    },
+    "chart": "apps/vscode",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-20T21:36:06.180Z",
+    "created_on": "2021-02-19T21:41:41.509Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 38,
+  "fields": {
+    "name": "Prostudio",
+    "slug": "prostudio",
+    "category": "misc",
+    "settings": {},
+    "chart": "apps/prostudio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-22T07:24:43.334Z",
+    "created_on": "2021-02-19T21:42:23.468Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 39,
+  "fields": {
+    "name": "Tetris",
+    "slug": "tetris",
+    "category": "misc",
+    "settings": {},
+    "chart": "apps/tetris",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-25T12:28:29.826Z",
+    "created_on": "2021-02-19T21:42:58.138Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 40,
+  "fields": {
+    "name": "Dash Deployment",
+    "slug": "dash-deployment",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "deployment": {
+        "debug": {
+          "type": "boolean",
+          "title": "Debug deployment",
+          "default": "False"
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/dash-app",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-24T16:18:22.637Z",
+    "created_on": "2021-02-24T15:19:46.048Z"
+  }
+}
+]

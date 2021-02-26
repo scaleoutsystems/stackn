@@ -94,7 +94,7 @@ def filtered(request, user, project, category):
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj)
+                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj, project=project)
     pk_list = ''
     for instance in appinstances:
         pk_list += str(instance.pk)+','
