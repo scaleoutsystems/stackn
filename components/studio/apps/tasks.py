@@ -140,6 +140,17 @@ def deploy_resource(instance_pk, action='create'):
             }
         }
         parameters.update(gatekeeper)
+
+
+        # For backwards-compatibility with old ingress spec:
+        print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
+        ingress = {
+            "ingress": {
+                "v1beta1": settings.INGRESS_V1BETA1
+            }
+        }
+
+
         instance.parameters = parameters
         instance.save()
         # Keycloak DONE.
