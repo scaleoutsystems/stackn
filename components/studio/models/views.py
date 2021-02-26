@@ -28,13 +28,8 @@ def index(request):
 @login_required
 def list(request, user, project):
     template = 'models_list.html'
-    project = Project.objects.filter(slug=project).first()
-
+    project = Project.objects.get(slug=project)
     models = Model.objects.filter(project=project)
-    
-    # model_logs = ModelLog.objects.all()
-
-    # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
@@ -226,18 +221,14 @@ def details_public(request, id):
 
 @login_required
 def delete(request, user, project, id):
-    template = 'model_confirm_delete.html'
 
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
-    if request.method == "POST":
-        l = ProjectLog(project=project, module='MO', headline='Model',
-                       description='Model {name} has been removed'.format(name=model.name))
-        l.save()
+    l = ProjectLog(project=project, module='MO', headline='Model',
+                    description='Model {name} has been removed'.format(name=model.name))
+    l.save()
 
-        model.delete()
+    model.delete()
 
-        return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
-
-    return render(request, template, locals())
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
