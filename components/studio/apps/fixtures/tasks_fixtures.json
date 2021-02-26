@@ -1,0 +1,9 @@
+[
+{
+  "model": "django_celery_beat.periodictasks",
+  "pk": 1,
+  "fields": {
+    "last_update": "2021-02-26T10:36:13.935Z"
+  }
+}
+]
