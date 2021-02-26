@@ -9,4 +9,4 @@ spec:
     targetPort: 9090
     protocol: TCP
   selector:
-    app: {{ .Values.appname }}
+    release: {{ $.Release.Name }}

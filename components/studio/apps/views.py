@@ -114,24 +114,27 @@ def get_status(request, user, project):
     pk = request.POST.get('pk')
     # print(pk)
     pk = pk.split(',')
-    appinstances = AppInstance.objects.filter(pk__in=pk)
-    print(appinstances)
-    res = dict()
-    for instance in appinstances:
-        try:
-            status = instance.status.latest().status_type
-            
-        except:
-            status = instance.state
-        if status in status_success:
-            span_class = 'bg-success'
-        elif status in status_warning:
-            span_class = 'bg-warning'
-        else:
-            span_class = 'bg-danger'
-        res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
-        print(status)
     print(pk)
+    res = {}
+    if len(pk)>0 and not (len(pk)==1 and pk[0]==''):
+        appinstances = AppInstance.objects.filter(pk__in=pk)
+        print(appinstances)
+        res = dict()
+        for instance in appinstances:
+            try:
+                status = instance.status.latest().status_type
+                
+            except:
+                status = instance.state
+            if status in status_success:
+                span_class = 'bg-success'
+            elif status in status_warning:
+                span_class = 'bg-warning'
+            else:
+                span_class = 'bg-danger'
+            res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
+            print(status)
+        print(pk)
     return JsonResponse(res)
     # if 'pk' in request.POST:
     #     pk = request.POST['pk']
@@ -195,6 +198,8 @@ def create(request, user, project, app_slug):
                 parameters_out['project'] = dict()
             parameters_out['project']['client_id'] = client_id
             parameters_out['project']['client_secret'] = client_secret
+            parameters_out['project']['slug'] = project.slug
+            parameters_out['project']['name'] = project.name
             # parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
             print(parameters_out)
             permission.projects.set([project])
