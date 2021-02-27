@@ -56,10 +56,13 @@
                             <tr role="row">
                                 <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
                                     rowspan="1" colspan="1" aria-sort="ascending"
-                                    aria-label="UID: activate to sort column descending">UID</th>
+                                    aria-label="UID: activate to sort column descending">Name</th>
                                 <th class="d-none d-xl-table-cell sorting" tabindex="0"
                                     aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
                                     aria-label="Owner: activate to sort column ascending">Owner</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                    aria-label="Owner: activate to sort column ascending">Info</th>
                                 <th class="d-none d-xl-table-cell sorting" tabindex="0"
                                     aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
                                     aria-label="Created: activate to sort column ascending">Created</th>
@@ -74,14 +77,15 @@
                         <tbody>
                             {% for lab in labs %}
                             <tr role="row" class="odd">
-                                <td class="sorting_1">{{ lab.id }}</td>
-                                <td class="d-none d-xl-table-cell">{{ lab.lab_session_owner.username }}</td>
-                                <td class="d-none d-xl-table-cell">{{ lab.created_at }}</td>
+                                <td class="sorting_1">{{ lab.name }}</td>
+                                <td class="d-none d-xl-table-cell">{{ lab.owner }}</td>
+                                <td class="d-none d-xl-table-cell">{{ lab.table_field | safe }}</td>
+                                <td class="d-none d-xl-table-cell">{{ lab.created_on }}</td>
                                 <td><span class="badge 
                                     {% if lab.status == 'CR' %}bg-warning
                                     {% elif lab.status == 'ST' or lab.status == 'FN' %}bg-success
                                     {% elif model.status == 'SP' or lab.status == 'AB' %}bg-danger
-                                    {% endif %}">{{ lab.get_status_display }}</span></td>
+                                    {% endif %}">{{ lab.status.latest.status_type }}</span></td>
                                 <td class="d-none d-md-table-cell">
                                     <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
                                         <button class="btn btn-square btn-primary">Open</button>
