@@ -9,7 +9,7 @@ import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -71,8 +71,16 @@ def serialize_environment(form_selection):
         environment_id = form_selection.get('environment', None)
         environment = Environment.objects.get(pk=environment_id)
         environment_json['environment'] = {
-            "image": environment.image
+            "pk": environment.pk,
+            "repository": environment.repository,
+            "image": environment.image,
+            "registry": False
         }
+        if environment.registry:
+            environment_json['environment']['registry'] = environment.registry.parameters
+            environment_json['environment']['registry']['enabled'] = True
+        else:
+            environment_json['environment']['registry'] = {"enabled": False}
     return environment_json
 
 

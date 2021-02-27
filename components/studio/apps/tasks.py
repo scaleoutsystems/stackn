@@ -12,7 +12,7 @@ import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus
-from projects.models import S3
+from projects.models import S3, Environment
 from studio.celery import app
 
 def get_URI(parameters):
@@ -62,6 +62,22 @@ def process_helm_result(results):
 def post_create_hooks(instance):
     # hard coded hooks for now, we can make this dynamic and loaded from the app specs
     if instance.app.slug == 'minio':
+        # Create a user role mapper for SSO (mapping readwrite role to 'minio_policy' claim.):
+        kc = keylib.keycloak_init()
+        client_id = instance.parameters['release']
+        scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, client_id+'-scope')
+        res_json = keylib.keycloak_create_scope_mapper_roles(kc, scope_id, client_id, client_id+'-role-mapper', 'minio-policy')
+        
+        if not res_json['success']:
+            print("Failed to create user role mapper for Minio instance: {}".format(instance.parameters['release']))
+            # TODO: Update instance to reflect failure (User can still log in with root credentials)
+
+        # Allow implicit flow for client:
+        res_json = keylib.keycloak_client_allow_implicit_flow(kc, client_id)
+        if not res_json['success']:
+            print("Failed to allow implicit flow for Minio instance client: {}".format(instance.parameters['release']))
+            # TODO: Update instance to reflect failure (User can still log in with root credentials)
+
         # Create project S3 object
         # TODO: If the instance is being updated, update the existing S3 object.
         access_key = instance.parameters['credentials']['access_key']
@@ -82,6 +98,30 @@ def post_create_hooks(instance):
                         owner=instance.owner)
         s3obj.save()
 
+    if instance.app.slug == 'environment':
+        params = instance.parameters
+        image = params['container']['name']
+        # We can assume one registry here
+        for reg_key in params['apps']['docker_registry'].keys():
+            reg_release = params['apps']['docker_registry'][reg_key]['release']
+            reg_domain = params['apps']['docker_registry'][reg_key]['global']['domain']
+        repository = reg_release+'.'+reg_domain
+        registry = AppInstance.objects.get(parameters__contains={
+                                                        'release':reg_release
+                                                    })
+
+        target_environment = Environment.objects.get(pk=params['environment']['pk'])
+        target_app = target_environment.app
+
+        env_obj = Environment(name=instance.name,
+                              project=instance.project,
+                              repository=repository,
+                              image=image,
+                              registry=registry,
+                              app=target_app,
+                              appenv=instance)
+        env_obj.save()
+
 def post_delete_hooks(instance):
     if instance.app.slug == 'minio':
         try:
@@ -89,6 +129,13 @@ def post_delete_hooks(instance):
             s3obj.delete()
         except:
             print("S3 object not connected to a Minio App")
+    
+    if instance.app.slug == 'environment':
+        print("POST DELETE ENVIRONMENT APP")
+        try:
+            env_obj = instance.envobj.all().delete()
+        except:
+            print("Didn't find any associated environment to delete.")
 
 @shared_task
 @transaction.atomic
@@ -118,7 +165,22 @@ def deploy_resource(instance_pk, action='create'):
         print(parameters)
         print("IN DEPLOY_RESOURCE: RELEASE:")
         print(parameters['release'])
-        client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URI, parameters['release'], username, ['owner'], ['owner'])
+
+        # Default keycloak roles if none specified in config:
+        keycloak_roles = ['owner']
+        keycloak_default_roles = ['owner']
+        # Check if app defines custom Keycloak roles and default roles:
+        if 'keycloak-config' in instance.app.settings:
+            keycloak_roles = instance.app.settings['keycloak-config']['roles']
+            keycloak_default_roles = instance.app.settings['keycloak-config']['default-roles']
+
+
+        client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URI,
+                                                                               parameters['release'],
+                                                                               username,
+                                                                               keycloak_roles,
+                                                                               keycloak_default_roles)
+        
         if not res_json['success']:
             keycloak_success = False
         instance.info['keycloak'].update({"keycloak_setup_base_client": res_json})
