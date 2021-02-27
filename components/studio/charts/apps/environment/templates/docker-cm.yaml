@@ -4,5 +4,6 @@ metadata:
   name: {{ .Release.Name }}-df
   namespace: {{ .Values.namespace }}
 data:
-  Dockerfile: |- 
+  Dockerfile: |-
+    FROM {{ .Values.environment.repository }}/{{ .Values.environment.image }}
 {{ .Values.image.dockerfile | indent 4 }}

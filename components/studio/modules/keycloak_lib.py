@@ -264,6 +264,27 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
 
     return keycloak_output(res, "keycloak_create_client")
 
+def keycloak_client_allow_implicit_flow(kc, client_id):
+    clients, res_json = keycloak_get_clients(kc, {'clientId': client_id})
+    if not res_json['success']:
+        return res_json
+
+    try:
+        clients[0]['implicitFlowEnabled'] = "True"
+    except Exception as err:
+        res_json['success'] = False
+        res_json['info']['msg'] = "Failed to set implicit flow in client rep."
+        return res_json
+
+    
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    
+    if res['success']:
+        print("Allowed implicit flow for client: {}.".format(client_id))
+    else:
+        print("Failed to allow implicit flow for client: {}.".format(client_id))
+    return res
+
 def keycloak_add_client_valid_redirect(kc, client_id, redirectUri):    
     clients, res_json = keycloak_get_clients(kc, {'clientId': client_id})
     if not res_json['success']:
@@ -378,6 +399,8 @@ def keycloak_delete_client_scope(kc, scope_id):
         print(res.text)
         return False
 
+
+# Audience mapper
 def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
     create_client_scope_mapper_url = '{}/admin/realms/{}/client-scopes/{}/protocol-mappers/models'.format(kc.admin_url, kc.realm, scope_id)
     scope_mapper = {'name': mapper_name,
@@ -395,12 +418,35 @@ def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
     success = False
     if res:
         success = True
-    # else:
-    #     print('Failed to create scope mapper.')
-    #     print('Status code: '+str(res.status_code))
-    #     print(res.text)
-    #     return False
+
     return keycloak_output(res, "keycloak_create_scope_mapper")
+
+# User role mapper
+def keycloak_create_scope_mapper_roles(kc, scope_id, client_id, mapper_name, claim_name):
+    create_client_scope_mapper_url = '{}/admin/realms/{}/client-scopes/{}/protocol-mappers/models'.format(kc.admin_url, kc.realm, scope_id)
+    scope_mapper = {'name': mapper_name,
+                    'protocol': 'openid-connect',
+                    'protocolMapper': 'oidc-usermodel-client-role-mapper',
+                    "consentRequired": False,
+                    "config": {
+                        "multivalued": "true",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "userinfo.token.claim": "true",
+                        "usermodel.clientRoleMapping.clientId": client_id,
+                        "claim.name": claim_name,
+                        "jsonType.label": "String"
+                    }}
+
+    res = r.post(create_client_scope_mapper_url,
+                 json=scope_mapper,
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
+    success = False
+    if res:
+        success = True
+
+    return keycloak_output(res, "keycloak_create_scope_mapper_roles")
 
 def keycloak_add_scope_to_client(kc, client_id, scope_id):
     add_default_scope_url = '{}/admin/realms/{}/clients/{}/default-client-scopes/{}'.format(kc.admin_url, kc.realm, client_id, scope_id)
@@ -410,11 +456,6 @@ def keycloak_add_scope_to_client(kc, client_id, scope_id):
     success = False
     if res:
         success = True
-    # else:
-    #     print('Failed to add scope to client.')
-    #     print('Status code: '+str(res.status_code))
-    #     print(res.text)
-    #     return False
     return keycloak_output(res, "keycloak_add_scope_to_client")    
 
 def keycloak_create_client_role(kc, client_nid, role_name, session):
@@ -596,6 +637,7 @@ def keycloak_setup_base_client(base_url, client_id, username, roles=['default'],
     if not res_json['success']:
         return client_id, client_secret, res_json
     # _________________
+   
 
     # Add the scope to the client
     res_json = keycloak_add_scope_to_client(kc, client_nid, scope_id)

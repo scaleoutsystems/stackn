@@ -30,10 +30,18 @@ spec:
         - /home/stackn/{{ $key }}
         {{- end }}
         env:
-        - name: MINIO_ACCESS_KEY
+        - name: MINIO_ROOT_USER
           value: {{ .Values.credentials.access_key }}
-        - name: MINIO_SECRET_KEY
+        - name: MINIO_ROOT_PASSWORD
           value: {{ .Values.credentials.secret_key }}
+        - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+          value: {{ .Values.gatekeeper.auth_endpoint }}/{{ .Values.gatekeeper.realm }}/.well-known/openid-configuration
+        - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+          value: {{ .Values.gatekeeper.client_id }}
+        - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+          value: minio-policy
+        - name: MINIO_IDENTITY_OPENID_SCOPES
+          value: {{ .Values.release }}-scope
         image: minio/minio:latest
         livenessProbe:
           exec:

@@ -20,5 +20,5 @@ flavor:
     cpu: 2000m
     memory: 12Gi
   requests:
-    cpu: 200m
-    memory: 1Gi
+    cpu: 500m
+    memory: 6Gi

@@ -251,7 +251,8 @@ def details(request, user, project_slug):
         
     if project:
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
-        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        # labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        labs = AppInstance.objects.filter(~Q(state="Deleted"), project=project).order_by('-created_on')
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())

@@ -61,10 +61,14 @@
 
                     {% if form.dep_environment %}
                     <div class="mb-3">
-                        <label class="form-label">Environment</label>
+                        <label class="form-label">{{ form.environments.title }}</label>
                         <select name="environment" id="environment" class="form-control">
-                            {% for environment in form.environments %}
-                            <option value="{{ environment.pk }}">{{ environment.name }}</option> 
+                            {% for environment in form.environments.objs %}
+                            {% if environment.pk == form.environments.selected %}
+                            <option value="{{ environment.pk }}" selected>{{ environment.name }}</option> 
+                            {% else %}
+                            <option value="{{ environment.pk }}">{{ environment.name }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>

@@ -14,5 +14,11 @@ data:
           "auth": "{{ tpl ("{{ .value.credentials.username }}:{{ .value.credentials.password }}") $ | b64enc }}"
         }
         {{- end }}
+        {{ if .Values.environment.registry.enabled }}
+        ,
+        "{{ $.Values.environment.registry.release }}.{{ $.Values.environment.registry.global.domain }}": {
+          "auth": "{{ tpl ("{{ $.Values.environment.registry.credentials.username }}:{{ $.Values.environment.registry.credentials.password }}") $ | b64enc }}"
+        }
+        {{ end }}
       }
     }

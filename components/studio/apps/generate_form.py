@@ -15,7 +15,7 @@ import flatten_json
 import uuid
 from datetime import datetime, timedelta
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
@@ -55,6 +55,7 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
                 key = 'appobj'+'.'+myapp.slug
 
                 app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+                                                           ~Q(state="Deleted"),
                                                            project=project,
                                                            app=app_obj,
                                                            parameters__contains={
@@ -126,12 +127,32 @@ def get_form_appobj(aset, project, appinstance=[]):
     print(appobjs)
     return dep_appobj, appobjs
 
+def get_form_environments(aset, project, app, appinstance=[]):
+    print("CHECKING ENVIRONMENT")
+    dep_environment = False
+    environments = dict()
+    if 'environment' in aset:
+        dep_environment = True
+        if aset['environment']['type'] == "match":
+            environments['objs'] = Environment.objects.filter(project=project, app=app)
+        elif aset['environment']['type'] == "any":
+            environments['objs'] = Environment.objects.filter(project=project)
+        elif 'apps' in aset['environment']:
+            environments['objs'] = Environment.objects.filter(project=project, app__slug__in=aset['environment']['apps'])
+        
+        environments['title'] = aset['environment']['title']
+        if appinstance:
+            ai_vals = appinstance.parameters
+            environments['selected'] = ai_vals['environment']['pk']
+
+    return dep_environment, environments
 
 def generate_form(aset, project, app, user, appinstance=[]):
     form = dict()
     form['dep_model'], form['models'] = get_form_models(aset, project, appinstance)
     form['dep_apps'], form['app_deps'] = get_form_apps(aset, project, app, user, appinstance)
     form['dep_appobj'], form['appobjs'] = get_form_appobj(aset, project, appinstance)
+    form['dep_environment'], form['environments'] = get_form_environments(aset, project, app, appinstance)
 
     form['dep_vols'] = False
     form['dep_flavor'] = False
@@ -139,10 +160,10 @@ def generate_form(aset, project, app, user, appinstance=[]):
         form['dep_flavor'] = True
         form['flavors'] = Flavor.objects.all()
     
-    form['dep_environment'] = False
-    if 'environment' in aset:
-        form['dep_environment'] = True
-        form['environments'] = Environment.objects.all()
+    # form['dep_environment'] = False
+    # if 'environment' in aset:
+    #     form['dep_environment'] = True
+    #     form['environments'] = Environment.objects.all()
 
 
     form['primitives'] = get_form_primitives(aset, project, appinstance)

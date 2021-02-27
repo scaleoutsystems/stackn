@@ -78,19 +78,17 @@ class Flavor(models.Model):
 
 
 class Environment(models.Model):
-    name = models.CharField(max_length=512)
-    slug = models.CharField(max_length=512, blank=True, null=True)
-    image = models.CharField(max_length=512)
+    name = models.CharField(max_length=100)
+    slug = models.CharField(max_length=100, null=True)
+    
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True)
 
-    # registry = models.ManyToManyField('apps.Apps', related_name="registry_app")
-    # project = models.OneToOneField('projects.Project', on_delete=models.CASCADE)
-    # app = models.OneToOneField('apps.Apps', on_delete=models.CASCADE)
+    repository = models.CharField(max_length=100, blank=True, null=True)
+    image = models.CharField(max_length=100)
 
-
-
-    dockerfile = models.TextField(default='FROM jupyter/base-notebook')
-    startup = models.TextField(null=True, blank=True)
-    teardown = models.TextField(null=True, blank=True)
+    registry = models.ForeignKey('apps.AppInstance', related_name="environments", null=True, blank=True, on_delete=models.CASCADE)
+    appenv = models.ForeignKey('apps.AppInstance', related_name="envobj", null=True, blank=True, on_delete=models.CASCADE)
+    app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE, null=True)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

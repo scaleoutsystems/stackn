@@ -29,8 +29,10 @@ spec:
       affinity:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}
+    {{ if .Values.environment.registry }}
       imagePullSecrets:
         - name: {{ .Release.Name }}-pull-secret
+    {{ end }}
       #securityContext:
       #  runAsUser: 65533  # to allow read of ssh key
       containers:
@@ -45,11 +47,7 @@ spec:
         - name: gatekeeper-config
           mountPath: /etc/secrets/
       - name: labs
-        {{- range $key, $value := .Values.apps.environment }}
-        {{- range $subkey, $subvalue := $value.apps.docker_registry }}
-        image: {{ $subvalue.release }}.{{ $subvalue.global.domain }}/{{ $value.container.name }}:{{ $value.container.tag }}
-        {{- end }}
-        {{- end }}
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
         imagePullPolicy: Always
         ports:
         - containerPort: 8888

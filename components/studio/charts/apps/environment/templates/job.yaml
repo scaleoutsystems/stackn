@@ -38,9 +38,9 @@ spec:
           mountPath: /kaniko/.docker
         imagePullPolicy: Always  
         resources:
-          limits:
-            cpu: {{ .Values.flavor.limits.cpu }}
-            memory: {{ .Values.flavor.limits.memory }}
+          # limits:
+          #   cpu: {{ .Values.flavor.limits.cpu }}
+          #   memory: {{ .Values.flavor.limits.memory }}
           requests:
             cpu: {{ .Values.flavor.requests.cpu }}
             memory: {{ .Values.flavor.requests.memory }}
