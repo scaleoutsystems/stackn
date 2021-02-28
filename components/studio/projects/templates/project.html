@@ -5,7 +5,7 @@
 <h1 class="h3 mb-3">Overview</h1>
 
 <div class="row">
-    <div class="col-12 col-md-6 col-lg-4" style="padding-bottom: 24px;">
+    <!-- <div class="col-12 col-md-6 col-lg-4" style="padding-bottom: 24px;">
         <div class="card" style="height: 100%;">
             <div class="card-header">
                 <h5 class="card-title mb-0">Description</h5>
@@ -16,7 +16,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </div> -->
     <div class="col-12 col-lg-6 col-xl-4 d-flex">
         <div class="card flex-fill w-100">
             <div class="card-header">
@@ -35,131 +35,269 @@
             </div>
         </div>
     </div>
+    <div class="col-12 col-lg-6 col-xl-4 d-flex">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <h5 class="card-title">CPU</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                    <canvas id="totalCPUChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block;" class="chartjs-render-monitor"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6 col-xl-4 d-flex">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <h5 class="card-title">Memory</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
-<div class="row row-custom">
-    <div class="card flex-fill">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Notebooks</h5>
-        </div>
-        {% if labs %}
-        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
-            <div class="row">
-                <div class="col-sm-12 col-md-6"></div>
-                <div class="col-sm-12 col-md-6"></div>
+<div class="row">
+    {% for objs in resources %}
+    <div class="col-6 d-flex">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <div class="card-actions float-end">
+                    <div class="dropdown show">
+                        <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
+                        <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> -->
+                        <button class="btn btn-outline-secondary">New</button>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right">
+                            {% for app in objs.apps %}
+                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug app.slug  %}">{{ app.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <h5 class="card-title mb-0">{{ objs.title }}</h5>
             </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                        role="grid" aria-describedby="datatables-dashboard-projects_info">
-                        <thead>
-                            <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-sort="ascending"
-                                    aria-label="UID: activate to sort column descending">Name</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Owner: activate to sort column ascending">Owner</th>
+            {% if objs.objs %}
+            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+                <!-- <div class="row">
+                    <div class="col-sm-12 col-md-6"></div>
+                    <div class="col-sm-12 col-md-6"></div>
+                </div> -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                            role="grid" aria-describedby="datatables-dashboard-projects_info">
+                            <thead>
+                                <tr role="row">
+                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                        rowspan="1" colspan="1" aria-sort="ascending"
+                                        aria-label="UID: activate to sort column descending">App</th>
+                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                        rowspan="1" colspan="1" aria-sort="ascending"
+                                        aria-label="UID: activate to sort column descending">Name</th>
                                     <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Owner: activate to sort column ascending">Info</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Created: activate to sort column ascending">Created</th>
-                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
-                                    Status</th>
-                                <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Actions: activate to sort column ascending">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lab in labs %}
-                            <tr role="row" class="odd">
-                                <td class="sorting_1">{{ lab.name }}</td>
-                                <td class="d-none d-xl-table-cell">{{ lab.owner }}</td>
-                                <td class="d-none d-xl-table-cell">{{ lab.table_field | safe }}</td>
-                                <td class="d-none d-xl-table-cell">{{ lab.created_on }}</td>
-                                <td><span class="badge 
-                                    {% if lab.status == 'CR' %}bg-warning
-                                    {% elif lab.status == 'ST' or lab.status == 'FN' %}bg-success
-                                    {% elif model.status == 'SP' or lab.status == 'AB' %}bg-danger
-                                    {% endif %}">{{ lab.status.latest.status_type }}</span></td>
-                                <td class="d-none d-md-table-cell">
-                                    <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
-                                        <button class="btn btn-square btn-primary">Open</button>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Owner: activate to sort column ascending">Owner</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Created: activate to sort column ascending">Created</th>
+                                    <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                        rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                        Status</th>
+                                    <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Actions: activate to sort column ascending">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for obj in objs.objs %}
+                                <tr role="row" class="odd">
+                                    <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
+                                    <td class="sorting_1">{{ obj.name }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ obj.owner }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ obj.created_on }}</td>
+                                    <td><span class="badge 
+                                        {% if obj.status.latest.status_type in status_success %}bg-success
+                                        {% elif obj.status.latest.status_type in status_warning %}bg-warning
+                                        {% else %}bg-danger
+                                        {% endif %}">{{ obj.status.latest.status_type }}</span></td>
+                                    <!-- <td class="d-none d-md-table-cell">
+                                        <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
+                                            <button class="btn btn-square btn-primary">Open</button>
+                                        </a>
+                                    </td> -->
+                                    <td class="table-action">
+                                        <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
+                                        <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
+                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+            {% else %}
+            <!-- <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p> -->
+            {% endif %}
         </div>
-        {% else %}
-        <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p>
-        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-6 d-flex" style="padding-bottom: 24px;">
+        <div class="card flex-fill">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Models</h5>
+            </div>
+            {% if models %}
+            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6"></div>
+                    <div class="col-sm-12 col-md-6"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+                            role="grid" aria-describedby="datatables-dashboard-projects_info">
+                            <thead>
+                                <tr role="row">
+                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                        rowspan="1" colspan="1" aria-sort="ascending"
+                                        aria-label="Name: activate to sort column descending">Name</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Version: activate to sort column ascending">Version</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Created: activate to sort column ascending">Created</th>
+                                    <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
+                                        rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                        Status</th>
+                                    <th class="d-none d-md-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Accessability: activate to sort column ascending">Accessability</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for model in models %}
+                                <tr role="row" class="odd">
+                                    <td class="sorting_1">{{ model.name }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ model.version }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
+                                    <td><span class="badge 
+                                        {% if model.status == 'CR' %}bg-warning
+                                        {% elif model.status == 'DP' %}bg-success
+                                        {% elif model.status == 'AR' %}bg-danger
+                                        {% endif %}">{{ model.get_status_display }}</span></td>
+                                    <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p style="margin-left: 25px;">No models have been uploaded to this project yet.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<div class="row row-custom">
-    <div class="card flex-fill">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Models</h5>
-        </div>
-        {% if models %}
-        <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
-            <div class="row">
-                <div class="col-sm-12 col-md-6"></div>
-                <div class="col-sm-12 col-md-6"></div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                        role="grid" aria-describedby="datatables-dashboard-projects_info">
-                        <thead>
-                            <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-sort="ascending"
-                                    aria-label="Name: activate to sort column descending">Name</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Version: activate to sort column ascending">Version</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Created: activate to sort column ascending">Created</th>
-                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
-                                    Status</th>
-                                <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Accessability: activate to sort column ascending">Accessability</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for model in models %}
-                            <tr role="row" class="odd">
-                                <td class="sorting_1">{{ model.name }}</td>
-                                <td class="d-none d-xl-table-cell">{{ model.version }}</td>
-                                <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
-                                <td><span class="badge 
-                                    {% if model.status == 'CR' %}bg-warning
-                                    {% elif model.status == 'DP' %}bg-success
-                                    {% elif model.status == 'AR' %}bg-danger
-                                    {% endif %}">{{ model.get_status_display }}</span></td>
-                                <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <p style="margin-left: 25px;">No models have been uploaded to this project yet.</p>
-        {% endif %}
-    </div>
-</div>
+
+
+<script>
+
+    function newChart(chart, labels, y_data, ylabel) {
+        new Chart(chart, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total CPU usage',
+                    fill: true,
+                    backgroundColor: 'transparent',
+                    borderColor: window.theme.primary,
+                    data: y_data
+                }]          
+            },
+            options: {
+                elements: {
+                    point: {
+                        radius: 0
+                    }
+                },
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    intersect: false
+                },
+                hover: {
+                    intersect: true
+                },
+                plugins: {
+                    filler: {
+                    propagate: false
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            maxTicksLimit: 10
+                        },
+                        reverse: true,
+                        gridLines: {
+                            color: "rgba(0,0,0,0.05)"
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 100,
+                            maxTicksLimit: 10
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: ylabel
+                        },
+                        display: true,
+                        borderDash: [5, 5],
+                        gridLines: {
+                            color: "rgba(0,0,0,0)",
+                            fontColor: "#fff"
+                        }
+                    }]
+                }
+            }
+        });
+    }
+
+    function resourceCharts(chart_id1, chart_id2) {
+        var $labsCPUChart = $(chart_id1);
+        var $labsMEMChart = $(chart_id2);
+        $.ajax({
+            url: "{% url 'monitor:usage' user project.slug %}",
+            success: function (data) {
+                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)')
+                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)')
+    
+            }
+        });
+  
+    };
+  
+    resourceCharts('#totalCPUChart', '#totalMEMChart');
+  
+</script>
+
 {% endblock %}

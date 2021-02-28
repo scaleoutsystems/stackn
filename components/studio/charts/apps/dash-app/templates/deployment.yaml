@@ -47,6 +47,8 @@ spec:
         - name: DEBUG
           value: "false"
         {{ end }}
+        - name: DEPLOYMENT_PATH
+          value: {{ .Values.deployment.path }}
         volumeMounts:
         {{- range $key, $value := .Values.apps.volume }}
         - name: {{ $key }}
