@@ -25,6 +25,7 @@ from .helpers import create_project_resources
 from labs.models import Session
 from models.models import Model
 from deployments.models import DeploymentInstance
+from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +229,7 @@ def create(request):
 
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
+    
     return render(request, template, locals())
 
 
@@ -250,9 +252,18 @@ def details(request, user, project_slug):
         message = 'Project not found.'
         
     if project:
+        status_success, status_warning = get_status_defs()
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
-        # labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
-        labs = AppInstance.objects.filter(~Q(state="Deleted"), project=project).order_by('-created_on')
+        resources = list()
+        rslugs = [{"slug": "compute", "name": "Compute"},
+                  {"slug": "serve", "name": "Serve"},
+                  {"slug": "store", "name": "Store"},
+                  {"slug": "misc", "name": "Misc"}]
+        for rslug in rslugs:
+            tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
+            apps = Apps.objects.filter(category__slug=rslug['slug'])
+            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
+        
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())
