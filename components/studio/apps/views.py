@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponseRedirect, reverse
+from django.shortcuts import render, HttpResponseRedirect, reverse, redirect
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils.text import slugify
@@ -94,7 +94,7 @@ def filtered(request, user, project, category):
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
     appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj, project=project)
+                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj, project=project).order_by('-created_on')
     pk_list = ''
     for instance in appinstances:
         pk_list += str(instance.pk)+','
@@ -249,10 +249,10 @@ def create(request, user, project, app_slug):
             deploy_resource.delay(instance.pk, "update")
         else:
             raise Exception("Incorrect action on app.")
-
-        return HttpResponseRedirect(
-                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
-
+        
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path_info))
+        # return HttpResponseRedirect(request.path_info) #, kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug})
+    # 'apps:filtered'
     return render(request, template, locals())
 
 def delete(request, user, project, category, ai_id):
