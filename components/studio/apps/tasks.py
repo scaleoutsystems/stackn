@@ -143,13 +143,14 @@ def deploy_resource(instance_pk, action='create'):
 
     instance = AppInstance.objects.select_for_update().get(pk=instance_pk)
     username = str(instance.owner)
+    status = AppStatus(appinstance=instance)
     # If app is new, we need to create a Keycloak client.
     keycloak_success = True
     if action == "create":
 
         parameters = instance.parameters
         
-        status = AppStatus(appinstance=instance)
+        
         status.status_type = 'Failed'
         status.info = parameters['release']
 
@@ -216,6 +217,7 @@ def deploy_resource(instance_pk, action='create'):
         instance.parameters = parameters
         instance.save()
         # Keycloak DONE.
+
 
     # Deploy resource.
     if keycloak_success:
@@ -325,6 +327,7 @@ def check_status():
     res_json = json.loads(results.stdout.decode('utf-8'))
     app_statuses = dict()
     # print(res_json)
+    # TODO: Handle case of having many pods (could have many replicas, or could be right after update)
     for item in res_json['items']:
         release = item['metadata']['labels']['release']
         phase = item['status']['phase']

@@ -84,7 +84,6 @@ def filtered(request, user, project, category):
     # template = 'index_apps.html'
     status_success, status_warning = get_status_defs()
     menu = dict()
-    
 
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
@@ -145,6 +144,11 @@ def appsettings(request, user, project, ai_id):
     template = 'create.html'
     app_action = "Settings"
 
+    if 'from' in request.GET:
+        from_page = request.GET.get('from')
+    else:
+        from_page = 'filtered'
+
     project = Project.objects.get(slug=project)
     appinstance = AppInstance.objects.get(pk=ai_id)
     existing_app_name = appinstance.name
@@ -159,7 +163,11 @@ def appsettings(request, user, project, ai_id):
 def create(request, user, project, app_slug):
     template = 'create.html'
     app_action = "Create"
-
+    
+    if 'from' in request.GET:
+        from_page = request.GET.get('from')
+    else:
+        from_page = 'filtered'
 
 
     existing_app_name = ""
@@ -250,15 +258,41 @@ def create(request, user, project, app_slug):
         else:
             raise Exception("Incorrect action on app.")
         
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path_info))
-        # return HttpResponseRedirect(request.path_info) #, kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug})
-    # 'apps:filtered'
+        if 'from' in request.GET:
+            from_page = request.GET.get('from')
+            if from_page == "overview":
+                return HttpResponseRedirect(
+                    reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
+            elif from_page == "filtered":
+                return HttpResponseRedirect(
+                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+        else:
+            return HttpResponseRedirect(
+                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+
     return render(request, template, locals())
 
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
 
+    if 'from' in request.GET:
+        from_page = request.GET.get('from')
+    else:
+        from_page = 'filtered'
+
     delete_resource.delay(ai_id)        
+
+    if 'from' in request.GET:
+        from_page = request.GET.get('from')
+        if from_page == "overview":
+            return HttpResponseRedirect(
+                reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project)}))
+        elif from_page == "filtered":
+            return HttpResponseRedirect(
+                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+        else:
+            return HttpResponseRedirect(
+                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
 
     return HttpResponseRedirect(
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))

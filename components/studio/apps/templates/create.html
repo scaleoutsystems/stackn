@@ -11,7 +11,7 @@
                 <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
             </div> -->
             <div class="card-body">
-                <form action="{% url 'apps:create' request.user project.slug app.slug %}" method="post">
+                <form action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post">
                     {% csrf_token %}
                     
                     <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">

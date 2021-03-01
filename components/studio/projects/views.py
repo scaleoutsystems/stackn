@@ -250,8 +250,10 @@ def details(request, user, project_slug):
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'Project not found.'
-        
+
     if project:
+        pk_list = ''
+        
         status_success, status_warning = get_status_defs()
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
         resources = list()
@@ -261,9 +263,13 @@ def details(request, user, project_slug):
                   {"slug": "misc", "name": "Misc"}]
         for rslug in rslugs:
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
+            for instance in tmp:
+                pk_list += str(instance.pk)+','
+            
             apps = Apps.objects.filter(category__slug=rslug['slug'])
             resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
-        
+        pk_list = pk_list[:-1]
+        pk_list = "'"+pk_list+"'"
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())

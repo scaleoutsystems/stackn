@@ -76,7 +76,7 @@
 
                         <div class="dropdown-menu dropdown-menu-right">
                             {% for app in objs.apps %}
-                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug app.slug  %}">{{ app.name }}</a>
+                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">{{ app.name }}</a>
                             {% endfor %}
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                                     <td class="sorting_1">{{ obj.name }}</td>
                                     <td class="d-none d-xl-table-cell">{{ obj.owner }}</td>
                                     <td class="d-none d-xl-table-cell">{{ obj.created_on }}</td>
-                                    <td><span class="badge 
+                                    <td id="status-{{ obj.pk }}"><span class="badge 
                                         {% if obj.status.latest.status_type in status_success %}bg-success
                                         {% elif obj.status.latest.status_type in status_warning %}bg-warning
                                         {% else %}bg-danger
@@ -134,8 +134,8 @@
                                     </td> -->
                                     <td class="table-action">
                                         <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
-                                        <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
-                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
+                                        <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
+                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -299,5 +299,24 @@
     resourceCharts('#totalCPUChart', '#totalMEMChart');
   
 </script>
-
+<script>
+    function update_status() {
+        var apps = {{ pk_list | safe }}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'apps:get_status' request.user project.slug %}",
+            data: {'pk': apps},
+            success: function (data) {
+                console.log(data)
+                apps.split(',').forEach(function (item, index) {
+                    document.getElementById("status-"+item).innerHTML = data['status-'+item];
+                });
+            },
+            complete: function() {
+                setTimeout(update_status, 3000);
+            }
+        });
+    };
+    setTimeout(update_status, 3000);
+</script>
 {% endblock %}
