@@ -15,7 +15,8 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
-from .models import Project, S3
+from .models import Project, S3, Flavor
+from .forms import FlavorForm
 from apps.models import AppInstance
 from apps.models import Apps
 import modules.keycloak_lib as kc
@@ -70,7 +71,8 @@ def settings(request, user, project_slug):
     environments = Environment.objects.all()
 
     s3instances = S3.objects.filter(project=project)
-
+    flavors = Flavor.objects.filter(project=project)
+    flavor_form = FlavorForm()
     # minio_keys = get_minio_keys(project)
     # decrypted_key = minio_keys['project_key']
     # decrypted_secret = minio_keys['project_secret']
@@ -111,6 +113,41 @@ def change_description(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
+@login_required
+def create_flavor(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create flavor in this project.
+    if request.method == 'POST':
+        # TODO: Check input
+        project = Project.objects.get(slug=project_slug)
+        print(request.POST)
+        name = request.POST.get('flavor_name')
+        cpu_req = request.POST.get('cpu_req')
+        mem_req = request.POST.get('mem_req')
+        gpu_req = request.POST.get('gpu_req')
+        cpu_lim = request.POST.get('cpu_lim')
+        mem_lim = request.POST.get('mem_lim')
+        flavor = Flavor(name=name,
+                        project=project,
+                        cpu_req=cpu_req,
+                        mem_req=mem_req,
+                        gpu_req=gpu_req,
+                        cpu_lim=cpu_lim,
+                        mem_lim=mem_lim)
+        flavor.save()
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_flavor(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('flavor_pk')
+        # TODO: Check that the user has permission to delete this flavor.
+        flavor = Flavor.objects.get(pk=pk)
+        flavor.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
 def set_s3storage(request, user, project_slug):
