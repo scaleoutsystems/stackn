@@ -48,18 +48,22 @@ def serialize_flavor(form_selection):
 
         flavor_json['flavor'] = {
             "requests": {
-                "cpu": flavor.cpu,
-                "memory": flavor.mem
+                "cpu": flavor.cpu_req,
+                "memory": flavor.mem_req,
+                "gpu": flavor.gpu_req,
+                "ephmem": flavor.ephmem_req
             },
             "limits": {
-                "cpu": flavor.cpu,
-                "memory": flavor.mem
+                "cpu": flavor.cpu_lim,
+                "memory": flavor.mem_lim,
+                "gpu": flavor.gpu_lim,
+                "ephmem": flavor.ephmem_lim
             },
             "gpu": {
                 "enabled": False
             }
         }
-        if flavor.gpu and flavor.gpu > 0:
+        if flavor.gpu_req and int(flavor.gpu_req) > 0:
             flavor_json['flavor']['gpu']['enabled'] = True
 
     return flavor_json

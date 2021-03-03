@@ -61,13 +61,19 @@ def pre_save_volume(sender, instance, using, **kwargs):
 
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
-    slug = models.CharField(max_length=512)
 
-    cpu = models.TextField(blank=True, null=True)
-    mem = models.TextField(blank=True, null=True)
-    gpu = models.TextField(blank=True, null=True)
+    cpu_req = models.TextField(blank=True, null=True, default="200m")
+    mem_req = models.TextField(blank=True, null=True, default="0.5Gi")
+    gpu_req = models.TextField(blank=True, null=True, default="0")
+    ephmem_req = models.TextField(blank=True, null=True, default="200Mi")
 
-    # project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    cpu_lim = models.TextField(blank=True, null=True, default="1000m")
+    mem_lim = models.TextField(blank=True, null=True, default="3Gi")
+    gpu_lim = models.TextField(blank=True, null=True, default="0")
+    ephmem_lim = models.TextField(blank=True, null=True, default="200Mi")
+
+
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True)
     # app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE)
 
     updated_at = models.DateTimeField(auto_now=True)

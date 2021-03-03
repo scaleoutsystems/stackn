@@ -85,6 +85,10 @@ def get_form_primitives(aset, project, appinstance=[]):
     for key in all_keys:
         if key not in key_words:
             primitives[key] = aset[key]
+            if 'meta' in primitives[key]:
+                primitives[key]['meta_title'] = primitives[key]['meta']['title']
+            else:
+                primitives[key]['meta_title'] = key
             if appinstance:
                 for subkey, subval in aset[key].items():
                     primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
@@ -158,7 +162,7 @@ def generate_form(aset, project, app, user, appinstance=[]):
     form['dep_flavor'] = False
     if 'flavor' in aset:
         form['dep_flavor'] = True
-        form['flavors'] = Flavor.objects.all()
+        form['flavors'] = Flavor.objects.filter(project=project)
     
     # form['dep_environment'] = False
     # if 'environment' in aset:

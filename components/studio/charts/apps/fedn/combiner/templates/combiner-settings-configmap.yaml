@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-combiner-config
+data:
+  settings.yaml: |-
+    network_id: {{ .Values.global.network | default "fedn-test-network" }}
+
+    combiner:
+        name: "{{ .Values.release }}.{{ .Values.global.domain }}"
+        host: "{{ .Values.release }}.{{ .Values.global.domain }}"
+        port: 443
+        max_clients: 30
+
+    controller:
+    {{- range $key, $val := .Values.apps.reducer }}
+        discover_host: {{ $val.release }}.{{ $val.global.domain }}
+        discover_port: 443
+        token: token
+    {{- end }}
+

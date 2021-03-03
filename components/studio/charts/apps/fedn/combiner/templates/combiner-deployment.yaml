@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f config/combiner.yaml
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: combiner
+  name: combiner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: combiner
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f config/combiner.yaml
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: combiner
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - fedn run combiner -in /config/settings.yaml
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "0"
+          image: scaleoutsystems/fedn-combiner:develop
+          imagePullPolicy: Always
+          name: combiner
+          ports:
+            - containerPort: 443
+          resources: {}
+          volumeMounts:
+            - mountPath: /config/settings.yaml
+              name: combiner-config
+              subPath: settings.yaml
+            {{- range $key, $value := .Values.apps.volume }}
+            - name: {{ $key }}
+              mountPath: /tmp/models
+            {{- end }}
+            # - mountPath: /tmp/models
+            #   name: combiner-modelstore
+            - mountPath: /app/client/certs
+              name: certs-dir
+          workingDir: /app/client
+      restartPolicy: Always
+      volumes:
+        - name: combiner-config
+          configMap:
+            name: {{ .Release.Name }}-combiner-config
+            items:
+            - key: settings.yaml
+              path: settings.yaml
+        # - name: combiner-modelstore
+        #   persistentVolumeClaim:
+        #     claimName: combiner-modelstore
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          persistentVolumeClaim:
+            claimName: {{ $value.release }}
+        {{- end }}
+        - name: certs-dir
+          emptyDir: {}
+status: {}

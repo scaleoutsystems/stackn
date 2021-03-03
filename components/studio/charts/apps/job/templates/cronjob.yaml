@@ -36,7 +36,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: cronjob
-            image: {{ .Values.environment.image }}
+            image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
             command: {{ .Values.job.command }}
             volumeMounts:
             {{- range $key, $value := .Values.apps.volume }}

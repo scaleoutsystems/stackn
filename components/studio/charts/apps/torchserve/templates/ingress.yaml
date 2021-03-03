@@ -2,10 +2,13 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -13,20 +16,23 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}
+            serviceName: {{ .Values.release }}
             servicePort: 80
   tls:
-    - secretName: {{ .Values.ingress.secretName }}
+    - secretName: prod-ingress
       hosts:
-        - {{ .Values.global.domain }}
+        - {{ .Release.Name }}.{{ .Values.global.domain }}
 {{ else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -35,9 +41,9 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}
+              name: {{ .Values.release }}
               port:
-                number: 443
+                number: 80
           pathType: ImplementationSpecific
   tls:
     - secretName: prod-ingress

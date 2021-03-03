@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f config/reducer.yaml
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: reducer
+  name: reducer
+spec:
+  ports:
+    - name: "8090"
+      port: 80
+      targetPort: 8090
+  selector:
+    io.kompose.service: reducer
+status:
+  loadBalancer: {}
