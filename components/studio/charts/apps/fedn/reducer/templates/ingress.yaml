@@ -2,18 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    #kubernetes.io/ingress.class: "nginx"
-    #nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    #kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    #nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-  name: reducer-ingress
-  namespace: default
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
 spec:
-  ingressClassName: "public"
   rules:
   - host: {{ .Values.release }}.{{ .Values.global.domain }}
     http:
@@ -22,13 +17,10 @@ spec:
         path: /
         backend:
           service:
-            name: reducer
+            name: {{ .Values.release }}
             port:
               number: 80
   tls:
-  # This secret must exist beforehand
-  # The cert must also contain the subj-name fortune-teller.stack.build
-  # https://github.com/kubernetes/ingress-nginx/blob/master/docs/examples/PREREQUISITES.md#tls-certificates
   - secretName: {{ .Values.ingress.secret }}
     hosts:
       - {{ .Values.release }}.{{ .Values.global.domain }}

@@ -1,18 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f config/reducer.yaml
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: reducer
   name: reducer
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: reducer
       release: {{ .Release.Name }}
       app: fedn-reducer
       project: {{ .Values.project.slug }}
@@ -22,12 +16,7 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f config/reducer.yaml
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: reducer
         release: {{ .Release.Name }}
         app: fedn-reducer
         project: {{ .Values.project.slug }}
@@ -64,7 +53,7 @@ spec:
       volumes:
         - name: reducer-config
           configMap:
-            name: {{ .Release.Name }}-reducer-config
+            name: {{ .Release.Name }}
             items:
             - key: settings.yaml
               path: settings.yaml

@@ -1,28 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f config/combiner.yaml
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: combiner
-  name: combiner
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: combiner
+      release: {{ .Values.release }}
+      app: fedn-combiner
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: combiner
   strategy:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f config/combiner.yaml
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: combiner
+        release: {{ .Values.release }}
+        app: fedn-combiner
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: combiner
     spec:
       containers:
         - args:
@@ -46,8 +45,6 @@ spec:
             - name: {{ $key }}
               mountPath: /tmp/models
             {{- end }}
-            # - mountPath: /tmp/models
-            #   name: combiner-modelstore
             - mountPath: /app/client/certs
               name: certs-dir
           workingDir: /app/client
@@ -59,9 +56,6 @@ spec:
             items:
             - key: settings.yaml
               path: settings.yaml
-        # - name: combiner-modelstore
-        #   persistentVolumeClaim:
-        #     claimName: combiner-modelstore
         {{- range $key, $value := .Values.apps.volume }}
         - name: {{ $key }}
           persistentVolumeClaim:

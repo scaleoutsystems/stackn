@@ -1,19 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f config/combiner.yaml
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: combiner
-  name: combiner
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
 spec:
   ports:
     - name: grpc
       port: 443
       targetPort: 443
   selector:
-    io.kompose.service: combiner
+    release: {{ .Values.release }}
 status:
   loadBalancer: {}

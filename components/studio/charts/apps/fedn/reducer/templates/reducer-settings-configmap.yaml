@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-reducer-config
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
 data:
   settings.yaml: |-
     network_id: {{ .Values.global.network | default "fedn-test-network" }}
