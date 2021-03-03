@@ -106,7 +106,7 @@
                     {% for key, vals in form.primitives.items %}
                     
                         <!-- <label class="form-label">{{ key }}</label> -->
-                        <h6>{{ key }}</h6>
+                        <h6> {{ vals.meta_title }}</h6>
                         {% for subkey, subval in vals.items %}
                         <div class="mb-3">
                             {% if subval.type == "boolean" %}
