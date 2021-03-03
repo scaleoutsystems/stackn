@@ -113,12 +113,8 @@
         "dockerfile": {
           "type": "textfield",
           "title": "Dockerfile",
-          "default": "FROM jupyter/minimal-notebook:latest"
+          "default": ""
         }
-      },
-      "appobj": {
-        "type": "",
-        "title": "Applies to app:"
       },
       "container": {
         "tag": {
@@ -132,6 +128,12 @@
           "default": ""
         }
       },
+      "environment": {
+        "name": "from",
+        "type": "any",
+        "title": "From",
+        "quantity": "one"
+      },
       "permissions": {
         "public": {
           "value": "false",
@@ -139,7 +141,7 @@
         },
         "private": {
           "value": "false",
-          "option": "true"
+          "option": "false"
         },
         "project": {
           "value": "true",
@@ -150,7 +152,7 @@
     "chart": "apps/environment",
     "description": "",
     "table_field": "",
-    "updated_on": "2021-02-19T21:35:14.408Z",
+    "updated_on": "2021-03-01T13:03:00.749Z",
     "created_on": "2021-02-19T21:35:14.408Z"
   }
 },
@@ -267,12 +269,17 @@
         "cronjob"
       ],
       "flavor": "one",
-      "environment": "one"
+      "environment": {
+        "name": "environment",
+        "type": "match",
+        "title": "Environment",
+        "quantity": "one"
+      }
     },
     "chart": "apps/job",
     "description": "",
     "table_field": "",
-    "updated_on": "2021-02-20T21:50:11.737Z",
+    "updated_on": "2021-03-01T13:19:11.899Z",
     "created_on": "2021-02-19T21:37:43.835Z"
   }
 },
@@ -285,10 +292,15 @@
     "category": "compute",
     "settings": {
       "apps": {
-        "Environment": "one",
         "Persistent Volume": "many"
       },
       "flavor": "one",
+      "environment": {
+        "name": "from",
+        "type": "match",
+        "title": "From",
+        "quantity": "one"
+      },
       "permissions": {
         "public": {
           "value": "false",
@@ -307,7 +319,7 @@
     "chart": "apps/lab-test",
     "description": "",
     "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-23T09:40:30.675Z",
+    "updated_on": "2021-02-26T19:15:01.360Z",
     "created_on": "2021-02-19T21:38:15.625Z"
   }
 },
@@ -333,12 +345,20 @@
           "title": "Secret Key",
           "default": "secretkey123"
         }
+      },
+      "keycloak-config": {
+        "roles": [
+          "readwrite"
+        ],
+        "default-roles": [
+          "readwrite"
+        ]
       }
     },
     "chart": "apps/minio",
     "description": "",
     "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-21T12:30:30.471Z",
+    "updated_on": "2021-02-27T14:23:24.771Z",
     "created_on": "2021-02-19T21:38:39.532Z"
   }
 },
@@ -606,6 +626,11 @@
         "Persistent Volume": "many"
       },
       "deployment": {
+        "path": {
+          "type": "string",
+          "title": "Path to folder",
+          "default": ""
+        },
         "debug": {
           "type": "boolean",
           "title": "Debug deployment",
@@ -630,8 +655,132 @@
     "chart": "apps/dash-app",
     "description": "",
     "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-24T16:18:22.637Z",
+    "updated_on": "2021-02-28T16:25:19.836Z",
     "created_on": "2021-02-24T15:19:46.048Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 41,
+  "fields": {
+    "name": "Git Sync",
+    "slug": "git-sync",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "repository": {
+        "branch": {
+          "type": "string",
+          "title": "Branch",
+          "default": "master"
+        },
+        "repository": {
+          "type": "string",
+          "title": "Repository",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/git-sync",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-28T15:28:24.674Z",
+    "created_on": "2021-02-28T15:28:24.674Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 42,
+  "fields": {
+    "name": "Torch Serve",
+    "slug": "torch-serve",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "logs": [
+        "serve",
+        "gatekeeper"
+      ],
+      "flavor": "one",
+      "modelstore": {
+        "meta": {
+          "title": "Models"
+        },
+        "path": {
+          "type": "string",
+          "title": "Path to Model Store",
+          "default": "model-store"
+        },
+        "models": {
+          "type": "string",
+          "title": "Comma-separeted list of models (model1,model2,model3)",
+          "default": ""
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/torchserve",
+    "description": "",
+    "table_field": "https://{{ release }}.{{ global.domain }}/predictions/<model_name>",
+    "updated_on": "2021-03-01T19:58:00.136Z",
+    "created_on": "2021-03-01T15:39:37.525Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 43,
+  "fields": {
+    "name": "FEDn Reducer",
+    "slug": "reducer",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Minio": "one",
+        "MongoDB": "one"
+      }
+    },
+    "chart": "apps/fedn/reducer",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-03-02T07:04:12.832Z",
+    "created_on": "2021-03-02T06:52:48.395Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 44,
+  "fields": {
+    "name": "FEDn Combiner",
+    "slug": "combiner",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "FEDn Reducer": "one",
+        "Persistent Volume": "one"
+      }
+    },
+    "chart": "apps/fedn/combiner",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-03-02T08:54:59.749Z",
+    "created_on": "2021-03-02T08:49:14.526Z"
   }
 }
 ]
