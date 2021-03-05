@@ -1,0 +1,92 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   annotations:
+#     kompose.cmd: kompose convert
+#     kompose.version: 1.20.0 ()
+#   creationTimestamp: null
+#   labels:
+#     io.kompose.service: {{ .Release.Name }}-file-controller
+#     name: {{ .Release.Name }}-file-controller
+#   name: {{ .Release.Name }}-file-controller
+# spec:
+#   replicas: 1
+#   strategy:
+#     type: Recreate
+#   selector:
+#     matchLabels:
+#       name: {{ .Release.Name }}-file-controller
+#   template:
+#     metadata:
+#       annotations:
+#         kompose.cmd: kompose convert
+#         kompose.version: 1.20.0 ()
+#       creationTimestamp: null
+#       labels:
+#         io.kompose.service: {{ .Release.Name }}-file-controller
+#         name: {{ .Release.Name }}-file-controller
+#     spec:
+#       #securityContext:
+#       #  fsGroup: 1000
+#         #runAsNonRoot: true
+#       {{ if .Values.labs.repository }}
+#       initContainers:
+#       - name: git-sync
+#         image: k8s.gcr.io/git-sync:v3.1.1
+#         env:
+#         - name: GIT_SYNC_REPO
+#           value: {{ .Values.labs.repository | quote }}
+#         - name: GIT_SYNC_BRANCH
+#           value: master
+#         - name: GIT_SYNC_DEST
+#           value: work
+#         - name: GIT_SYNC_PERMISSIONS
+#           value: "0777"
+#         - name: GIT_SYNC_ONE_TIME
+#           value: "true"
+#         {{ if .Values.labs.secret }}
+#         - name: GIT_SYNC_SSH
+#           value: "true"
+#         - name: GIT_KNOWN_HOSTS
+#           value: "false"
+#         - name: GIT_SSH_KEY_FILE
+#           value: /etc/git-secret/ssh
+#         - name: git-secret
+#           mountPath: /etc/git-secret/
+#         {{ end }}
+#         volumeMounts:
+#         - name: project-files
+#           mountPath: /tmp/git
+#         #securityContext:
+#         # allowPrivilegeEscalation: false
+#           #readOnlyRootFilesystem: true
+#         #  runAsUser: 1000
+#         #  runAsGroup: 100
+#       {{ end }}
+#       containers:
+#       - name: {{ .Release.Name }}-file-controller
+#         image: scaleoutsystems/file-controller:master
+#         imagePullPolicy: Always
+#         env:
+#         - name: PROJECT_DIR
+#           value: /app/work
+#         ports:
+#         - containerPort: 5000
+#         resources: {}
+#         volumeMounts:
+#         - mountPath: /app/work
+#           name: project-files
+#       {{- if .Values.imagePullSecret }}
+#       imagePullSecrets:
+#         - name: {{ .Values.imagePullSecret }}
+#       {{- end }}
+#       volumes:
+#       - name: project-files
+#         persistentVolumeClaim:
+#           claimName: {{ .Release.Name }}-project-files
+#       {{ if .Values.labs.secret }}
+#       - name: git-secret
+#         secret:
+#           secretName: digits-example-ssh-secret
+#       {{ end }}
+# status: {}

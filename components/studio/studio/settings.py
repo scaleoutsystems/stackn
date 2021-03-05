@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'experiments',
     'deployments',
     'bootstrap_modal_forms',
-    'studio_admin'
+    'studio_admin',
+    'apps'
 ]
 
 REST_FRAMEWORK = {

@@ -15,6 +15,10 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
+from .models import Project, S3, Flavor
+from .forms import FlavorForm
+from apps.models import AppInstance
+from apps.models import Apps
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
@@ -22,6 +26,7 @@ from .helpers import create_project_resources
 from labs.models import Session
 from models.models import Model
 from deployments.models import DeploymentInstance
+from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +42,23 @@ def index(request):
     request.session['next'] = '/projects/'
     return render(request, template, locals())
 
+@login_required
+def create_environment(request, user, project_slug):
+    template = 'create_environment.html'
+    project = Project.objects.get(slug=project_slug)
+    action = "Create"
+
+    apps = Apps.objects.all()
+
+    return render(request, template, locals())
+
+@login_required
+def environments(request, user, project_slug):
+    template = 'environments.html'
+    project = Project.objects.get(slug=project_slug)
+
+    return render(request, template, locals())
+
 
 @login_required
 def settings(request, user, project_slug):
@@ -46,11 +68,15 @@ def settings(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
-    environments = Environment.objects.all()
+    environments = Environment.objects.filter(project=project)
+    apps = Apps.objects.all()
 
-    minio_keys = get_minio_keys(project)
-    decrypted_key = minio_keys['project_key']
-    decrypted_secret = minio_keys['project_secret']
+    s3instances = S3.objects.filter(project=project)
+    flavors = Flavor.objects.filter(project=project)
+    flavor_form = FlavorForm()
+    # minio_keys = get_minio_keys(project)
+    # decrypted_key = minio_keys['project_key']
+    # decrypted_secret = minio_keys['project_secret']
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -88,6 +114,82 @@ def change_description(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
+@login_required
+def create_environment(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create environment in this project.
+    if request.method == 'POST':
+        project = Project.objects.get(slug=project_slug)
+        name = request.POST.get('environment_name')
+        repo = request.POST.get('environment_repository')
+        image = request.POST.get('environment_image')
+        app_pk = request.POST.get('environment_app')
+        app = Apps.objects.get(pk=app_pk)
+        environment = Environment(name=name, slug=name, project=project, repository=repo, image=image, app=app)
+        environment.save()
+    return HttpResponseRedirect(reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_environment(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('environment_pk')
+        # TODO: Check that the user has permission to delete this environment.
+        environment = Environment.objects.get(pk=pk, project=project)
+        environment.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def create_flavor(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create flavor in this project.
+    if request.method == 'POST':
+        # TODO: Check input
+        project = Project.objects.get(slug=project_slug)
+        print(request.POST)
+        name = request.POST.get('flavor_name')
+        cpu_req = request.POST.get('cpu_req')
+        mem_req = request.POST.get('mem_req')
+        gpu_req = request.POST.get('gpu_req')
+        cpu_lim = request.POST.get('cpu_lim')
+        mem_lim = request.POST.get('mem_lim')
+        flavor = Flavor(name=name,
+                        project=project,
+                        cpu_req=cpu_req,
+                        mem_req=mem_req,
+                        gpu_req=gpu_req,
+                        cpu_lim=cpu_lim,
+                        mem_lim=mem_lim)
+        flavor.save()
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_flavor(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('flavor_pk')
+        # TODO: Check that the user has permission to delete this flavor.
+        flavor = Flavor.objects.get(pk=pk, project=project)
+        flavor.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def set_s3storage(request, user, project_slug):
+    # TODO: Ensure that the user has the correct permissions to set this specific
+    # s3 object to storage in this project (need to check that the user has access to the
+    # project as well.)
+    if request.method == 'POST':
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('s3storage')
+        print(pk)
+        s3obj = S3.objects.get(pk=pk)
+        project.s3storage = s3obj
+        project.save()
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
 def grant_access_to_project(request, user, project_slug):
@@ -191,6 +293,7 @@ def create(request):
 
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
+    
     return render(request, template, locals())
 
 
@@ -211,10 +314,26 @@ def details(request, user, project_slug):
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'Project not found.'
-        
+
     if project:
+        pk_list = ''
+        
+        status_success, status_warning = get_status_defs()
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
-        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        resources = list()
+        rslugs = [{"slug": "compute", "name": "Compute"},
+                  {"slug": "serve", "name": "Serve"},
+                  {"slug": "store", "name": "Store"},
+                  {"slug": "misc", "name": "Misc"}]
+        for rslug in rslugs:
+            tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
+            for instance in tmp:
+                pk_list += str(instance.pk)+','
+            
+            apps = Apps.objects.filter(category__slug=rslug['slug'])
+            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
+        pk_list = pk_list[:-1]
+        pk_list = "'"+pk_list+"'"
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())

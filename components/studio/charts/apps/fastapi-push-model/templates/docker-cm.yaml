@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-df
+  namespace: {{ .Values.namespace }}
+data:
+  Dockerfile: |-
+    FROM scaleoutsystems/default-python
+    RUN /bin/bash -c "./mc alias set projminio http://{{ .Values.project.slug }}-minio:9000 {{ .Values.model.access_key }} {{ .Values.model.secret_key }}"
+    RUN /bin/bash -c "./mc cp projminio/{{ .Values.model.bucket }}/{{ .Values.model.obj }} model/model.tar.gz"
+    RUN /bin/bash -c "cd model && tar xvf model.tar.gz"
+    RUN /bin/bash -c "cd model && [[ -f requirements.txt ]] && pip3 install -r requirements.txt && cd .."
+    CMD ["./deploy.sh"]

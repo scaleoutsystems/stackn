@@ -11,6 +11,45 @@ import logging
 
 logger = logging.getLogger('cli')
 
+# def keycloak_token_exchange_studio(user_id, keycloak_url, token, client_id, realm='STACKn', secure=True):
+#     token_url = os.path.join(keycloak_url, 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
+#     # token_url = '{}/realms/{}/protocol/openid-connect/token'.format(kc.admin_url, kc.realm)
+#     req = {'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
+#            'client_id': client_id,
+#            'requested_subject': user_id,
+#            'subject_token': token}
+#     res = requests.post(token_url, data=req, verify=secure)
+#     print(res.text)
+#     token = res.json()['access_token']
+#     refresh_token = res.json()['refresh_token']
+#     return token, refresh_token
+
+# def keycloak_user_auth_implicit(username, password, keycloak_url, client_id='studio-api', realm='STACKn', secure=True):
+#     discovery_url = os.path.join(keycloak_url, 'auth/realms/{}'.format(realm))
+#     res = requests.get(discovery_url, verify=secure)
+#     if res:
+#         realm_info = res.json()
+#         public_key = realm_info['public_key']
+#     else:
+#         print('Failed to discover realm settings: '+realm)
+#         return None
+#     token_url = os.path.join(keycloak_url, 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
+#     req = {'client_id': client_id,
+#            'grant_type': 'implicit-flow',
+#            'username': username,
+#            'password': password}
+#     res = requests.post(token_url, data=req, verify=secure)
+#     if res:
+#         res = res.json()
+#     else:
+#         print('Failed to authenticate.')
+#         print(res.text)
+#     if 'access_token' in res:
+#         return res['access_token'], res['refresh_token'], public_key
+#     else:
+#         print('User: '+username+' denied access to client: '+client_id)
+#         return False
+
 def keycloak_user_auth(username, password, keycloak_url, client_id='studio-api', realm='STACKn', secure=True):
     discovery_url = os.path.join(keycloak_url, 'auth/realms/{}'.format(realm))
     res = requests.get(discovery_url, verify=secure)
@@ -99,7 +138,7 @@ def get_remote_config():
         print('No active project: Create a new project or set an existing project.')
         return [], False
 
-def get_token(client_id='studio-api', realm='STACKn', secure=True):
+def get_token(client_id='studio-api', realm='STACKn', secure=True, do_refresh=False):
     # stackn_config, load_status = load_from_file('stackn', os.path.expanduser('~/.scaleout/'))
     # if not load_status:
     #     print('Failed to load stackn config file.')
@@ -114,14 +153,17 @@ def get_token(client_id='studio-api', realm='STACKn', secure=True):
     
     access_token = token_config['access_token']
 
-    try:
-        public_key_full = '-----BEGIN PUBLIC KEY-----\n'+token_config['public_key']+'\n-----END PUBLIC KEY-----'
-        access_token_json = jwt.decode(access_token,
-                                    public_key_full,
-                                    algorithms='RS256',
-                                    audience='studio-api')
-        # print('Token valid for user '+access_token_json['preferred_username'])
-    except:
+    if do_refresh==False:
+        try:
+            public_key_full = '-----BEGIN PUBLIC KEY-----\n'+token_config['public_key']+'\n-----END PUBLIC KEY-----'
+            access_token_json = jwt.decode(access_token,
+                                        public_key_full,
+                                        algorithms='RS256',
+                                        audience='studio-api')
+            # print('Token valid for user '+access_token_json['preferred_username'])
+        except:
+            do_refresh = True
+    if do_refresh:
         # Try to refresh token
         token_url = os.path.join(token_config['keycloak_url'], 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
         req = {'grant_type': 'refresh_token',
@@ -142,7 +184,7 @@ def get_token(client_id='studio-api', realm='STACKn', secure=True):
         else:
             print('Failed to authenticate with token, please login again.')
             print(res.text)
-            access_token = login(deployment=stackn_config['active'], keycloak_host=token_config['keycloak_url'], studio_host=token_config['studio_url'], secure=secure)
+            access_token = login(client_id=client_id, deployment=stackn_config['active'], keycloak_host=token_config['keycloak_url'], studio_host=token_config['studio_url'], secure=secure)
 
     return access_token, token_config
 
@@ -166,7 +208,7 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
     if not username:
         username = input('Username: ')
     password = getpass()
-    access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host, secure=secure)
+    access_token, refresh_token, public_key = keycloak_user_auth(username, password, keycloak_host, client_id=client_id, secure=secure)
     # dirname = base64.urlsafe_b64encode(host.encode("utf-8")).decode("utf-8")
     dirpath = os.path.expanduser('~/.scaleout/'+deployment)
     if not os.path.exists(dirpath):

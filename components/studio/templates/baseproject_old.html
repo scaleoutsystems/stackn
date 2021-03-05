@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %} {% endblock %}
+
+{% block extra_nav %}
+<li class="nav-item">
+    <div class="nav-link">/</div>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'projects:details' request.user project.slug %}"><b>{{ project.name }}</b></a>
+</li>
+{% endblock %}
+
+{% block sidebar %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col-md-1 new-sidebar" style="min-width: 180px;">
+    <ul class="nav flex-column list-group">
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/house.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'projects:details' request.user project.slug %}">
+                Overview
+            </a>
+        </li>
+        
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/terminal.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'experiments:index' request.user project.slug %}">
+                Experiments
+            </a>
+        </li> -->
+        
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/diamond.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'models:list' request.user project.slug %}">
+                Models
+            </a>
+        </li>
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/documents-alt.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'datasets:page' request.user project.slug 1 %}">
+                Datasets
+            </a>
+        </li> -->
+        <!-- <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/document-richtext.svg' %}" alt="" width="24" height="24"
+                 title="Bootstrap" class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'reports:index' request.user project.slug %}"
+               style="text-align: center;">
+                Metrics
+            </a>
+        </li> -->
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/laptop.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'apps:filtered' request.user project.slug 'compute' %}">
+                Compute
+            </a>
+        </li>
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/plug.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'apps:filtered' request.user project.slug 'serve' %}">
+                Serve
+            </a>
+        </li>
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/plug.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'apps:filtered' request.user project.slug 'store' %}">
+                Store
+            </a>
+        </li>
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+        <img src="{% static '/icons/display.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                class="side-bar-icon">
+        <a class="nav-link side-bar-text" href="{% url 'apps:filtered' request.user project.slug 'misc' %}">
+            Misc
+        </a>
+        </li>
+          <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/graph-up.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'monitor:overview' request.user project.slug %}">
+                Monitor
+            </a>
+        </li>
+        <li class="nav-item list-group-item list-group-item-action sidebar-item">
+            <img src="{% static '/icons/toggles.svg' %}" alt="" width="24" height="24" title="Bootstrap"
+                 class="side-bar-icon">
+            <a class="nav-link side-bar-text" href="{% url 'projects:settings' request.user project.slug %}">
+                Settings
+            </a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %} {% endblock %}
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+{% block extrascripts %} {% endblock %}

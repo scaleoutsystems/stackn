@@ -1,0 +1,126 @@
+{% extends 'baseproject.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<h1 class="h3 mb-3">Project Resource Usage</h1>
+
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <h5 class="card-title">CPU</h5>
+                <!-- <h6 class="card-subtitle text-muted">Total CPU usage for project.</h6> -->
+            </div>
+            <div class="card-body">
+                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                    <canvas id="totalCPUChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card flex-fill w-100">
+            <div class="card-header">
+                <h5 class="card-title">Memory</h5>
+                <!-- <h6 class="card-subtitle text-muted">Total memory usage for project.</h6> -->
+            </div>
+            <div class="card-body">
+                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+
+    function newChart(chart, labels, y_data, ylabel) {
+        new Chart(chart, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total CPU usage',
+                    fill: true,
+                    backgroundColor: 'transparent',
+                    borderColor: window.theme.primary,
+                    data: y_data
+                }]          
+            },
+            options: {
+                elements: {
+                    point: {
+                        radius: 0
+                    }
+                },
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    intersect: false
+                },
+                hover: {
+                    intersect: true
+                },
+                plugins: {
+                    filler: {
+                    propagate: false
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            maxTicksLimit: 15
+                        },
+                        reverse: true,
+                        gridLines: {
+                            color: "rgba(0,0,0,0.05)"
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 100
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: ylabel
+                        },
+                        display: true,
+                        borderDash: [5, 5],
+                        gridLines: {
+                            color: "rgba(0,0,0,0)",
+                            fontColor: "#fff"
+                        }
+                    }]
+                }
+            }
+        });
+    }
+
+    function resourceCharts(chart_id1, chart_id2) {
+        var $labsCPUChart = $(chart_id1);
+        var $labsMEMChart = $(chart_id2);
+        $.ajax({
+            url: "{% url 'monitor:usage' user project.slug %}",
+            success: function (data) {
+                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)')
+                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)')
+    
+            }
+        });
+  
+    };
+  
+    resourceCharts('#totalCPUChart', '#totalMEMChart');
+  
+</script>
+
+
+
+{% endblock %}

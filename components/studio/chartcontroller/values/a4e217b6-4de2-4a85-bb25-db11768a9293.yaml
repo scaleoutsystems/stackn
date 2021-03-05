@@ -1,0 +1,30 @@
+app_action: Create
+app_id: ''
+app_name: mnist-vol
+appname: volume-test2-zrd-86ba
+apps: {}
+chart: apps/volume
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: volume-test2-zrd-86ba
+  client_secret: 15dc6ed1-f4b3-4bbb-8746-9029452c9fce
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: volume-test2-zrd-86ba
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: volume-test2-zrd-86ba
+storageClass: microk8s-hostpath
+volume:
+  size: 1Gi

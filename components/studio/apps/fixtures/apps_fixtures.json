@@ -1,0 +1,826 @@
+[
+{
+  "model": "apps.apps",
+  "pk": 23,
+  "fields": {
+    "name": "Dask Cluster",
+    "slug": "dask-cluster",
+    "category": "compute",
+    "settings": {
+      "workers": {
+        "replicas": {
+          "type": "number",
+          "title": "Replicas",
+          "default": "3"
+        },
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "4Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "100m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "0.5Gi"
+        }
+      },
+      "scheduler": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "1Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "100m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "0.5Gi"
+        }
+      }
+    },
+    "chart": "apps/dask",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:33:18.241Z",
+    "created_on": "2021-02-19T21:32:55.588Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 24,
+  "fields": {
+    "name": "Docker Registry",
+    "slug": "docker_registry",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "default": "password"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": "admin"
+        }
+      }
+    },
+    "chart": "apps/docker-registry",
+    "description": "",
+    "table_field": "Registry URL: https://{{ release }}.{{ global.domain }}, <a href=\"https://{{ release }}.{{ global.domain }}/registry/\">View</a>",
+    "updated_on": "2021-02-20T11:12:31.073Z",
+    "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 25,
+  "fields": {
+    "name": "Environment",
+    "slug": "environment",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Docker Registry": "one"
+      },
+      "logs": [
+        "kaniko"
+      ],
+      "image": {
+        "dockerfile": {
+          "type": "textfield",
+          "title": "Dockerfile",
+          "default": ""
+        }
+      },
+      "container": {
+        "tag": {
+          "type": "string",
+          "title": "Tag",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "default": ""
+        }
+      },
+      "environment": {
+        "name": "from",
+        "type": "any",
+        "title": "From",
+        "quantity": "one"
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "false",
+          "option": "false"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/environment",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-03-01T13:03:00.749Z",
+    "created_on": "2021-02-19T21:35:14.408Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 26,
+  "fields": {
+    "name": "Build Model Image",
+    "slug": "build-model",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Docker Registry": "one"
+      },
+      "logs": [
+        "kaniko"
+      ],
+      "model": "one",
+      "container": {
+        "tag": {
+          "type": "string",
+          "title": "Tag",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/fastapi-push-model",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:36:23.182Z",
+    "created_on": "2021-02-19T21:35:53.056Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 27,
+  "fields": {
+    "name": "Python Model Deployment",
+    "slug": "fastapi-serve",
+    "category": "serve",
+    "settings": {
+      "model": "one",
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limits CPU",
+          "default": "400m"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "200m"
+        },
+        "limits.memory": {
+          "type": "string",
+          "title": "Limits Mem",
+          "default": "1Gi"
+        },
+        "requests.memory": {
+          "type": "string",
+          "title": "Request Mem",
+          "default": "0.5Gi"
+        }
+      },
+      "model_card": {
+        "path": {
+          "type": "string",
+          "title": "Path to model card",
+          "default": "model-card"
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled",
+          "default": "False"
+        }
+      }
+    },
+    "chart": "apps/fastapi-serve",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:37:13.384Z",
+    "created_on": "2021-02-19T21:37:13.384Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 28,
+  "fields": {
+    "name": "Jobs",
+    "slug": "jobs",
+    "category": "compute",
+    "settings": {
+      "job": {
+        "command": {
+          "type": "string",
+          "title": "Command",
+          "default": ""
+        },
+        "schedule": {
+          "type": "string",
+          "title": "Schedule",
+          "default": ""
+        }
+      },
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "logs": [
+        "cronjob"
+      ],
+      "flavor": "one",
+      "environment": {
+        "name": "environment",
+        "type": "match",
+        "title": "Environment",
+        "quantity": "one"
+      }
+    },
+    "chart": "apps/job",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-03-01T13:19:11.899Z",
+    "created_on": "2021-02-19T21:37:43.835Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 29,
+  "fields": {
+    "name": "Lab",
+    "slug": "lab",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "flavor": "one",
+      "environment": {
+        "name": "from",
+        "type": "match",
+        "title": "From",
+        "quantity": "one"
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "true",
+          "option": "true"
+        },
+        "project": {
+          "value": "false",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/lab-test",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-26T19:15:01.360Z",
+    "created_on": "2021-02-19T21:38:15.625Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 30,
+  "fields": {
+    "name": "Minio",
+    "slug": "minio",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "access_key": {
+          "type": "string",
+          "title": "Access Key",
+          "default": "accesskey"
+        },
+        "secret_key": {
+          "type": "string",
+          "title": "Secret Key",
+          "default": "secretkey123"
+        }
+      },
+      "keycloak-config": {
+        "roles": [
+          "readwrite"
+        ],
+        "default-roles": [
+          "readwrite"
+        ]
+      }
+    },
+    "chart": "apps/minio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-27T14:23:24.771Z",
+    "created_on": "2021-02-19T21:38:39.532Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 31,
+  "fields": {
+    "name": "Mongo Express",
+    "slug": "mongo-express",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "MongoDB": "one"
+      }
+    },
+    "chart": "apps/mongo-express",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-25T12:59:16.994Z",
+    "created_on": "2021-02-19T21:39:01.597Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 32,
+  "fields": {
+    "name": "MongoDB",
+    "slug": "mongodb",
+    "category": "store",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "credentials": {
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "default": "password"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": "admin"
+        }
+      }
+    },
+    "chart": "apps/mongodb",
+    "description": "",
+    "table_field": "mongodb://{{ release }}:27017",
+    "updated_on": "2021-02-25T13:18:26.150Z",
+    "created_on": "2021-02-19T21:39:36.578Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 33,
+  "fields": {
+    "name": "RStudio",
+    "slug": "rstudio",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "flavor": "one"
+    },
+    "chart": "apps/rstudio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-19T22:19:09.897Z",
+    "created_on": "2021-02-19T21:40:06.039Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 34,
+  "fields": {
+    "name": "Tensorflow Serving",
+    "slug": "tensorflow-serving",
+    "category": "serve",
+    "settings": {
+      "logs": [
+        "serve",
+        "gatekeeper"
+      ],
+      "model": "one",
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limits CPU",
+          "default": "400m"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "200m"
+        },
+        "limits.memory": {
+          "type": "string",
+          "title": "Limits Mem",
+          "default": "1Gi"
+        },
+        "requests.memory": {
+          "type": "string",
+          "title": "Request Mem",
+          "default": "0.5Gi"
+        }
+      },
+      "model_card": {
+        "path": {
+          "type": "string",
+          "title": "Path to model card",
+          "default": "model-card"
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled",
+          "default": "False"
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/tensorflow-serving",
+    "description": "",
+    "table_field": "http://{{ release }}.{{ global.domain }}/v1/models/models:predict",
+    "updated_on": "2021-02-25T19:30:33.026Z",
+    "created_on": "2021-02-19T21:40:28.051Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 35,
+  "fields": {
+    "name": "Ubuntu Tensorflow",
+    "slug": "ubuntu-tensorflow",
+    "category": "compute",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "resources": {
+        "limits.cpu": {
+          "type": "string",
+          "title": "Limit CPU",
+          "default": "1000m"
+        },
+        "limits.mem": {
+          "type": "string",
+          "title": "Limit Memory",
+          "default": "4Gi"
+        },
+        "requests.cpu": {
+          "type": "string",
+          "title": "Requests CPU",
+          "default": "500m"
+        },
+        "requests.mem": {
+          "type": "string",
+          "title": "Requests Memory",
+          "default": "1Gi"
+        }
+      }
+    },
+    "chart": "apps/wetty",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}/wetty/\">Open</a>",
+    "updated_on": "2021-02-19T22:20:50.471Z",
+    "created_on": "2021-02-19T21:40:50.169Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 36,
+  "fields": {
+    "name": "Persistent Volume",
+    "slug": "volume",
+    "category": "store",
+    "settings": {
+      "volume": {
+        "size": {
+          "type": "string",
+          "title": "Size",
+          "default": "1Gi"
+        }
+      }
+    },
+    "chart": "apps/volume",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-02-19T21:57:55.369Z",
+    "created_on": "2021-02-19T21:41:19.466Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 37,
+  "fields": {
+    "name": "VSCode",
+    "slug": "vscode",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      }
+    },
+    "chart": "apps/vscode",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-20T21:36:06.180Z",
+    "created_on": "2021-02-19T21:41:41.509Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 38,
+  "fields": {
+    "name": "Prostudio",
+    "slug": "prostudio",
+    "category": "misc",
+    "settings": {
+      "prostudio": {
+        "meta": {
+          "title": "Prosilico"
+        },
+        "license": {
+          "type": "textfield",
+          "title": "License",
+          "default": ""
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/prostudio",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-03-04T07:01:22.978Z",
+    "created_on": "2021-02-19T21:42:23.468Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 39,
+  "fields": {
+    "name": "Tetris",
+    "slug": "tetris",
+    "category": "misc",
+    "settings": {},
+    "chart": "apps/tetris",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-25T12:28:29.826Z",
+    "created_on": "2021-02-19T21:42:58.138Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 40,
+  "fields": {
+    "name": "Dash Deployment",
+    "slug": "dash-deployment",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "deployment": {
+        "path": {
+          "type": "string",
+          "title": "Path to folder",
+          "default": ""
+        },
+        "debug": {
+          "type": "boolean",
+          "title": "Debug deployment",
+          "default": "False"
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/dash-app",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-02-28T16:25:19.836Z",
+    "created_on": "2021-02-24T15:19:46.048Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 41,
+  "fields": {
+    "name": "Git Sync",
+    "slug": "git-sync",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "repository": {
+        "branch": {
+          "type": "string",
+          "title": "Branch",
+          "default": "master"
+        },
+        "repository": {
+          "type": "string",
+          "title": "Repository",
+          "default": ""
+        }
+      },
+      "credentials": {
+        "meta": {
+          "title": "Credentials (if private repository, otherwise leave blank)"
+        },
+        "token": {
+          "type": "string",
+          "title": "Token",
+          "default": ""
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/git-sync",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-03-05T13:37:33.256Z",
+    "created_on": "2021-02-28T15:28:24.674Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 42,
+  "fields": {
+    "name": "Torch Serve",
+    "slug": "torch-serve",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "logs": [
+        "serve",
+        "gatekeeper"
+      ],
+      "flavor": "one",
+      "modelstore": {
+        "meta": {
+          "title": "Models"
+        },
+        "path": {
+          "type": "string",
+          "title": "Path to Model Store",
+          "default": "model-store"
+        },
+        "models": {
+          "type": "string",
+          "title": "Comma-separeted list of models (model1,model2,model3)",
+          "default": ""
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/torchserve",
+    "description": "",
+    "table_field": "https://{{ release }}.{{ global.domain }}/predictions/<model_name>",
+    "updated_on": "2021-03-01T19:58:00.136Z",
+    "created_on": "2021-03-01T15:39:37.525Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 43,
+  "fields": {
+    "name": "FEDn Reducer",
+    "slug": "reducer",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Minio": "one",
+        "MongoDB": "one"
+      }
+    },
+    "chart": "apps/fedn/reducer",
+    "description": "",
+    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
+    "updated_on": "2021-03-02T07:04:12.832Z",
+    "created_on": "2021-03-02T06:52:48.395Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 44,
+  "fields": {
+    "name": "FEDn Combiner",
+    "slug": "combiner",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "FEDn Reducer": "one",
+        "Persistent Volume": "one"
+      }
+    },
+    "chart": "apps/fedn/combiner",
+    "description": "",
+    "table_field": "",
+    "updated_on": "2021-03-02T08:54:59.749Z",
+    "created_on": "2021-03-02T08:49:14.526Z"
+  }
+}
+]

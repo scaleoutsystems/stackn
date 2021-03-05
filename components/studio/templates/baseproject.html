@@ -12,30 +12,6 @@
     </a>
 </li>
 <li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'labs:index' request.user project.slug %}">
-        <i class="align-middle" data-feather="tool"></i>
-        <span class="align-middle">Labs</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug %}">
-        <i class="align-middle" data-feather="hard-drive"></i>
-        <span class="align-middle">Datasets</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
-        <i class="align-middle" data-feather="layers"></i>
-        <span class="align-middle">Models</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
-        <i class="align-middle" data-feather="file-text"></i>
-        <span class="align-middle">Metrics</span>
-    </a>
-</li>
-<li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
         <i class="align-middle" data-feather="trending-up"></i>
         <span class="align-middle">Monitor</span>
@@ -53,6 +29,49 @@
         <span class="align-middle">README.md</span>
     </a>
 </li>
+<li class="sidebar-header">
+    Resources
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
+        <i class="align-middle" data-feather="layers"></i>
+        <span class="align-middle">Models</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug %}">
+        <i class="align-middle" data-feather="hard-drive"></i>
+        <span class="align-middle">Datasets</span>
+    </a>
+</li>
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
+        <i class="align-middle" data-feather="file-text"></i>
+        <span class="align-middle">Metrics</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.compute }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Compute</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.serve }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'serve' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.store }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'store' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
+    </a>
+</li>
+<li class="sidebar-item {{ menu.misc }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
+        <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
+    </a>
+</li>
+
+
 {% endblock %}
 
 {% block extra_topnav_items %}

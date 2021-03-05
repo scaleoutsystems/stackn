@@ -1,0 +1,24 @@
+replicas: 1
+namespace: default
+
+global:
+  domain: global.domain
+
+project:
+  slug: project-slug
+
+gatekeeper:
+  image: scaleoutsystems/gatekeeper:latest
+  client_secret: 75ffdab1-605a-49a9-9544-4807072d0908
+  client_id: wetty-test
+  auth_endpoint: https://keycloak.local.stackn.dev/auth/realms
+  skip_tls: 0
+  port: 9090
+
+flavor:
+  limits:
+    cpu: 2000m
+    memory: 12Gi
+  requests:
+    cpu: 200m
+    memory: 1Gi
