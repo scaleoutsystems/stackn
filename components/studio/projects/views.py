@@ -68,7 +68,7 @@ def settings(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
-    environments = Environment.objects.all()
+    environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all()
 
     s3instances = S3.objects.filter(project=project)
