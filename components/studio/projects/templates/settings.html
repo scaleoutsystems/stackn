@@ -34,6 +34,9 @@
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#flavors" role="tab">
                     Flavors
                 </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#environments" role="tab">
+                    Environments
+                </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#transfer" role="tab">
                     Transfer
                 </a>
@@ -213,6 +216,54 @@
                                     <label for="mem_lim">Memory limits</label>
                                     <input type="text" name="mem_lim" id="mem_lim" value="4Gi" class="form-control" />
                                 </div>
+                                <button type="submit" class="btn btn-square btn-primary">Create</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="environments" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Environments</h5>
+                        <form action="{% url 'projects:delete_environment' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <select type="text" class="form-control" id="environment_pk" name="environment_pk" maxlength="256" required>
+                                {% for environment in environments %}
+                                    <option value="{{ environment.pk }}">{{ environment.name }}</option>
+                                {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-square btn-danger">Delete</button>
+                        </form>
+                        <div class="mt-2">
+                            or create new Environment:
+                            <form action="{% url 'projects:create_environment' request.user project.slug %}" method="post" class="mt-2">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="environment_name">Name</label>
+                                    <input type="text" name="environment_name" id="environment_name" value="" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_name">Repository</label>
+                                    <input type="text" name="environment_repository" id="environment_repository" value="" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_image">Image</label>
+                                    <input type="text" name="environment_image" id="environment_image" value="" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_app">Applies to app:</label>
+                                    <select type="text" class="form-control" id="environment_app" name="environment_app" maxlength="256" required>
+                                        {% for app in apps %}
+                                            <option value="{{ app.pk }}">{{ app.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
                                 <button type="submit" class="btn btn-square btn-primary">Create</button>
                             </form>
                         </div>

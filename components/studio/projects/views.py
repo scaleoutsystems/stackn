@@ -69,6 +69,7 @@ def settings(request, user, project_slug):
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.all()
+    apps = Apps.objects.all()
 
     s3instances = S3.objects.filter(project=project)
     flavors = Flavor.objects.filter(project=project)
@@ -114,6 +115,32 @@ def change_description(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
 @login_required
+def create_environment(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create environment in this project.
+    if request.method == 'POST':
+        project = Project.objects.get(slug=project_slug)
+        name = request.POST.get('environment_name')
+        repo = request.POST.get('environment_repository')
+        image = request.POST.get('environment_image')
+        app_pk = request.POST.get('environment_app')
+        app = Apps.objects.get(pk=app_pk)
+        environment = Environment(name=name, slug=name, project=project, repository=repo, image=image, app=app)
+        environment.save()
+    return HttpResponseRedirect(reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_environment(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('environment_pk')
+        # TODO: Check that the user has permission to delete this environment.
+        environment = Environment.objects.get(pk=pk, project=project)
+        environment.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
 def create_flavor(request, user, project_slug):
     # TODO: Ensure that user is allowed to create flavor in this project.
     if request.method == 'POST':
@@ -143,7 +170,7 @@ def delete_flavor(request, user, project_slug):
         project = Project.objects.get(slug=project_slug)
         pk = request.POST.get('flavor_pk')
         # TODO: Check that the user has permission to delete this flavor.
-        flavor = Flavor.objects.get(pk=pk)
+        flavor = Flavor.objects.get(pk=pk, project=project)
         flavor.delete()
     
     return HttpResponseRedirect(
