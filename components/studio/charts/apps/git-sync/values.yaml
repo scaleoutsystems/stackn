@@ -12,3 +12,7 @@ ingress:
 repository:
   repository: git-repository
   branch: master
+
+credentials:
+  token: ""
+  username: ""
