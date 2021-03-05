@@ -1,46 +1,55 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-11">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Models</h2>
-    </div>
-    <div class="row">
-        {% for model in models %}
-        <div class="card col-md-3" style="width: 18rem; margin: 15px;">
-            <div class="card-body">
-                <h5 class="card-title">{{ model.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ model.project.name }}</h6>
-                {% if model.description %}
-                <p class="card-text" style="margin-bottom: 30px;">
-                    {{ model.description }}
-                </p>
-                {% endif %}
-                {% if request.user.is_authenticated %}
-                    {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
-                    <a href="{% url 'models:details' request.user model.project.slug model.id %}" class="card-link">
-                        Model Card
-                    </a>
-                    {% else %}
-                    <a href="{% url 'models:details_public' model.id %}" class="card-link">
-                        Model Card
-                    </a>
-                    {% endif%}
-                {% else %}
-                <a href="{% url 'models:details_public' model.id %}" class="card-link">
-                    Model Card
-                </a>
-                {% endif%}
-                <p class="card-text" style="margin-top: 10px;">
-                    <small class="text-muted">Uploaded at {{ model.uploaded_at }}</small>
-                </p>
+<h1 class="h3 mb-3">Models</h1>
+
+<div class="row">
+
+    {% if not models %}
+    <p>No publicly published services available.</p>
+    {% endif %}
+
+    {% for model in models %}
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="card">
+
+            <div class="card-header px-4 pt-4">
+                <div class="card-actions float-end">
+                    <div class="dropdown show">
+                        <a href="#" data-bs-toggle="dropdown" data-display="static">
+                            <i class="align-middle" data-feather="more-horizontal"></i>
+                        </a>
+                        {% if request.user.is_authenticated %}
+                        {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item"
+                                href="{% url 'models:details' request.user model.project.slug model.id %}">View model
+                                card</a>
+                        </div>
+                        {% else %}
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="{% url 'models:details_public' model.id %}">View model
+                                card</a>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="{% url 'oidc_authentication_init' %}">View model card</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <h5 class="card-title mb-0">{{ model.name }}</h5>
+                <div
+                    class="badge {% if model.status == 'CR' %}bg-warning{% elif model.status == 'DP' %}bg-success{% elif model.status == 'AR' %}bg-danger{% endif %} my-2">
+                    {{ model.get_status_display }}</div>
+            </div>
+            <div class="card-body px-4 pt-2">
+                <p>{{ model.description }}</p>
+                <p>Uploaded at {{ model.uploaded_at }}</p>
             </div>
         </div>
-        {% empty %}
-        <p style="margin-left: 15px;">
-            No publicly published services available.
-        </p>
-        {% endfor %}
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
