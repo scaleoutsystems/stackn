@@ -591,11 +591,36 @@
     "name": "Prostudio",
     "slug": "prostudio",
     "category": "misc",
-    "settings": {},
+    "settings": {
+      "prostudio": {
+        "meta": {
+          "title": "Prosilico"
+        },
+        "license": {
+          "type": "textfield",
+          "title": "License",
+          "default": ""
+        }
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
     "chart": "apps/prostudio",
     "description": "",
     "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-22T07:24:43.334Z",
+    "updated_on": "2021-03-04T07:01:22.978Z",
     "created_on": "2021-02-19T21:42:23.468Z"
   }
 },
@@ -681,12 +706,27 @@
           "title": "Repository",
           "default": ""
         }
+      },
+      "credentials": {
+        "meta": {
+          "title": "Credentials (if private repository, otherwise leave blank)"
+        },
+        "token": {
+          "type": "string",
+          "title": "Token",
+          "default": ""
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": ""
+        }
       }
     },
     "chart": "apps/git-sync",
     "description": "",
     "table_field": "",
-    "updated_on": "2021-02-28T15:28:24.674Z",
+    "updated_on": "2021-03-05T13:37:33.256Z",
     "created_on": "2021-02-28T15:28:24.674Z"
   }
 },
