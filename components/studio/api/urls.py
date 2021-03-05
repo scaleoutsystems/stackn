@@ -13,22 +13,22 @@ router_drf = drfrouters.DefaultRouter()
 
 router = routers.SimpleRouter()
 
-router.register(r'reports', ReportList, base_name='report')
-router.register(r'generators', ReportGeneratorList, base_name='report_generator')
-router.register(r'projects', ProjectList, base_name='project')
+router.register(r'reports', ReportList, basename='report')
+router.register(r'generators', ReportGeneratorList, basename='report_generator')
+router.register(r'projects', ProjectList, basename='project')
 
 models_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
-models_router.register(r'models', ModelList, base_name='model')
-models_router.register(r'labs', LabsList, base_name='lab')
-models_router.register(r'members', MembersList, base_name='members')
-models_router.register(r'dataset', DatasetList, base_name='dataset')
-models_router.register(r'volumes', VolumeList, base_name='volumes')
-models_router.register(r'modellogs', ModelLogList, base_name='modellog')
-models_router.register(r'metadata', MetadataList, base_name='metadata')
-models_router.register(r'jobs', JobsList, base_name='jobs')
+models_router.register(r'models', ModelList, basename='model')
+models_router.register(r'labs', LabsList, basename='lab')
+models_router.register(r'members', MembersList, basename='members')
+models_router.register(r'dataset', DatasetList, basename='dataset')
+models_router.register(r'volumes', VolumeList, basename='volumes')
+models_router.register(r'modellogs', ModelLogList, basename='modellog')
+models_router.register(r'metadata', MetadataList, basename='metadata')
+models_router.register(r'jobs', JobsList, basename='jobs')
 
-router.register(r'deploymentInstances', DeploymentInstanceList, base_name='deploymentInstance')
-router.register(r'deploymentDefinitions', DeploymentDefinitionList, base_name='deploymentDefinition')
+router.register(r'deploymentInstances', DeploymentInstanceList, basename='deploymentInstance')
+router.register(r'deploymentDefinitions', DeploymentDefinitionList, basename='deploymentDefinition')
 
 urlpatterns = [
     path('', include(router_drf.urls)),
