@@ -4,6 +4,7 @@
 
 ### New functionality
 - Studio Administration module to monitor and manage resources as an alternative to Django Admin
+- Brand new STACKn UI
 
 ### Bug fixes
 

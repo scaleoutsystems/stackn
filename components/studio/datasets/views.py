@@ -23,11 +23,7 @@ def page(request, user, project):
         host = project.s3storage.host
         access_key = project.s3storage.access_key
         secret_key = project.s3storage.secret_key
-        print(host)
-        print(access_key)
-        print(secret_key)
         minio_repository = Minio(host.strip('/'), access_key, secret_key)
-        print(minio_repository)
         objects = minio_repository.list_objects('dataset', recursive=True)
         for obj in objects:
             datasets.append({'name': obj.object_name,
