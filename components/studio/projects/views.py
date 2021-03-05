@@ -26,10 +26,7 @@ from .helpers import create_project_resources
 from labs.models import Session
 from models.models import Model
 from deployments.models import DeploymentInstance
-<<<<<<< HEAD
 from apps.views import get_status_defs
-=======
->>>>>>> develop
 
 logger = logging.getLogger(__name__)
 
@@ -317,7 +314,6 @@ def details(request, user, project_slug):
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
         message = 'Project not found.'
-<<<<<<< HEAD
 
     if project:
         pk_list = ''
@@ -338,12 +334,6 @@ def details(request, user, project_slug):
             resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"
-=======
-        
-    if project:
-        activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
-        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
->>>>>>> develop
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())
