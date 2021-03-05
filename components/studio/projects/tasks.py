@@ -15,15 +15,16 @@ def create_keycloak_client_task(project_slug, username, repository):
     # The creator of the project assumes all roles by default.
     print('Creating Keycloak resources.')
     HOST = settings.DOMAIN
-    print('host: '+HOST)
     RELEASE_NAME = str(project_slug)
-    print('release: '+RELEASE_NAME)
+    # This is just a dummy URL -- it doesn't go anywhere.
     URL = 'https://{}/{}/{}'.format(HOST, username, RELEASE_NAME)
-    print(URL)
-    
-    keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username, settings.PROJECT_ROLES, settings.PROJECT_ROLES)
 
-    print('Done Keycloak.')
+    
+    client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username, settings.PROJECT_ROLES, settings.PROJECT_ROLES)
+    if not res_json['success']:
+        print("ERROR: Failed to create keycloak client for project.")
+    else:
+        print('Done creating Keycloak client for project.')
 
 
 def create_settings_file(project_slug):
