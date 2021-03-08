@@ -1,316 +1,262 @@
 {% extends 'baseproject.html' %}
+
 {% block content %}
-<div class="col-md-9">
-    <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
-        <ol class="breadcrumb project-breadcrumb-ol">
-            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-        </ol>
-    </nav>
 
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Settings</h2>
-    </div>
+<h1 class="h3 mb-3">Settings</h1>
 
-    <div class="container-fluid" style="padding:15px;">
-        <h5>General</h5>
-        <form action="{% url 'projects:change_description' request.user project.slug %}" method="POST">
-            {% csrf_token %}
-            <div class="form-group row">
-                <label for="name" class="col-sm-2 col-form-label">Name</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="name" name="name" readonly placeholder="{{ project.name }}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="description" class="col-sm-2 col-form-label">Descriptions</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="description" name="description" rows=5
-                              placeholder="{{ project.description }}"></textarea>
-                </div>
+<div class="row">
+    <div class="col-md-3 col-xl-2">
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Project Settings</h5>
             </div>
 
-            <button type="submit" class="btn btn-primary" name="save">Save</button>
-        </form>
-    </div>
-    
-    {% if user_permissions.view_credentials %}
-    <div class="container-fluid" style="padding: 15px;">
-        <h5>S3 Credentials</h5>
-        <div class="form-group row">
-            <label for="url_minio" class="col-sm-2 col-form-label">URL</label>
-            <div class="col-sm-10">
-                <a class="form-control-plaintext" id="url_minio"
-                   href="https://{{ project.slug }}-minio.{{ url_domain }}/" style="color: #007bff;">
-                    https://{{ project.slug }}-minio.{{ url_domain }}/
+            <div class="list-group list-group-flush" role="tablist">
+                <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#projdesc"
+                    role="tab">
+                    Description
+                </a>
+                {% if user_permissions.add_member %}
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
+                    Access
+                </a>
+                {% endif %}
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
+                    Publish
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
+                    Labs
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#transfer" role="tab">
+                    Transfer
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#delete" role="tab"
+                    style="color: red;">
+                    Delete
                 </a>
             </div>
         </div>
-        <div class="form-group row">
-            <label for="access_key" class="col-sm-2 col-form-label">Access Key</label>
-            <div class="col-sm-10">
-                <input type="url" readonly class="form-control-plaintext" id="access_key"
-                       value="{{ decrypted_key }}">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="secret_key" class="col-sm-2 col-form-label">Secret Key</label>
-            <div class="col-sm-10">
-                <input type="url" readonly class="form-control-plaintext" id="secret_key"
-                       value="{{ decrypted_secret }}">
-            </div>
-        </div>
     </div>
-    {% endif %}
 
-    <!-- Not available with the first release!
+    <div class="col-md-9 col-xl-10">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="projdesc" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Change project description</h5>
 
-    <div class="container-fluid" style="padding:15px;">
-        <h5>Workflows</h5>
-        <h6>Settings for workflows</h6>
+                        <form action="{% url 'projects:change_description' request.user project.slug %}" method="post">
+                            {% csrf_token %}
 
-        <form>
-            <div class="form-group row">
-                <label for="training_workflow" class="col-form-label col-sm-2 pt-0">Default Training workflow</label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="training_workflow" rows="3"></textarea>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="deployment_workflow" class="col-form-label col-sm-2 pt-0">
-                    Default Deployment workflow
-                </label>
-                <div class="col-sm-10">
-                    <textarea class="form-control" id="deployment_workflow" rows="3"></textarea>
-                </div>
-            </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" readonly
+                                    placeholder="{{ project.name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" rows="5" id="description" name="description"
+                                    placeholder="{{ project.description }}"></textarea>
+                            </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-    </div>
-    -->
+                            <button type="submit" class="btn btn-square btn-primary">Save</button>
+                        </form>
 
-    <div class="container-fluid" style="padding:15px;">
-        <h5>Sharing and collaboration</h5>
-        <h6>Settings for sharing and collaboration</h6>
-
-        <form>
-            <fieldset class="form-group">
-                <div class="row">
-                    <legend class="col-form-label col-sm-2 pt-0">Sharing level</legend>
-                    <div class="col-sm-10">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="sharing_level" id="1" value="" checked>
-                            <label class="form-check-label" for="1">
-                                Private
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="sharing_level" id="2" value="" disabled>
-                            <label class="form-check-label" for="2">
-                                Public
-                            </label>
-                        </div>
-                        <!-- Not available with the first release!
-                        
-                        <div class="form-check disabled">
-                            <input class="form-check-input" type="radio" name="sharing_level" id="3" value="" disabled>
-                            <label class="form-check-label" for="3">
-                                Alliance
-                            </label>
-                        </div>
-                        -->
                     </div>
                 </div>
-            </fieldset>
-
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-    </div>
-
-    {% if user_permissions.add_member %}
-    <div class="container-fluid" style="padding: 15px;">
-        <h5>Grant access</h5>
-        <p>For granting/revoking access to this project, select one or more users from the list below.</p>
-        <p>Hold <b>ctrl</b> or <b>shift</b> (or drag with the mouse) to select more than one.</p>
-        {% if platform_users|length == project.authorized.all|length %}
-        <div class="get-started-header">
-            <p>All users have already been added as members to this project.</p>
-        </div>
-        {% else %}
-        <form method="POST" action="{% url 'projects:grant_access' request.user project.slug %}">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <select name="selected_users" required="" multiple="" class="form-control" id="id_selected_users">
-                    {% for user in platform_users %}
-                    {% if user not in project.authorized.all %}
-                    <option value="{{ user.pk }}">
-                        {{ user.username }}
-                    </option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
             </div>
-            <button type="submit" class="btn btn-primary">Grant</button>
-        </form>
-        {% endif %}
-    </div>
-    {% endif %}
+            <div class="tab-pane fade" id="access" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Grant or revoke access</h5>
 
-    {% if user_permissions.add_member and project.authorized.all %}
-    <div class="container-fluid" style="padding: 15px;">
-        <h5>Revoke access</h5>
-        <form method="POST" action="{% url 'projects:revoke_access' request.user project.slug %}">
-            {% csrf_token %}
+                        <p>For granting/revoking access to this project,
+                            select one or more users from the list below.</p>
+                        <p>Hold <b>ctrl</b> or <b>shift</b> (or drag with the mouse)
+                            to select more than one.</p>
 
-            <div class="form-group">
-                <select name="selected_users" required="" multiple="" class="form-control" id="id_selected_users">
-                    {% for user in project.authorized.all %}
-                    <option value="{{ user.pk }}">
-                        {{ user.username }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-danger">Revoke</button>
-        </form>
-    </div>
-    {% endif %}
+                        {% if platform_users|length == project.authorized.all|length %}
+                        <div class="alert alert-success alert-outline alert-dismissible" role="alert">
+                            <div class="alert-icon">
+                                <i class="far fa-fw fa-bell"></i>
+                            </div>
+                            <div class="alert-message">
+                                <strong>Well done!</strong> All users have already been added as members to this
+                                project.
+                            </div>
+                        </div>
+                        {% else %}
+                        <form action="{% url 'projects:grant_access' request.user project.slug %}" method="post">
+                            {% csrf_token %}
 
-    <div class="container-fluid" style="padding:15px;">
-        <h5>Publish project on GitHub</h5>
+                            <div class="mb-3">
+                                <label class="form-label" for="id_selected_users">Unauthorized users</label>
+                                <select name="selected_users" id="id_selected_users" class="form-control" multiple
+                                    required>
+                                    {% for user in platform_users %}
+                                    {% if user not in project.authorized.all %}
+                                    <option value="{{ user.pk }}">
+                                        {{ user.username }}
+                                    </option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-square btn-primary">Grant access</button>
+                        </form>
+                        {% endif %}
+                        {% if project.authorized.all %}
+                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" method="post" style="margin-top: 24px;">
+                            {% csrf_token %}
 
-        {% if not project.clone_url %}
-        <h6 style="padding-bottom: 15px;">
-            Fill in GitHub account's credentials to publish project:
-        </h6>
-
-        <form action="{% url 'projects:publish_project' request.user project.slug %}" method="POST">
-            {% csrf_token %}
-
-            <div class="form-group row">
-                <label for="id_user_name" class="col-sm-2 col-form-label">GitHub username</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="id_user_name" name="user_name" maxlength="256"
-                           required="">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="id_user_password" class="col-sm-2 col-form-label">GitHub password</label>
-                <div class="col-sm-10">
-                    <input type="password" class="form-control" id="id_user_password" name="user_password"
-                           maxlength="256" required="">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Publish</button>
-        </form>
-        {% else %}
-        <h6 style="padding-bottom: 15px;">
-            This project is already available on GitHub.
-        </h6>
-
-        <div class="form-group row">
-            <label for="github_clone_url" class="col-sm-2 col-form-label">Clone URL</label>
-            <div class="col-sm-10">
-                <input type="url" readonly class="form-control-plaintext" id="github_clone_url"
-                       value="{{ project.clone_url }}">
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <div class="container-fluid" style="padding:15px;">
-        <h5 style="padding-bottom: 15px;">Danger Zone</h5>
-        <div>
-            <h6 style="padding-bottom: 15px;">
-                Transfer this project's ownership to another user within your organization.
-            </h6>
-            <form method="POST" style="padding-bottom: 15px;">
-                {% csrf_token %}
-
-                <div class="form-group row">
-                    <label for="id_transfer_to" class="col-sm-2 col-form-label">Transfer to</label>
-
-                    <div class="col-sm-10">
-                        <select class="form-control" type="text" name="transfer_to" maxlength="256" required=""
-                                id="id_transfer_to">
-                            <option value="">--</option>
-                            {% for user in platform_users %}
-                            <option value="{{ user.pk }}">{{ user.username }}</option>
-                            {% endfor %}
-                        </select>
+                            <div class="mb-3">
+                                <label class="form-label" for="id_selected_users">Authorized users</label>
+                                <select name="selected_users" id="id_selected_users" class="form-control" multiple
+                                    required>
+                                    {% for user in project.authorized.all %}
+                                    <option value="{{ user.pk }}">
+                                        {{ user.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-square btn-danger">Revoke access</button>
+                        </form>
+                        {% endif %}
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="publish" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Publish project on GitHub</h5>
 
-                    <label class="col-sm-2 col-form-label"></label>
+                        {% if not project.clone_url %}
+                        <form action="{% url 'projects:publish_project' request.user project.slug %}" method="post">
+                            {% csrf_token %}
 
-                    <div style="padding-left: 15px; padding-top: 5px;">
-                        <button class="btn btn-outline-danger">
-                            <a data-toggle="modal" data-target="#transferModal">
+                            <div class="mb-3">
+                                <label for="id_user_name" class="form-label">GitHub username</label>
+                                <input type="text" class="form-control" id="id_user_name" name="user_name"
+                                    maxlength="256" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_user_password" class="form-label">GitHub password</label>
+                                <input type="password" class="form-control" id="id_user_password" name="user_password"
+                                    maxlength="256" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Publish</button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-success alert-outline alert-dismissible" role="alert">
+                            <div class="alert-icon">
+                                <i class="far fa-fw fa-bell"></i>
+                            </div>
+                            <div class="alert-message">
+                                <strong>This project is already on GitHub!</strong> Clone URL: {{ project.clone_url }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="transfer" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Transfer project ownership</h5>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="id_transfer_to" class="form-label">Transfer to</label>
+                                <select class="form-control" type="text" name="transfer_to" maxlength="256"
+                                    id="id_transfer_to" required>
+                                    {% for user in platform_users %}
+                                    <option value="{{ user.pk }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-square btn-warning" data-bs-toggle="modal"
+                                data-bs-target="#transferModal">
                                 Transfer
-                            </a>
-                        </button>
-                        <div class="modal fade" id="transferModal" tabindex="-1" role="dialog"
-                             aria-labelledby="transferModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="transferModalLabel">Confirm transfer</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Are you sure?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                            Close
-                                        </button>
-                                        <button type="submit" id="transfer" class="btn btn-sm btn-outline-warning">
-                                            Transfer
-                                        </button>
+                            </button>
+                            <div class="modal fade" id="transferModal" tabindex="-1" style="display: none;"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Transfer project ownership</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body m-3">
+                                            <p class="mb-0">Are you sure that you want to transfer this project's
+                                                ownership to the selected user?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-square btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-square btn-warning">Confirm</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+            <div class="tab-pane fade" id="delete" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Delete project</h5>
 
-        <div>
-            <h6 style="padding-bottom: 15px;">
-                Once you delete this project, there is no going back. Please be certain.
-            </h6>
-            <div class="form-group row">
-                <label for="id_delete_button" class="col-sm-2 col-form-label">Delete project</label>
-                <button type="submit" class="btn btn-danger" id="id_delete_button"
-                        style="padding-left: 12px;margin-left: 15px;" data-toggle="modal" data-target="#deleteModal">
-                    Delete
-                </button>
-                <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
-                     aria-labelledby="deleteModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="deleteModalLabel">Confirm delete</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                        <div class="alert alert-danger alert-outline alert-dismissible" role="alert">
+                            <div class="alert-icon">
+                                <i class="far fa-fw fa-bell"></i>
                             </div>
-                            <div class="modal-body">
-                                Are you sure?
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
-                                </button>
-                                <a href="{% url 'projects:delete' request.user project.slug %}">
-                                    <button id="delete" class="btn btn-sm btn-outline-warning">Delete
-                                    </button>
-                                </a>
+                            <div class="alert-message">
+                                <strong>Please be certain!</strong> Once you delete this project, there is no going
+                                back.
                             </div>
                         </div>
+                        <form class="row row-cols-md-auto align-items-center"
+                            action="{% url 'projects:delete' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="col-12">
+                                <label for="id_delete_button">Delete anyway?</label>
+                            </div>
+                            <div class="col-12">
+                                <button type="button" class="btn btn-danger btn-square" id="id_delete_button"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    Delete
+                                </button>
+                                <div class="modal fade" id="deleteModal" tabindex="-1" style="display: none;"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Delete project</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body m-3">
+                                                <p class="mb-0">Are you sure that you want to delete project with name
+                                                    {{ project.name }}?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-square btn-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-square btn-danger">Confirm</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

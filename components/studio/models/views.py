@@ -28,45 +28,11 @@ def index(request):
 @login_required
 def list(request, user, project):
     template = 'models_list.html'
-    project = Project.objects.filter(slug=project).first()
-
+    project = Project.objects.get(slug=project)
     models = Model.objects.filter(project=project)
-    
-    # model_logs = ModelLog.objects.all()
-
-    # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
-
-
-@login_required
-def create(request, user, project):
-    template = 'models_upload.html'
-
-    project = Project.objects.filter(slug=project).first()
-    uid = uuid.uuid4()
-
-    if request.method == 'POST':
-        obj = None
-
-        form = ModelForm(request.POST, request.FILES)
-        if form.is_valid():
-            obj = form.save()
-
-            l = ProjectLog(project=project, module='MO', headline='Model',
-                           description='A new Model {name} has been added'.format(name=obj.name))
-            l.save()
-
-            url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
-        else:
-            url = '/{}/{}/models/'.format(user, project.slug)
-
-        return HttpResponseRedirect(url)
-    else:
-        form = ModelForm()
-
-        return render(request, template, locals())
 
 
 @login_required
@@ -279,17 +245,15 @@ def details_public(request, id):
 
 @login_required
 def delete(request, user, project, id):
-    template = 'model_confirm_delete.html'
 
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
-    if request.method == "POST":
-        l = ProjectLog(project=project, module='MO', headline='Model',
-                       description='Model {name} has been removed'.format(name=model.name))
-        l.save()
+    l = ProjectLog(project=project, module='MO', headline='Model',
+                    description='Model {name} has been removed'.format(name=model.name))
+    l.save()
 
-        model.delete()
+    model.delete()
 
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 

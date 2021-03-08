@@ -28,7 +28,7 @@ def index(request, user, project):
 
     project = Project.objects.filter(slug=project).first()
     print('Project: '+project.slug)
-    experiments = Experiment.objects.filter(project=project)
+    experiments = Experiment.objects.filter(project=project).order_by('-created_at')
     environments = Environment.objects.all()
 
     return render(request, temp, locals())

@@ -19,7 +19,9 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-
+from labs.models import Session
+from models.models import Model
+from deployments.models import DeploymentInstance
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +145,7 @@ def revoke_access_to_project(request, user, project_slug):
 
 @login_required
 def create(request):
-    template = 'index_projects.html'
+    template = 'project_create.html'
 
     if request.method == 'POST':
 
@@ -208,23 +210,13 @@ def details(request, user, project_slug):
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        message = 'No project found'
-
-    filename = None
-    readme = None
-    url = 'http://{}-file-controller/readme'.format(project.slug)
-    try:
-        response = r.get(url)
-        if response.status_code == 200 or response.status_code == 203:
-            payload = response.json()
-            if payload['status'] == 'OK':
-                filename = payload['filename']
-
-                md = markdown.Markdown(extensions=['extra'])
-                readme = md.convert(payload['readme'])
-    except Exception as e:
-        logger.error("Failed to get response from {} with error: {}".format(url, e))
-
+        message = 'Project not found.'
+        
+    if project:
+        activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
+    
     return render(request, template, locals())
 
 
@@ -295,28 +287,28 @@ def publish_project(request, user, project_slug):
 
 
 @login_required
-def load_project_activity(request, user, project_slug):
-    template = 'project_activity.html'
-
-    member = None
+def project_readme(request, user, project_slug):
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    
     project = None
+    username = request.user.username
     try:
-        member = User.objects.get(username=user)
-        project = Project.objects.get(Q(slug=project_slug), Q(owner=member) | Q(authorized=member))
+        owner = User.objects.get(username=username)
+        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        print(e)
+        print('Project not found.')
 
-    if member and project:
-        time_period = request.GET.get('period')
-        if time_period == 'week':
-            last_week = datetime.today() - timedelta(days=7)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_week).order_by('-created_at')
-        elif time_period == 'month':
-            last_month = datetime.today() - timedelta(days=30)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_month).order_by('-created_at')
-        else:
-            project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
-    else:
-        project_logs = ProjectLog.objects.none()
-
-    return render(request, template, {'project_logs': project_logs})
+    readme = None
+    if project:     
+        url = 'http://{}-file-controller/readme'.format(project.slug)
+        try:
+            response = r.get(url)
+            if response.status_code == 200 or response.status_code == 203:
+                payload = response.json()
+                if payload['status'] == 'OK':
+                    md = markdown.Markdown(extensions=['extra'])
+                    readme = md.convert(payload['readme'])
+        except Exception as e:
+            logger.error("Failed to get response from {} with error: {}".format(url, e))
+    
+    return render(request, "project_readme.html", locals())
