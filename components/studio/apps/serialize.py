@@ -2,7 +2,7 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.db.models import Q
 from .models import Apps, AppInstance, AppCategories, AppPermission
-from projects.models import Project, Volume, Flavor, Environment
+from projects.models import Project, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -39,13 +39,15 @@ def serialize_model(form_selection):
 
     return model_json, obj
 
-def serialize_flavor(form_selection):
+def serialize_flavor(form_selection, project):
     print("SERIALIZING FLAVOR")
     flavor_json = dict()
     if 'flavor' in form_selection:
         flavor_id = form_selection.get('flavor', None)
-        flavor = Flavor.objects.get(pk=flavor_id)
-
+        try:
+            flavor = Flavor.objects.get(pk=flavor_id)
+        except:
+            flavor = Flavor.objects.get(name=flavor_id, project=project)
         flavor_json['flavor'] = {
             "requests": {
                 "cpu": flavor.cpu_req,
@@ -68,12 +70,15 @@ def serialize_flavor(form_selection):
 
     return flavor_json
 
-def serialize_environment(form_selection):
+def serialize_environment(form_selection, project):
     print("SERIALIZING ENVIRONMENT")
     environment_json = dict()
     if 'environment' in form_selection:
         environment_id = form_selection.get('environment', None)
-        environment = Environment.objects.get(pk=environment_id)
+        try:
+            environment = Environment.objects.get(pk=environment_id)
+        except:
+            environment = Environment.objects.get(name=environment_id, project=project)
         environment_json['environment'] = {
             "pk": environment.pk,
             "repository": environment.repository,
@@ -97,11 +102,17 @@ def serialize_apps(form_selection):
         if "app:" in key and key[0:4] == "app:":
             
             app_name = key[4:]
-            app = Apps.objects.get(name=app_name)
+            try:
+                app = Apps.objects.get(name=app_name)
+            except:
+                app = Apps.objects.get(slug=app_name)
             parameters['apps'][app.slug] = dict()
             print(app_name)
             print('id: '+str(form_selection[key]))
-            objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
+            try:
+                objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
+            except:
+                objs = AppInstance.objects.filter(name__in=form_selection.get(key))
 
             for obj in objs:
                 app_deps.append(obj)
@@ -151,7 +162,7 @@ def serialize_appobjs(form_selection):
     print(parameters)
     return parameters
 
-def serialize_app(form_selection):
+def serialize_app(form_selection, project):
     print("SERIALIZING APP")
     parameters = dict()
 
@@ -164,10 +175,10 @@ def serialize_app(form_selection):
     prim_params = serialize_primitives(form_selection)
     parameters.update(prim_params)
 
-    flavor_params = serialize_flavor(form_selection)
+    flavor_params = serialize_flavor(form_selection, project)
     parameters.update(flavor_params)
 
-    environment_params = serialize_environment(form_selection)
+    environment_params = serialize_environment(form_selection, project)
     parameters.update(environment_params)
 
     permission_params = serialize_permissions(form_selection)
