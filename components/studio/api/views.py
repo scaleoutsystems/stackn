@@ -78,9 +78,8 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         try:
             run_id = request.data['run_id']
             trained_model = request.data['trained_model']
-            training_started_at = request.data['training_started_at']
+            model_version = request.data['model_version']
             execution_time = request.data['execution_time']
-            code_version = request.data['code_version']
             current_git_repo = request.data['current_git_repo']
             latest_git_commit = request.data['latest_git_commit']
             system_details = request.data['system_details']
@@ -88,9 +87,13 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
             training_status = request.data['training_status']
         except:
             return HttpResponse('Failed to create training session log.', 400)
-
-        new_log = ModelLog(run_id=run_id, trained_model=trained_model, project=project.name, training_started_at=training_started_at, execution_time=execution_time,
-                           code_version=code_version, current_git_repo=current_git_repo, latest_git_commit=latest_git_commit, 
+        if model_version=='latest':
+            print(trained_model)
+            mod = Model.objects_version.latest(trained_model, project)
+        else:
+            mod = Model.objects.get(name=trained_model, version=model_version, project=project)
+        new_log = ModelLog(run_id=run_id, trained_model=trained_model, model_version=mod.version, project=project.name, execution_time=execution_time,
+                           current_git_repo=current_git_repo, latest_git_commit=latest_git_commit, 
                            system_details=system_details, cpu_details=cpu_details, training_status=training_status, )
         new_log.save()
         return HttpResponse('ok', 200)

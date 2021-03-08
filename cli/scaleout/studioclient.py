@@ -706,9 +706,9 @@ class StudioClient():
             Collection.insert_one(data_to_log)
     """     
 
-
+    """
     def retrieve_metadata(self, model, run_id):
-        """ Retrieve metadata logged during model training """
+        #Retrieve metadata logged during model training
 
         md_file = 'src/models/tracking/metadata/{}.pkl'.format(run_id)
         if os.path.isfile(md_file):
@@ -738,14 +738,17 @@ class StudioClient():
                 if not _check_status(r, error_msg="Failed to create metadata log in Studio for run with ID '{}'".format(run_id)):
                     return 
                 print("Created metadata log in Studio for run with ID '{}'".format(run_id))
-            except Exception as e: # Should catch more specific error here
-                print("Error")
+            except (ImportError, OSError) as e: # Should catch more specific error here
+                if ImportError:
+                    print("Could not import the pickle module; therefore, metadata cannot be extracted from your local file.")
+                else:
+                    print("Metadata could not be extracted from your local file.")
                 print(e)
                 return 
         else:
             print("No metadata available for current training session.")
             return 
-
+    """
 
     def run_training_file(self, model, training_file, run_id):
         """ Run training file and return date and time for training, and execution time """
@@ -760,14 +763,13 @@ class StudioClient():
             print("Training of the model was not executed properly.")
         else:
             training_status = 'DO'
-        self.retrieve_metadata(model, run_id)
         return (start_time, execution_time, training_status)
 
 
-    def train(self, model, run_id, training_file, code_version):
+    def train(self, model, model_version, run_id, training_file):
         """ Train a model and log corresponding data in Studio. """
         
-        system_details, cpu_details, git_details = get_run_details(code_version)
+        system_details, cpu_details, git_details = get_run_details()
         print('Running training script...')
         training_output = self.run_training_file(model, training_file, run_id) # Change output of run_training_file
         repo = self.get_repository()
@@ -775,22 +777,126 @@ class StudioClient():
 
         training_data = {"run_id": run_id,
                          "trained_model": model,
-                         "training_started_at": training_output[0],
+                         "model_version": model_version,
                          "execution_time": training_output[1],
-                         "code_version": code_version,
                          "current_git_repo": str(git_details[0]),
                          "latest_git_commit": git_details[1],
                          "system_details": system_details,
                          "cpu_details": cpu_details,
                          "training_status": training_output[2]}  
         url = self.endpoints['modellogs'].format(self.project['id'])+'/'
-        print(git_details)
         r = requests.post(url, json=training_data, headers=self.auth_headers, verify=self.secure_mode)
         if not _check_status(r, error_msg="Failed to create training session log in Studio for {}".format(model)):
             return False
         else:
             print("Created training log for {}".format(model))
+            self.retrieve_metadata(model, run_id)
             return True
+
+
+    def retrieve_metadata(self, model, run_id):
+        """ Retrieve metadata logged during experiment """
+
+        md_dir = 'src/models/tracking/metadata/{}'.format(run_id)
+        if os.path.exists(md_dir):
+            print('Retrieving metadata for current experiment from local storage...')
+            try:
+                import pickle
+                metadata = {
+                    'params': {},
+                    'metrics': {},
+                    'model': {}
+                }
+                for md_file in os.listdir(md_dir):
+                    with open(md_dir + "/" + md_file, 'rb') as metadata_file:
+                        local_metadata = pickle.load(metadata_file)
+                    if 'params' in local_metadata:
+                        metadata['params'] = {**metadata['params'], **local_metadata['params']}
+                    if 'metrics' in local_metadata:
+                        metadata['metrics'] = {**metadata['metrics'], **local_metadata['metrics']}
+                    if 'model' in local_metadata:
+                        metadata['model'] = {**metadata['model'], **local_metadata['model']}
+                    print("Metadata was retrieved successfully from '{}'".format(md_file))
+                post_metadata = {
+                            "run_id": run_id,
+                            "trained_model": model,
+                            "model_details": metadata["model"],
+                            "parameters": metadata["params"],
+                            "metrics": metadata["metrics"]
+                }
+                url = self.endpoints['metadata'].format(self.project['id'])+'/'
+                r = requests.post(url, json=post_metadata, headers=self.auth_headers, verify=self.secure_mode)
+                if r:
+                    print('Successfully created Metadata object for model experiment.')
+                    return True
+                else:
+                    print('Failed to create Metadata object for model experiment.')
+                    print('Status code: {}'.format(r.status_code))
+                    print('Reason: {} - {}'.format(r.reason, r.text))
+                    return False
+            except Exception as e:
+                print("Could not extract metadata from local storage.")
+                print("Reason: {}".format(e))
+                return 
+        else:
+            print("No metadata available for current training session.")
+            return 
+
+
+    def run_experiment(self, model, run_id, data):
+        """ Run experiment and return date and time for training, and execution time """
+
+        start_time = datetime.now()
+        if data["requirements"]:
+            print("Installing requirements")
+            subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
+        for file_name, exp_file in data["pipeline"].items():
+            try:
+                print("Running file '{}'".format(file_name))
+                subprocess.run(['python', exp_file, run_id])
+                experiment_status = 'DO'
+            except Exception as e:
+                print("Experiment failed.")
+                print("Reason: {}".format(e))
+                experiment_status = 'FA'
+        end_time = datetime.now()
+        execution_time = str(end_time - start_time)
+        start_time = start_time.strftime("%Y/%m/%d, %H:%M:%S")
+        return execution_time, experiment_status
+
+
+    def run(self, model, model_version, run_id, data):
+        """ Start model experiment and log corresponding data in Studio. """
+        
+        system_details, cpu_details, git_details = get_run_details()
+        print('Starting experiment...')
+        execution_time, experiment_status = self.run_experiment(model, run_id, data) 
+
+        experiment_data = {"run_id": run_id,
+                         "trained_model": model,
+                         "model_version": model_version,
+                         "execution_time": execution_time,
+                         "current_git_repo": str(git_details[0]),
+                         "latest_git_commit": git_details[1],
+                         "system_details": system_details,
+                         "cpu_details": cpu_details,
+                         "training_status": experiment_status
+        }
+        url = self.endpoints['modellogs'].format(self.project['id'])+'/'
+        r = requests.post(url, json=experiment_data, headers=self.auth_headers, verify=self.secure_mode)
+        if r:
+            print('Successfully created Log object for model experiment.')
+            self.retrieve_metadata(model, run_id)
+            print('Model: {}'.format(model))
+            print('Version: {}'.format(model_version))
+            print('Experiment ID: {}'.format(run_id))
+            print('Execution time: {}'.format(execution_time))
+            return True
+        else:
+            print('Failed to create Log object for model experiment.')
+            print('Status code: {}'.format(r.status_code))
+            print('Reason: {} - {}'.format(r.reason, r.text))
+            return False
 
 
     def predict(self, model, inp, version=None):
