@@ -93,7 +93,7 @@ def serialize_environment(form_selection, project):
     return environment_json
 
 
-def serialize_apps(form_selection):
+def serialize_apps(form_selection, project):
     print("SERIALIZING DEPENDENT APPS")
     parameters = dict()
     parameters['apps'] = dict()
@@ -112,7 +112,7 @@ def serialize_apps(form_selection):
             try:
                 objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
             except:
-                objs = AppInstance.objects.filter(name__in=form_selection.get(key))
+                objs = AppInstance.objects.filter(name__in=form_selection[key], project=project)
 
             for obj in objs:
                 app_deps.append(obj)
@@ -169,7 +169,7 @@ def serialize_app(form_selection, project):
     model_params, model_deps = serialize_model(form_selection)
     parameters.update(model_params)
 
-    app_params, app_deps = serialize_apps(form_selection)
+    app_params, app_deps = serialize_apps(form_selection, project)
     parameters.update(app_params)
 
     prim_params = serialize_primitives(form_selection)

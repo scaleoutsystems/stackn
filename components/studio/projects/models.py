@@ -148,7 +148,7 @@ class S3(models.Model):
 class ProjectTemplate(models.Model):
     name = models.CharField(max_length=512, unique=True)
     description = models.TextField(null=True, blank=True)
-    template = models.JSONField(null=True, blank=True)
+    template = models.TextField(null=True, blank=True)
     def __str__(self):
         return '{}'.format(self.name)
 
