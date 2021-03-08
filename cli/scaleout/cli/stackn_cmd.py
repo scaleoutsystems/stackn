@@ -8,6 +8,8 @@ import random
 import string
 import json
 import uuid
+import subprocess
+
 
 # @click.option('--daemon',
 #               is_flag=True,
@@ -63,7 +65,6 @@ def predict_cmd(ctx, model, version, inp):
     #                     headers={"Authorization": "Token "+token},
     #                     json = inp)
 
-
 @main.command('train')
 @click.option('--log-off', flag_value='log-off', default=False)
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
@@ -80,7 +81,6 @@ def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
     print("Preparing to start training session with '{}' as unique ID.".format(run_id))
     if os.path.isfile(training_file):
         if log_off:
-            import subprocess
             subprocess.run(['python', training_file, run_id])
         else:
             model_exists = search_for_model(ctx, "models", model) 
@@ -95,6 +95,28 @@ def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
             + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))
 
 
+@main.command('dvc')
+@click.pass_context
+def dvc_cmd(ctx):
+    stackn_config, load_status = get_stackn_config()
+    if not load_status:
+        print('Failed to load STACKn config.')
+    else:
+        if 'active_project' in stackn_config:
+            client = ctx.obj['CLIENT']
+            if not os.path.isdir('.dvc'):
+                print("Checking for local DVC installation:")
+                version_control = subprocess.run(["dvc", "version"], stdout=subprocess.PIPE, text=True)
+                if version_control.returncode == 0:
+                    print("\n{}".format(version_control.stdout))
+                    client.dvc_init("install")
+                else:
+                    print("DVC is not installed on your local system. Please install DVC before initializing a dvc setup with 'stackn dvc'")
+            else:
+                print('DVC config already exists in current directory.')
+        else:
+            print("No active project in STACKn config; set an existing project as active using 'stackn set project -p <name of project>'")
+        
 @main.command('run')
 @click.option('--log-off', flag_value='log-off', default=False)
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
