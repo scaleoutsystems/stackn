@@ -8,7 +8,7 @@ import re
 import time
 
 import modules.keycloak_lib as keylib
-from .tasks import create_keycloak_client_task, create_helm_resources_task
+from .tasks import create_keycloak_client_task
 
 def urlify(s):
 
@@ -23,7 +23,6 @@ def urlify(s):
     
 def create_project_resources(project, username, repository=None):
     res1 = create_keycloak_client_task.delay(project.slug, username, [])
-    res2 = create_helm_resources_task.delay(project.slug, project.project_key, project.project_secret, repository)
     # Wait for keycloak task to finish before returning (otherwise user wouldn't have
     # correct Keycloak roles)
     while not res1.ready():
