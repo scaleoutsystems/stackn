@@ -156,7 +156,7 @@ def login(client_id='studio-api', realm='STACKn', deployment=[], keycloak_host=[
         studio_host = input('Studio host: ')
 
     url = "{}/api/settings".format(studio_host)
-    r = requests.get(url)
+    r = requests.get(url, verify=secure)
     if (r.status_code >= 200 or r.status_code <= 299):
         studio_settings = json.loads(r.content)["data"]
         keycloak_host = next(item for item in studio_settings if item["name"] == "keycloak_host")["value"]

@@ -1,26 +1,21 @@
 {% extends 'baseproject.html' %}
+
 {% block content %}
-<div class="col-md-9">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h3>Experiment details</h3>
-    </div>
-
-
-  <div class="form-group row">
-    <div class="col-sm-10">
-      <input type="input" class="form-control" id="experiment_id" placeholder="Email" value="{{ experiment.environment }}" readonly>
-    </div>
-    <div class="col-sm-10">
-      <input type="input" class="form-control" id="experiment_id" placeholder="Email" value="{{ experiment.id }}" readonly>
-    </div>
-    <div class="col-sm-10">
-      <input type="input" class="form-control" id="experiment_command" placeholder="Password" value="{{ experiment.command }}" readonly>
-    </div>
+<div class="body-project">
+  <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
+    <ol class="breadcrumb project-breadcrumb-ol">
+      <li class="breadcrumb-item"><a href="{% url 'experiments:index' request.user project.slug %}">Experiments</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ experiment.pk }}</li>
+    </ol>
+  </nav>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h3>Output</h3>
   </div>
-    <div class="col-sm-10">
-      {% for line in logs %}
-      {{ line }}<br>
-      {% endfor %}
-    </div>
+  <div class="col-md-12 experiment-logs">
+    $ {{ experiment.command }}<br><br>
+    {% for line in logs %}
+    {{ line }}<br>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    models = Model.objects.filter(access='PU')
+    models = Model.objects.filter(access='PU', project__isnull=False)
 
     return render(request, 'models_cards.html', locals())
 
@@ -28,45 +28,11 @@ def index(request):
 @login_required
 def list(request, user, project):
     template = 'models_list.html'
-    project = Project.objects.filter(slug=project).first()
-
+    project = Project.objects.get(slug=project)
     models = Model.objects.filter(project=project)
-    
-    # model_logs = ModelLog.objects.all()
-
-    # TODO: Filter by project and access.
     deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
-
-
-@login_required
-def create(request, user, project):
-    template = 'models_upload.html'
-
-    project = Project.objects.filter(slug=project).first()
-    uid = uuid.uuid4()
-
-    if request.method == 'POST':
-        obj = None
-
-        form = ModelForm(request.POST, request.FILES)
-        if form.is_valid():
-            obj = form.save()
-
-            l = ProjectLog(project=project, module='MO', headline='Model',
-                           description='A new Model {name} has been added'.format(name=obj.name))
-            l.save()
-
-            url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
-        else:
-            url = '/{}/{}/models/'.format(user, project.slug)
-
-        return HttpResponseRedirect(url)
-    else:
-        form = ModelForm()
-
-        return render(request, template, locals())
 
 
 @login_required
@@ -145,25 +111,40 @@ def details(request, user, project, id):
     else:
         form = GenerateReportForm()
 
-    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model, model_version=model.version)
     model_logs = []
     for log in log_objects:
+        try:
+            run_md = Metadata.objects.get(project=project.name, trained_model=model, run_id=log.run_id)
+            params = ast.literal_eval(run_md.parameters)
+            metrics = ast.literal_eval(run_md.metrics)
+            model_details = ast.literal_eval(run_md.model_details)
+            metadata_exists = True
+        except Exception as e:
+            params = ""
+            metrics = ""
+            model_details = ""
+            metadata_exists = False
         model_logs.append({
             'id': log.id,
+            'run_id': log.run_id,
             'trained_model': log.trained_model,
             'training_status': log.training_status,
             'training_started_at': log.training_started_at,
             'execution_time': log.execution_time,
-            'code_version': log.code_version,
             'current_git_repo': log.current_git_repo,
             'latest_git_commit': log.latest_git_commit,
             'system_details': ast.literal_eval(log.system_details),
-            'cpu_details': ast.literal_eval(log.cpu_details)
+            'cpu_details': ast.literal_eval(log.cpu_details),
+            'params': params,
+            'metrics': metrics,
+            'model_details': model_details,
+            'metadata_exists': metadata_exists
         })
-
-    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
+        
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model).order_by('id')
     if md_objects:
-        metrics = get_chart_data(md_objects)
+        metrics = get_chart_data(md_objects, project, model)
 
     filename = None
     readme = None
@@ -183,23 +164,30 @@ def details(request, user, project, id):
 
     return render(request, 'models_details.html', locals())
 
-def get_chart_data(md_objects):
+def get_chart_data(md_objects, project, model):
     new_data.clear()
     metrics_pre = []
     metrics = []
     for md_item in md_objects:
-        metrics_pre.append({
-            'run_id': md_item.run_id,
-            'metrics': ast.literal_eval(md_item.metrics),
-            'parameters': ast.literal_eval(md_item.parameters)
-        })
+        try:
+            log = ModelLog.objects.get(project=project.name, trained_model=model, run_id=md_item.run_id)
+            time = log.training_started_at.strftime("%Y/%m/%d, %H:%M:%S")
+            metrics_pre.append({
+                'run_id': md_item.run_id,
+                'metrics': ast.literal_eval(md_item.metrics),
+                'parameters': ast.literal_eval(md_item.parameters),
+                'date': time.replace('/', '-').replace(',', '') 
+            })
+        except:
+            print("Could not retrieve timestamp for training run")
     for m in metrics_pre: 
         for key, value in m["metrics"].items():
-            new_data[key].append([m["run_id"], value, m["parameters"]])
+            new_data[key].append([m["run_id"], value, m["parameters"], m["date"]])
     for key, value in new_data.items():
         data = []
         labels = []
         params = []
+        dates = []
         run_id = []
         run_counter = 0
         for item in value:
@@ -208,10 +196,12 @@ def get_chart_data(md_objects):
             run_id.append(item[0])
             data.append(item[1])
             params.append(item[2])
+            dates.append(item[3])
         metrics.append({
             "metric": key,
             "details": {
                 "run_id": run_id,
+                "dates": dates,
                 "labels": labels,
                 "data": data,
                 "params": params
@@ -255,18 +245,33 @@ def details_public(request, id):
 
 @login_required
 def delete(request, user, project, id):
-    template = 'model_confirm_delete.html'
 
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
-    if request.method == "POST":
-        l = ProjectLog(project=project, module='MO', headline='Model',
-                       description='Model {name} has been removed'.format(name=model.name))
-        l.save()
+    l = ProjectLog(project=project, module='MO', headline='Model',
+                    description='Model {name} has been removed'.format(name=model.name))
+    l.save()
 
-        model.delete()
+    model.delete()
 
         return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
 
     return render(request, template, locals())
+
+
+def metric_chart(request, user, project, id):
+    project = Project.objects.filter(slug=project).first()
+    model = Model.objects.filter(id=id).first()
+    versions = []
+    dates = []
+    same_name_models = Model.objects.filter(project=project, name=model)
+    for model in same_name_models:
+        model_version = model.version
+        uploaded_at = model.uploaded_at.strftime("%Y/%m/%d, %H:%M:%S")
+        versions.append(model_version)
+        dates.append(uploaded_at.replace('/', '-').replace(',', ''))
+    return JsonResponse(data={
+        'dates': dates,
+        'version': versions,
+    })

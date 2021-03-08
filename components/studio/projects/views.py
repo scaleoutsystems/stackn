@@ -19,7 +19,9 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-
+from labs.models import Session
+from models.models import Model
+from deployments.models import DeploymentInstance
 
 logger = logging.getLogger(__name__)
 
@@ -89,21 +91,12 @@ def change_description(request, user, project_slug):
 
 @login_required
 def grant_access_to_project(request, user, project_slug):
-    project = Project.objects.filter(slug=project_slug).first()
+
+    project = Project.objects.get(slug=project_slug)
 
     if request.method == 'POST':
 
-        print(request.POST)
-        # if form.is_valid():
-        # print('Form valid:')
-        # print(form.is_valid())
-
-        selected_users = request.POST.getlist('selected_users') #form.cleaned_data.get('selected_users')
-        print('Selected users:')
-        print(request.POST.getlist('selected_users'))
-        print('....')
-        project.authorized.set(selected_users)
-        project.save()
+        selected_users = request.POST.getlist('selected_users')
 
         l = ProjectLog(project=project, module='PR', headline='New members',
                        description='{number} new members have been added to the Project'.format(
@@ -115,6 +108,7 @@ def grant_access_to_project(request, user, project_slug):
 
         for selected_user in selected_users:
             user_tmp = User.objects.get(pk=selected_user)
+            project.authorized.add(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
             kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
@@ -123,8 +117,35 @@ def grant_access_to_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+def revoke_access_to_project(request, user, project_slug):
+
+    project = Project.objects.get(slug=project_slug)
+
+    if request.method == 'POST':
+
+        selected_users = request.POST.getlist('selected_users')
+
+        l = ProjectLog(project=project, module='PR', headline='Removed Project members',
+                       description='{number} of members have been removed from the Project'.format(
+                           number=len(selected_users)))
+        l.save()
+
+        if len(selected_users) == 1:
+            selected_users = list(selected_users)
+
+        for selected_user in selected_users:
+            user_tmp = User.objects.get(pk=selected_user)
+            project.authorized.remove(user_tmp)
+            username_tmp = user_tmp.username
+            logger.info('Trying to add user {} to project.'.format(username_tmp))
+            kc.keycloak_remove_role_from_user(project.slug, username_tmp, 'member')
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
 def create(request):
-    template = 'index_projects.html'
+    template = 'project_create.html'
 
     if request.method == 'POST':
 
@@ -189,25 +210,13 @@ def details(request, user, project_slug):
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        message = 'No project found'
-
-    filename = None
-    readme = None
-    url = 'http://{}-file-controller/readme'.format(project.slug)
-    try:
-        response = r.get(url)
-        if response.status_code == 200 or response.status_code == 203:
-            payload = response.json()
-            if payload['status'] == 'OK':
-                filename = payload['filename']
-
-                md = markdown.Markdown(extensions=['extra'])
-                readme = md.convert(payload['readme'])
-    except Exception as e:
-        logger.error("Failed to get response from {} with error: {}".format(url, e))
-
-    project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
-
+        message = 'Project not found.'
+        
+    if project:
+        activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+        labs = Session.objects.filter(project=project).order_by('-created_at')[:10]
+        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
+    
     return render(request, template, locals())
 
 
@@ -278,19 +287,28 @@ def publish_project(request, user, project_slug):
 
 
 @login_required
-def load_project_activity(request, user, project_slug):
-    template = 'project_activity.html'
+def project_readme(request, user, project_slug):
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    
+    project = None
+    username = request.user.username
+    try:
+        owner = User.objects.get(username=username)
+        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
+    except Exception as e:
+        print('Project not found.')
 
-    time_period = request.GET.get('period')
-    if time_period == 'week':
-        last_week = datetime.today() - timedelta(days=7)
-        project_logs = ProjectLog.objects.filter(created_at__gte=last_week).order_by('-created_at')
-    elif time_period == 'month':
-        last_month = datetime.today() - timedelta(days=30)
-        project_logs = ProjectLog.objects.filter(created_at__gte=last_month).order_by('-created_at')
-    else:
-        project_logs = ProjectLog.objects.all().order_by('-created_at')
-
-    return render(request, template, {'project_logs': project_logs})
-
-
+    readme = None
+    if project:     
+        url = 'http://{}-file-controller/readme'.format(project.slug)
+        try:
+            response = r.get(url)
+            if response.status_code == 200 or response.status_code == 203:
+                payload = response.json()
+                if payload['status'] == 'OK':
+                    md = markdown.Markdown(extensions=['extra'])
+                    readme = md.convert(payload['readme'])
+        except Exception as e:
+            logger.error("Failed to get response from {} with error: {}".format(url, e))
+    
+    return render(request, "project_readme.html", locals())

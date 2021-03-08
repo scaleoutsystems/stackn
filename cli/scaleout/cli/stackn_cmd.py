@@ -65,19 +65,18 @@ def predict_cmd(ctx, model, version, inp):
     #                     headers={"Authorization": "Token "+token},
     #                     json = inp)
 
-
-
 @main.command('train')
 @click.option('--log-off', flag_value='log-off', default=False)
 @click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
 @click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
 @click.option('-f', '--training-file', required=False, default="src/models/train.py")
-@click.option('-v', '--version', prompt=True, cls=Determinant, determinant='log_off')
+#@click.option('-c', '--code-version', prompt=True, cls=Determinant, determinant='log_off')
+@click.option('-v', '--model-version', default='latest')
 @click.pass_context
-def train_cmd(ctx, log_off, model, run_id, training_file, version):
+def train_cmd(ctx, log_off, model, run_id, training_file, model_version=[]):
     """ Train a model and log metadata """
     
-    if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): # Only checks locally. Should we check if there exists a log on Studio with the same ID as well?
+    if os.path.isfile('src/models/tracking/metadata/{}.pkl'.format(run_id)): 
         run_id = new_id(run_id)
     print("Preparing to start training session with '{}' as unique ID.".format(run_id))
     if os.path.isfile(training_file):
@@ -87,13 +86,13 @@ def train_cmd(ctx, log_off, model, run_id, training_file, version):
             model_exists = search_for_model(ctx, "models", model) 
             if model_exists:
                 client = ctx.obj['CLIENT']
-                client.train(model, run_id, training_file, version)
+                client.train(model, model_version, run_id, training_file)
             else: 
                 print("The model '{}' does not exist in the active project and cannot be trained.".format(model))
     else:
         current_dir = os.getcwd()
         print("Could not start a training session. Check that you have initialized a model "\
-            + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))    
+            + "in '{}' and that the file '{}' exists.".format(current_dir, training_file))
 
 
 @main.command('dvc')
@@ -118,3 +117,38 @@ def dvc_cmd(ctx):
         else:
             print("No active project in STACKn config; set an existing project as active using 'stackn set project -p <name of project>'")
         
+@main.command('run')
+@click.option('--log-off', flag_value='log-off', default=False)
+@click.option('-m', '--model', prompt=True, cls=Determinant, determinant='log_off')
+@click.option('-i', '--run-id', required=False, default=str(uuid.uuid1().hex))
+@click.option('-f', '--config-file', required=False, default="pipeline.json")
+@click.option('-v', '--model-version', default='latest')
+@click.pass_context
+def run_cmd(ctx, log_off, model, run_id, config_file, model_version=[]):
+    """ Conduct experiment as specified in pipeline.json """
+
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+        if log_off:
+            import subprocess
+            if data["requirements"]:
+                print("Installing requirements")
+                subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
+            for file_name, exp_file in data["pipeline"].items():
+                try:
+                    print("Running file '{}'".format(file_name))
+                    subprocess.run(['python', exp_file])
+                except Exception as e:
+                    print("Experiment failed.")
+                    print("Reason: {}".format(e))
+        else:
+            model_exists = search_for_model(ctx, "models", model)
+            if model_exists:
+                client = ctx.obj['CLIENT']
+                client.run(model, model_version, run_id, data)
+            else: 
+                print("The model '{}' does not exist in the active project.".format(model)) 
+    except Exception as e:
+        print("Could not start experiment.")
+        print("Reason: {}".format(e))
