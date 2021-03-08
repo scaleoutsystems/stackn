@@ -15,7 +15,7 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
-from .models import Project, S3, Flavor
+from .models import Project, S3, Flavor, ProjectTemplate
 from .forms import FlavorForm
 from apps.models import AppInstance
 from apps.models import Apps
@@ -23,7 +23,7 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-from labs.models import Session
+from .parse_template import create_resources_from_template
 from models.models import Model
 from deployments.models import DeploymentInstance
 from apps.views import get_status_defs
@@ -248,6 +248,7 @@ def revoke_access_to_project(request, user, project_slug):
 @login_required
 def create(request):
     template = 'project_create.html'
+    templates = ProjectTemplate.objects.all()
 
     if request.method == 'POST':
 
@@ -269,8 +270,13 @@ def create(request):
             success = False
 
         try:
-            # Create project resources
+            # Create project resources (Keycloak only)
             create_project_resources(project, request.user.username, repository)
+
+            # Create resources from the chosen template
+            project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
+            create_resources_from_template(request, request.user, project, project_template.template)
+
             # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
             request.session.save()
