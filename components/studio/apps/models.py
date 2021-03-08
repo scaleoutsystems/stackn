@@ -6,7 +6,7 @@ from django.conf import settings
 from django.template import engines
 from deployments.models import HelmResource
 from models.models import Model
-from projects.models import Project, Volume
+from projects.models import Project
 from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
 from modules import keycloak_lib as keylib

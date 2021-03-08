@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Volume, Flavor, Environment
+from projects.models import Project, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib

@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Volume, Flavor, Environment
+from projects.models import Project, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -160,7 +160,7 @@ def appsettings(request, user, project, ai_id):
     return render(request, template, locals())
 
 
-def create(request, user, project, app_slug):
+def create(request, user, project, app_slug, data=[]):
     template = 'create.html'
     app_action = "Create"
     
@@ -179,17 +179,24 @@ def create(request, user, project, app_slug):
     # Set up form
     form = generate_form(aset, project, app, request.user, [])
 
-    if request.method == "POST":
-        app_name = request.POST.get('app_name')
-        parameters_out, app_deps, model_deps = serialize_app(request.POST)
+    if request.method == "POST" or data:
+        if not data:
+            data = request.POST
+        print("INPUT")
+        print(data)
+        app_name = data.get('app_name')
+        parameters_out, app_deps, model_deps = serialize_app(data, project)
 
-        if request.POST.get('app_action') == "Create":
+        if data.get('app_action') == "Create":
             permission = AppPermission(name=app_name)
             permission.save()
-        elif request.POST.get('app_action') == "Settings":
-            instance = AppInstance.objects.get(pk=request.POST.get('app_id'))
+        elif data.get('app_action') == "Settings":
+            instance = AppInstance.objects.get(pk=data.get('app_id'))
             permission = instance.permission
-
+        else:
+            print("No action set, aborting...")
+            print(data.get('app_action'))
+            return JsonResponse({'status': 'failed', 'reason': 'app_action not set.'})
         permission.public = False
         permission.projects.set([])
         permission.users.set([])
@@ -217,7 +224,7 @@ def create(request, user, project, app_slug):
 
 
 
-        if request.POST.get('app_action') == "Create":
+        if data.get('app_action') == "Create":
             instance = AppInstance(name=app_name,
                                 app=app,
                                 project=project,
@@ -245,7 +252,7 @@ def create(request, user, project, app_slug):
             # Setting up Keycloak and deploying resources.
             deploy_resource.delay(instance.pk, "create")
 
-        elif request.POST.get('app_action') == "Settings":
+        elif data.get('app_action') == "Settings":
             print("UPDATING APP DEPLOYMENT")
             print(instance)
             instance.name = app_name
@@ -258,6 +265,8 @@ def create(request, user, project, app_slug):
         else:
             raise Exception("Incorrect action on app.")
         
+        if 'apicall' in request.GET:
+            return JsonResponse({'status': 'ok'})
         if 'from' in request.GET:
             from_page = request.GET.get('from')
             if from_page == "overview":
