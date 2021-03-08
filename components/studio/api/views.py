@@ -19,9 +19,8 @@ from projects.models import Environment
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
     DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer, \
-    ExperimentSerializer, Experiment
+    DeploymentDefinitionSerializer, UserSerializer, \
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -119,42 +118,6 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
                           model_details=model_details, parameters=parameters, metrics=metrics, )
         new_md.save()
         return HttpResponse('ok', 200)
-
-
-
-class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission,)
-    serializer_class = LabSessionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'name', 'lab_session_owner']
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the Lab Sessions
-        for the currently authenticated user.
-        """
-
-        return Session.objects.filter(project__pk=self.kwargs['project_pk'])
-
-    def create(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-
-        uid = uuid.uuid4()
-        name = str(project.slug) + str(uid)[0:7]
-        try:
-            flavor_slug = request.data['flavor']
-            environment_slug = request.data['environment']
-        except Exception as e:
-            print(e)
-            return HttpResponse('Failed to create a Lab Session.', 400)
-
-        lab_session = Session(id=uid, name=name, flavor_slug=flavor_slug, environment_slug=environment_slug,
-                              project=project, lab_session_owner=request.user)
-        lab_session.extraVols = []
-        if 'extraVols' in request.data:
-            lab_session.extraVols = request.data['extraVols']
-        lab_session.save()
-        return HttpResponse('Ok.', 200)
 
 class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
@@ -379,68 +342,6 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
 
-class JobsList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = ExperimentSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'username', 'project']
-    def get_queryset(self):
-        jobs = Experiment.objects.filter(project__pk=self.kwargs['project_pk'])
-        return jobs
-    
-    def create(self, request, *args, **kwargs):
-        try:
-            project = Project.objects.get(id=self.kwargs['project_pk'])
-            environment = Environment.objects.get(name=request.data['environment'])
-            job = Experiment(username=request.user.username,
-                             command=request.data['command'],
-                             environment=environment,
-                             project=project,
-                             schedule=request.data['schedule'])
-            job.options = request.data
-            job.save()                 
-        except Exception as err:
-            print(err)
-            return HttpResponse('Failed to create job.', 400)
-        return HttpResponse('ok', 200)
-
-class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = VolumeSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'slug', 'created_by']
-    def get_queryset(self):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-        volumes = Volume.objects.filter(project_slug=project.slug)
-        return volumes
-
-    def create(self, request, *args, **kwargs):
-        try:
-            project = Project.objects.get(id=self.kwargs['project_pk'])
-            name = request.data['name']
-            size = request.data['size']
-            proj_slug = project.slug
-            created_by = request.user.username
-            volume = Volume(name=name, size=size, created_by=created_by, project_slug=proj_slug)
-            volume.save()
-        except Exception as err:
-            print(err)
-            return HttpResponse('Failed to create volume.', 400)
-        return HttpResponse('ok', 200)
-    
-    def destroy(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-        volume = Volume.objects.get(pk=self.kwargs['pk'], project_slug=project.slug)
-        try:
-            volume.helmchart.delete()
-            print('OK')
-            return HttpResponse('ok', 200)
-        except Exception as err:
-            print('Failed')
-            print(err)
-            return HttpResponse('Failed to delete volume', 400)
 
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):

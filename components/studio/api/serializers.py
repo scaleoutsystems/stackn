@@ -2,12 +2,11 @@ from rest_framework.serializers import ModelSerializer
 
 from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
-from projects.models import Project, Volume, S3
+from projects.models import Project, S3
 from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
-from experiments.models import Experiment
-from labs.models import Session
 from django.contrib.auth.models import User
+
 class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
@@ -70,14 +69,6 @@ class ProjectSerializer(ModelSerializer):
             'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 's3storage', 'updated_at',
             'created_at', 'repository', 'repository_imported')
 
-
-class LabSessionSerializer(ModelSerializer):
-    class Meta:
-        model = Session
-        fields = (
-            'id', 'name', 'slug', 'project', 'lab_session_owner', 'flavor_slug', 'environment_slug', 'status',
-            'created_at', 'updated_at')
-
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
@@ -94,13 +85,3 @@ class FileModelSerializer(ModelSerializer):
     class Meta:
         model = FileModel
         fields = ['id', 'name', 'bucket']
-
-class VolumeSerializer(ModelSerializer):
-    class Meta:
-        model = Volume
-        fields = ['id', 'name', 'slug', 'size', 'settings', 'created_by', 'created_on', 'updated_on']
-
-class ExperimentSerializer(ModelSerializer):
-    class Meta:
-        model = Experiment
-        fields = ['id', 'username', 'command', 'environment', 'project', 'schedule', 'created_at', 'uploaded_at']
