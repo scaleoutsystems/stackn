@@ -1,7 +1,7 @@
 from django.shortcuts import render, reverse
 from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from .exceptions import ProjectCreationException
 from .helpers import delete_project_resources
 from django.contrib.auth.models import User
@@ -23,9 +23,9 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-from .parse_template import create_resources_from_template
+from .tasks import create_resources_from_template
 from models.models import Model
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
@@ -177,17 +177,25 @@ def delete_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
-def set_s3storage(request, user, project_slug):
+def set_s3storage(request, user, project_slug, s3storage=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # s3 object to storage in this project (need to check that the user has access to the
     # project as well.)
-    if request.method == 'POST':
+    if request.method == 'POST' or s3storage:
         project = Project.objects.get(slug=project_slug)
-        pk = request.POST.get('s3storage')
-        print(pk)
-        s3obj = S3.objects.get(pk=pk)
+        
+        if s3storage:
+            s3obj = S3.objects.get(name=s3storage, project=project)
+        else:
+            pk = request.POST.get('s3storage')
+            s3obj = S3.objects.get(pk=pk)
+
         project.s3storage = s3obj
         project.save()
+
+        if s3storage:
+            return JsonResponse({"status": "ok"})
+
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
@@ -275,7 +283,7 @@ def create(request):
 
             # Create resources from the chosen template
             project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
-            create_resources_from_template(request, request.user, project, project_template.template)
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
             # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
