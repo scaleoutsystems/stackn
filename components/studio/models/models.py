@@ -74,7 +74,7 @@ class Model(models.Model):
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
-    s3 = models.OneToOneField('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
+    s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(
         'projects.Project',
