@@ -5,6 +5,7 @@ from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment
 from models.models import Model
@@ -15,6 +16,7 @@ from .tasks import deploy_resource, delete_resource
 import requests
 import flatten_json
 import uuid
+import time
 from datetime import datetime, timedelta
 from .generate_form import generate_form
 from .helpers import create_instance_params
@@ -160,14 +162,19 @@ def appsettings(request, user, project, ai_id):
     return render(request, template, locals())
 
 
-def create(request, user, project, app_slug, data=[]):
+def create(request, user, project, app_slug, data=[], wait=False):
     template = 'create.html'
     app_action = "Create"
     
-    if 'from' in request.GET:
-        from_page = request.GET.get('from')
+    if request:
+        user = request.user
+        if 'from' in request.GET:
+            from_page = request.GET.get('from')
+        else:
+            from_page = 'filtered'
     else:
-        from_page = 'filtered'
+        from_page = ''
+        user = User.objects.get(username=user)
 
 
     existing_app_name = ""
@@ -177,9 +184,9 @@ def create(request, user, project, app_slug, data=[]):
     aset = app.settings
 
     # Set up form
-    form = generate_form(aset, project, app, request.user, [])
+    form = generate_form(aset, project, app, user, [])
 
-    if request.method == "POST" or data:
+    if data or request.method == "POST":
         if not data:
             data = request.POST
         print("INPUT")
@@ -219,7 +226,7 @@ def create(request, user, project, app_slug, data=[]):
             print(parameters_out)
             permission.projects.set([project])
         elif parameters_out['permissions']['private']:
-            permission.users.set([request.user])
+            permission.users.set([user])
         permission.save()
 
 
@@ -230,7 +237,7 @@ def create(request, user, project, app_slug, data=[]):
                                 project=project,
                                 info={},
                                 parameters=parameters_out,
-                                owner=request.user)
+                                owner=user)
             
             
             
@@ -250,7 +257,10 @@ def create(request, user, project, app_slug, data=[]):
             instance.model_dependencies.set(model_deps)
 
             # Setting up Keycloak and deploying resources.
-            deploy_resource.delay(instance.pk, "create")
+            res = deploy_resource.delay(instance.pk, "create")
+            if wait:
+                while not res.ready():
+                    time.sleep(0.1)
 
         elif data.get('app_action') == "Settings":
             print("UPDATING APP DEPLOYMENT")
@@ -261,24 +271,24 @@ def create(request, user, project, app_slug, data=[]):
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)
 
-            deploy_resource.delay(instance.pk, "update")
+            res = deploy_resource.delay(instance.pk, "update")
         else:
             raise Exception("Incorrect action on app.")
         
-        if 'apicall' in request.GET:
-            return JsonResponse({'status': 'ok'})
-        if 'from' in request.GET:
-            from_page = request.GET.get('from')
-            if from_page == "overview":
+        if request:
+            if 'from' in request.GET:
+                from_page = request.GET.get('from')
+                if from_page == "overview":
+                    return HttpResponseRedirect(
+                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
+                elif from_page == "filtered":
+                    return HttpResponseRedirect(
+                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+            else:
                 return HttpResponseRedirect(
-                    reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
-            elif from_page == "filtered":
-                return HttpResponseRedirect(
-                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
         else:
-            return HttpResponseRedirect(
-                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
-
+            return JsonResponse({"status": "ok"})
     return render(request, template, locals())
 
 def delete(request, user, project, category, ai_id):
