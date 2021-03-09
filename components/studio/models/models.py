@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete, pre_save
 from django import forms
 from django.utils.module_loading import import_string
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from ast import literal_eval
 from functools import cmp_to_key
 from projects.helpers import get_minio_keys

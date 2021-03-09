@@ -8,7 +8,7 @@ from .models import Model, ModelLog, Metadata
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
-from deployments.models import DeploymentDefinition, DeploymentInstance
+# from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
