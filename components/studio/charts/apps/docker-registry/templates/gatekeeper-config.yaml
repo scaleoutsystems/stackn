@@ -24,7 +24,7 @@ data:
     {{ else if .Values.permissions.public }}
     enable-default-deny: false
     {{ else }}
-    enable-default-deny: true
+    enable-default-deny: false
     {{ end }}
     discovery-url: {{ .Values.gatekeeper.auth_endpoint }}/{{ .Values.gatekeeper.realm }}
     {{ if .Values.permissions.project }}
