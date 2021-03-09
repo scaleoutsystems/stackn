@@ -10,7 +10,7 @@ import string
 import random
 from django_cryptography.fields import encrypt
 
-from deployments.models import HelmResource
+# from deployments.models import HelmResource
 
 # # -------------------------------------------
 # # --- The volume model should be deleted. ---

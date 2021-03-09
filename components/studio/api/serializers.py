@@ -3,7 +3,7 @@ from rest_framework.serializers import ModelSerializer
 from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
 from projects.models import Project, S3
-from deployments.models import DeploymentInstance, DeploymentDefinition
+# from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
 from django.contrib.auth.models import User
 
@@ -29,17 +29,17 @@ class MetadataSerializer(ModelSerializer):
             'id', 'run_id', 'trained_model', 'project', 'model_details', 'parameters', 'metrics')
 
 
-class DeploymentDefinitionSerializer(ModelSerializer):
-    class Meta:
-        model = DeploymentDefinition
-        fields = (
-            'id', 'project','name', 'bucket','filename','path_predict')
+# class DeploymentDefinitionSerializer(ModelSerializer):
+#     class Meta:
+#         model = DeploymentDefinition
+#         fields = (
+#             'id', 'project','name', 'bucket','filename','path_predict')
 
 
-class DeploymentInstanceSerializer(ModelSerializer):
-    class Meta:
-        model = DeploymentInstance
-        fields = ('id','deployment', 'model', 'access', 'path', 'endpoint', 'created_at')
+# class DeploymentInstanceSerializer(ModelSerializer):
+#     class Meta:
+#         model = DeploymentInstance
+#         fields = ('id','deployment', 'model', 'access', 'path', 'endpoint', 'created_at')
 
 
 class ReportSerializer(ModelSerializer):

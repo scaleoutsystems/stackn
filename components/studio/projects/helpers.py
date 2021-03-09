@@ -44,6 +44,7 @@ def delete_project_resources(project):
     return False
 
 
+
 def get_minio_keys(project):
     return {
         'project_key': decrypt_key(project.project_key),
