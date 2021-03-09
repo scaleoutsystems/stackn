@@ -101,6 +101,6 @@ def create_resources_from_template(user, project_slug, template):
         if 'project-S3' in template['settings']:
             print("SETTING DEFAULT S3")
             s3storage=template['settings']['project-S3']
-            s3obj = S3.objects.get(name=s3storage)
+            s3obj = S3.objects.get(name=s3storage, project=project)
             project.s3storage = s3obj
             project.save()
