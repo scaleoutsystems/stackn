@@ -30,7 +30,7 @@ def list(request, user, project):
     template = 'models_list.html'
     project = Project.objects.get(slug=project)
     models = Model.objects.filter(project=project)
-    deployments = DeploymentDefinition.objects.all()
+    # deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
 
