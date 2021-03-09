@@ -60,10 +60,10 @@ class AppInstance(models.Model):
     table_field = models.JSONField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    deleted_on = models.DateTimeField(null=True)
+    deleted_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)+' ({})-{}'.format(self.state, self.owner)
+        return str(self.name)+' ({})-{}-{}'.format(self.state, self.owner, self.app.name)
 
 class AppStatus(models.Model):
     appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="status")
