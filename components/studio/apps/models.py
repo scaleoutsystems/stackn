@@ -4,13 +4,11 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 from django.template import engines
-# from deployments.models import HelmResource
 from models.models import Model
 from projects.models import Project
 from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
 from modules import keycloak_lib as keylib
-# from .tasks import add_valid_redirect_uri, deploy_resource, delete_resource
 import uuid
 import flatten_json
 from datetime import datetime, timedelta
@@ -38,7 +36,7 @@ class Apps(models.Model):
     settings = models.JSONField(blank=True, null=True)
     chart = models.CharField(max_length=512)
     description = models.TextField(blank=True, null=True, default="")
-    table_field = models.TextField(blank=True, null=True)
+    table_field = models.JSONField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     
@@ -55,11 +53,11 @@ class AppInstance(models.Model):
     app_dependencies = models.ManyToManyField('apps.AppInstance')
     model_dependencies = models.ManyToManyField('models.Model')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
-    url = models.CharField(max_length=512, null=True)
+    # url = models.CharField(max_length=512, null=True)
     info = models.JSONField(blank=True, null=True)
     parameters = models.JSONField(blank=True, null=True)
-    state = models.CharField(max_length=50, null=True)
-    table_field = models.CharField(max_length=512, null=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    table_field = models.JSONField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     deleted_on = models.DateTimeField(null=True)
