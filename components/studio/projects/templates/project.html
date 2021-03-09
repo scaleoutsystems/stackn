@@ -119,7 +119,11 @@
                                 {% for obj in objs.objs %}
                                 <tr role="row" class="odd">
                                     <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
+                                    {% if obj.table_field.url %}
+                                    <td class="sorting_1"><a href="{{ obj.table_field.url }}">{{ obj.name }}</a></td>
+                                    {% else %}
                                     <td class="sorting_1">{{ obj.name }}</td>
+                                    {% endif %}
                                     <td class="d-none d-xl-table-cell">{{ obj.owner }}</td>
                                     <td class="d-none d-xl-table-cell">{{ obj.created_on }}</td>
                                     <td id="status-{{ obj.pk }}"><span class="badge 
