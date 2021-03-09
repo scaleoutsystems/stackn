@@ -9,7 +9,7 @@ data:
 
     control:
       state: idle
-      helper: {{ .Values.global.control.helper | default "keras_weights"}}
+      helper: {{ .Values.global.control.helper | default "keras"}}
 
     statestore:
       type: MongoDB
