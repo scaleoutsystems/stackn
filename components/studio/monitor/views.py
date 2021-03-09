@@ -15,7 +15,7 @@ from .helpers import get_total_labs_cpu_usage_60s, get_total_labs_memory_usage_6
 from .helpers import get_labs_cpu_requests, get_labs_memory_requests
 from .helpers import get_total_cpu_usage_60s_ts
 from .helpers import get_resource, get_all
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from models.models import Model
 from apps.models import AppInstance, ResourceData
 from modules.project_auth import get_permissions
