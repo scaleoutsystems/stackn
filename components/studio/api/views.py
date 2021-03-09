@@ -17,9 +17,7 @@ import modules.keycloak_lib as kc
 from projects.models import Environment
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
-    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
-    DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer, UserSerializer, \
+    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, UserSerializer, \
     DatasetSerializer, FileModelSerializer, Dataset, FileModel
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
@@ -119,148 +117,148 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         new_md.save()
         return HttpResponse('ok', 200)
 
-class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = DeploymentDefinitionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
+# class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+#     permission_classes = (IsAuthenticated,)
+#     serializer_class = DeploymentDefinitionSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['name']
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def build_definition(self, request):
-        instance = DeploymentDefinition.objects.get(name=request.data['name'])
-        build_definition(instance)
-        return HttpResponse('ok', 200)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def build_definition(self, request):
+#         instance = DeploymentDefinition.objects.get(name=request.data['name'])
+#         build_definition(instance)
+#         return HttpResponse('ok', 200)
 
 
-    def get_queryset(self):
-        """
-        This view should return a list of all the deployments
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        return DeploymentDefinition.objects.filter(project__owner__username=current_user)
+#     def get_queryset(self):
+#         """
+#         This view should return a list of all the deployments
+#         for the currently authenticated user.
+#         """
+#         current_user = self.request.user
+#         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
 
 
-class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = DeploymentInstanceSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id']
-    def get_queryset(self):
-        """
-        This view should return a list of all the deployments
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        print(self.request.query_params)
-        project = self.request.query_params.get('project', [])
-        model = self.request.query_params.get('model', [])
-        if model:
-            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
-        else:
-            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
+# class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+#     permission_classes = (IsAuthenticated,)
+#     serializer_class = DeploymentInstanceSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['id']
+#     def get_queryset(self):
+#         """
+#         This view should return a list of all the deployments
+#         for the currently authenticated user.
+#         """
+#         current_user = self.request.user
+#         print(self.request.query_params)
+#         project = self.request.query_params.get('project', [])
+#         model = self.request.query_params.get('model', [])
+#         if model:
+#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
+#         else:
+#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
     
-    def destroy(self, request, *args, **kwargs):
-        current_user = self.request.user
-        name = self.request.query_params.get('name', [])
-        version = self.request.query_params.get('version', [])
-        if name and version:
-            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-            print('Deleting deployment of model {}-{}.'.format(name, version))
-        else:
-            return HttpResponse('Takes model and tag as parameters.', 400)
-        if current_user == instance.model.project.owner:
-            resource = instance.helmchart
-            resource.delete()
-            return HttpResponse('ok', 200)
-        else:
-            return HttpResponse('Not Allowed', 400)
+#     def destroy(self, request, *args, **kwargs):
+#         current_user = self.request.user
+#         name = self.request.query_params.get('name', [])
+#         version = self.request.query_params.get('version', [])
+#         if name and version:
+#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
+#             print('Deleting deployment of model {}-{}.'.format(name, version))
+#         else:
+#             return HttpResponse('Takes model and tag as parameters.', 400)
+#         if current_user == instance.model.project.owner:
+#             resource = instance.helmchart
+#             resource.delete()
+#             return HttpResponse('ok', 200)
+#         else:
+#             return HttpResponse('Not Allowed', 400)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def build_instance(self, request):
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def build_instance(self, request):
 
-        model_name = request.data['name']
-        model_version = request.data['version']
-        environment = request.data['depdef']
-        project_id = request.data['project']
-        project = Project.objects.get(pk=project_id)
-        print(model_name+':'+model_version)
-        try:
-            print('Check model')
-            # TODO: Check that we have permission to access the model.
-            if model_version=='latest':
-                mod = Model.objects_version.latest(model_name, project)
-            else:
-                mod = Model.objects.get(name=model_name, version=model_version, project=project)
-            if mod.status == 'DP':
-                return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
-        except:
-            return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
+#         model_name = request.data['name']
+#         model_version = request.data['version']
+#         environment = request.data['depdef']
+#         project_id = request.data['project']
+#         project = Project.objects.get(pk=project_id)
+#         print(model_name+':'+model_version)
+#         try:
+#             print('Check model')
+#             # TODO: Check that we have permission to access the model.
+#             if model_version=='latest':
+#                 mod = Model.objects_version.latest(model_name, project)
+#             else:
+#                 mod = Model.objects.get(name=model_name, version=model_version, project=project)
+#             if mod.status == 'DP':
+#                 return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
+#         except:
+#             return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
         
-        try:
-            # TODO: Check that we have permission to access the deployment definition.
-            dep = DeploymentDefinition.objects.get(name=environment)
-        except:
-            return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
+#         try:
+#             # TODO: Check that we have permission to access the deployment definition.
+#             dep = DeploymentDefinition.objects.get(name=environment)
+#         except:
+#             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
 
-        instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user.username)
-        instance.params = request.data['deploy_config']
-        # TODO: Verify that the user is allowed to set the parameters in deploy_config.
-        #       This whole endpoint needs to be refactored:
-        #         1. Make consistent with rest of API
-        #         2. Authorization via ProjectPermissions.
-        instance.save()
+#         instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user.username)
+#         instance.params = request.data['deploy_config']
+#         # TODO: Verify that the user is allowed to set the parameters in deploy_config.
+#         #       This whole endpoint needs to be refactored:
+#         #         1. Make consistent with rest of API
+#         #         2. Authorization via ProjectPermissions.
+#         instance.save()
         
-        return HttpResponse('ok', status=200)
+#         return HttpResponse('ok', status=200)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def update_instance(self, request):
-        # This implementation is a proof-of-concept, and is used to test
-        # the chart controller upgrade functionality
-        current_user = request.user
-        name = request.data['name']
-        version = request.data['version']
-        # Currently only allows updating of the number of replicas.
-        # This code can be improved and generalized later on. We cannot
-        # allow general helm upgrades though, as this can cause STACKn-wide
-        # problems.
-        try:
-            replicas = int(self.request.data['replicas'])
-        except:
-            return HttpResponse('Replicas parameter should be an integer.', 400)
-        print(replicas)
-        if replicas < 0 or (isinstance(replicas, int) == False):
-            return HttpResponse('Replicas parameter should be positive integer.', 400)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def update_instance(self, request):
+#         # This implementation is a proof-of-concept, and is used to test
+#         # the chart controller upgrade functionality
+#         current_user = request.user
+#         name = request.data['name']
+#         version = request.data['version']
+#         # Currently only allows updating of the number of replicas.
+#         # This code can be improved and generalized later on. We cannot
+#         # allow general helm upgrades though, as this can cause STACKn-wide
+#         # problems.
+#         try:
+#             replicas = int(self.request.data['replicas'])
+#         except:
+#             return HttpResponse('Replicas parameter should be an integer.', 400)
+#         print(replicas)
+#         if replicas < 0 or (isinstance(replicas, int) == False):
+#             return HttpResponse('Replicas parameter should be positive integer.', 400)
 
-        if name and version:
-            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-            print('instance name: '+instance.model.name)
-        else:
-            return HttpResponse('Requires model name and version as parameters.', 400)
-        # Who should be allowed to update the model? Currently only the owner.
-        if current_user == instance.model.project.owner:
-            params = instance.helmchart.params
-            params = literal_eval(params)
-            params['replicas'] = str(replicas)
-            print(params)
-            instance.helmchart.params = params
-            instance.helmchart.save()
-            return HttpResponse('Ok', status=200)
+#         if name and version:
+#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
+#             print('instance name: '+instance.model.name)
+#         else:
+#             return HttpResponse('Requires model name and version as parameters.', 400)
+#         # Who should be allowed to update the model? Currently only the owner.
+#         if current_user == instance.model.project.owner:
+#             params = instance.helmchart.params
+#             params = literal_eval(params)
+#             params['replicas'] = str(replicas)
+#             print(params)
+#             instance.helmchart.params = params
+#             instance.helmchart.save()
+#             return HttpResponse('Ok', status=200)
 
         
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def auth(self, request):
-      auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
-      subs = auth_req_red.split('/')
-      release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
-      try:
-          instance = DeploymentInstance.objects.get(release=release)
-      except:
-          return HttpResponse(status=500)
-      if instance.access == 'PU' or instance.model.project.owner == request.user:
-          return HttpResponse('Ok', status=200)
-      else:
-          return HttpResponse(status=401)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def auth(self, request):
+#       auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
+#       subs = auth_req_red.split('/')
+#       release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
+#       try:
+#           instance = DeploymentInstance.objects.get(release=release)
+#       except:
+#           return HttpResponse(status=500)
+#       if instance.access == 'PU' or instance.model.project.owner == request.user:
+#           return HttpResponse('Ok', status=200)
+#       else:
+#           return HttpResponse(status=401)
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
