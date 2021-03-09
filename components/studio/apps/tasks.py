@@ -468,3 +468,8 @@ def get_resource_usage():
     # print(timestamp)
     # print(json.dumps(resources, indent=2))  
 
+@app.task
+def clean_resource_usage():
+
+    curr_timestamp = time.time()
+    ResourceData.objects.filter(time__lte=curr_timestamp-48*3600).delete()
