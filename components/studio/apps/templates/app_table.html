@@ -1,6 +1,8 @@
+{% load static %}
 <table id="{{ cat_obj.slug }}" class="table">
   <thead>
-      <tr>
+      <tr> 
+          <th></th>
           <th>App</th>
           <th>Name</th>
           <th></th>
@@ -12,6 +14,7 @@
   <tbody>
     {% for appinstance in appinstances %}
     <tr>
+        <td><img src="{% static appinstance.app.logo %}" class="img-fluid " style="max-height:25px;"></td>
         <td>{{ appinstance.app.name }}</td>
         <td>{{ appinstance.name }}</td>
         {% if appinstance.table_field.url %}

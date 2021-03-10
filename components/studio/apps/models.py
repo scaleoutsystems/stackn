@@ -37,6 +37,7 @@ class Apps(models.Model):
     chart = models.CharField(max_length=512)
     description = models.TextField(blank=True, null=True, default="")
     table_field = models.JSONField(blank=True, null=True)
+    logo = models.CharField(max_length=512, default="dist/applogos/stackn_logo_square.png")
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     
