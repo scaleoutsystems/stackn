@@ -1,5 +1,5 @@
 {% extends 'baseproject.html' %}
-
+{% load static %}
 {% block content %}
 
 <h1 class="h3 mb-3">Overview</h1>
@@ -95,15 +95,18 @@
                             role="grid" aria-describedby="datatables-dashboard-projects_info">
                             <thead>
                                 <tr role="row">
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
+                                        aria-label="Owner: activate to sort column ascending"></th> 
                                     <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
                                         rowspan="1" colspan="1" aria-sort="ascending"
                                         aria-label="UID: activate to sort column descending">App</th>
                                     <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
                                         rowspan="1" colspan="1" aria-sort="ascending"
                                         aria-label="UID: activate to sort column descending">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
+                                    <!-- <th class="d-none d-xl-table-cell sorting" tabindex="0"
                                         aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Owner: activate to sort column ascending">Owner</th>
+                                        aria-label="Owner: activate to sort column ascending">Owner</th> -->
                                     <th class="d-none d-xl-table-cell sorting" tabindex="0"
                                         aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
                                         aria-label="Created: activate to sort column ascending">Created</th>
@@ -118,28 +121,34 @@
                             <tbody>
                                 {% for obj in objs.objs %}
                                 <tr role="row" class="odd">
+                                    <td><img src="{% static obj.app.logo %}" class="img-fluid " style="max-height:25px;"></td>
                                     <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
                                     {% if obj.table_field.url %}
                                     <td class="sorting_1"><a href="{{ obj.table_field.url }}">{{ obj.name }}</a></td>
                                     {% else %}
                                     <td class="sorting_1">{{ obj.name }}</td>
                                     {% endif %}
-                                    <td class="d-none d-xl-table-cell">{{ obj.owner }}</td>
-                                    <td class="d-none d-xl-table-cell">{{ obj.created_on }}</td>
+                                    <!-- <td class="d-none d-xl-table-cell">{{ obj.owner }}</td> -->
+                                    <td class="d-none d-xl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
                                     <td id="status-{{ obj.pk }}"><span class="badge 
                                         {% if obj.status.latest.status_type in status_success %}bg-success
                                         {% elif obj.status.latest.status_type in status_warning %}bg-warning
                                         {% else %}bg-danger
                                         {% endif %}">{{ obj.status.latest.status_type }}</span></td>
-                                    <!-- <td class="d-none d-md-table-cell">
-                                        <a href="http://{{ lab.slug }}.{{ url_domain }}" target="_blank">
-                                            <button class="btn btn-square btn-primary">Open</button>
-                                        </a>
-                                    </td> -->
-                                    <td class="table-action">
-                                        <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
+                                    <td class="table-action text-center">
+                                        <div class="dropdown show">
+                                            <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">Logs</a>
+                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">Settings</a>
+                                                <a class="dropdown-item bg-danger text-white" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">Delete</a>
+                                            </div>
+                                        </div>
+                                        <!-- <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
                                         <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
-                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
+                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a> -->
                                     </td>
                                 </tr>
                                 {% endfor %}
