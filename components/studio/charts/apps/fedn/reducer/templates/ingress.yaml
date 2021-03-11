@@ -11,9 +11,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.org/ssl-services: "true"
-    nginx.org/grpc-services: "true"
-    nginx.org/ssl-passthrough: "true"
+    nginx.org/ssl-services: "{{ .Values.release }}""
 spec:
   rules:
     - host: {{ .Values.release }}.{{ .Values.global.domain }}
@@ -37,9 +35,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.org/ssl-services: "true"
-    nginx.org/grpc-services: "true"
-    nginx.org/ssl-passthrough: "true"
+    nginx.org/ssl-services: "{{ .Values.release }}"
   name: {{ .Values.release }}
   namespace: {{ .Values.namespace }}
 spec:
