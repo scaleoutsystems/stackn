@@ -23,8 +23,6 @@ spec:
         type: app
         pod: mongodb
     spec:
-      securityContext:
-        runAsUser: 999
       containers:
       - image: mongo:3-xenial
         name: {{ .Release.Name }}
