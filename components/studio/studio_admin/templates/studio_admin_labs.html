@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="col-md-11">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Lab Sessions</h2>
+    </div>
+    {% if request.user.is_superuser %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <table class="table studio-table">
+                    <thead class="studio-table-header">
+                        <tr>
+                            <th scope="col">UID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Project</th>
+                            <th scope="col">Owner</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Updated</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lab in objects %}
+                        <tr>
+                            <th scope="row">{{ lab.6 }}</th>
+                            <th scope="row">{{ lab.7 }}</th>
+                            <th scope="row">{{ lab.8 }}</th>
+                            <th scope="row">{{ lab.0 }}</th>
+                            <th scope="row">{{ lab.9 }}</th>
+                            <th scope="row">{{ lab.10 }}</th>
+                            <th scope="row">{{ lab.11 }}</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#" class="studio-table-a" data-toggle="modal"
+                                        data-target="#labSessionModal">
+                                        <img class="studio-table-icon" src="/static/icons/pencil-square.svg"
+                                            alt="pencil">
+                                        View
+                                    </a>
+                                </span>
+                                <!-- Modal -->
+                                <div class="modal fade" id="labSessionModal" tabindex="-1" role="dialog"
+                                    aria-labelledby="labSessionModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="labSessionModalLabel">{{ lab.7 }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <table class="table studio-table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">Owner</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.0 }}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Flavor</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.1 }}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">CPU limit</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.2 }}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">CPU request</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.3 }}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory limit</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.4 }}
+                                                                Gi
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory request</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {{ lab.5 }}
+                                                                Gi
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light"
+                                                    data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span>
+                                    <a href="{% url 'studio_admin:remove_lab_session' lab.6 %}" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
+                                        Remove
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container-fluid">
+        <div class="row">
+            <p>You don't have permission to access this resource.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

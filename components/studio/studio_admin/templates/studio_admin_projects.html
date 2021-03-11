@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load studio_admin_extras %}
+{% block content %}
+<div class="col-md-11">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Projects</h2>
+    </div>
+    {% if request.user.is_superuser %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <table class="table studio-table">
+                    <thead class="studio-table-header">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Slug</th>
+                            <th scope="col">Owner</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Updated</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proj in objects %}
+                        <tr>
+                            <th scope="row">{{ proj.name }}</th>
+                            <th scope="row">{{ proj.slug }}</th>
+                            <th scope="row">{{ proj.owner.username }}</th>
+                            <th scope="row">{{ proj.created_at }}</th>
+                            <th scope="row">{{ proj.updated_at }}</th>
+                            <td class="studio-table-actions-column">
+                                <span>
+                                    <a href="#" class="studio-table-a" data-toggle="modal" data-target="#projectModal">
+                                        <img class="studio-table-icon" src="/static/icons/pencil-square.svg"
+                                            alt="pencil">
+                                        View
+                                    </a>
+                                </span>
+                                <!-- Modal -->
+                                <div class="modal fade" id="projectModal" tabindex="-1" role="dialog"
+                                    aria-labelledby="projectModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="projectModalLabel">{{ proj.name }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="studio-modal-table-header">Labs</div>
+                                                <table class="table studio-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col"></th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Requests</th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Limits</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">CPU</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",lab,requests,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",lab,limits,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",lab,requests,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",lab,limits,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div class="studio-modal-table-header">Deployments</div>
+                                                <table class="table studio-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col"></th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Requests</th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Limits</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">CPU</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",deployment,requests,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",deployment,limits,cpu_cores" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",deployment,requests,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",deployment,limits,memory_bytes" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div class="studio-modal-table-header">Total</div>
+                                                <table class="table studio-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col"></th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Requests</th>
+                                                            <th scope="col" class="studio-table-actions-column">
+                                                                Limits</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">CPU</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",total_cpu_req" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",total_cpu" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Memory</th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",total_mem_req" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                            <th scope="row" class="studio-table-actions-column">
+                                                                {% with proj.slug|add:",total_mem" as args %}
+                                                                    {{ projects_resources|get_resource_value:args }}
+                                                                {% endwith %}
+                                                                Gi
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-light"
+                                                    data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span>
+                                    <a href="{% url 'studio_admin:remove_project' proj.slug %}" class="studio-table-a">
+                                        <img class="studio-table-icon" src="/static/icons/trash.svg" alt="pencil">
+                                        Remove
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container-fluid">
+        <div class="row">
+            <p>You don't have permission to access this resource.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

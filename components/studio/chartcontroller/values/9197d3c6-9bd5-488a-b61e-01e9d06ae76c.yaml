@@ -1,0 +1,30 @@
+app_action: Create
+app_id: ''
+app_name: test2
+appname: volume-test2-zrd-fc32
+apps: {}
+chart: apps/volume
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: volume-test2-zrd-fc32
+  client_secret: 34637490-080f-497c-945e-abaa4e7d5ce2
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: volume-test2-zrd-fc32
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: volume-test2-zrd-fc32
+storageClass: microk8s-hostpath
+volume:
+  size: 1Gi

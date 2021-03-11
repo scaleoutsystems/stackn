@@ -1,0 +1,63 @@
+app_action: Create
+app_id: ''
+app_name: registry
+appname: docker-registry-test2-zrd-d551
+apps:
+  volume:
+    regvol:
+      app_action: Create
+      app_id: ''
+      app_name: regvol
+      appname: volume-test2-zrd-1f8b
+      apps: {}
+      chart: apps/volume
+      gatekeeper:
+        auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+        client_id: volume-test2-zrd-1f8b
+        client_secret: b1de7f01-eeae-487c-9284-e31e8d620b20
+        realm: STACKn
+      global:
+        domain: studio-dev.local.stackn.dev
+      namespace: studio-develop
+      permission: private
+      permissions:
+        private: true
+        project: false
+        public: false
+      project:
+        name: test2
+        slug: test2-zrd
+      release: volume-test2-zrd-1f8b
+      s3sync:
+        image: scaleoutsystems/s3-sync:latest
+      service:
+        name: volume-test2-zrd-1f8b
+      storageClass: microk8s-hostpath
+      volume:
+        size: 20Gi
+chart: apps/docker-registry
+credentials:
+  password: password
+  username: admin
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: docker-registry-test2-zrd-d551
+  client_secret: 1631503a-4d0b-44dc-a1ab-40997dc2aeb8
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: docker-registry-test2-zrd-d551
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: docker-registry-test2-zrd-d551
+storageClass: microk8s-hostpath

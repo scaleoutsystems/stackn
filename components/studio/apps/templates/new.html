@@ -1,0 +1,59 @@
+{% extends 'baseproject.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<div class="card flex-fill">
+    <div class="card-header">
+        <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+    </div>
+    
+        {% include 'app_table.html' %}
+    
+</div>
+
+
+
+
+<div class="row">
+    {% for app in apps %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ app.name }}</h5>
+            </div>
+            <div class="card-body">
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                <a href="{% url 'apps:create' request.user project.slug app.slug  %}" class="btn btn-primary">Create</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    function update_status() {
+        var apps = {{ pk_list | safe }}
+        $.ajax({
+            type: "POST",
+            url: "{% url 'apps:get_status' request.user project.slug %}",
+            data: {'pk': apps},
+            success: function (data) {
+                console.log(data)
+                apps.split(',').forEach(function (item, index) {
+                    document.getElementById("status-"+item).innerHTML = data['status-'+item];
+                });
+            },
+            complete: function() {
+                setTimeout(update_status, 3000);
+            }
+        });
+    };
+    setTimeout(update_status, 3000);
+</script>
+
+
+{% endblock %}

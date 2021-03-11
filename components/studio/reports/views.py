@@ -100,24 +100,21 @@ def visualize_report_public(request, id):
 
 @login_required
 def delete_generator(request, user, project, id):
-    project = Project.objects.filter(slug=project).first()
-    report = ReportGenerator.objects.filter(id=id).first()
+    project = Project.objects.get(slug=project)
+    report = ReportGenerator.objects.get(id=id)
 
     path = 'reports/{}'.format(report.visualiser)
 
-    if request.method == "POST":
-        if os.path.exists(path):
-            os.unlink(path)
+    if os.path.exists(path):
+        os.unlink(path)
 
-        l = ProjectLog(project=project, module='RE', headline='Metrics',
-                       description='Generator {id} has been removed'.format(id=report.pk))
-        l.save()
+    l = ProjectLog(project=project, module='RE', headline='Metrics',
+                    description='Generator {id} has been removed'.format(id=report.pk))
+    l.save()
 
-        report.delete()
+    report.delete()
 
-        return HttpResponseRedirect('/{}/{}/reports/'.format(request.user, project.slug))
-
-    return render(request, 'report_confirm_delete.html', locals())
+    return HttpResponseRedirect('/{}/{}/reports/'.format(request.user, project.slug))
 
 
 @login_required

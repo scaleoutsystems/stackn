@@ -1,96 +1,71 @@
 {% extends 'baseproject.html' %}
+
 {% block content %}
-<div class="col-md-9">
-    <nav aria-label="breadcrumb" class="project-breadcrumb-nav">
-        <ol class="breadcrumb project-breadcrumb-ol">
-            <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">Projects</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
-        </ol>
-    </nav>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-        <h2>Datasets</h2>
+
+<h1 class="h3 mb-3">Datasets</h1>
+
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">MiniO</h5>
+            </div>
+            <div class="card-body">
+                <p>If you would want to manage the files and/or upload new ones, you can simply do that by
+                    going to MiniO and use the following login credentials: </p>
+                <p>
+                    Access Key: <b>{{ access_key }}</b>
+                </p>
+                <p>
+                    Secret Key: <b>{{ secret_key }}</b>
+                </p>
+                <a href="https://{{ host }}" class="card-link">Go to MiniO</a>
+            </div>
+        </div>
     </div>
-    <div class="get-started-header">
-        <p>If you would want to manage the files and/or upload new ones, you can simply do that by
-            going to <a href="https://{{ project.slug }}-minio.{{ url_domain }}/" target="_blank">MiniO</a>
-            and use the following login credentials: </p>
-        <p>
-            Access Key: <b>{{ decrypted_key }}</b>
-        </p>
-        <p>
-            Secret Key: <b>{{ decrypted_secret }}</b>
-        </p>
-    </div>
-    <nav aria-label="breadcrumb" style="margin-bottom: 25px;">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">
-                dataset
-                <img src="/static/icons/folder-check.svg" alt="" width="21" height="21" title="Bootstrap"
-                     style="padding-left: 3px;">
-            </li>
-        </ol>
-    </nav>
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col" style="width: 5%;text-align: center;"></th>
-            <th scope="col" style="width: 10%;text-align: left">Location</th>
-            <th scope="col" style="width: 35%;text-align: left">Name</th>
-            <th scope="col" style="width: 15%;text-align: left">Datasheet</th>
-            <th scope="col" style="width: 10%;text-align: left">Size</th>
-            <th scope="col" style="width: 15%;text-align: left">Last Modified</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for entry in datasets %}
-        <tr>
-            {% if entry.is_dir %}
-            <td><span class="oi oi-folder"></span></td>
-            <td>{{ entry.location }}</td>
-            <td><a href="{% url 'datasets:path_page' user project.slug entry.name 1 %}">{{ entry.name }}</a></td>
-            <td>--</td>
-            <td>--</td>
-            {% else %}
-            <td><span class="oi oi-file"></span></td>
-            <td>{{ entry.location }}</td>
-            <td>{{ entry.name }}</td>
-            <td><a href="{%url 'datasets:datasheet' request.user project.slug 1 %}" class="btn mt-auto btn-info"
-                style="width: fit-content;">{{ entry.datasheet }}</a></td>
-            <td>{{ entry.size }} MB</td>
-            <td>{{ entry.modified }}</td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Datasets page navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug previous_page %}">
-                    Previous
-                </a>
-            </li>
-            {% for page in pages %}
-            {% if page == page_index %}
-            <li class="page-item active">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
-                    {{ page }}
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug page %}">
-                    {{ page }}
-                </a>
-            </li>
-            {% endif %}
-            {% endfor %}
-            <li class="page-item">
-                <a class="page-link" href="{% url 'datasets:page' user project.slug next_page %}">
-                    Next
-                </a>
-            </li>
-        </ul>
-    </nav>
 </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Datasets</h5>
+                <h6 class="card-subtitle text-muted">You can see the content of your 'datasets' bucket in the table
+                    below.</h6>
+            </div>
+            <div class="card-body">
+                <table id="datatables-reponsive" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Last Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in datasets %}
+                        <tr>
+                            <td>{{ entry.location }}</td>
+                            <td>{{ entry.name }}</td>
+                            <td>{{ entry.size }} MB</td>
+                            <td>{{ entry.modified }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Datatables Responsive
+        $("#datatables-reponsive").DataTable({
+            responsive: true
+        });
+    });
+</script>
 {% endblock %}

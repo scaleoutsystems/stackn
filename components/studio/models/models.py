@@ -74,6 +74,7 @@ class Model(models.Model):
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
+    s3 = models.OneToOneField('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(
         'projects.Project',
@@ -158,10 +159,10 @@ def pre_delete_model(sender, instance, using, **kwargs):
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)
     try:
-        client = Minio(minio_url,
-                      access_key=minio_keys['project_key'],
-                      secret_key=minio_keys['project_secret'],
-                      secure=True)
+        client = Minio(instance.project.s3storage.host,
+                      access_key=instance.project.s3storage.access_key,
+                      secret_key=instance.project.s3storage.secret_key,
+                      secure=settings.OIDC_VERIFY_SSL)
         client.remove_object('models', instance.uid)
     except:
         print('Failed to delete model object {} from minio store.'.format(instance.uid))

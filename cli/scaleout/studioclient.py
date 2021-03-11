@@ -39,6 +39,8 @@ class StudioClient():
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
             self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
+            if not load_status:
+                self.project, load_status = load_from_file('project', project_dir)
             if load_status:
                 self.found_project = True
                 self.project_slug = self.project['slug']
@@ -97,11 +99,10 @@ class StudioClient():
         # print(project)
         # TODO: Obtain port and host from Studio backend API, this assumes a certain naming schema  
         data = {
-            'minio_host': '{}-minio.{}'.format(self.project_slug,
-                                               self.token_config['studio_url'].replace('https://', '').replace('http://', '')),
+            'minio_host': self.project['s3storage']['host'],
             'minio_port': 9000,
-            'minio_access_key': self.decrypt_key(project['project_key']),
-            'minio_secret_key': self.decrypt_key(project['project_secret']),
+            'minio_access_key': project['s3storage']['access_key'],
+            'minio_secret_key': project['s3storage']['secret_key'],
             'minio_secure_mode': self.secure_mode,
         }
         return data
@@ -199,6 +200,7 @@ class StudioClient():
             # Fetch and write project settings file
             print('Writing new project config file.')
             project = self.get_projects({'name': project_name})
+            print(project)
             status = dump_to_file(project, project_name, project_dir)
             if not status:
                 print('Failed to set project -- could not write to config.')

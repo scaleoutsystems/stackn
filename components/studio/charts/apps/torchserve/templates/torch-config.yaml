@@ -1,0 +1,14 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-torch-conf
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  config.properties: |-
+    inference_address=http://0.0.0.0:8080
+    management_address=http://0.0.0.0:8081
+    metrics_address=http://0.0.0.0:8082
+    number_of_netty_threads=32
+    job_queue_size=1000
+    model_store=/home/model-server/model-store/{{ .Values.modelstore.path }}

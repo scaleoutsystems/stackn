@@ -5,7 +5,7 @@ from .jobs import get_logs
 from .models import Report
 import json
 import subprocess
-from studio.minio import MinioRepository, ResponseError
+from studio.minio import MinioRepository
 from projects.models import Project, ProjectLog
 import logging
 from projects.helpers import get_minio_keys
@@ -50,7 +50,7 @@ def upload_report_json(report_id, client=None):
                                filename=filename.replace('reports/', '')))
             l.save()
 
-    except ResponseError as err:
+    except Exception as err:
         print(err)
 
     os.unlink(filename)
@@ -112,7 +112,7 @@ def get_download_link(project_id, filename, client=None):
             client = minio_repository.client
 
         download_link = client.presigned_get_object('reports', filename, expires=timedelta(days=2))
-    except ResponseError as err:
+    except Exception as err:
         print(err)
 
     return download_link

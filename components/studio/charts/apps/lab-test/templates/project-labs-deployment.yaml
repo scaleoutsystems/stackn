@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: lab
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: lab
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: lab
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: lab
+    spec:
+    {{ if .Values.labs.gpu.enabled }}
+      affinity:
+        {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+    {{ end }}
+      #securityContext:
+      #  runAsUser: 65533  # to allow read of ssh key
+      containers:
+      - name: gatekeeper
+        image: scaleoutsystems/gatekeeper:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+      - name: labs
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_ENABLE_LAB
+          value: "yes"
+        - name: NOTEBOOK_PASSWD_SHA1
+          value: ""
+        - name: NOTEBOOK_TOKEN
+          value: ""
+        resources:
+          requests:
+            memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
+            {{if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+          limits:
+            memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
+            {{if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+        workingDir: /home/jovyan/work
+        volumeMounts:
+        - name: jupyterconf
+          mountPath: /etc/jupyter/jupyter_notebook_config.py
+          subPath: jupyter_notebook_config.py
+        # - name: stacknconfig
+        #   mountPath: /home/jovyan/.scaleout/
+        # - name: projectconfig
+        #   mountPath: /home/jovyan/.scaleout/stackn/projects/
+        # - name: userconfig
+        #   mountPath: /home/jovyan/.scaleout/stackn/
+        #   readOnly: true
+        # - name: cli-working-dir
+        #   mountPath: /home/.scaleout/
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /home/jovyan/work/{{ $key }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: true
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+      # - name: stacknconfig
+      #   configMap:
+      #     name: {{ .Values.project.name }}-project-settings-configmap
+      # - name: projectconfig
+      #   configMap:
+      #     name: {{ .Release.Name }}-project-labs-stackn-settings
+      # - name: userconfig
+      #   secret:
+      #     secretName: {{ .Release.Name }}-project-labs-user-settings
+      # - name: cli-working-dir
+      #   emptyDir: {}
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      - name: jupyterconf
+        configMap:
+          name: {{ .Release.Name }}-jupyter-configmap
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

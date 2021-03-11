@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from models.models import Model, ModelLog, Metadata
 from reports.models import Report, ReportGenerator
-from projects.models import Project, Volume
+from projects.models import Project, Volume, S3
 from deployments.models import DeploymentInstance, DeploymentDefinition
 from datasets.models import Dataset, FileModel
 from experiments.models import Experiment
@@ -56,12 +56,18 @@ class ReportGeneratorSerializer(ModelSerializer):
         fields = (
             'id', 'project', 'description', 'generator', 'visualiser', 'created_at')
 
+class S3serializer(ModelSerializer):
+    class Meta:
+        model = S3
+        fields = ('access_key', 'secret_key', 'host', 'region')
 
 class ProjectSerializer(ModelSerializer):
+    s3storage = S3serializer()
     class Meta:
         model = Project
+        
         fields = (
-            'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 'project_key', 'project_secret', 'updated_at',
+            'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 's3storage', 'updated_at',
             'created_at', 'repository', 'repository_imported')
 
 

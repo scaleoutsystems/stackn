@@ -1,0 +1,35 @@
+settings_file: project-settings
+user_settings_file: user-settings
+namespace: default
+
+project:
+  slug: aml-itt
+
+cronjob:
+  schedule: "* * * * *"
+
+resources:
+  gpu:
+    enabled: false
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 256Mi
+    gpu: 0
+  
+
+command: command
+image: python
+iscron: false
+             
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: acceleration
+          operator: In
+          values:
+          - gpu

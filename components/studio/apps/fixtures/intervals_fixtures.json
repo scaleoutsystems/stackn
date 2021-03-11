@@ -1,0 +1,18 @@
+[
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 1,
+    "fields": {
+      "every": 3,
+      "period": "seconds"
+    }
+  },
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 2,
+    "fields": {
+      "every": 15,
+      "period": "seconds"
+    }
+  }
+  ]

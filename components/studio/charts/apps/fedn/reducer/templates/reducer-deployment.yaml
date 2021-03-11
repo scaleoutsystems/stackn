@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reducer
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: fedn-reducer
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: reducer
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: fedn-reducer
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: reducer
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - fedn run reducer -n reducer  --init=/config/settings.yaml
+          env:
+            - name: GET_HOSTS_FROM
+              value: dns
+            - name: PROJECT
+              value: {{ .Values.global.network | quote | default "project" }}
+            - name: USER
+              value: test
+
+          image: scaleoutsystems/fedn-reducer:develop
+          imagePullPolicy: Always
+          name: reducer
+          ports:
+            - containerPort: 8090
+          resources: {}
+          volumeMounts:
+            - mountPath: /config/settings.yaml
+              subPath: settings.yaml
+              name: reducer-config
+            - mountPath: /app/client/certs
+              name: certs-dir
+          workingDir: /app/client
+      restartPolicy: Always
+      volumes:
+        - name: reducer-config
+          configMap:
+            name: {{ .Release.Name }}
+            items:
+            - key: settings.yaml
+              path: settings.yaml
+        - name: certs-dir
+          emptyDir: {}
+status: {}
