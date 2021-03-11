@@ -46,6 +46,7 @@ service:
   port: 80
 
 ingress:
+  v1beta1: false
   secret: prod-ingress
   enabled: false
   annotations: {}
