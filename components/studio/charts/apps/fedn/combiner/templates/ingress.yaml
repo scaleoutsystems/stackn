@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.org/ssl-services: "{{ .Values.release }}"
   name: {{ .Values.release }}
   namespace: {{ .Values.namespace }}
 spec:
