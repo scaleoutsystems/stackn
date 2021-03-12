@@ -200,7 +200,7 @@ class StudioClient():
             # Fetch and write project settings file
             print('Writing new project config file.')
             project = self.get_projects({'name': project_name})
-            print(project)
+            # print(project)
             status = dump_to_file(project, project_name, project_dir)
             if not status:
                 print('Failed to set project -- could not write to config.')

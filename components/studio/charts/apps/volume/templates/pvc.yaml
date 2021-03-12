@@ -5,8 +5,12 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   accessModes:
-  - {{ .Values.accessModes }}
+  - {{ .Values.volume.accessModes }}
+  {{ if .Values.volume.storageClass }}
+  storageClassName: {{ .Values.volume.storageClass }}
+  {{ else }}
   storageClassName: {{ .Values.storageClass | default "default" }}
+  {{ end }}
   resources:
     requests:
       storage: {{ .Values.volume.size }}

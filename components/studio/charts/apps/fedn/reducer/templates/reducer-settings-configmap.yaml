@@ -9,7 +9,9 @@ data:
 
     control:
       state: idle
-      helper: {{ .Values.global.control.helper | default "keras_weights"}}
+      context: compute-package.tar.gz
+      model: seed.npz
+      helper: {{ .Values.global.control.helper | default "keras"}}
 
     statestore:
       type: MongoDB
