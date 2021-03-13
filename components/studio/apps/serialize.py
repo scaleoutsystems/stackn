@@ -2,14 +2,14 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.db.models import Q
 from .models import Apps, AppInstance, AppCategories, AppPermission
-from projects.models import Project, Flavor, Environment
+from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -38,6 +38,23 @@ def serialize_model(form_selection):
         }
 
     return model_json, obj
+
+def serialize_S3(form_selection):
+    print("SERIALIZING S3")
+    s3_json = dict()
+    if "S3" in form_selection:
+        s3_id = form_selection.get('S3', None)
+        obj = S3.objects.filter(pk=s3_id)
+        s3_json = {
+            "s3": {
+                "name": obj[0].name,
+                "host": obj[0].host,
+                "access_key": obj[0].access_key,
+                "secret_key": obj[0].secret_key,
+                "region": obj[0].region
+            }
+        }
+    return s3_json
 
 def serialize_flavor(form_selection, project):
     print("SERIALIZING FLAVOR")
@@ -180,6 +197,9 @@ def serialize_app(form_selection, project):
 
     environment_params = serialize_environment(form_selection, project)
     parameters.update(environment_params)
+
+    s3params = serialize_S3(form_selection)
+    parameters.update(s3params)
 
     permission_params = serialize_permissions(form_selection)
     parameters.update(permission_params)
