@@ -1,0 +1,18 @@
+{{ if .Values.model_card.enabled }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-mc-config
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  nginx.conf: |-
+    worker_processes 1;
+    events { worker_connections 1024; }
+    http {
+        server {
+            listen 80;
+            root /model/{{ .Values.model_card.path }};
+        }
+    }
+{{ end }}

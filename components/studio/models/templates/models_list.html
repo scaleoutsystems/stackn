@@ -2,8 +2,6 @@
 
 {% block content %}
 
-<h1 class="h3 mb-3">Models</h1>
-
 <div class="row">
     <div class="card flex-fill">
         <div class="card-header">
@@ -17,47 +15,36 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                        role="grid" aria-describedby="datatables-dashboard-projects_info">
+                    <table id="datatables-dashboard-projects" class="table">
                         <thead>
                             <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-sort="ascending"
-                                    aria-label="Name: activate to sort column descending">Name</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Version: activate to sort column ascending">Version</th>
-                                <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Created: activate to sort column ascending">Created</th>
-                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                <th>Name</th>
+                                <th>Version</th>
+                                <th>Created</th>
+                                <th>
                                     Status</th>
-                                <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                    rowspan="1" colspan="1" aria-label="User: activate to sort column ascending">
+                                <th>
                                     User</th>
-                                <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                    aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                    aria-label="Actions: activate to sort column ascending">Actions</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for model in models %}
                             <tr role="row" class="odd">
-                                <td class="sorting_1">
+                                <td>
                                     <a href="{% url 'models:details' request.user project.slug model.id %}">
                                         {{ model.name }}
                                     </a>
                                 </td>
-                                <td class="d-none d-xl-table-cell">{{ model.version }}</td>
-                                <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
+                                <td>{{ model.version }}</td>
+                                <td>{{ model.uploaded_at }}</td>
                                 <td><span class="badge 
                                     {% if model.status == 'CR' %}bg-warning
                                     {% elif model.status == 'DP' %}bg-success
                                     {% elif model.status == 'AR' %}bg-danger
                                     {% endif %}">{{ model.get_status_display }}</span></td>
-                                <td class="d-none d-xl-table-cell">{{ project.owner }}</td>
-                                <td class="d-none d-md-table-cell">
+                                <td>{{ project.owner }}</td>
+                                <td>
 
                                     <button type="button" class="btn btn-square btn-danger" data-bs-toggle="modal"
                                         data-bs-target="#delModal{{ model.id }}">
