@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
 from projects.models import Environment
+from models.models import ObjectType
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
     Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, UserSerializer, \
@@ -40,22 +41,31 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
+        print(project)
 
         try:
             model_name = request.data['name']
             release_type = request.data['release_type']
             description = request.data['description']
             model_uid = request.data['uid']
-        except:
-            return HttpResponse('Failed to create model.', 400)
+            object_type_slug = request.data['object_type']
+            object_type = ObjectType.objects.get(slug=object_type_slug)
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create object: incorrect input data.', 400)
 
-        new_model = Model(name=model_name,
-                          release_type=release_type,
-                          description=description,
-                          uid=model_uid,
-                          project=project,
-                          s3=project.s3storage)
-        new_model.save()
+        try:
+            new_model = Model(name=model_name,
+                            release_type=release_type,
+                            description=description,
+                            uid=model_uid,
+                            project=project,
+                            s3=project.s3storage)
+            new_model.save()
+            new_model.object_type.set([object_type])
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create object: failed to save object.', 400)
         return HttpResponse('ok', 200)
 
 
