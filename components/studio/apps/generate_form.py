@@ -23,7 +23,11 @@ def get_form_models(aset, project, appinstance=[]):
     if 'model' in aset:
         print('app requires a model')
         dep_model = True
-        models = Model.objects.filter(project=project)
+        if 'object_type' in aset['model']:
+            object_type = aset['model']['object_type']
+        else:
+            object_type = 'model'
+        models = Model.objects.filter(project=project, object_type__slug=object_type)
         
         for model in models:
             if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():

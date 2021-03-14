@@ -45,6 +45,13 @@ class ModelManager(models.Manager):
 
         return []
 
+class ObjectType(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True, default="Model")
+    slug = models.CharField(max_length=100, null=True, blank=True, default="model")
+    apps = models.ManyToManyField('apps.Apps', blank=True)
+    def __str__(self):
+        return self.name
+
 class Model(models.Model):
 
     objects_version = ModelManager()
@@ -73,6 +80,7 @@ class Model(models.Model):
     description = models.CharField(max_length=255, null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
+    object_type = models.ManyToManyField(ObjectType, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -88,7 +96,7 @@ class Model(models.Model):
         unique_together = ('name', 'version', 'project')
 
     def __str__(self): 
-        return "{name}".format(name=self.name)
+        return "{name}:{version}".format(name=self.name, version=self.version)
 
 class ModelLog(models.Model):
     STARTED = 'ST'

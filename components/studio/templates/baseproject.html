@@ -32,10 +32,10 @@
 <li class="sidebar-header">
     Resources
 </li>
-<li class="sidebar-item">
+<li class="sidebar-item {{ menu.objects }}">
     <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
         <i class="align-middle" data-feather="layers"></i>
-        <span class="align-middle">Models</span>
+        <span class="align-middle">Objects</span>
     </a>
 </li>
 <!-- <li class="sidebar-item">

@@ -112,7 +112,7 @@ def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expir
         return None
     try:
         # print('Decoding user token: {}'.format(request.user))
-        print(access_token)
+        # print(access_token)
         user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
         # print('Successfully decoded token.')
         # print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
