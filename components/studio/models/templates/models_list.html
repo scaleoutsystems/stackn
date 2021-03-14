@@ -5,85 +5,92 @@
 <div class="row">
     <div class="card flex-fill">
         <div class="card-header">
-            <h5 class="card-title mb-0">Models</h5>
+            <!-- <h5 class="card-title mb-0">Models</h5> -->
+            <ul class="nav nav-pills card-header-pills pull-right" role="tablist">
+                {% for object_type in object_types %}
+                <li class="nav-item">
+                    <a class="nav-link {% if object_type.slug == active_type %}active{% endif %}" data-bs-toggle="tab" href="#{{ object_type.slug }}">{{ object_type.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        {% if models %}
+        {% if objects %}
         <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
             <div class="row">
-                <div class="col-sm-12 col-md-6"></div>
-                <div class="col-sm-12 col-md-6"></div>
-            </div>
-            <div class="row">
                 <div class="col-sm-12">
-                    <table id="datatables-dashboard-projects" class="table">
-                        <thead>
-                            <tr role="row">
-                                <th>Name</th>
-                                <th>Version</th>
-                                <th>Created</th>
-                                <th>
-                                    Status</th>
-                                <th>
-                                    User</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for model in models %}
-                            <tr role="row" class="odd">
-                                <td>
-                                    <a href="{% url 'models:details' request.user project.slug model.id %}">
-                                        {{ model.name }}
-                                    </a>
-                                </td>
-                                <td>{{ model.version }}</td>
-                                <td>{{ model.uploaded_at }}</td>
-                                <td><span class="badge 
-                                    {% if model.status == 'CR' %}bg-warning
-                                    {% elif model.status == 'DP' %}bg-success
-                                    {% elif model.status == 'AR' %}bg-danger
-                                    {% endif %}">{{ model.get_status_display }}</span></td>
-                                <td>{{ project.owner }}</td>
-                                <td>
+                    <div class="tab-content">
+                        {% for object_type, models in objects %}
+                        <div class="tab-pane fade {% if object_type.slug == active_type %}active show{% endif %}" id="{{ object_type.slug }}" role="tabpanel">
+                            <table id="table-{{ object_type.slug }}" class="table">
+                                <thead>
+                                    <tr role="row">
+                                        <th>Name</th>
+                                        <th>Version</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                        <th>User</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for model in models %}
+                                    <tr role="row" class="odd">
+                                        <td>
+                                            <a href="{% url 'models:details' request.user project.slug model.id %}">
+                                                {{ model.name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ model.version }}</td>
+                                        <td>{{ model.uploaded_at }}</td>
+                                        <td><span class="badge 
+                                            {% if model.status == 'CR' %}bg-warning
+                                            {% elif model.status == 'DP' %}bg-success
+                                            {% elif model.status == 'AR' %}bg-danger
+                                            {% endif %}">{{ model.get_status_display }}</span></td>
+                                        <td>{{ project.owner }}</td>
+                                        <td>
 
-                                    <button type="button" class="btn btn-square btn-danger" data-bs-toggle="modal"
-                                        data-bs-target="#delModal{{ model.id }}">
-                                        Remove
-                                    </button>
-                                    <div class="modal fade" id="#delModal{{ model.id }}" tabindex="-1" role="dialog"
-                                        aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Remove modal</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body m-3">
-                                                    <p class="mb-0">Are you sure you want to remove model with name 
-                                                        {{ model.name }}?</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-square btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                    <a
-                                                        href="{% url 'models:delete' request.user project.slug model.id %}">
-                                                        <button type="button" class="btn btn-square btn-danger">Confirm</button>
-                                                    </a>
+                                            <button type="button" class="btn btn-square btn-danger" data-bs-toggle="modal"
+                                                data-bs-target="#delModal{{ model.id }}">
+                                                Remove
+                                            </button>
+                                            <div class="modal fade" id="#delModal{{ model.id }}" tabindex="-1" role="dialog"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Remove modal</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body m-3">
+                                                            <p class="mb-0">Are you sure you want to remove model with name 
+                                                                {{ model.name }}?</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-square btn-secondary"
+                                                                data-bs-dismiss="modal">Close</button>
+                                                            <a
+                                                                href="{% url 'models:delete' request.user project.slug model.id %}">
+                                                                <button type="button" class="btn btn-square btn-danger">Confirm</button>
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
         {% else %}
-        <p style="margin-left: 25px;">No Models have been uploaded to this project yet.</p>
+        <p style="margin-left: 25px;">No Objects have been uploaded to this project yet.</p>
         {% endif %}
     </div>
 </div>
