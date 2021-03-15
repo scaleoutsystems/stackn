@@ -59,8 +59,9 @@
     },
     "chart": "apps/dask",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-02-19T21:33:18.241Z",
+    "table_field": {},
+    "logo": "dist/applogos/dask_logo.svg",
+    "updated_on": "2021-03-10T19:33:52.665Z",
     "created_on": "2021-02-19T21:32:55.588Z"
   }
 },
@@ -90,8 +91,11 @@
     },
     "chart": "apps/docker-registry",
     "description": "",
-    "table_field": "Registry URL: https://{{ release }}.{{ global.domain }}, <a href=\"https://{{ release }}.{{ global.domain }}/registry/\">View</a>",
-    "updated_on": "2021-02-20T11:12:31.073Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/registry/"
+    },
+    "logo": "dist/applogos/docker_logo.png",
+    "updated_on": "2021-03-10T19:45:03.927Z",
     "created_on": "2021-02-19T21:34:37.815Z"
   }
 },
@@ -151,8 +155,9 @@
     },
     "chart": "apps/environment",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-03-01T13:03:00.749Z",
+    "table_field": {},
+    "logo": "dist/applogos/kaniko_logo.png",
+    "updated_on": "2021-03-10T20:05:17.220Z",
     "created_on": "2021-02-19T21:35:14.408Z"
   }
 },
@@ -186,8 +191,9 @@
     },
     "chart": "apps/fastapi-push-model",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-02-19T21:36:23.182Z",
+    "table_field": {},
+    "logo": "dist/applogos/kaniko_logo.png",
+    "updated_on": "2021-03-10T20:05:05.069Z",
     "created_on": "2021-02-19T21:35:53.056Z"
   }
 },
@@ -199,46 +205,25 @@
     "slug": "fastapi-serve",
     "category": "serve",
     "settings": {
+      "logs": [
+        "serve"
+      ],
       "model": "one",
-      "resources": {
-        "limits.cpu": {
-          "type": "string",
-          "title": "Limits CPU",
-          "default": "400m"
-        },
-        "requests.cpu": {
-          "type": "string",
-          "title": "Requests CPU",
-          "default": "200m"
-        },
-        "limits.memory": {
-          "type": "string",
-          "title": "Limits Mem",
-          "default": "1Gi"
-        },
-        "requests.memory": {
-          "type": "string",
-          "title": "Request Mem",
-          "default": "0.5Gi"
-        }
-      },
-      "model_card": {
-        "path": {
-          "type": "string",
-          "title": "Path to model card",
-          "default": "model-card"
-        },
-        "enabled": {
-          "type": "boolean",
-          "title": "Enabled",
-          "default": "False"
-        }
+      "flavor": "one",
+      "environment": {
+        "name": "from",
+        "type": "match",
+        "title": "Environment",
+        "quantity": "one"
       }
     },
     "chart": "apps/fastapi-serve",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-02-19T21:37:13.384Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/predict/"
+    },
+    "logo": "dist/applogos/fastapi_logo.png",
+    "updated_on": "2021-03-10T20:01:10.566Z",
     "created_on": "2021-02-19T21:37:13.384Z"
   }
 },
@@ -278,8 +263,9 @@
     },
     "chart": "apps/job",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-03-01T13:19:11.899Z",
+    "table_field": {},
+    "logo": "dist/applogos/kubernetes_logo.png",
+    "updated_on": "2021-03-10T20:11:43.943Z",
     "created_on": "2021-02-19T21:37:43.835Z"
   }
 },
@@ -318,8 +304,11 @@
     },
     "chart": "apps/lab-test",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-26T19:15:01.360Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/jupyter_logo.svg",
+    "updated_on": "2021-03-10T19:22:08.506Z",
     "created_on": "2021-02-19T21:38:15.625Z"
   }
 },
@@ -357,8 +346,11 @@
     },
     "chart": "apps/minio",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-27T14:23:24.771Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/minio_logo.png",
+    "updated_on": "2021-03-10T19:50:16.799Z",
     "created_on": "2021-02-19T21:38:39.532Z"
   }
 },
@@ -376,8 +368,11 @@
     },
     "chart": "apps/mongo-express",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-25T12:59:16.994Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/mongo_express.png",
+    "updated_on": "2021-03-10T19:46:31.941Z",
     "created_on": "2021-02-19T21:39:01.597Z"
   }
 },
@@ -407,8 +402,11 @@
     },
     "chart": "apps/mongodb",
     "description": "",
-    "table_field": "mongodb://{{ release }}:27017",
-    "updated_on": "2021-02-25T13:18:26.150Z",
+    "table_field": {
+      "info": "mongodb://{{ release }}:27017"
+    },
+    "logo": "dist/applogos/mongodb_logo.png",
+    "updated_on": "2021-03-10T19:47:54.488Z",
     "created_on": "2021-02-19T21:39:36.578Z"
   }
 },
@@ -427,8 +425,11 @@
     },
     "chart": "apps/rstudio",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-19T22:19:09.897Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/rstudio_logo.png",
+    "updated_on": "2021-03-10T19:23:46.706Z",
     "created_on": "2021-02-19T21:40:06.039Z"
   }
 },
@@ -496,8 +497,11 @@
     },
     "chart": "apps/tensorflow-serving",
     "description": "",
-    "table_field": "http://{{ release }}.{{ global.domain }}/v1/models/models:predict",
-    "updated_on": "2021-02-25T19:30:33.026Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/v1/models/models:predict"
+    },
+    "logo": "dist/applogos/tensorflow_logo.png",
+    "updated_on": "2021-03-10T20:01:54.355Z",
     "created_on": "2021-02-19T21:40:28.051Z"
   }
 },
@@ -505,8 +509,8 @@
   "model": "apps.apps",
   "pk": 35,
   "fields": {
-    "name": "Ubuntu Tensorflow",
-    "slug": "ubuntu-tensorflow",
+    "name": "Ubuntu Terminal",
+    "slug": "ubuntu-terminal",
     "category": "compute",
     "settings": {
       "apps": {
@@ -537,8 +541,11 @@
     },
     "chart": "apps/wetty",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}/wetty/\">Open</a>",
-    "updated_on": "2021-02-19T22:20:50.471Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/wetty"
+    },
+    "logo": "dist/applogos/terminal_logo.png",
+    "updated_on": "2021-03-10T19:29:59.081Z",
     "created_on": "2021-02-19T21:40:50.169Z"
   }
 },
@@ -555,13 +562,24 @@
           "type": "string",
           "title": "Size",
           "default": "1Gi"
+        },
+        "accessModes": {
+          "type": "string",
+          "title": "AccessModes",
+          "default": "ReadWriteMany"
+        },
+        "storageClass": {
+          "type": "string",
+          "title": "StorageClass",
+          "default": ""
         }
       }
     },
     "chart": "apps/volume",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-02-19T21:57:55.369Z",
+    "table_field": {},
+    "logo": "dist/applogos/volume_logo.png",
+    "updated_on": "2021-03-11T13:47:02.699Z",
     "created_on": "2021-02-19T21:41:19.466Z"
   }
 },
@@ -579,8 +597,11 @@
     },
     "chart": "apps/vscode",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-20T21:36:06.180Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/vscode_logo.svg",
+    "updated_on": "2021-03-10T19:54:04.579Z",
     "created_on": "2021-02-19T21:41:41.509Z"
   }
 },
@@ -588,7 +609,7 @@
   "model": "apps.apps",
   "pk": 38,
   "fields": {
-    "name": "Prostudio",
+    "name": "Prosilico Studio",
     "slug": "prostudio",
     "category": "misc",
     "settings": {
@@ -619,8 +640,11 @@
     },
     "chart": "apps/prostudio",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-03-04T07:01:22.978Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/prosilico_logo.png",
+    "updated_on": "2021-03-10T20:10:03.773Z",
     "created_on": "2021-02-19T21:42:23.468Z"
   }
 },
@@ -634,8 +658,11 @@
     "settings": {},
     "chart": "apps/tetris",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-25T12:28:29.826Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/tetris_logo.png",
+    "updated_on": "2021-03-10T20:08:00.192Z",
     "created_on": "2021-02-19T21:42:58.138Z"
   }
 },
@@ -679,8 +706,11 @@
     },
     "chart": "apps/dash-app",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-02-28T16:25:19.836Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/plotly_logo.png",
+    "updated_on": "2021-03-10T20:03:56.867Z",
     "created_on": "2021-02-24T15:19:46.048Z"
   }
 },
@@ -725,8 +755,9 @@
     },
     "chart": "apps/git-sync",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-03-05T13:37:33.256Z",
+    "table_field": {},
+    "logo": "dist/applogos/git_logo.png",
+    "updated_on": "2021-03-10T20:06:12.282Z",
     "created_on": "2021-02-28T15:28:24.674Z"
   }
 },
@@ -734,7 +765,7 @@
   "model": "apps.apps",
   "pk": 42,
   "fields": {
-    "name": "Torch Serve",
+    "name": "PyTorch Serve",
     "slug": "torch-serve",
     "category": "serve",
     "settings": {
@@ -778,8 +809,11 @@
     },
     "chart": "apps/torchserve",
     "description": "",
-    "table_field": "https://{{ release }}.{{ global.domain }}/predictions/<model_name>",
-    "updated_on": "2021-03-01T19:58:00.136Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/predictions/<model_name>"
+    },
+    "logo": "dist/applogos/pytorch_logo.png",
+    "updated_on": "2021-03-10T20:00:22.980Z",
     "created_on": "2021-03-01T15:39:37.525Z"
   }
 },
@@ -789,17 +823,25 @@
   "fields": {
     "name": "FEDn Reducer",
     "slug": "reducer",
-    "category": "misc",
+    "category": "fedn",
     "settings": {
+      "S3": "one",
       "apps": {
-        "Minio": "one",
-        "MongoDB": "one"
+        "MongoDB": "one",
+        "Docker Registry": "one"
+      },
+      "model": {
+        "quantity": "one",
+        "object_type": "fedn-client"
       }
     },
     "chart": "apps/fedn/reducer",
     "description": "",
-    "table_field": "<a href=\"https://{{ release }}.{{ global.domain }}\">Open</a>",
-    "updated_on": "2021-03-02T07:04:12.832Z",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/fedn_logo.png",
+    "updated_on": "2021-03-13T18:53:24.903Z",
     "created_on": "2021-03-02T06:52:48.395Z"
   }
 },
@@ -809,7 +851,7 @@
   "fields": {
     "name": "FEDn Combiner",
     "slug": "combiner",
-    "category": "misc",
+    "category": "fedn",
     "settings": {
       "apps": {
         "FEDn Reducer": "one",
@@ -818,9 +860,36 @@
     },
     "chart": "apps/fedn/combiner",
     "description": "",
-    "table_field": "",
-    "updated_on": "2021-03-02T08:54:59.749Z",
+    "table_field": {},
+    "logo": "dist/applogos/fedn_logo.png",
+    "updated_on": "2021-03-10T19:34:59.783Z",
     "created_on": "2021-03-02T08:49:14.526Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 45,
+  "fields": {
+    "name": "FEDn Serve",
+    "slug": "fedn-serve",
+    "category": "fedn",
+    "settings": {
+      "apps": {
+        "FEDn Reducer": "one"
+      },
+      "logs": [
+        "serve"
+      ],
+      "flavor": "one"
+    },
+    "chart": "apps/fedn-deploy",
+    "description": "",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/predict/"
+    },
+    "logo": "dist/applogos/fastapi_logo.png",
+    "updated_on": "2021-03-12T19:41:58.943Z",
+    "created_on": "2021-03-12T15:42:47.361Z"
   }
 }
 ]
