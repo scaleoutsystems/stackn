@@ -8,6 +8,13 @@
 },
 {
   "model": "apps.appcategories",
+  "pk": "fedn",
+  "fields": {
+    "name": "FEDn"
+  }
+},
+{
+  "model": "apps.appcategories",
   "pk": "misc",
   "fields": {
     "name": "Misc"
