@@ -1,7 +1,7 @@
 from django.shortcuts import render, reverse
 from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from .exceptions import ProjectCreationException
 from .helpers import delete_project_resources
 from django.contrib.auth.models import User
@@ -15,7 +15,7 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
-from .models import Project, S3, Flavor
+from .models import Project, S3, Flavor, ProjectTemplate
 from .forms import FlavorForm
 from apps.models import AppInstance
 from apps.models import Apps
@@ -23,9 +23,9 @@ import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-from labs.models import Session
+from .tasks import create_resources_from_template
 from models.models import Model
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
@@ -177,17 +177,25 @@ def delete_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
-def set_s3storage(request, user, project_slug):
+def set_s3storage(request, user, project_slug, s3storage=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # s3 object to storage in this project (need to check that the user has access to the
     # project as well.)
-    if request.method == 'POST':
+    if request.method == 'POST' or s3storage:
         project = Project.objects.get(slug=project_slug)
-        pk = request.POST.get('s3storage')
-        print(pk)
-        s3obj = S3.objects.get(pk=pk)
+        
+        if s3storage:
+            s3obj = S3.objects.get(name=s3storage, project=project)
+        else:
+            pk = request.POST.get('s3storage')
+            s3obj = S3.objects.get(pk=pk)
+
         project.s3storage = s3obj
         project.save()
+
+        if s3storage:
+            return JsonResponse({"status": "ok"})
+
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
@@ -248,6 +256,7 @@ def revoke_access_to_project(request, user, project_slug):
 @login_required
 def create(request):
     template = 'project_create.html'
+    templates = ProjectTemplate.objects.all()
 
     if request.method == 'POST':
 
@@ -269,8 +278,13 @@ def create(request):
             success = False
 
         try:
-            # Create project resources
+            # Create project resources (Keycloak only)
             create_project_resources(project, request.user.username, repository)
+
+            # Create resources from the chosen template
+            project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
+
             # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
             request.session.save()
