@@ -2,8 +2,7 @@ from django.shortcuts import render
 from .models import ActivityLog
 from projects.models import Project
 from models.models import Model
-from labs.models import Session
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from monitor.helpers import get_resource
 from monitor.views import get_cpu_mem
 from django.contrib.auth.decorators import login_required

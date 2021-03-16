@@ -18,16 +18,17 @@ def create_cmd(ctx, daemon):
   if daemon:
       print('{} NYI should run as daemon...'.format(__file__))
 
-@create_cmd.command('model')
+@create_cmd.command('object')
 @click.option('-f', '--model-file', required=False, default="")
 @click.option('-n', '--model-name', required=True)
 @click.option('-r', '--release-type', required=False)
-@click.option('-d', '--description', required=False,default="")
+@click.option('-d', '--description', required=False, default="")
+@click.option('-t', '--object-type', required=False, default="model")
 @click.pass_context
-def create_model_cmd(ctx, model_file, model_name, release_type, description):
+def create_model_cmd(ctx, model_file, model_name, release_type, description, object_type):
   """ Publish a model. """
   client = ctx.obj['CLIENT']
-  client.create_model(model_file, model_name, release_type, description)
+  client.create_model(model_file, model_name, release_type, object_type, description)
 
 @create_cmd.command('deploymentdefinition')
 @click.option('-n', '--name', required=True)

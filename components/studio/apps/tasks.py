@@ -458,13 +458,25 @@ def get_resource_usage():
     for key in resources.keys():
         entry = resources[key]
         # print(entry['labels']['release'])
-        appinstance = AppInstance.objects.get(parameters__contains={"release": entry['labels']['release']})
-        # print(timestamp)
-        # print(appinstance)
-        # print(entry)
-        datapoint = ResourceData(appinstance=appinstance, cpu=entry['cpu'], mem=entry['memory'], gpu=entry['gpu'], time=timestamp)
-        datapoint.save()
+        try:
+            appinstance = AppInstance.objects.get(parameters__contains={"release": entry['labels']['release']})
+            # print(timestamp)
+            # print(appinstance)
+            # print(entry)
+            datapoint = ResourceData(appinstance=appinstance, cpu=entry['cpu'], mem=entry['memory'], gpu=entry['gpu'], time=timestamp)
+            datapoint.save()
+        except:
+            print("Didn't find corresponding AppInstance: {}".format(key))
 
     # print(timestamp)
     # print(json.dumps(resources, indent=2))  
 
+@app.task
+def clean_resource_usage():
+
+    curr_timestamp = time.time()
+    ResourceData.objects.filter(time__lte=curr_timestamp-48*3600).delete()
+
+@app.task
+def remove_deleted_app_instances():
+    AppInstance.objects.filter(state="Deleted").delete()

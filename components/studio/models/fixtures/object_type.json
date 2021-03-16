@@ -1,0 +1,20 @@
+[
+{
+  "model": "models.objecttype",
+  "pk": 1,
+  "fields": {
+    "name": "Model",
+    "slug": "model",
+    "apps": []
+  }
+},
+{
+  "model": "models.objecttype",
+  "pk": 2,
+  "fields": {
+    "name": "FEDn Client",
+    "slug": "fedn-client",
+    "apps": []
+  }
+}
+]

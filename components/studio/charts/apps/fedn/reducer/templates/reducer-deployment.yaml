@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reducer
+  name: {{ .Values.release }}-reducer
   namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
@@ -23,6 +23,82 @@ spec:
         type: app
         pod: reducer
     spec:
+      initContainers:
+      - name: copy-model
+        image: minio/mc
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+        env:
+        - name: S3_ACCESS_KEY_ID
+          value: {{ .Values.model.access_key }}
+        - name: S3_SECRET_ACCESS_KEY
+          value: {{ .Values.model.secret_key }}
+        - name: AWS_REGION
+          value: us-east-1
+        - name: S3_ENDPOINT
+          value: {{ .Values.model.url }}
+        - name: STACKN_MODEL_BUCKET
+          value: {{ .Values.model.bucket }}
+        - name: STACKN_MODEL_FILE
+          value: {{ .Values.model.obj }}
+      - name: extract-model
+        image: busybox
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "cd /models && tar xvf model.tar.gz"]
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+      - name: create-compute-package
+        image: busybox
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "cd /models && tar czvf compute-package.tar.gz client"]
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+      - name: copy-seed-and-compute
+        image: minio/mc
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp /models/compute-package.tar.gz projminio/fedn-context/compute-package.tar.gz;mc cp /models/seed/seed.npz projminio/fedn-models/seed.npz"]
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+        env:
+        - name: S3_ACCESS_KEY_ID
+          value: {{ .Values.model.access_key }}
+        - name: S3_SECRET_ACCESS_KEY
+          value: {{ .Values.model.secret_key }}
+        - name: AWS_REGION
+          value: us-east-1
+        - name: S3_ENDPOINT
+          value: {{ .Values.model.url }}
+        - name: STACKN_MODEL_BUCKET
+          value: {{ .Values.model.bucket }}
+        - name: STACKN_MODEL_FILE
+          value: {{ .Values.model.obj }}
+      - name: build-client
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=/models/Dockerfile"
+        - "--context=dir:///models"
+        {{- range $key, $value := .Values.apps.docker_registry }}
+        - "--destination={{ $value.release }}.{{ $value.global.domain }}/fedn-client:latest"
+        {{- end }}
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+        - name: auth
+          mountPath: /kaniko/.docker
+        - name: fedn-network
+          mountPath: /models/fedn-network.yaml
+          subPath: fedn-network.yaml
+        imagePullPolicy: Always
       containers:
         - args:
             - sh
@@ -48,15 +124,26 @@ spec:
               name: reducer-config
             - mountPath: /app/client/certs
               name: certs-dir
+            - name: model-vol
+              mountPath: /models
           workingDir: /app/client
       restartPolicy: Always
+
       volumes:
-        - name: reducer-config
-          configMap:
-            name: {{ .Release.Name }}
-            items:
-            - key: settings.yaml
-              path: settings.yaml
-        - name: certs-dir
-          emptyDir: {}
+      - name: auth
+        configMap:
+          name: {{ .Release.Name }}-auth
+      - name: fedn-network
+        configMap:
+          name: {{ .Values.release }}-fedn-network
+      - name: reducer-config
+        configMap:
+          name: {{ .Release.Name }}
+          items:
+          - key: settings.yaml
+            path: settings.yaml
+      - name: certs-dir
+        emptyDir: {}
+      - name: model-vol
+        emptyDir: {}
 status: {}

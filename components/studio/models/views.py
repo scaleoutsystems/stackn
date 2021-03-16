@@ -4,11 +4,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model, ModelLog, Metadata
+from .models import Model, ModelLog, Metadata, ObjectType
 from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
-from deployments.models import DeploymentDefinition, DeploymentInstance
+# from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
@@ -27,10 +27,18 @@ def index(request):
 
 @login_required
 def list(request, user, project):
+    menu = dict()
+    menu['objects'] = 'active'
     template = 'models_list.html'
     project = Project.objects.get(slug=project)
-    models = Model.objects.filter(project=project)
-    deployments = DeploymentDefinition.objects.all()
+    objects = []
+    
+    object_types = ObjectType.objects.all()
+    for object_type in object_types:
+        objects.append((object_type, Model.objects.filter(project=project, object_type__slug=object_type.slug)))
+    print("OBJECTS")
+    print(objects)
+    active_type = 'model'
 
     return render(request, template, locals())
 

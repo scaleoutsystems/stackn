@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Volume, Flavor, Environment
+from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -15,7 +15,7 @@ import flatten_json
 import uuid
 from datetime import datetime, timedelta
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken', 'S3']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
@@ -23,7 +23,11 @@ def get_form_models(aset, project, appinstance=[]):
     if 'model' in aset:
         print('app requires a model')
         dep_model = True
-        models = Model.objects.filter(project=project)
+        if 'object_type' in aset['model']:
+            object_type = aset['model']['object_type']
+        else:
+            object_type = 'model'
+        models = Model.objects.filter(project=project, object_type__slug=object_type)
         
         for model in models:
             if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():
@@ -153,12 +157,30 @@ def get_form_environments(aset, project, app, appinstance=[]):
 
     return dep_environment, environments
 
+def get_form_S3(aset, project, app, appinstance=[]):
+    print("CHECKING S3")
+    dep_S3 = False
+    s3stores = []
+    if 'S3' in aset:
+        dep_S3 = True
+        s3stores = S3.objects.filter(project=project)
+        
+        # for s3store in s3stores:
+        #     if appinstance and s3store.app.appinstance_set.filter(pk=appinstance.pk).exists():
+        #         print(model)
+        #         model.selected = "selected"
+        #     else:
+        #         model.selected = ""
+    return dep_S3, s3stores
+
+
 def generate_form(aset, project, app, user, appinstance=[]):
     form = dict()
     form['dep_model'], form['models'] = get_form_models(aset, project, appinstance)
     form['dep_apps'], form['app_deps'] = get_form_apps(aset, project, app, user, appinstance)
     form['dep_appobj'], form['appobjs'] = get_form_appobj(aset, project, appinstance)
     form['dep_environment'], form['environments'] = get_form_environments(aset, project, app, appinstance)
+    form['dep_S3'], form['s3stores'] = get_form_S3(aset, project, app, appinstance)
 
     form['dep_vols'] = False
     form['dep_flavor'] = False

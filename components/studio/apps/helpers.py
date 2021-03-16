@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Volume, Flavor, Environment
+from projects.models import Project, Flavor, Environment
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -12,6 +12,7 @@ from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
 import flatten_json
+import json
 import uuid
 from datetime import datetime, timedelta
 from .generate_form import generate_form
@@ -67,6 +68,6 @@ def create_instance_params(instance, action="create"):
     if instance.app.table_field and instance.app.table_field != "":
         django_engine = engines['django']
         info_field = django_engine.from_string(instance.app.table_field).render(parameters)
-        instance.table_field = info_field
+        instance.table_field = eval(info_field)
     else:
-        instance.table_field = ""
+        instance.table_field = {}

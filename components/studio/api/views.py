@@ -15,13 +15,11 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
 from projects.models import Environment
+from models.models import ObjectType
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
-    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, \
-    DeploymentInstance, DeploymentInstanceSerializer, DeploymentDefinition, \
-    DeploymentDefinitionSerializer, Session, LabSessionSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel, Volume, VolumeSerializer, \
-    ExperimentSerializer, Experiment
+    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, UserSerializer, \
+    DatasetSerializer, FileModelSerializer, Dataset, FileModel
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
@@ -43,22 +41,31 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
+        print(project)
 
         try:
             model_name = request.data['name']
             release_type = request.data['release_type']
             description = request.data['description']
             model_uid = request.data['uid']
-        except:
-            return HttpResponse('Failed to create model.', 400)
+            object_type_slug = request.data['object_type']
+            object_type = ObjectType.objects.get(slug=object_type_slug)
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create object: incorrect input data.', 400)
 
-        new_model = Model(name=model_name,
-                          release_type=release_type,
-                          description=description,
-                          uid=model_uid,
-                          project=project,
-                          s3=project.s3storage)
-        new_model.save()
+        try:
+            new_model = Model(name=model_name,
+                            release_type=release_type,
+                            description=description,
+                            uid=model_uid,
+                            project=project,
+                            s3=project.s3storage)
+            new_model.save()
+            new_model.object_type.set([object_type])
+        except Exception as err:
+            print(err)
+            return HttpResponse('Failed to create object: failed to save object.', 400)
         return HttpResponse('ok', 200)
 
 
@@ -120,184 +127,148 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         new_md.save()
         return HttpResponse('ok', 200)
 
-
-
-class LabsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission,)
-    serializer_class = LabSessionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'name', 'lab_session_owner']
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the Lab Sessions
-        for the currently authenticated user.
-        """
-
-        return Session.objects.filter(project__pk=self.kwargs['project_pk'])
-
-    def create(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-
-        uid = uuid.uuid4()
-        name = str(project.slug) + str(uid)[0:7]
-        try:
-            flavor_slug = request.data['flavor']
-            environment_slug = request.data['environment']
-        except Exception as e:
-            print(e)
-            return HttpResponse('Failed to create a Lab Session.', 400)
-
-        lab_session = Session(id=uid, name=name, flavor_slug=flavor_slug, environment_slug=environment_slug,
-                              project=project, lab_session_owner=request.user)
-        lab_session.extraVols = []
-        if 'extraVols' in request.data:
-            lab_session.extraVols = request.data['extraVols']
-        lab_session.save()
-        return HttpResponse('Ok.', 200)
-
-class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = DeploymentDefinitionSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
+# class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+#     permission_classes = (IsAuthenticated,)
+#     serializer_class = DeploymentDefinitionSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['name']
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def build_definition(self, request):
-        instance = DeploymentDefinition.objects.get(name=request.data['name'])
-        build_definition(instance)
-        return HttpResponse('ok', 200)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def build_definition(self, request):
+#         instance = DeploymentDefinition.objects.get(name=request.data['name'])
+#         build_definition(instance)
+#         return HttpResponse('ok', 200)
 
 
-    def get_queryset(self):
-        """
-        This view should return a list of all the deployments
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        return DeploymentDefinition.objects.filter(project__owner__username=current_user)
+#     def get_queryset(self):
+#         """
+#         This view should return a list of all the deployments
+#         for the currently authenticated user.
+#         """
+#         current_user = self.request.user
+#         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
 
 
-class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = DeploymentInstanceSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id']
-    def get_queryset(self):
-        """
-        This view should return a list of all the deployments
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        print(self.request.query_params)
-        project = self.request.query_params.get('project', [])
-        model = self.request.query_params.get('model', [])
-        if model:
-            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
-        else:
-            return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
+# class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+#     permission_classes = (IsAuthenticated,)
+#     serializer_class = DeploymentInstanceSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['id']
+#     def get_queryset(self):
+#         """
+#         This view should return a list of all the deployments
+#         for the currently authenticated user.
+#         """
+#         current_user = self.request.user
+#         print(self.request.query_params)
+#         project = self.request.query_params.get('project', [])
+#         model = self.request.query_params.get('model', [])
+#         if model:
+#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
+#         else:
+#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
     
-    def destroy(self, request, *args, **kwargs):
-        current_user = self.request.user
-        name = self.request.query_params.get('name', [])
-        version = self.request.query_params.get('version', [])
-        if name and version:
-            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-            print('Deleting deployment of model {}-{}.'.format(name, version))
-        else:
-            return HttpResponse('Takes model and tag as parameters.', 400)
-        if current_user == instance.model.project.owner:
-            resource = instance.helmchart
-            resource.delete()
-            return HttpResponse('ok', 200)
-        else:
-            return HttpResponse('Not Allowed', 400)
+#     def destroy(self, request, *args, **kwargs):
+#         current_user = self.request.user
+#         name = self.request.query_params.get('name', [])
+#         version = self.request.query_params.get('version', [])
+#         if name and version:
+#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
+#             print('Deleting deployment of model {}-{}.'.format(name, version))
+#         else:
+#             return HttpResponse('Takes model and tag as parameters.', 400)
+#         if current_user == instance.model.project.owner:
+#             resource = instance.helmchart
+#             resource.delete()
+#             return HttpResponse('ok', 200)
+#         else:
+#             return HttpResponse('Not Allowed', 400)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def build_instance(self, request):
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def build_instance(self, request):
 
-        model_name = request.data['name']
-        model_version = request.data['version']
-        environment = request.data['depdef']
-        project_id = request.data['project']
-        project = Project.objects.get(pk=project_id)
-        print(model_name+':'+model_version)
-        try:
-            print('Check model')
-            # TODO: Check that we have permission to access the model.
-            if model_version=='latest':
-                mod = Model.objects_version.latest(model_name, project)
-            else:
-                mod = Model.objects.get(name=model_name, version=model_version, project=project)
-            if mod.status == 'DP':
-                return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
-        except:
-            return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
+#         model_name = request.data['name']
+#         model_version = request.data['version']
+#         environment = request.data['depdef']
+#         project_id = request.data['project']
+#         project = Project.objects.get(pk=project_id)
+#         print(model_name+':'+model_version)
+#         try:
+#             print('Check model')
+#             # TODO: Check that we have permission to access the model.
+#             if model_version=='latest':
+#                 mod = Model.objects_version.latest(model_name, project)
+#             else:
+#                 mod = Model.objects.get(name=model_name, version=model_version, project=project)
+#             if mod.status == 'DP':
+#                 return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
+#         except:
+#             return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
         
-        try:
-            # TODO: Check that we have permission to access the deployment definition.
-            dep = DeploymentDefinition.objects.get(name=environment)
-        except:
-            return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
+#         try:
+#             # TODO: Check that we have permission to access the deployment definition.
+#             dep = DeploymentDefinition.objects.get(name=environment)
+#         except:
+#             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
 
-        instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user.username)
-        instance.params = request.data['deploy_config']
-        # TODO: Verify that the user is allowed to set the parameters in deploy_config.
-        #       This whole endpoint needs to be refactored:
-        #         1. Make consistent with rest of API
-        #         2. Authorization via ProjectPermissions.
-        instance.save()
+#         instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user.username)
+#         instance.params = request.data['deploy_config']
+#         # TODO: Verify that the user is allowed to set the parameters in deploy_config.
+#         #       This whole endpoint needs to be refactored:
+#         #         1. Make consistent with rest of API
+#         #         2. Authorization via ProjectPermissions.
+#         instance.save()
         
-        return HttpResponse('ok', status=200)
+#         return HttpResponse('ok', status=200)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def update_instance(self, request):
-        # This implementation is a proof-of-concept, and is used to test
-        # the chart controller upgrade functionality
-        current_user = request.user
-        name = request.data['name']
-        version = request.data['version']
-        # Currently only allows updating of the number of replicas.
-        # This code can be improved and generalized later on. We cannot
-        # allow general helm upgrades though, as this can cause STACKn-wide
-        # problems.
-        try:
-            replicas = int(self.request.data['replicas'])
-        except:
-            return HttpResponse('Replicas parameter should be an integer.', 400)
-        print(replicas)
-        if replicas < 0 or (isinstance(replicas, int) == False):
-            return HttpResponse('Replicas parameter should be positive integer.', 400)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def update_instance(self, request):
+#         # This implementation is a proof-of-concept, and is used to test
+#         # the chart controller upgrade functionality
+#         current_user = request.user
+#         name = request.data['name']
+#         version = request.data['version']
+#         # Currently only allows updating of the number of replicas.
+#         # This code can be improved and generalized later on. We cannot
+#         # allow general helm upgrades though, as this can cause STACKn-wide
+#         # problems.
+#         try:
+#             replicas = int(self.request.data['replicas'])
+#         except:
+#             return HttpResponse('Replicas parameter should be an integer.', 400)
+#         print(replicas)
+#         if replicas < 0 or (isinstance(replicas, int) == False):
+#             return HttpResponse('Replicas parameter should be positive integer.', 400)
 
-        if name and version:
-            instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-            print('instance name: '+instance.model.name)
-        else:
-            return HttpResponse('Requires model name and version as parameters.', 400)
-        # Who should be allowed to update the model? Currently only the owner.
-        if current_user == instance.model.project.owner:
-            params = instance.helmchart.params
-            params = literal_eval(params)
-            params['replicas'] = str(replicas)
-            print(params)
-            instance.helmchart.params = params
-            instance.helmchart.save()
-            return HttpResponse('Ok', status=200)
+#         if name and version:
+#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
+#             print('instance name: '+instance.model.name)
+#         else:
+#             return HttpResponse('Requires model name and version as parameters.', 400)
+#         # Who should be allowed to update the model? Currently only the owner.
+#         if current_user == instance.model.project.owner:
+#             params = instance.helmchart.params
+#             params = literal_eval(params)
+#             params['replicas'] = str(replicas)
+#             print(params)
+#             instance.helmchart.params = params
+#             instance.helmchart.save()
+#             return HttpResponse('Ok', status=200)
 
         
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def auth(self, request):
-      auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
-      subs = auth_req_red.split('/')
-      release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
-      try:
-          instance = DeploymentInstance.objects.get(release=release)
-      except:
-          return HttpResponse(status=500)
-      if instance.access == 'PU' or instance.model.project.owner == request.user:
-          return HttpResponse('Ok', status=200)
-      else:
-          return HttpResponse(status=401)
+#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+#     def auth(self, request):
+#       auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
+#       subs = auth_req_red.split('/')
+#       release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
+#       try:
+#           instance = DeploymentInstance.objects.get(release=release)
+#       except:
+#           return HttpResponse(status=500)
+#       if instance.access == 'PU' or instance.model.project.owner == request.user:
+#           return HttpResponse('Ok', status=200)
+#       else:
+#           return HttpResponse(status=401)
 
 class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated,)
@@ -379,68 +350,6 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
 
-class JobsList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = ExperimentSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'username', 'project']
-    def get_queryset(self):
-        jobs = Experiment.objects.filter(project__pk=self.kwargs['project_pk'])
-        return jobs
-    
-    def create(self, request, *args, **kwargs):
-        try:
-            project = Project.objects.get(id=self.kwargs['project_pk'])
-            environment = Environment.objects.get(name=request.data['environment'])
-            job = Experiment(username=request.user.username,
-                             command=request.data['command'],
-                             environment=environment,
-                             project=project,
-                             schedule=request.data['schedule'])
-            job.options = request.data
-            job.save()                 
-        except Exception as err:
-            print(err)
-            return HttpResponse('Failed to create job.', 400)
-        return HttpResponse('ok', 200)
-
-class VolumeList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = VolumeSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'slug', 'created_by']
-    def get_queryset(self):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-        volumes = Volume.objects.filter(project_slug=project.slug)
-        return volumes
-
-    def create(self, request, *args, **kwargs):
-        try:
-            project = Project.objects.get(id=self.kwargs['project_pk'])
-            name = request.data['name']
-            size = request.data['size']
-            proj_slug = project.slug
-            created_by = request.user.username
-            volume = Volume(name=name, size=size, created_by=created_by, project_slug=proj_slug)
-            volume.save()
-        except Exception as err:
-            print(err)
-            return HttpResponse('Failed to create volume.', 400)
-        return HttpResponse('ok', 200)
-    
-    def destroy(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-        volume = Volume.objects.get(pk=self.kwargs['pk'], project_slug=project.slug)
-        try:
-            volume.helmchart.delete()
-            print('OK')
-            return HttpResponse('ok', 200)
-        except Exception as err:
-            print('Failed')
-            print(err)
-            return HttpResponse('Failed to delete volume', 400)
 
 class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):

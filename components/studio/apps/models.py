@@ -4,13 +4,11 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 from django.template import engines
-from deployments.models import HelmResource
 from models.models import Model
-from projects.models import Project, Volume
+from projects.models import Project
 from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
 from modules import keycloak_lib as keylib
-# from .tasks import add_valid_redirect_uri, deploy_resource, delete_resource
 import uuid
 import flatten_json
 from datetime import datetime, timedelta
@@ -38,7 +36,8 @@ class Apps(models.Model):
     settings = models.JSONField(blank=True, null=True)
     chart = models.CharField(max_length=512)
     description = models.TextField(blank=True, null=True, default="")
-    table_field = models.TextField(blank=True, null=True)
+    table_field = models.JSONField(blank=True, null=True)
+    logo = models.CharField(max_length=512, default="dist/applogos/stackn_logo_square.png")
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     
@@ -52,20 +51,20 @@ class AppInstance(models.Model):
     name = models.CharField(max_length=512, default="app_name")
     app = models.ForeignKey('Apps', on_delete=models.CASCADE, related_name='appinstance')
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='appinstance')
-    app_dependencies = models.ManyToManyField('apps.AppInstance')
-    model_dependencies = models.ManyToManyField('models.Model')
+    app_dependencies = models.ManyToManyField('apps.AppInstance', blank=True)
+    model_dependencies = models.ManyToManyField('models.Model', blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_owner', null=True)
-    url = models.CharField(max_length=512, null=True)
+    # url = models.CharField(max_length=512, null=True)
     info = models.JSONField(blank=True, null=True)
     parameters = models.JSONField(blank=True, null=True)
-    state = models.CharField(max_length=50, null=True)
-    table_field = models.CharField(max_length=512, null=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    table_field = models.JSONField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    deleted_on = models.DateTimeField(null=True)
+    deleted_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)+' ({})-{}'.format(self.state, self.owner)
+        return str(self.name)+' ({})-{}-{}'.format(self.state, self.owner, self.app.name)
 
 class AppStatus(models.Model):
     appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="status")

@@ -15,8 +15,7 @@ from .helpers import get_total_labs_cpu_usage_60s, get_total_labs_memory_usage_6
 from .helpers import get_labs_cpu_requests, get_labs_memory_requests
 from .helpers import get_total_cpu_usage_60s_ts
 from .helpers import get_resource, get_all
-from labs.models import Session
-from deployments.models import DeploymentInstance
+# from deployments.models import DeploymentInstance
 from models.models import Model
 from apps.models import AppInstance, ResourceData
 from modules.project_auth import get_permissions
@@ -79,49 +78,36 @@ def overview(request, user, project):
     template = 'monitor_new.html'
     project = Project.objects.filter(slug=project).first()
 
-    resource_types = ['lab', 'deployment']
-    q_types = ['requests', 'limits']
-    r_types = ['memory_bytes', 'cpu_cores']
+    # resource_types = ['lab', 'deployment']
+    # q_types = ['requests', 'limits']
+    # r_types = ['memory_bytes', 'cpu_cores']
 
-    resource_status = dict()
-    for resource_type in resource_types:
-        resource_status[resource_type] = dict()
-        for q_type in q_types:
-            resource_status[resource_type][q_type] = dict()
-            for r_type in r_types:
-                tmp = get_resource(project.slug, resource_type, q_type, r_type)
+    # resource_status = dict()
+    # for resource_type in resource_types:
+    #     resource_status[resource_type] = dict()
+    #     for q_type in q_types:
+    #         resource_status[resource_type][q_type] = dict()
+    #         for r_type in r_types:
+    #             tmp = get_resource(project.slug, resource_type, q_type, r_type)
                 
-                if r_type == 'memory_bytes':
-                    tmp ="{:.2f}".format(float(tmp)/1e9*0.931323)
-                elif tmp:
-                    tmp = "{:.2f}".format(float(tmp))
+    #             if r_type == 'memory_bytes':
+    #                 tmp ="{:.2f}".format(float(tmp)/1e9*0.931323)
+    #             elif tmp:
+    #                 tmp = "{:.2f}".format(float(tmp))
 
-                resource_status[resource_type][q_type][r_type] = tmp
+    #             resource_status[resource_type][q_type][r_type] = tmp
 
-    total_cpu = float(resource_status['lab']['limits']['cpu_cores'])+float(resource_status['deployment']['limits']['cpu_cores'])
-    total_mem = float(resource_status['lab']['limits']['memory_bytes'])+float(resource_status['deployment']['limits']['memory_bytes'])
-    total_cpu_req = float(resource_status['lab']['requests']['cpu_cores'])+float(resource_status['deployment']['requests']['cpu_cores'])
-    total_mem_req = float(resource_status['lab']['requests']['memory_bytes'])+float(resource_status['deployment']['requests']['memory_bytes'])
+    # total_cpu = float(resource_status['lab']['limits']['cpu_cores'])+float(resource_status['deployment']['limits']['cpu_cores'])
+    # total_mem = float(resource_status['lab']['limits']['memory_bytes'])+float(resource_status['deployment']['limits']['memory_bytes'])
+    # total_cpu_req = float(resource_status['lab']['requests']['cpu_cores'])+float(resource_status['deployment']['requests']['cpu_cores'])
+    # total_mem_req = float(resource_status['lab']['requests']['memory_bytes'])+float(resource_status['deployment']['requests']['memory_bytes'])
 
-    labs = Session.objects.filter(project=project)
-    lab_list = get_cpu_mem(labs, project.slug, 'lab')
+    # labs = Session.objects.filter(project=project)
+    # lab_list = get_cpu_mem(labs, project.slug, 'lab')
     
-    deps = DeploymentInstance.objects.filter(model__project=project)
-    dep_list = get_cpu_mem(deps, project.slug, 'deployment')
-    print(dep_list)
-    # lab_list = list()
-    # for lab in labs:
-    #     lab_cpu_limit = get_resource(project.slug, 'lab', 'limits', 'cpu_cores', app_name=lab.appname)
-    #     lab_cpu_limit = "{:.2f}".format(float(lab_cpu_limit))
-    #     lab_cpu_request = get_resource(project.slug, 'lab', 'requests', 'cpu_cores', app_name=lab.appname)
-    #     lab_cpu_limit = "{:.2f}".format(float(lab_cpu_request))
-    #     lab_mem_limit = get_resource(project.slug, 'lab', 'limits', 'memory_bytes', app_name=lab.appname)
-    #     lab_mem_limit = "{:.2f}".format(float(lab_mem_limit)/1e9*0.931323)
-    #     lab_mem_request = get_resource(project.slug, 'lab', 'requests', 'memory_bytes', app_name=lab.appname)
-    #     lab_mem_request = "{:.2f}".format(float(lab_mem_request)/1e9*0.931323)
-    #     lab_flavor = lab.flavor_slug
-    #     lab_owner = lab.lab_session_owner.username
-    #     lab_list.append((lab_owner, lab_flavor, lab_cpu_limit, lab_cpu_request, lab_mem_limit, lab_mem_request, str(lab.id)))
+    # deps = DeploymentInstance.objects.filter(model__project=project)
+    # dep_list = get_cpu_mem(deps, project.slug, 'deployment')
+
 
     return render(request, template, locals())
 

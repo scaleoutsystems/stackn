@@ -2,8 +2,7 @@ import io
 import logging
 
 from minio import Minio
-from minio.error import (ResponseError, BucketAlreadyOwnedByYou,
-                         BucketAlreadyExists)
+from minio.error import S3Error
 from scaleout.repository.base import Repository
 
 logger = logging.getLogger(__name__)
@@ -52,14 +51,12 @@ class MINIORepository(Repository):
 
 
     def create_bucket(self, bucket_name):
-        try:
-            self.client.make_bucket(bucket_name)
-        except BucketAlreadyOwnedByYou as err:
-            pass
-        except BucketAlreadyExists as err:
-            pass
-        except ResponseError as err:
-            raise
+        found = self.client.bucket_exists(bucket_name)
+        if not found:
+            try:
+                self.client.make_bucket(bucket_name)
+            except Exception as err:
+                raise
 
     def set_artifact(self, instance_name, instance, is_file=False, bucket=''):
         """ Instance must be a byte-like object. """
@@ -97,6 +94,6 @@ class MINIORepository(Repository):
 
         try:
             self.client.remove_object(bucket, instance_name)
-        except ResponseError as err:
+        except Exception as err:
             print(err)
             print('Could not delete artifact: {}'.format(instance_name))

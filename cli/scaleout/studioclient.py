@@ -38,6 +38,7 @@ class StudioClient():
         active_dir = self.stackn_config['active']
         if 'active_project' in self.stackn_config:
             project_dir = os.path.expanduser('~/.scaleout/'+active_dir+'/projects')
+            self.set_project(self.stackn_config['active_project'])
             self.project, load_status = load_from_file(self.stackn_config['active_project'], project_dir)
             if not load_status:
                 self.project, load_status = load_from_file('project', project_dir)
@@ -200,7 +201,7 @@ class StudioClient():
             # Fetch and write project settings file
             print('Writing new project config file.')
             project = self.get_projects({'name': project_name})
-            print(project)
+            # print(project)
             status = dump_to_file(project, project_name, project_dir)
             if not status:
                 print('Failed to set project -- could not write to config.')
@@ -425,7 +426,7 @@ class StudioClient():
         print("No model found with id: ", model_id)
         return None
 
-    def create_model(self, model_file, model_name, release_type='', model_description=None,is_file=True):
+    def create_model(self, model_file, model_name, release_type='', object_type='model', model_description=None, is_file=True):
         """ Publish a model to Studio. """
 
         import uuid
@@ -434,16 +435,9 @@ class StudioClient():
         if model_file == "":
             building_from_current = True
             model_file = '{}.tar.gz'.format(model_uid)
-            # Find latest serialized model
-            path = 'models'
-            os.chdir(path)
-            files = sorted(os.listdir(os.getcwd()), key=os.path.getmtime)
-            os.chdir('../')
-            newest = ''
-            if files:
-                newest = os.path.join('models', files[-1])
-            print(newest)
-            res = subprocess.run(['tar', 'czvf', model_file, 'models', 'requirements.txt', 'setup.py', 'src'], stdout=subprocess.PIPE) #, 'dataset/interim/preprocessed'
+            f = open(model_file, 'w')
+            f.close()
+            res = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, '.'], stdout=subprocess.PIPE)
 
         repo = self.get_repository()
         repo.bucket = 'models'
@@ -453,7 +447,8 @@ class StudioClient():
         model_data = {"uid": model_uid,
                       "name": model_name,
                       "release_type": release_type,
-                      "description": model_description}
+                      "description": model_description,
+                      "object_type": object_type}
 
         url = self.endpoints['models'].format(self.project['id'])+'/'
         # url = url.replace('http:', 'https:')
