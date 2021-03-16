@@ -47,6 +47,17 @@
                         </select>
                     </div>
                     {% endif %}
+
+                    {% if form.dep_S3 %}
+                    <div class="mb-3">
+                        <label class="form-label">S3</label>
+                        <select name="S3" id="S3" class="form-control">
+                            {% for s3 in form.s3stores %}
+                            <option value="{{ s3.pk }}" {{ s3.selected }}>{{ s3.name }}</option> 
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
                     
                     {% if form.dep_flavor %}
                     <div class="mb-3">
