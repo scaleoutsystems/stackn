@@ -16,10 +16,7 @@ from projects.models import S3, Environment
 from studio.celery import app
 
 def get_URI(parameters):
-    if settings.OIDC_VERIFY_SSL:
-        URI =  'https://'+parameters['release']+'.'+parameters['global']['domain']
-    else:
-        URI =  'http://'+parameters['release']+'.'+parameters['global']['domain']
+    URI =  'https://'+parameters['release']+'.'+parameters['global']['domain']
 
     URI = URI.strip('/')
     return URI
@@ -202,6 +199,8 @@ def deploy_resource(instance_pk, action='create'):
                 "auth_endpoint": settings.OIDC_OP_REALM_AUTH,
             }
         }
+        if settings.OIDC_VERIFY_SSL == False:
+            gatekeeper['gatekeeper']['skip_tls'] = True
         parameters.update(gatekeeper)
 
 
