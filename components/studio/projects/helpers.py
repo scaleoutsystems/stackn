@@ -33,16 +33,14 @@ def delete_project_resources(project):
     # TODO: Resources should not be deleted via old chartcontroller.
     # retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
 
-    if retval:
+    # if retval:
         # Delete Keycloak project client
-        kc = keylib.keycloak_init()
-        keylib.keycloak_delete_client(kc, project.slug)
-        
-        scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
-        keylib.keycloak_delete_client_scope(kc, scope_id)
-        return True
-
-    return False
+    kc = keylib.keycloak_init()
+    keylib.keycloak_delete_client(kc, project.slug)
+    
+    scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+    keylib.keycloak_delete_client_scope(kc, scope_id)
+    return True
 
 
 
