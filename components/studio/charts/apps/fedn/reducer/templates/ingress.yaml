@@ -12,7 +12,6 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.org/ssl-services: "{{ .Values.release }}"
-    nginx.org/grpc-services: "{{ .Values.release }}"
 spec:
   rules:
     - host: {{ .Values.release }}.{{ .Values.global.domain }}
@@ -37,7 +36,6 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.org/ssl-services: "{{ .Values.release }}"
-    nginx.org/grpc-services: "{{ .Values.release }}"
   name: {{ .Values.release }}
   namespace: {{ .Values.namespace }}
 spec:

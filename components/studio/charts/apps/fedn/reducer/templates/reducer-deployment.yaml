@@ -112,7 +112,7 @@ spec:
             - name: USER
               value: test
 
-          image: scaleoutsystems/reducer:stefan-dev
+          image: scaleoutsystems/fedn-reducer:develop
           imagePullPolicy: Always
           name: reducer
           ports:
