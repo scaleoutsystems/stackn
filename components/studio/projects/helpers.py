@@ -30,7 +30,8 @@ def create_project_resources(project, username, repository=None):
 
 
 def delete_project_resources(project):
-    retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
+    # TODO: Resources should not be deleted via old chartcontroller.
+    # retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
 
     if retval:
         # Delete Keycloak project client
