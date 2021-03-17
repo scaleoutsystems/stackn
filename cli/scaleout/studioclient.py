@@ -195,16 +195,16 @@ class StudioClient():
         # Update STACKN config
         stackn_config['active_project'] = project_name
         sauth.write_stackn_config(stackn_config)
-        if not os.path.exists(proj_path):
-            if not os.path.exists(project_dir):
-                os.makedirs(project_dir)
-            # Fetch and write project settings file
-            print('Writing new project config file.')
-            project = self.get_projects({'name': project_name})
-            # print(project)
-            status = dump_to_file(project, project_name, project_dir)
-            if not status:
-                print('Failed to set project -- could not write to config.')
+        # if not os.path.exists(proj_path):
+        if not os.path.exists(project_dir):
+            os.makedirs(project_dir)
+        # Fetch and write project settings file
+        print('Writing new project config file.')
+        project = self.get_projects({'name': project_name})
+        print(project)
+        status = dump_to_file(project, project_name, project_dir)
+        if not status:
+            print('Failed to set project -- could not write to config.')
             
 
     def create_deployment_definition(self, name, filepath, path_predict=''):
