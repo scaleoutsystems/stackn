@@ -76,15 +76,7 @@ spec:
         - name: jupyterconf
           mountPath: /etc/jupyter/jupyter_notebook_config.py
           subPath: jupyter_notebook_config.py
-        # - name: stacknconfig
-        #   mountPath: /home/jovyan/.scaleout/
-        # - name: projectconfig
-        #   mountPath: /home/jovyan/.scaleout/stackn/projects/
-        # - name: userconfig
-        #   mountPath: /home/jovyan/.scaleout/stackn/
-        #   readOnly: true
-        # - name: cli-working-dir
-        #   mountPath: /home/.scaleout/
+
         {{- range $key, $value := .Values.apps.volume }}
         - name: {{ $key }}
           mountPath: /home/jovyan/work/{{ $key }}
@@ -94,17 +86,6 @@ spec:
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       volumes:
-      # - name: stacknconfig
-      #   configMap:
-      #     name: {{ .Values.project.name }}-project-settings-configmap
-      # - name: projectconfig
-      #   configMap:
-      #     name: {{ .Release.Name }}-project-labs-stackn-settings
-      # - name: userconfig
-      #   secret:
-      #     secretName: {{ .Release.Name }}-project-labs-user-settings
-      # - name: cli-working-dir
-      #   emptyDir: {}
       - name: gatekeeper-config
         configMap:
           name: {{ .Release.Name }}-gatekeeper-config

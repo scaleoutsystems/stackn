@@ -29,7 +29,7 @@ deployment:
   name: deployment-name
   endpoint: deployment-endpoint
   path: deployment-path
-  port: 8501
+  
 
 context:
   image: context-image
@@ -44,6 +44,10 @@ model:
   secret_key: secret
   bucket: bucket
   obj: obj
+
+default_values:
+  is_tar: false
+  port: 8501
 
 model_card:
   enabled: false

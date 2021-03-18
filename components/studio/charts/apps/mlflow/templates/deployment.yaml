@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: mlflow
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: mlflow
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: mlflow
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: mlflow
+    spec:
+      containers:
+      - name: gatekeeper
+        image: scaleoutsystems/gatekeeper:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+      - image: scaleoutsystems/mlflow-server:latest
+        name: mlflow
+        env:
+        - name: BACKEND_STORE_URI
+          value: sqlite:///mlruns/mydb.sqlite
+        - name: MLFLOW_BUCKET
+          value: mlflow
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: https://{{ .Values.s3.host }}
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.s3.access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.s3.secret_key }}
+        ports:
+        - containerPort: 5000
+        resources: {}
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /mlruns
+        {{- end }}
+      hostname: {{ .Release.Name }}
+      restartPolicy: Always
+      volumes:
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 import time
+import requests
 from celery import shared_task
 # from celery.decorators import periodic_task
 from django.conf import settings
@@ -12,6 +13,7 @@ import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus
+from models.models import Model, ObjectType
 from projects.models import S3, Environment
 from studio.celery import app
 
@@ -469,6 +471,57 @@ def get_resource_usage():
 
     # print(timestamp)
     # print(json.dumps(resources, indent=2))  
+
+
+@app.task
+def sync_mlflow_models():
+    mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), app__slug="mlflow")
+    for mlflow_app in mlflow_apps:
+        # print(mlflow_app.parameters['release'])
+        url = 'http://{}:5000/{}'.format(mlflow_app.parameters['release'], 'api/2.0/preview/mlflow/model-versions/search')
+        # print(url, flush=True)
+        res = requests.get(url)
+        models = res.json()
+        for item in models['model_versions']:
+            # print(item)
+            name = item['name']
+            version = 'v{}.0.0'.format(item['version'])
+            release = 'major'
+            source = item['source'].replace('s3://', '').split('/')
+            bucket = source[0]
+            experiment_id = source[1]
+            run_id = source[2]
+            path = '/'.join(source[1:])
+            project = mlflow_app.project
+            uid = run_id
+            s3 = S3.objects.get(pk=mlflow_app.parameters['s3']['pk'])
+            # print(path)
+            # print(source)
+            # print(s3)
+            model_found = True
+            try:
+                stackn_model = Model.objects.get(uid=uid)
+            except:
+                model_found = False
+            if not model_found:
+                model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
+                model.save()
+                obj_type = ObjectType.objects.filter(slug='mlflow-model')
+                model.object_type.set(obj_type)
+                # print(model)
+            else:
+                print("Model already exists, synchronize.")
+                print(item['current_stage'])
+                if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
+                    stackn_model.status = "AR"
+                    stackn_model.save()
+                if item['current_stage'] != 'Archived' and stackn_model.status == "AR":
+                    stackn_model.status = "CR"
+                    stackn_model.save()
+            # versions = requests.get(url2, params={"name": name})
+            # print(versions)
+        # print(models)
+
 
 @app.task
 def clean_resource_usage():

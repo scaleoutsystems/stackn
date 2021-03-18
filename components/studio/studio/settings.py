@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'api',
     'monitor',
     'projects',
-    'labs',
     'models',
     'reports',
     'files',

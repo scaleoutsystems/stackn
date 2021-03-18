@@ -16,7 +16,7 @@ data:
             large_client_header_buffers 4 128k;
 
             location / {
-                proxy_pass http://127.0.0.1:{{ .Values.deployment.port }};
+                proxy_pass http://127.0.0.1:{{ .Values.default_values.port }};
             }
             {{ if .Values.model_card.enabled }}
             location ~ ^/model-card(/?)(.*) {
