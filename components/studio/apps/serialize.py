@@ -9,7 +9,7 @@ import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
-key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'csrfmiddlewaretoken']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -32,8 +32,9 @@ def serialize_model(form_selection):
                 "url": "https://{}".format(obj[0].s3.host),
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
-                "bucket": "models",
-                "obj": obj[0].uid
+                "bucket": obj[0].bucket,
+                "obj": obj[0].uid,
+                "path": obj[0].path
             }
         }
 
@@ -47,6 +48,7 @@ def serialize_S3(form_selection):
         obj = S3.objects.filter(pk=s3_id)
         s3_json = {
             "s3": {
+                "pk": obj[0].pk,
                 "name": obj[0].name,
                 "host": obj[0].host,
                 "access_key": obj[0].access_key,
@@ -179,7 +181,21 @@ def serialize_appobjs(form_selection):
     print(parameters)
     return parameters
 
-def serialize_app(form_selection, project):
+def serialize_default_values(aset):
+    parameters = []
+    if 'default_values' in aset:
+        parameters = dict()
+        print(aset['default_values'])
+        parameters['default_values'] = aset['default_values']
+        for key in parameters['default_values'].keys():
+            if parameters['default_values'][key] == "False":
+                parameters['default_values'][key] = False
+            elif parameters['default_values'][key] == "True":
+                parameters['default_values'][key] = True
+
+    return parameters
+
+def serialize_app(form_selection, project, aset):
     print("SERIALIZING APP")
     parameters = dict()
 
@@ -206,5 +222,8 @@ def serialize_app(form_selection, project):
 
     appobj_params = serialize_appobjs(form_selection)
     parameters.update(appobj_params)
+
+    default_values = serialize_default_values(aset)
+    parameters.update(default_values)
 
     return parameters, app_deps, model_deps
