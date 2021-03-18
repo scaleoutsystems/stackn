@@ -16,5 +16,14 @@
     "slug": "fedn-client",
     "apps": []
   }
+},
+{
+  "model": "models.objecttype",
+  "pk": 3,
+  "fields": {
+    "name": "MLFlow Model",
+    "slug": "mlflow-model",
+    "apps": []
+  }
 }
 ]
