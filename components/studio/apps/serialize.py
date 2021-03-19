@@ -40,12 +40,16 @@ def serialize_model(form_selection):
 
     return model_json, obj
 
-def serialize_S3(form_selection):
+def serialize_S3(form_selection, project):
     print("SERIALIZING S3")
     s3_json = dict()
     if "S3" in form_selection:
+        
         s3_id = form_selection.get('S3', None)
-        obj = S3.objects.filter(pk=s3_id)
+        try:
+            obj = S3.objects.filter(pk=s3_id)
+        except:
+            obj = S3.objects.filter(name=s3_id, project=project)
         s3_json = {
             "s3": {
                 "pk": obj[0].pk,
@@ -195,6 +199,20 @@ def serialize_default_values(aset):
 
     return parameters
 
+def serialize_project(project):
+    parameters = dict()
+    if project.mlflow:
+        parameters['mlflow'] = {
+            "url": project.mlflow.mlflow_url,
+            "s3url": 'https://'+project.mlflow.s3.host,
+            "access_key": project.mlflow.s3.access_key,
+            "secret_key": project.mlflow.s3.secret_key,
+            "region": project.mlflow.s3.region,
+            "username": project.mlflow.basic_auth.username,
+            "password": project.mlflow.basic_auth.password
+        }
+    return parameters
+
 def serialize_app(form_selection, project, aset):
     print("SERIALIZING APP")
     parameters = dict()
@@ -214,7 +232,7 @@ def serialize_app(form_selection, project, aset):
     environment_params = serialize_environment(form_selection, project)
     parameters.update(environment_params)
 
-    s3params = serialize_S3(form_selection)
+    s3params = serialize_S3(form_selection, project)
     parameters.update(s3params)
 
     permission_params = serialize_permissions(form_selection)
@@ -225,5 +243,8 @@ def serialize_app(form_selection, project, aset):
 
     default_values = serialize_default_values(aset)
     parameters.update(default_values)
+
+    project_values = serialize_project(project)
+    parameters.update(project_values)
 
     return parameters, app_deps, model_deps
