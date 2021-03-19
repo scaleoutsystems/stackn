@@ -7,8 +7,10 @@ metadata:
 data:
   # Configuration values can be set as key-value properties
   gatekeeper.yaml: |-
-    {{ if .Values.permissions.private }}
     resources:
+    - uri: /api*
+      white-listed: true
+    {{ if .Values.permissions.private }}
     - uri: /*
       roles:
       - {{ .Values.gatekeeper.client_id }}:owner
@@ -39,7 +41,7 @@ data:
     enable-json-logging: true
     encryption-key: {{ randAlphaNum 32 }}
     enable-refresh-tokens: true
-    upstream-url: http://localhost:5000
+    upstream-url: http://localhost:1234
     {{ if .Values.gatekeeper.skip_tls }}
     skip-openid-provider-tls-verify: true
     {{ end }}

@@ -130,6 +130,8 @@ spec:
         {{- tpl . $ | nindent 8 }}
         {{- end }}
         env:
+        - name: GUNICORN_CMD_ARGS
+          value: "--limit-request-field_size 0"
           {{- with .Values.extraEnv }}
           {{- tpl . $ | nindent 10 }}
           {{- end }}

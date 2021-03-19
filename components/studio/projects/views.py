@@ -15,7 +15,7 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
-from .models import Project, S3, Flavor, ProjectTemplate
+from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
 from .forms import FlavorForm
 from apps.models import AppInstance
 from apps.models import Apps
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 def index(request):
     template = 'index_projects.html'
     try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
         projects = []
         print(err)
@@ -73,10 +73,7 @@ def settings(request, user, project_slug):
 
     s3instances = S3.objects.filter(project=project)
     flavors = Flavor.objects.filter(project=project)
-    flavor_form = FlavorForm()
-    # minio_keys = get_minio_keys(project)
-    # decrypted_key = minio_keys['project_key']
-    # decrypted_secret = minio_keys['project_secret']
+    mlflows = MLFlow.objects.filter(project=project)
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -188,12 +185,38 @@ def set_s3storage(request, user, project_slug, s3storage=[]):
             s3obj = S3.objects.get(name=s3storage, project=project)
         else:
             pk = request.POST.get('s3storage')
-            s3obj = S3.objects.get(pk=pk)
+            if pk == 'blank':
+                s3obj = None
+            else:
+                s3obj = S3.objects.get(pk=pk)
 
         project.s3storage = s3obj
         project.save()
 
         if s3storage:
+            return JsonResponse({"status": "ok"})
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def set_mlflow(request, user, project_slug, mlflow=[]):
+    # TODO: Ensure that the user has the correct permissions to set this specific
+    # MLFlow object to MLFlow Server in this project (need to check that the user has access to the
+    # project as well.)
+    if request.method == 'POST' or mlflow:
+        project = Project.objects.get(slug=project_slug)
+        
+        if mlflow:
+            mlflowobj = MLFlow.objects.get(name=mlflow, project=project)
+        else:
+            pk = request.POST.get('mlflow')
+            mlflowobj = MLFlow.objects.get(pk=pk)
+
+        project.mlflow = mlflowobj
+        project.save()
+
+        if mlflow:
             return JsonResponse({"status": "ok"})
 
     return HttpResponseRedirect(
@@ -364,16 +387,21 @@ def delete(request, user, project_slug):
 
     if not retval:
         next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
-        print("could not delete!")
+        print("could not delete Keycloak resources!")
         return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
 
-    print("PROJECT RESOURCES DELETED SUCCESFULLY!")
+    print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
+    print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+    from .tasks import delete_project_apps
+    delete_project_apps(project_slug)
 
+    print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
     for model in models:
         model.status = 'AR'
         model.save()
-    project.delete()
+    project.status = 'archived'
+    project.save()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 

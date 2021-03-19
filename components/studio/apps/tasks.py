@@ -14,7 +14,7 @@ from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus
 from models.models import Model, ObjectType
-from projects.models import S3, Environment
+from projects.models import S3, Environment, MLFlow, BasicAuth
 from studio.celery import app
 
 def get_URI(parameters):
@@ -121,6 +121,25 @@ def post_create_hooks(instance):
                               appenv=instance)
         env_obj.save()
 
+    if instance.app.slug == 'mlflow':
+        params = instance.parameters
+        s3 = S3.objects.get(pk=instance.parameters['s3']['pk'])
+        basic_auth = BasicAuth(owner=instance.owner,
+                               name=instance.name,
+                               project=instance.project,
+                               username=instance.parameters['credentials']['username'],
+                               password=instance.parameters['credentials']['password'])
+        basic_auth.save()
+        obj = MLFlow(name=instance.name,
+                     project=instance.project,
+                     mlflow_url='https://{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain']),
+                     s3=s3,
+                     basic_auth=basic_auth,
+                     app=instance,
+                     owner=instance.owner)
+        obj.save()
+
+
 def post_delete_hooks(instance):
     if instance.app.slug == 'minio':
         try:
@@ -135,6 +154,13 @@ def post_delete_hooks(instance):
             env_obj = instance.envobj.all().delete()
         except:
             print("Didn't find any associated environment to delete.")
+    
+    if instance.app.slug == 'mlflow':
+        try:
+            mlflow_obj = instance.mlflowobj
+            mlflow_obj.delete()
+        except:
+            print("MLFlow instance has no project MLFlow meta object.")
 
 @shared_task
 @transaction.atomic
@@ -477,51 +503,50 @@ def get_resource_usage():
 def sync_mlflow_models():
     mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), app__slug="mlflow")
     for mlflow_app in mlflow_apps:
-        # print(mlflow_app.parameters['release'])
-        url = 'http://{}:5000/{}'.format(mlflow_app.parameters['release'], 'api/2.0/preview/mlflow/model-versions/search')
-        # print(url, flush=True)
-        res = requests.get(url)
-        models = res.json()
-        for item in models['model_versions']:
-            # print(item)
-            name = item['name']
-            version = 'v{}.0.0'.format(item['version'])
-            release = 'major'
-            source = item['source'].replace('s3://', '').split('/')
-            bucket = source[0]
-            experiment_id = source[1]
-            run_id = source[2]
-            path = '/'.join(source[1:])
-            project = mlflow_app.project
-            uid = run_id
-            s3 = S3.objects.get(pk=mlflow_app.parameters['s3']['pk'])
-            # print(path)
-            # print(source)
-            # print(s3)
-            model_found = True
-            try:
-                stackn_model = Model.objects.get(uid=uid)
-            except:
-                model_found = False
-            if not model_found:
-                model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
-                model.save()
-                obj_type = ObjectType.objects.filter(slug='mlflow-model')
-                model.object_type.set(obj_type)
-                # print(model)
-            else:
-                print("Model already exists, synchronize.")
-                print(item['current_stage'])
-                if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
-                    stackn_model.status = "AR"
-                    stackn_model.save()
-                if item['current_stage'] != 'Archived' and stackn_model.status == "AR":
-                    stackn_model.status = "CR"
-                    stackn_model.save()
-            # versions = requests.get(url2, params={"name": name})
-            # print(versions)
-        # print(models)
 
+        current_time = time.time()-600
+        url = 'http://{}:5000/{}'.format(mlflow_app.parameters['release'], 'api/2.0/preview/mlflow/model-versions/search')
+        res = False
+        try:
+            res = requests.get(url)
+        except Exception as err:
+            print("Call to MLFlow Server failed.")
+            print(err, flush=True)
+        
+        if res:
+            models = res.json()
+            for item in models['model_versions']:
+                # print(item)
+                name = item['name']
+                version = 'v{}.0.0'.format(item['version'])
+                release = 'major'
+                source = item['source'].replace('s3://', '').split('/')
+                bucket = source[0]
+                experiment_id = source[1]
+                run_id = source[2]
+                path = '/'.join(source[1:])
+                project = mlflow_app.project
+                uid = run_id
+                s3 = S3.objects.get(pk=mlflow_app.parameters['s3']['pk'])
+                model_found = True
+                try:
+                    stackn_model = Model.objects.get(uid=uid)
+                except:
+                    model_found = False
+                if not model_found:
+                    model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
+                    model.save()
+                    obj_type = ObjectType.objects.filter(slug='mlflow-model')
+                    model.object_type.set(obj_type)
+                else:
+                    if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
+                        stackn_model.status = "AR"
+                        stackn_model.save()
+                    if item['current_stage'] != 'Archived' and stackn_model.status == "AR":
+                        stackn_model.status = "CR"
+                        stackn_model.save()
+        else:
+            print(res.text)
 
 @app.task
 def clean_resource_usage():

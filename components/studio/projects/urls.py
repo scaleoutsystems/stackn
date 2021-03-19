@@ -12,6 +12,7 @@ urlpatterns = [
     path('<user>/<project_slug>/settings', views.settings, name='settings'),
     path('<user>/<project_slug>/delete', views.delete, name='delete'),
     path('<user>/<project_slug>/setS3storage', views.set_s3storage, name='set_s3storage'),
+    path('<user>/<project_slug>/setmlflow', views.set_mlflow, name='set_mlflow'),
     path('<user>/<project_slug>/createflavor', views.create_flavor, name='create_flavor'),
     path('<user>/<project_slug>/deleteflavor', views.delete_flavor, name='delete_flavor'),
     path('<user>/<project_slug>/createenvironment', views.create_environment, name='create_environment'),

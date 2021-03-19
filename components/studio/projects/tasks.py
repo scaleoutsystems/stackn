@@ -12,7 +12,8 @@ from .exceptions import ProjectCreationException
 
 from django.conf import settings
 
-from .models import Flavor, Environment, Project, S3
+from .models import Flavor, Environment, Project, S3, MLFlow
+# 
 
 
 
@@ -57,50 +58,67 @@ def create_resources_from_template(user, project_slug, template):
     template = decoder.decode(template)
     print(template)
     project = Project.objects.get(slug=project_slug)
+    for key, item in template.items():
+        print(key)
+        if 'flavors' == key:
+            flavors = item
+            for key, item in flavors.items():
+                flavor = Flavor(name=key,
+                                cpu_req=item['cpu']['requirement'],
+                                cpu_lim=item['cpu']['limit'],
+                                mem_req=item['mem']['requirement'],
+                                mem_lim=item['mem']['limit'],
+                                gpu_req=item['gpu']['requirement'],
+                                gpu_lim=item['gpu']['limit'],
+                                ephmem_req=item['ephmem']['requirement'],
+                                ephmem_lim=item['ephmem']['limit'],
+                                project=project)
+                flavor.save()
+        if 'environments' == key:
+            environments = item
+            for key, item in environments.items():
+                app = Apps.objects.get(slug=item['app'])
+                environment = Environment(name=key,
+                                        project=project,
+                                        repository=item['repository'],
+                                        image=item['image'],
+                                        app=app)
+                environment.save()
+        
+        if 'apps' == key:
+            apps = item
+            for key, item in apps.items():
+                app_name = key
+                data = {
+                    "app_name": app_name,
+                    "app_action": "Create"
+                }
+                data = {**data, **item}
+                print("DATA TEMPLATE")
+                print(data)
+                res = appviews.create([], user, project.slug, app_slug=item['slug'], data=data, wait=True)
 
-    if 'flavors' in template:
-        flavors = template['flavors']
-        for key, item in flavors.items():
-            flavor = Flavor(name=key,
-                            cpu_req=item['cpu']['requirement'],
-                            cpu_lim=item['cpu']['limit'],
-                            mem_req=item['mem']['requirement'],
-                            mem_lim=item['mem']['limit'],
-                            gpu_req=item['gpu']['requirement'],
-                            gpu_lim=item['gpu']['limit'],
-                            ephmem_req=item['ephmem']['requirement'],
-                            ephmem_lim=item['ephmem']['limit'],
-                            project=project)
-            flavor.save()
-    if 'environments' in template:
-        environments = template['environments']
-        for key, item in environments.items():
-            app = Apps.objects.get(slug=item['app'])
-            environment = Environment(name=key,
-                                      project=project,
-                                      repository=item['repository'],
-                                      image=item['image'],
-                                      app=app)
-            environment.save()
-    
-    if 'apps' in template:
-        apps = template['apps']
-        for key, item in apps.items():
-            app_name = key
-            data = {
-                "app_name": app_name,
-                "app_action": "Create"
-            }
-            data = {**data, **item}
-            print("DATA TEMPLATE")
-            print(data)
-            res = appviews.create([], user, project.slug, app_slug=item['slug'], data=data, wait=True)
+        if 'settings' == key:
+            print("PARSING SETTINGS")
+            if 'project-S3' in item:
+                print("SETTING DEFAULT S3")
+                s3storage=item['project-S3']
+                s3obj = S3.objects.get(name=s3storage, project=project)
+                project.s3storage = s3obj
+                project.save()
+            if 'project-MLflow' in item:
+                print("SETTING DEFAULT MLflow")
+                mlflow=item['project-MLflow']
+                mlflowobj = MLFlow.objects.get(name=mlflow, project=project)
+                project.mlflow = mlflowobj
+                project.save()
 
-    if 'settings' in template:
-        print("PARSING SETTINGS")
-        if 'project-S3' in template['settings']:
-            print("SETTING DEFAULT S3")
-            s3storage=template['settings']['project-S3']
-            s3obj = S3.objects.get(name=s3storage, project=project)
-            project.s3storage = s3obj
-            project.save()
+
+@shared_task
+def delete_project_apps(project_slug):
+    project = Project.objects.get(slug=project_slug)
+    from apps.models import AppInstance
+    from apps.tasks import delete_resource
+    apps = AppInstance.objects.filter(project=project)
+    for app in apps:
+        delete_resource.delay(app.pk)

@@ -58,6 +58,18 @@ spec:
           value: ""
         - name: NOTEBOOK_TOKEN
           value: ""
+        - name: MLFLOW_TRACKING_URI
+          value: {{ .Values.mlflow.url }}
+        - name: MLFLOW_TRACKING_USERNAME
+          value: {{ .Values.mlflow.username }}
+        - name: MLFLOW_TRACKING_PASSWORD
+          value: {{ .Values.mlflow.password }}
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: {{ .Values.mlflow.s3url }}
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.mlflow.access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.mlflow.secret_key }}
         resources:
           requests:
             memory: {{ .Values.flavor.requests.memory | default "256Mi" }}

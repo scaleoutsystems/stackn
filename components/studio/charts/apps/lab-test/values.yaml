@@ -53,3 +53,12 @@ gatekeeper:
 ingress:
   v1beta1: false
   secretName: prod-ingress
+
+mlflow:
+  url: ""
+  s3url: ""
+  access_key: ""
+  secret_key: ""
+  region: ""
+  username: ""
+  password: ""
