@@ -145,6 +145,26 @@ class S3(models.Model):
     def __str__(self):
         return '{} ({})'.format(self.name, self.project.slug)
 
+class BasicAuth(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='ba_project', null=True)
+    username = models.CharField(max_length=100, blank=True, default="")
+    password = models.CharField(max_length=100, blank=True, default="")
+
+class MLFlow(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='mlflow_project')
+    mlflow_url = models.CharField(max_length=512)
+    s3 = models.ForeignKey(S3, on_delete=models.DO_NOTHING, blank=True, null=True)
+    basic_auth = models.ForeignKey(BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True)
+    app = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True, related_name="mlflowobj")
+    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.project.slug)
+
 class ProjectTemplate(models.Model):
     name = models.CharField(max_length=512, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -155,15 +175,16 @@ class ProjectTemplate(models.Model):
 class Project(models.Model):
     objects = ProjectManager()
 
-    name = models.CharField(max_length=512, unique=True)
+    name = models.CharField(max_length=512)
     description = models.TextField(null=True, blank=True)
     slug = models.CharField(max_length=512, unique=True)
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='owner')
     authorized = models.ManyToManyField(User, blank=True)
 
     s3storage = models.OneToOneField(S3, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_s3')
+    mlflow = models.OneToOneField(MLFlow, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_mlflow')
 
-
+    status = models.CharField(max_length=20, null=True, blank=True, default="active")
 
     # These fields should be removed.
     image = models.CharField(max_length=2048, blank=True, null=True)
@@ -174,11 +195,13 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # These fields should be removed.
     repository = models.CharField(max_length=512, null=True, blank=True)
     repository_imported = models.BooleanField(default=False)
+    # ----------------------
 
     def __str__(self):
-        return "Name: {} Description: {}".format(self.name, self.description)
+        return "Name: {} ({})".format(self.name, self.status)
 
     clone_url = models.CharField(max_length=512, null=True, blank=True)
 
