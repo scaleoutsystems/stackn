@@ -903,6 +903,18 @@
       "S3": "one",
       "apps": {
         "Persistent Volume": "one"
+      },
+      "credentials": {
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "default": "password"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": "admin"
+        }
       }
     },
     "chart": "apps/mlflow",
@@ -911,7 +923,7 @@
       "url": "https://{{ release }}.{{ global.domain }}"
     },
     "logo": "dist/applogos/mlflow_logo.png",
-    "updated_on": "2021-03-18T08:44:06.482Z",
+    "updated_on": "2021-03-18T21:33:33.677Z",
     "created_on": "2021-03-17T21:41:38.701Z"
   }
 },
@@ -937,6 +949,20 @@
         "title": "Environment",
         "quantity": "one"
       },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "true",
+          "option": "true"
+        },
+        "project": {
+          "value": "false",
+          "option": "true"
+        }
+      },
       "default_values": {
         "port": "5000",
         "is_tar": "False"
@@ -948,7 +974,7 @@
       "url": "https://{{ release }}.{{ global.domain }}/invocations"
     },
     "logo": "dist/applogos/mlflow_logo.png",
-    "updated_on": "2021-03-18T14:56:00.090Z",
+    "updated_on": "2021-03-19T14:17:38.394Z",
     "created_on": "2021-03-18T13:40:11.231Z"
   }
 }
