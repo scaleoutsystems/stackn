@@ -75,6 +75,7 @@ class StudioClient():
         self.get_endpoints()
 
     def get_endpoints(self):
+        print("SETTING ENDPOINTS")
         self.endpoints = dict()
         self.endpoints['models'] = self.api_url+'/projects/{}/models'
         self.endpoints['modellogs'] = self.api_url+'/projects/{}/modellogs'
@@ -167,7 +168,8 @@ class StudioClient():
             return json.loads(r.content)
 
     def get_projects(self, params=[]):
-        url = self.endpoints['projects']
+        self.get_endpoints()
+        url = get_endpoints['projects']
         if params:
             r = requests.get(url, headers=self.auth_headers, params=params, verify=self.secure_mode)
         else:

@@ -84,6 +84,16 @@ def create_resources_from_template(user, project_slug, template):
                                         image=item['image'],
                                         app=app)
                 environment.save()
+        # if 'S3' == key:
+        #     S3 = item
+        #     for key, item in S3.items():
+        #         app = Apps.objects.get(slug=item['app'])
+        #         environment = Environment(name=key,
+        #                                 project=project,
+        #                                 repository=item['repository'],
+        #                                 image=item['image'],
+        #                                 app=app)
+        #         environment.save()
         
         if 'apps' == key:
             apps = item
