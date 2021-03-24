@@ -361,7 +361,8 @@ def details(request, user, project_slug):
         rslugs = [{"slug": "compute", "name": "Compute"},
                   {"slug": "serve", "name": "Serve"},
                   {"slug": "store", "name": "Store"},
-                  {"slug": "misc", "name": "Misc"}]
+                  {"slug": "misc", "name": "Misc"},
+                  {"slug": "fedn", "name": "FEDn"}]
         for rslug in rslugs:
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
