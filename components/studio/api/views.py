@@ -195,7 +195,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         for the currently authenticated user.
         """
         current_user = self.request.user
-        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk))
+        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk), ~Q(status='archived'))
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def create_project(self, request):
