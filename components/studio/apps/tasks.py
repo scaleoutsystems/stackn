@@ -12,7 +12,7 @@ from datetime import datetime
 import time
 from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
-from .models import AppInstance, ResourceData, AppStatus
+from .models import AppInstance, ResourceData, AppStatus, Apps
 from models.models import Model, ObjectType
 from projects.models import S3, Environment, MLFlow, BasicAuth
 from studio.celery import app
@@ -557,3 +557,15 @@ def clean_resource_usage():
 @app.task
 def remove_deleted_app_instances():
     AppInstance.objects.filter(state="Deleted").delete()
+
+@app.task
+def clear_table_field():
+    all_apps = AppInstance.objects.all()
+    for app in all_apps:
+        app.table_field = "{}"
+        app.save()
+
+    all_apps = Apps.objects.all()
+    for app in all_apps:
+        app.table_field = "{}"
+        app.save()
