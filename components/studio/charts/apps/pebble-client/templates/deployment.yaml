@@ -6,10 +6,10 @@ metadata:
   labels:
     app: {{ .Values.release }}
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: 1
   selector:
     matchLabels:
-      release: {{ .Release.Name }}
+      release: {{ .Values.release }}
       app: pebble-client
       project: {{ .Values.project.slug }}
       type: app
@@ -21,7 +21,7 @@ spec:
         prometheus.io/path: /metrics
         prometheus.io/port: "8501"
       labels:
-        release: {{ .Release.Name }}
+        release: {{ .Values.release }}
         app: pebble-client
         project: {{ .Values.project.slug }}
         type: app
@@ -34,9 +34,9 @@ spec:
         env:
         {{- range $key, $val := .Values.apps.iotex }}
         - name: MQTT_HOST
-          value: in-memory
+          value: {{ $val.release }}
         - name: MQTT_PORT
-          value:
+          value: "1883"
         {{- end }}
         - name: PEBBLE_ID
           value: {{ .Values.release }}

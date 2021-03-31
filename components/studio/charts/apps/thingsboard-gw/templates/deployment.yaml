@@ -28,39 +28,17 @@ spec:
         pod: thingsboard-gw
     spec:
       volumes:
-      # - name: gatekeeper-config
-      #   configMap:
-      #     name: {{ .Release.Name }}-gatekeeper-config
       - name: mqtt-config
         configMap:
           name: {{ .Values.release }}-mqtt
       - name: config
         configMap:
           name: {{ .Values.release }}-main
-      - name: tbgw-volume
-      {{- range $key, $value := .Values.apps.volume }}
-        persistentVolumeClaim:
-          claimName: {{ $value.release }}
-        {{- end }}
-  
       containers:
-      # - name: gatekeeper
-      #   image: {{ .Values.gatekeeper.image }}
-      #   imagePullPolicy: Always
-      #   args:
-      #     - --config=/etc/secrets/gatekeeper.yaml
-      #   ports:
-      #     - containerPort: {{ .Values.gatekeeper.port }}
-      #   volumeMounts:
-      #   - name: gatekeeper-config
-      #     mountPath: /etc/secrets/
-   
       - name: tb-gateway
         image: thingsboard/tb-gateway:latest
         imagePullPolicy: Always
         volumeMounts:
-        - name: tbgw-volume
-          mountPath: /home/root/.tb-gateway
         - name: mqtt-config
           mountPath: /thingsboard_gateway/config/mqtt.json
           subPath: mqtt.json
