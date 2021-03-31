@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from models.models import Model, ModelLog, Metadata
+from models.models import Model, ModelLog, Metadata, ObjectType
 from projects.models import Project, S3
 from django.contrib.auth.models import User
 
@@ -8,8 +8,12 @@ class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
         fields = (
-            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version')
+            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version', 'object_type')
 
+class ObjectTypeSerializer(ModelSerializer):
+    class Meta:
+        model = ObjectType
+        fields = ('id', 'name', 'slug')
 
 class ModelLogSerializer(ModelSerializer):
     class Meta:
