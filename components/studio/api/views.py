@@ -18,12 +18,26 @@ from projects.models import Environment
 from models.models import ObjectType
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
+from .serializers import ObjectTypeSerializer
+
+class ObjectTypeList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = ObjectTypeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'slug']
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the models
+        for the currently authenticated user.
+        """
+        return ObjectType.objects.all()
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'version']
+    filterset_fields = ['id','name', 'version', 'object_type']
 
     def get_queryset(self):
         """

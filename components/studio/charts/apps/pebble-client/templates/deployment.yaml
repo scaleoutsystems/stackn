@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.release }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: pebble-client
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: pebble-client
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: pebble-client
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: pebble-client
+    spec:  
+      containers:
+      - name: client
+        image: scaleoutsystems/pebble-client:latest
+        imagePullPolicy: Always
+        env:
+        {{- range $key, $val := .Values.apps.iotex }}
+        - name: MQTT_HOST
+          value: in-memory
+        - name: MQTT_PORT
+          value:
+        {{- end }}
+        - name: PEBBLE_ID
+          value: {{ .Values.release }}
+        
