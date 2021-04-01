@@ -501,7 +501,7 @@ def get_resource_usage():
 
 @app.task
 def sync_mlflow_models():
-    mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), app__slug="mlflow")
+    mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), project__status="active", app__slug="mlflow")
     for mlflow_app in mlflow_apps:
 
         current_time = time.time()-600
@@ -546,7 +546,7 @@ def sync_mlflow_models():
                         stackn_model.status = "CR"
                         stackn_model.save()
         else:
-            print(res.text)
+            print("WARNING: Failed to fetch info from MLflow Server: {}".format(url))
 
 @app.task
 def clean_resource_usage():
