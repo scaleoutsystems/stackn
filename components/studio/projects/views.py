@@ -17,7 +17,7 @@ import base64
 from projects.helpers import get_minio_keys
 from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
 from .forms import FlavorForm
-from apps.models import AppInstance
+from apps.models import AppInstance, AppCategories
 from apps.models import Apps
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
@@ -358,11 +358,11 @@ def details(request, user, project_slug):
         status_success, status_warning = get_status_defs()
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
         resources = list()
-        rslugs = [{"slug": "compute", "name": "Compute"},
-                  {"slug": "serve", "name": "Serve"},
-                  {"slug": "store", "name": "Store"},
-                  {"slug": "misc", "name": "Misc"},
-                  {"slug": "fedn", "name": "FEDn"}]
+        cats = AppCategories.objects.all()
+        rslugs = []
+        for cat in cats:
+            rslugs.append({"slug": cat.slug, "name": cat.name})
+
         for rslug in rslugs:
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:

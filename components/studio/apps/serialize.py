@@ -23,6 +23,12 @@ def serialize_model(form_selection):
         
         # model_json['model'] = dict()
         keys = get_minio_keys(obj[0].project)
+        object_type = obj[0].object_type.all()
+        if len(object_type) == 1:
+            print("OK")
+        else:
+            print("Currently only supports one object type per model")
+            print("Will assume first in list.")
         model_json = {
             "model": {
                 "name": obj[0].name,
@@ -34,7 +40,8 @@ def serialize_model(form_selection):
                 "secret_key": obj[0].s3.secret_key,
                 "bucket": obj[0].bucket,
                 "obj": obj[0].uid,
-                "path": obj[0].path
+                "path": obj[0].path,
+                "type": object_type[0].slug
             }
         }
 
