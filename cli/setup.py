@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
-
+import stackn.version as version
 
 setup(
     name='scaleout-cli',
-    version='0.1.0',
+    version=version.__version__,
     description="""Scaleout CLI""",
     author='Morgan Ekmefjord',
     author_email='morgan@scaleout.se',
