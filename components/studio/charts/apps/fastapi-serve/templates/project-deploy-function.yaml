@@ -104,6 +104,13 @@ spec:
         volumeMounts:
         - name: rp-conf
           mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
 
       {{ if .Values.model_card.enabled }}
       - name: model-card
@@ -114,6 +121,13 @@ spec:
           mountPath: /model
         - name: mc-conf
           mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
       {{ end }}
       - name: serve
         resources:

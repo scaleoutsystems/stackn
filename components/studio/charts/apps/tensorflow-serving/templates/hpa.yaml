@@ -1,3 +1,4 @@
+{{ if .Values.hpa.enabled }}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -8,15 +9,15 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ .Values.appname }}
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: {{ .Values.hpa.min_pods }}
+  maxReplicas: {{ .Values.hpa.max_pods }}
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: {{ .Values.hpa.cpu_target }}
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 60
@@ -30,3 +31,4 @@ spec:
       - type: Pods
         value: 1
         periodSeconds: 15
+{{ end }}
