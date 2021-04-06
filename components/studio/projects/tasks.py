@@ -53,7 +53,7 @@ def create_settings_file(project_slug):
 def create_resources_from_template(user, project_slug, template):
     from apps.models import Apps
     import apps.views as appviews
-
+    print(template)
     decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
     template = decoder.decode(template)
     print(template)
