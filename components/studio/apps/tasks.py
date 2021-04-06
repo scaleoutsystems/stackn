@@ -515,36 +515,38 @@ def sync_mlflow_models():
         
         if res:
             models = res.json()
-            for item in models['model_versions']:
-                # print(item)
-                name = item['name']
-                version = 'v{}.0.0'.format(item['version'])
-                release = 'major'
-                source = item['source'].replace('s3://', '').split('/')
-                bucket = source[0]
-                experiment_id = source[1]
-                run_id = source[2]
-                path = '/'.join(source[1:])
-                project = mlflow_app.project
-                uid = run_id
-                s3 = S3.objects.get(pk=mlflow_app.parameters['s3']['pk'])
-                model_found = True
-                try:
-                    stackn_model = Model.objects.get(uid=uid)
-                except:
-                    model_found = False
-                if not model_found:
-                    model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
-                    model.save()
-                    obj_type = ObjectType.objects.filter(slug='mlflow-model')
-                    model.object_type.set(obj_type)
-                else:
-                    if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
-                        stackn_model.status = "AR"
-                        stackn_model.save()
-                    if item['current_stage'] != 'Archived' and stackn_model.status == "AR":
-                        stackn_model.status = "CR"
-                        stackn_model.save()
+            print(models)
+            if len(models) > 0:
+                for item in models['model_versions']:
+                    # print(item)
+                    name = item['name']
+                    version = 'v{}.0.0'.format(item['version'])
+                    release = 'major'
+                    source = item['source'].replace('s3://', '').split('/')
+                    bucket = source[0]
+                    experiment_id = source[1]
+                    run_id = source[2]
+                    path = '/'.join(source[1:])
+                    project = mlflow_app.project
+                    uid = run_id
+                    s3 = S3.objects.get(pk=mlflow_app.parameters['s3']['pk'])
+                    model_found = True
+                    try:
+                        stackn_model = Model.objects.get(uid=uid)
+                    except:
+                        model_found = False
+                    if not model_found:
+                        model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
+                        model.save()
+                        obj_type = ObjectType.objects.filter(slug='mlflow-model')
+                        model.object_type.set(obj_type)
+                    else:
+                        if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
+                            stackn_model.status = "AR"
+                            stackn_model.save()
+                        if item['current_stage'] != 'Archived' and stackn_model.status == "AR":
+                            stackn_model.status = "CR"
+                            stackn_model.save()
         else:
             print("WARNING: Failed to fetch info from MLflow Server: {}".format(url))
 
