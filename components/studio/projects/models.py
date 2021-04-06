@@ -8,6 +8,7 @@ from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 import string
 import random
+import uuid
 from django_cryptography.fields import encrypt
 
 # from deployments.models import HelmResource
@@ -167,6 +168,7 @@ class MLFlow(models.Model):
 
 class ProjectTemplate(models.Model):
     name = models.CharField(max_length=512, unique=True)
+    slug = models.CharField(max_length=512, default="")
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
     def __str__(self):

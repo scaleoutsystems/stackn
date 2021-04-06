@@ -1,0 +1,55 @@
+
+# def read_project(studio_url):
+#     # project_name = []
+#     # if 'STACKN_PROJECT_NAME' in os.environ:
+#     #     project_name = os.environ['STACKN_PROJECT_NAME']
+#     #     return project_name
+#     # else:
+#     conf = {'STACKN_URL': studio_url}
+#     conf = get_config(conf)
+#     if not conf['STACKN_PROJECT']:
+#         stackn_config = load_config_file(conf)
+#         if stackn_config:
+#             try:
+#                 studio_url_key = get_studio_url_key(studio_url)
+#                 conf['STACKN_PROJECT'] = stackn_config[studio_url_key]['project']
+#             except:
+#                 return []
+#     return conf
+
+
+# def read_tokens(studio_url):
+#     '''
+#     Reads tokens from file, unless they exist in environment variables.
+#     '''
+#     access_token = []
+#     refresh_token = []
+#     if 'STACKN_ACCESS_TOKEN' in os.environ:
+#         access_token = os.environ['STACKN_ACCESS_TOKEN']
+#     if 'STACKN_REFRESH_TOKEN' in os.environ:
+#         refresh_token = os.environ['STACKN_REFRESH_TOKEN']
+
+#     if access_token and refresh_token:
+#         return access_token, refresh_token
+
+#     stackn_config = load_config_file()
+
+#     studio_url_key = get_studio_url_key(studio_url)
+
+#     if not access_token:
+#         try:
+#             access_token = stackn_config[studio_url_key]['access_token']
+#         except Exception as err:
+#             print("Failed to read access token from STACKn config.")
+#             print("Either login, or set environment variable STACKN_ACCESS_TOKEN")
+#             return [], []
+#     if not refresh_token:
+#         try:
+#             refresh_token = stackn_config[studio_url_key]['refresh_token']
+#         except Exception as err:
+#             print("Failed to read refresh token from STACKn config.")
+#             print("Either login, or set environment variable STACKN_REFRESH_TOKEN")
+#             print(err)
+#             return [], []
+
+#     return access_token, refresh_token

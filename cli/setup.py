@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
-from scaleout import version
 
 
 setup(
     name='scaleout-cli',
-    version=version.__version__,
+    version='0.1.0',
     description="""Scaleout CLI""",
-    author='Scaleout Systems',
+    author='Morgan Ekmefjord',
+    author_email='morgan@scaleout.se',
     url='https://www.scaleoutsystems.com',
     include_package_data=True,
     py_modules=['scaleout'],
@@ -30,7 +30,7 @@ setup(
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
     entry_points={
-        'console_scripts': ["stackn=scaleout.cli:main"]
+        'console_scripts': ["stackn=stackn:main"]
     },
     keywords='',
     packages=find_packages(exclude=["tests", "tests.*"]),
