@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
-from scaleout import version
-
+import stackn.version as version
 
 setup(
     name='scaleout-cli',
@@ -31,7 +30,7 @@ setup(
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
     entry_points={
-        'console_scripts': ["stackn=scaleout.cli:main"]
+        'console_scripts': ["stackn=stackn:main"]
     },
     keywords='',
     packages=find_packages(exclude=["tests", "tests.*"]),

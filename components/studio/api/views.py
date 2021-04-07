@@ -1,7 +1,8 @@
 import uuid
+import json
 from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
@@ -11,21 +12,35 @@ from rest_framework import generics
 from .APIpermissions import ProjectPermission
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
+from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
-from projects.models import Environment
+from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog
 from models.models import ObjectType
+from apps.models import AppInstance
 
-from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, \
-    Report, ReportSerializer, ReportGenerator, ReportGeneratorSerializer, Project, ProjectSerializer, UserSerializer, \
-    DatasetSerializer, FileModelSerializer, Dataset, FileModel
+from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
+from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
+from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer
+
+from projects.tasks import create_resources_from_template
+from apps.tasks import delete_resource
+
+class ObjectTypeList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = ObjectTypeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'slug']
+
+    def get_queryset(self):
+        return ObjectType.objects.all()
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'version']
+    filterset_fields = ['id','name', 'version', 'object_type']
 
     def get_queryset(self):
         """
@@ -35,9 +50,13 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
         return Model.objects.filter(project__pk=self.kwargs['project_pk'])
 
     def destroy(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
         model = self.get_object()
-        model.delete()
-        return HttpResponse('ok', 200)
+        if model.project==project:
+            model.delete()
+            return HttpResponse('ok', 200)
+        else:
+            return HttpResponse('User is not allowed to delete object.', 403)
 
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
@@ -127,173 +146,7 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         new_md.save()
         return HttpResponse('ok', 200)
 
-# class DeploymentDefinitionList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = DeploymentDefinitionSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['name']
-    
-#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-#     def build_definition(self, request):
-#         instance = DeploymentDefinition.objects.get(name=request.data['name'])
-#         build_definition(instance)
-#         return HttpResponse('ok', 200)
 
-
-#     def get_queryset(self):
-#         """
-#         This view should return a list of all the deployments
-#         for the currently authenticated user.
-#         """
-#         current_user = self.request.user
-#         return DeploymentDefinition.objects.filter(project__owner__username=current_user)
-
-
-# class DeploymentInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = DeploymentInstanceSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['id']
-#     def get_queryset(self):
-#         """
-#         This view should return a list of all the deployments
-#         for the currently authenticated user.
-#         """
-#         current_user = self.request.user
-#         print(self.request.query_params)
-#         project = self.request.query_params.get('project', [])
-#         model = self.request.query_params.get('model', [])
-#         if model:
-#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project, model=model)
-#         else:
-#             return DeploymentInstance.objects.filter(model__project__owner__username=current_user, model__project=project)
-    
-#     def destroy(self, request, *args, **kwargs):
-#         current_user = self.request.user
-#         name = self.request.query_params.get('name', [])
-#         version = self.request.query_params.get('version', [])
-#         if name and version:
-#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-#             print('Deleting deployment of model {}-{}.'.format(name, version))
-#         else:
-#             return HttpResponse('Takes model and tag as parameters.', 400)
-#         if current_user == instance.model.project.owner:
-#             resource = instance.helmchart
-#             resource.delete()
-#             return HttpResponse('ok', 200)
-#         else:
-#             return HttpResponse('Not Allowed', 400)
-
-#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-#     def build_instance(self, request):
-
-#         model_name = request.data['name']
-#         model_version = request.data['version']
-#         environment = request.data['depdef']
-#         project_id = request.data['project']
-#         project = Project.objects.get(pk=project_id)
-#         print(model_name+':'+model_version)
-#         try:
-#             print('Check model')
-#             # TODO: Check that we have permission to access the model.
-#             if model_version=='latest':
-#                 mod = Model.objects_version.latest(model_name, project)
-#             else:
-#                 mod = Model.objects.get(name=model_name, version=model_version, project=project)
-#             if mod.status == 'DP':
-#                 return HttpResponse('Model {}:{} already deployed.'.format(model_name, model_version), status=400)
-#         except:
-#             return HttpResponse('Model {}:{} not found.'.format(model_name, model_version), status=400)
-        
-#         try:
-#             # TODO: Check that we have permission to access the deployment definition.
-#             dep = DeploymentDefinition.objects.get(name=environment)
-#         except:
-#             return HttpResponse('Deployment environment {} not found.'.format(environment), status=404)
-
-#         instance = DeploymentInstance(model=mod, deployment=dep, created_by=request.user.username)
-#         instance.params = request.data['deploy_config']
-#         # TODO: Verify that the user is allowed to set the parameters in deploy_config.
-#         #       This whole endpoint needs to be refactored:
-#         #         1. Make consistent with rest of API
-#         #         2. Authorization via ProjectPermissions.
-#         instance.save()
-        
-#         return HttpResponse('ok', status=200)
-
-#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-#     def update_instance(self, request):
-#         # This implementation is a proof-of-concept, and is used to test
-#         # the chart controller upgrade functionality
-#         current_user = request.user
-#         name = request.data['name']
-#         version = request.data['version']
-#         # Currently only allows updating of the number of replicas.
-#         # This code can be improved and generalized later on. We cannot
-#         # allow general helm upgrades though, as this can cause STACKn-wide
-#         # problems.
-#         try:
-#             replicas = int(self.request.data['replicas'])
-#         except:
-#             return HttpResponse('Replicas parameter should be an integer.', 400)
-#         print(replicas)
-#         if replicas < 0 or (isinstance(replicas, int) == False):
-#             return HttpResponse('Replicas parameter should be positive integer.', 400)
-
-#         if name and version:
-#             instance = DeploymentInstance.objects.get(model__name=name, model__version=version)
-#             print('instance name: '+instance.model.name)
-#         else:
-#             return HttpResponse('Requires model name and version as parameters.', 400)
-#         # Who should be allowed to update the model? Currently only the owner.
-#         if current_user == instance.model.project.owner:
-#             params = instance.helmchart.params
-#             params = literal_eval(params)
-#             params['replicas'] = str(replicas)
-#             print(params)
-#             instance.helmchart.params = params
-#             instance.helmchart.save()
-#             return HttpResponse('Ok', status=200)
-
-        
-#     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-#     def auth(self, request):
-#       auth_req_red = request.headers['X-Auth-Request-Redirect'].replace('predict/','')
-#       subs = auth_req_red.split('/')
-#       release = '{}-{}-{}'.format(subs[1], subs[3], subs[4])
-#       try:
-#           instance = DeploymentInstance.objects.get(release=release)
-#       except:
-#           return HttpResponse(status=500)
-#       if instance.access == 'PU' or instance.model.project.owner == request.user:
-#           return HttpResponse('Ok', status=200)
-#       else:
-#           return HttpResponse(status=401)
-
-class ReportList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = ReportSerializer
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the reports
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        return Report.objects.filter(generator__project__owner__username=current_user)
-
-
-class ReportGeneratorList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = ReportGeneratorSerializer
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the report generators
-        for the currently authenticated user.
-        """
-        current_user = self.request.user
-        return ReportGenerator.objects.filter(project__owner__username=current_user)
 
 class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
@@ -350,61 +203,6 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
 
-
-class DatasetList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
-    permission_classes = (IsAuthenticated, ProjectPermission, )
-    serializer_class = DatasetSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'project_slug', 'version']
-    def get_queryset(self):
-        """
-        This view should return a list of all the members
-        of the project
-        """
-        project = Project.objects.get(pk=self.kwargs['project_pk'])
-        return Dataset.objects.filter(project_slug=project.slug)
-    
-    def create(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-
-        try:
-            dataset_name = request.data['name']
-            release_type = request.data['release_type']
-            filenames = request.data['filenames'].split(',')
-            description = request.data['description']
-            bucket = request.data['bucket']
-            new_dataset = Dataset(name=dataset_name,
-                                  release_type=release_type,
-                                  description=description,
-                                  project_slug=project.slug,
-                                  bucket=bucket,
-                                  created_by=request.user.username)
-            new_dataset.save()
-            for fname in filenames:
-                fobj = FileModel(name=fname, bucket=bucket)
-                fobj.save()
-                new_dataset.files.add(FileModel.objects.get(pk=fobj.pk))
-            new_dataset.save()
-        except Exception as err:
-            print(err)
-            return HttpResponse('Failed to create dataset.', 400)
-        return HttpResponse('ok', 200)
-
-    def destroy(self, request, *args, **kwargs):
-        print('Deleting dataset')
-        project = Project.objects.get(id=self.kwargs['project_pk'])
-        dataset = Dataset.objects.get(pk=self.kwargs['pk'],
-                                      project_slug=project.slug)
-        try:
-            dataset.delete()
-            print('OK')
-            return HttpResponse('ok', 200)
-        except Exception as err:
-            print('Failed')
-            print(err)
-            return HttpResponse('Failed to delete dataset', 400)
-
 class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
     permission_classes = (IsAuthenticated,)
@@ -418,10 +216,39 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         for the currently authenticated user.
         """
         current_user = self.request.user
-        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk))
+        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk), ~Q(status='archived'))
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def create_project(self, request):
+    def destroy(self, request, *args, **kwargs):
+        project = self.get_object()
+        if request.user == project.owner and project.status.lower() != "deleted":
+            print("Delete project")
+
+            print("Cleaning up Keycloak.")
+            keyc = kc.keycloak_init()
+            kc.keycloak_delete_client(keyc, project.slug)
+            
+            scope_id, res = kc.keycloak_get_client_scope_id(keyc, project.slug+'-scope')
+            print(scope_id)
+            kc.keycloak_delete_client_scope(keyc, scope_id)
+
+            print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
+            print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+            delete_project_apps(project.slug)
+
+            print("ARCHIVING PROJECT Object")
+            objects = Model.objects.filter(project=project)
+            for obj in objects:
+                obj.status = 'AR'
+                obj.save()
+            project.status = 'archived'
+            project.save()
+        else:
+            print("User is not allowed to delete project (only owner can delete).")
+            return HttpResponse("User is not allowed to delete project (only owner can delete).", status=403)
+
+        return HttpResponse('ok', status=200)
+
+    def create(self, request):
         name = request.data['name']
         description = request.data['description']
         repository = request.data['repository']
@@ -430,13 +257,164 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                                                  description=description,
                                                  repository=repository)
         success = True
+        
         try:
-            create_project_resources(project, request.user, repository=repository)
-        except:
+            # Create project resources (Keycloak only)
+            create_project_resources(project, request.user.username, repository)
+
+            # Create resources from the chosen template
+            template_slug = request.data['template']
+            template = ProjectTemplate.objects.get(slug=template_slug)
+            project_template = ProjectTemplate.objects.get(pk=template.pk)
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
+
+            # Reset user token
+            if 'oidc_id_token_expiration' in request.session:
+                request.session['oidc_id_token_expiration'] = time.time()-100
+                request.session.save()
+            else:
+                print("No token to reset.")
+        except Exception as e:
             print("ERROR: could not create project resources")
+            print(e)
             success = False
-            return HttpResponse('Ok', status=400)
+
+        if not success:
+            project.delete()
+            return HttpResponse('Failed to create project.', status=200)
+        else:
+            l1 = ProjectLog(project=project, module='PR', headline='Project created',
+                            description='Created project {}'.format(project.name))
+            l1.save()
+
+            l2 = ProjectLog(project=project, module='PR', headline='Getting started',
+                            description='Getting started with project {}'.format(project.name))
+            l2.save()
+
 
         if success:
             project.save()
-            return HttpResponse('Ok', status=200)
+            return HttpResponse(project.slug, status=200)
+
+
+class ResourceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = AppInstanceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'app__category']
+
+    # def get_queryset(self):
+    #     return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs['project_pk'])
+    
+    def create(self, request, *args, **kwargs):
+        template = request.data
+        # template = {
+        #     "apps": request.data
+        # }
+        print(template)
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        create_resources_from_template.delay(request.user.username, project.slug, json.dumps(template))
+        return HttpResponse("Submitted request to create app.", status=200)
+
+class AppInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = AppInstanceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'app__category']
+
+    def get_queryset(self):
+        return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs['project_pk'])
+    
+    def create(self, request, *args, **kwargs):
+        return HttpResponse("Use 'resources' endpoint instead.", status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        appinstance = self.get_object()
+        # Check that user is allowed to delete app:
+        # Either user owns the app, or is a member of the project (Checked by project permission above)
+        # and the app is set to project level permission.
+        access = False
+        if appinstance.owner == request.user:
+            print("User owns app, can delete.")
+            access = True
+        elif appinstance.permission.projects.filter(slug=project.slug).exists():
+            print("Project has permission")
+            access = True
+        elif appinstance.permission.public:
+            print("App is public and user has project permission, allowed to delete.")
+            access = True
+        # Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True)
+        if access:
+            delete_resource.delay(appinstance.pk)
+        else:
+            return HttpResponse("User is not allowed to delete resource.", status=403)
+        return HttpResponse("Deleted app.", status=200)
+
+class FlavorsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = FlavorsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name']
+
+    def get_queryset(self):
+        return Flavor.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
+
+class EnvironmentList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = EnvironmentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name']
+
+    def get_queryset(self):
+        return Environment.objects.filter(project__pk=self.kwargs['project_pk'])
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
+
+class S3List(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = S3serializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'host', 'region']
+
+    def get_queryset(self):
+        return S3.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
+
+class MLflowList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = MLflowSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name']
+
+    def get_queryset(self):
+        return MLFlow.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)

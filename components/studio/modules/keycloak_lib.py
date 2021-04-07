@@ -367,7 +367,7 @@ def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect',
 def keycloak_get_client_scope_id(kc, scope_name):
     client_scope_url = '{}/admin/realms/{}/client-scopes'.format(kc.admin_url, kc.realm)
     res = r.get(client_scope_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
-
+    # TODO: There has to be a better way to fetch scope id than to loop over all scopes...!?
     success = False
     scope_id = []
     if res:

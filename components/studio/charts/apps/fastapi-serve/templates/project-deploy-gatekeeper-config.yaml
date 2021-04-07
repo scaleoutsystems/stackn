@@ -42,8 +42,7 @@ data:
     upstream-response-header-timeout: 500s
     server-idle-timeout: 500s
     enable-authorization-header: false
-    add-claims:
-      - email
+    enable-token-header: false
     {{ if .Values.gatekeeper.skip_tls }}
     skip-openid-provider-tls-verify: true
     {{ end }}

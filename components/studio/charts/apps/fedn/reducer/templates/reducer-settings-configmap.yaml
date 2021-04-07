@@ -9,8 +9,6 @@ data:
 
     control:
       state: idle
-      context: compute-package.tar.gz
-      model: seed.npz
       helper: {{ .Values.global.control.helper | default "keras"}}
 
     statestore:

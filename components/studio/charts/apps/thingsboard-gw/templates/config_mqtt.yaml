@@ -1,0 +1,156 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.release }}-mqtt
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  mqtt.json: |-
+    {
+        "broker": {
+            "name": "HMQ Pebble MQTT Broker",
+        {{- range $key, $val := .Values.apps.iotex }}
+        "host": "{{ $val.release }}",
+            "port": 1883,
+            "security": {
+            "type": "anonymous"
+            }
+        },
+        {{- end }}
+        "mapping": [
+            {
+                "topicFilter": "device/+/data",
+                "converter": {
+                    "type": "json",
+                    "deviceNameTopicExpression": "(?<=device/)(.*?)(?=/data)",
+                    "deviceTypeTopicExpression": "Pebble",
+                    "timeout": 60000,
+                    "timeseries": [
+                        {
+                            "type": "integer",
+                            "key": "snr",
+                            "value": "${message.SNR}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "vbat",
+                            "value": "${message.VBAT}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "latitude",
+                            "value": "${message.latitude}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "longitude",
+                            "value": "${message.longitude}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "gas_resistance",
+                            "value": "${message.gas_resistance}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "temperature",
+                            "value": "${message.temperature}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "pressure",
+                            "value": "${message.pressure}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "humidity",
+                            "value": "${message.humidity}"
+                        },
+                        {
+                            "type": "double",
+                            "key": "light",
+                            "value": "${message.light}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "gyroscope-X",
+                            "value": "${message.gyroscope[0]}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "gyroscope-Y",
+                            "value": "${message.gyroscope[1]}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "gyroscope-Z",
+                            "value": "${message.gyroscope[2]}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "accelerometer-X",
+                            "value": "${message.accelerometer[0]}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "accelerometer-Y",
+                            "value": "${message.accelerometer[1]}"
+                        },
+                        {
+                            "type": "integer",
+                            "key": "accelerometer-Z",
+                            "value": "${message.accelerometer[2]}"
+                        },
+                        {
+                            "type": "string",
+                            "key": "timestamp",
+                            "value": "${message.timestamp}"
+                        },
+                        {
+                            "type": "string",
+                            "key": "random",
+                            "value": "${message.random}"
+                        },
+                        {
+                            "type": "string",
+                            "key": "rsa_n",
+                            "value": "${message.RSA_N}"
+                        },
+                        {
+                            "type":	"string",
+                            "key": "rsa_e",
+                            "value": "${message.RSA_E}"
+                        },
+                        {
+                            "type": "string",
+                            "key": "signature_r",
+                            "value": "${signature_r}"
+                        },
+                        {
+                            "type": "string",
+                            "key": "signature_s",
+                            "value": "${signature_s}"
+                        }
+                    ]
+                }
+            }
+        ],
+        "attributeRequests": [],
+        "connectRequests": [
+            {
+                "topicFilter": "device/+/connect",
+                "deviceNameTopicExpression": "(?<=device\/)(.*?)(?=\/connect)"
+            }
+        ],
+        "disconnectRequests": [],
+        "attributeUpdates": [
+            {
+            "topicFilter": ".*",
+                "deviceNameFilter": ".*",
+                "attributeFilter": ".*",
+                "topicExpression": "topic/config/${deviceName}",
+                "valueExpression": "{\"${attributeKey}\":\"${attributeValue}\"}"
+            }
+        ],
+        "serverSideRpc": []
+    }

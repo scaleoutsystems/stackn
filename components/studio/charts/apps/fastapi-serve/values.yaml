@@ -29,10 +29,17 @@ deployment:
   name: deployment-name
   endpoint: deployment-endpoint
   path: deployment-path
-  port: 8501
+  
 
 context:
   image: context-image
+
+hpa:
+  enabled: true
+  min_pods: 1
+  max_pods: 3
+  cpu_target: 60
+
 
 model:
   name: name
@@ -44,6 +51,10 @@ model:
   secret_key: secret
   bucket: bucket
   obj: obj
+
+default_values:
+  is_tar: false
+  port: 8501
 
 model_card:
   enabled: false

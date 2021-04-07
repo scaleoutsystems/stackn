@@ -38,18 +38,6 @@
         <span class="align-middle">Objects</span>
     </a>
 </li>
-<!-- <li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'datasets:page' request.user project.slug %}">
-        <i class="align-middle" data-feather="hard-drive"></i>
-        <span class="align-middle">Datasets</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'reports:index' request.user project.slug %}">
-        <i class="align-middle" data-feather="file-text"></i>
-        <span class="align-middle">Metrics</span>
-    </a>
-</li> -->
 <li class="sidebar-item {{ menu.compute }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
         <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Compute</span>
@@ -70,6 +58,11 @@
        <span class="align-middle" style="padding-right:10px;"><img class="align-middle" src="{% static 'dist/applogos/fedn_logo.png' %}" width="20px"  /> </span><span class="align-middle">FEDn</span>
     </a>
 </li>
+<!-- <li class="sidebar-item {{ menu.iotex }}">
+    <a href="{% url 'apps:filtered' request.user project.slug 'iotex' %}" class="sidebar-link">
+       <span class="align-middle" style="padding-right:10px;"><img class="align-middle" src="{% static 'dist/applogos/iotex_logo.png' %}" width="20px"  /> </span><span class="align-middle">IoTeX</span>
+    </a>
+</li> -->
 <li class="sidebar-item {{ menu.misc }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
         <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>

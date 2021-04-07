@@ -49,11 +49,16 @@ spec:
         - name: {{ .Release.Name }}-pull-secret
       {{ end }}
       initContainers:
+      
       - name: copy-model
         image: minio/mc
         imagePullPolicy: Always
         command: ["/bin/bash"]
+        {{ if eq .Values.model.type "model" }}
         args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        {{ else }}
+        args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp -r projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_PATH /models/"]
+        {{ end }}
         volumeMounts:
         - name: model-vol
           mountPath: /models
@@ -70,6 +75,9 @@ spec:
           value: {{ .Values.model.bucket }}
         - name: STACKN_MODEL_FILE
           value: {{ .Values.model.obj }}
+        - name: STACKN_MODEL_PATH
+          value: {{ .Values.model.path }}
+      {{ if eq .Values.model.type "model" }}
       - name: extract-model
         image: busybox
         imagePullPolicy: Always
@@ -78,6 +86,7 @@ spec:
         volumeMounts:
         - name: model-vol
           mountPath: /models
+      {{ end }}
       containers:
       - name: gatekeeper
         image: {{ .Values.gatekeeper.image }}
@@ -95,6 +104,13 @@ spec:
         volumeMounts:
         - name: rp-conf
           mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
 
       {{ if .Values.model_card.enabled }}
       - name: model-card
@@ -105,6 +121,13 @@ spec:
           mountPath: /model
         - name: mc-conf
           mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
       {{ end }}
       - name: serve
         resources:
@@ -121,10 +144,12 @@ spec:
         {{- tpl . $ | nindent 8 }}
         {{- end }}
         env:
+        - name: GUNICORN_CMD_ARGS
+          value: "--limit-request-field_size 0"
           {{- with .Values.extraEnv }}
           {{- tpl . $ | nindent 10 }}
           {{- end }}
         image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
         imagePullPolicy: Always
         ports:
-        - containerPort: {{ .Values.deployment.port }}
+        - containerPort: {{ .Values.default_values.port }}

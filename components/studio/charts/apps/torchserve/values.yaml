@@ -34,6 +34,12 @@ deployment:
 context:
   image: context-image
 
+hpa:
+  enabled: true
+  min_pods: 1
+  max_pods: 3
+  cpu_target: 60
+
 model:
   name: name
   version: version

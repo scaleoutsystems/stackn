@@ -64,7 +64,7 @@ class AppInstance(models.Model):
     deleted_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)+' ({})-{}-{}'.format(self.state, self.owner, self.app.name)
+        return str(self.name)+' ({})-{}-{}-{}'.format(self.state, self.owner, self.app.name, self.project)
 
 class AppStatus(models.Model):
     appinstance = models.ForeignKey('AppInstance', on_delete=models.CASCADE, related_name="status")
