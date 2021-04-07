@@ -22,14 +22,17 @@
                     Access
                 </a>
                 {% endif %}
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
+                <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
                     Publish
-                </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
+                </a> -->
+                <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
                     Labs
-                </a>
+                </a> -->
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#s3storage" role="tab">
                     S3 storage
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#mlflow" role="tab">
+                    MLFlow
                 </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#flavors" role="tab">
                     Flavors
@@ -281,11 +284,39 @@
                             <div class="mb-3">
                                 <label for="id_user_name" class="form-label">S3 instance</label>
                                 <select type="text" class="form-control" id="id_s3storage" name="s3storage" maxlength="256" required>
+                                    <option value="blank" selected>--------</option>
                                 {% for s3 in s3instances %}
                                     {% if s3 == project.s3storage %}
                                     <option value="{{ s3.pk }}" selected>{{ s3.name }}</option>
                                     {% else %}
                                     <option value="{{ s3.pk }}">{{ s3.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Set</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="mlflow" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Default MLFlow Server</h5>
+                        <form action="{% url 'projects:set_mlflow' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="id_user_name" class="form-label">MLFlow Servers</label>
+                                <select type="text" class="form-control" id="id_mlflow" name="mlflow" maxlength="256" required>
+                                {% for mlflow in mlflows %}
+                                    <option value="blank" selected>--------</option>
+                                    {% if mlflow == project.mlflow %}
+                                    <option value="{{ mlflow.pk }}" selected>{{ mlflow.name }}</option>
+                                    {% else %}
+                                    <option value="{{ mlflow.pk }}">{{ mlflow.name }}</option>
                                     {% endif %}
                                 {% endfor %}
                                 </select>
