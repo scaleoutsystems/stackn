@@ -1,18 +1,20 @@
 from rest_framework.serializers import ModelSerializer
 
-from models.models import Model, ModelLog, Metadata
-from reports.models import Report, ReportGenerator
-from projects.models import Project, S3
-# from deployments.models import DeploymentInstance, DeploymentDefinition
-from datasets.models import Dataset, FileModel
+from models.models import Model, ModelLog, Metadata, ObjectType
+from projects.models import Project, S3, Flavor, Environment, MLFlow
+from apps.models import AppInstance, Apps, AppCategories, AppStatus
 from django.contrib.auth.models import User
 
 class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
         fields = (
-            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version')
+            'id', 'uid', 'name', 'description', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version', 'object_type')
 
+class ObjectTypeSerializer(ModelSerializer):
+    class Meta:
+        model = ObjectType
+        fields = ('id', 'name', 'slug')
 
 class ModelLogSerializer(ModelSerializer):
     class Meta:
@@ -29,36 +31,16 @@ class MetadataSerializer(ModelSerializer):
             'id', 'run_id', 'trained_model', 'project', 'model_details', 'parameters', 'metrics')
 
 
-# class DeploymentDefinitionSerializer(ModelSerializer):
-#     class Meta:
-#         model = DeploymentDefinition
-#         fields = (
-#             'id', 'project','name', 'bucket','filename','path_predict')
-
-
-# class DeploymentInstanceSerializer(ModelSerializer):
-#     class Meta:
-#         model = DeploymentInstance
-#         fields = ('id','deployment', 'model', 'access', 'path', 'endpoint', 'created_at')
-
-
-class ReportSerializer(ModelSerializer):
-    class Meta:
-        model = Report
-        fields = (
-            'id', 'model', 'description', 'created_at', 'report', 'job_id', 'generator', 'status')
-
-
-class ReportGeneratorSerializer(ModelSerializer):
-    class Meta:
-        model = ReportGenerator
-        fields = (
-            'id', 'project', 'description', 'generator', 'visualiser', 'created_at')
-
 class S3serializer(ModelSerializer):
     class Meta:
         model = S3
-        fields = ('access_key', 'secret_key', 'host', 'region')
+        fields = ('name', 'access_key', 'secret_key', 'host', 'region')
+
+class MLflowSerializer(ModelSerializer):
+    s3 = S3serializer()
+    class Meta:
+        model = MLFlow
+        fields = ('name', 'mlflow_url', 's3')
 
 class ProjectSerializer(ModelSerializer):
     s3storage = S3serializer()
@@ -69,19 +51,41 @@ class ProjectSerializer(ModelSerializer):
             'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 's3storage', 'updated_at',
             'created_at', 'repository', 'repository_imported')
 
+class AppCategorySerializer(ModelSerializer):
+    class Meta:
+        model = AppCategories
+        fields = ('name', )
+
+class AppSerializer(ModelSerializer):
+    category = AppCategorySerializer()
+    class Meta:
+        model = Apps
+        fields = ('name', 'category')
+
+class AppStatusSerializer(ModelSerializer):
+    class Meta:
+        model = AppStatus
+        fields = ('id', 'status_type')
+
+class AppInstanceSerializer(ModelSerializer):
+    app = AppSerializer()
+    status = AppStatusSerializer(many=True)
+    class Meta:
+        model = AppInstance
+        fields = ('id', 'name', 'app', 'table_field', 'state', 'status')
+
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username']
 
-class DatasetSerializer(ModelSerializer):
+class FlavorsSerializer(ModelSerializer):
     class Meta:
-        model = Dataset
-        fields = ['id', 'name', 'version', 'release_type', 'description',
-                  'bucket', 'project_slug', 'files', 'created_by', 'created_on', 'datasheet']
+        model = Flavor
+        fields = '__all__'
 
-
-class FileModelSerializer(ModelSerializer):
+class EnvironmentSerializer(ModelSerializer):
+    app = AppSerializer()
     class Meta:
-        model = FileModel
-        fields = ['id', 'name', 'bucket']
+        model = Environment
+        fields = '__all__'
