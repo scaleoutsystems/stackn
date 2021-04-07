@@ -63,6 +63,7 @@ def create_instance_params(instance, action="create"):
         instance.parameters['project'] = dict()
     instance.parameters['project'].update({'name': instance.project.name, 'slug': instance.project.slug})
 
+    
 
     # Add field for table.    
     if instance.app.table_field and instance.app.table_field != "":

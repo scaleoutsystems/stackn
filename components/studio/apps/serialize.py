@@ -9,7 +9,7 @@ import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
-key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'csrfmiddlewaretoken']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -23,6 +23,12 @@ def serialize_model(form_selection):
         
         # model_json['model'] = dict()
         keys = get_minio_keys(obj[0].project)
+        object_type = obj[0].object_type.all()
+        if len(object_type) == 1:
+            print("OK")
+        else:
+            print("Currently only supports one object type per model")
+            print("Will assume first in list.")
         model_json = {
             "model": {
                 "name": obj[0].name,
@@ -32,21 +38,28 @@ def serialize_model(form_selection):
                 "url": "https://{}".format(obj[0].s3.host),
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
-                "bucket": "models",
-                "obj": obj[0].uid
+                "bucket": obj[0].bucket,
+                "obj": obj[0].uid,
+                "path": obj[0].path,
+                "type": object_type[0].slug
             }
         }
 
     return model_json, obj
 
-def serialize_S3(form_selection):
+def serialize_S3(form_selection, project):
     print("SERIALIZING S3")
     s3_json = dict()
     if "S3" in form_selection:
+        
         s3_id = form_selection.get('S3', None)
-        obj = S3.objects.filter(pk=s3_id)
+        try:
+            obj = S3.objects.filter(pk=s3_id)
+        except:
+            obj = S3.objects.filter(name=s3_id, project=project)
         s3_json = {
             "s3": {
+                "pk": obj[0].pk,
                 "name": obj[0].name,
                 "host": obj[0].host,
                 "access_key": obj[0].access_key,
@@ -179,7 +192,35 @@ def serialize_appobjs(form_selection):
     print(parameters)
     return parameters
 
-def serialize_app(form_selection, project):
+def serialize_default_values(aset):
+    parameters = []
+    if 'default_values' in aset:
+        parameters = dict()
+        print(aset['default_values'])
+        parameters['default_values'] = aset['default_values']
+        for key in parameters['default_values'].keys():
+            if parameters['default_values'][key] == "False":
+                parameters['default_values'][key] = False
+            elif parameters['default_values'][key] == "True":
+                parameters['default_values'][key] = True
+
+    return parameters
+
+def serialize_project(project):
+    parameters = dict()
+    if project.mlflow:
+        parameters['mlflow'] = {
+            "url": project.mlflow.mlflow_url,
+            "s3url": 'https://'+project.mlflow.s3.host,
+            "access_key": project.mlflow.s3.access_key,
+            "secret_key": project.mlflow.s3.secret_key,
+            "region": project.mlflow.s3.region,
+            "username": project.mlflow.basic_auth.username,
+            "password": project.mlflow.basic_auth.password
+        }
+    return parameters
+
+def serialize_app(form_selection, project, aset):
     print("SERIALIZING APP")
     parameters = dict()
 
@@ -198,7 +239,7 @@ def serialize_app(form_selection, project):
     environment_params = serialize_environment(form_selection, project)
     parameters.update(environment_params)
 
-    s3params = serialize_S3(form_selection)
+    s3params = serialize_S3(form_selection, project)
     parameters.update(s3params)
 
     permission_params = serialize_permissions(form_selection)
@@ -206,5 +247,11 @@ def serialize_app(form_selection, project):
 
     appobj_params = serialize_appobjs(form_selection)
     parameters.update(appobj_params)
+
+    default_values = serialize_default_values(aset)
+    parameters.update(default_values)
+
+    project_values = serialize_project(project)
+    parameters.update(project_values)
 
     return parameters, app_deps, model_deps
