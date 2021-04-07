@@ -70,7 +70,6 @@
                 <div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> -->
                         <button class="btn btn-outline-secondary">New</button>
                         </a>
 
@@ -84,44 +83,30 @@
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
             </div>
             {% if objs.objs %}
-            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
                 <!-- <div class="row">
                     <div class="col-sm-12 col-md-6"></div>
                     <div class="col-sm-12 col-md-6"></div>
                 </div> -->
                 <div class="row">
                     <div class="col-sm-12">
-                        <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                            role="grid" aria-describedby="datatables-dashboard-projects_info">
+                        <table id="datatables-dashboard-projects-{{ forloop.counter }}" class="table table-striped my-0 dataTable no-footer"
+                            role="grid">
                             <thead>
-                                <tr role="row">
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Owner: activate to sort column ascending"></th> 
-                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                        rowspan="1" colspan="1" aria-sort="ascending"
-                                        aria-label="UID: activate to sort column descending">App</th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                        rowspan="1" colspan="1" aria-sort="ascending"
-                                        aria-label="UID: activate to sort column descending">Name</th>
-                                    <!-- <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Owner: activate to sort column ascending">Owner</th> -->
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Created: activate to sort column ascending">Created</th>
-                                    <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                        rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
-                                        Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Actions: activate to sort column ascending">Actions</th>
+                                <tr>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1"></th> 
+                                    <th class="sorting_asc" tabindex="0" 
+                                        rowspan="1" colspan="1">App</th>
+                                    <th class="sorting_asc" tabindex="0" rowspan="1" colspan="1">Name</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Created</th>
+                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
+                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for obj in objs.objs %}
-                                <tr role="row" class="odd">
-                                    <td><img src="{% static obj.app.logo %}" class="img-fluid " style="max-height:25px;"></td>
+                                <tr class="odd">
+                                    <td><img src="{% static obj.app.logo %}" class="img-fluid " alt="App Logo" style="max-height:25px;"></td>
                                     <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
                                     {% if obj.table_field.url %}
                                     <td class="sorting_1"><a href="{{ obj.table_field.url }}">{{ obj.name }}</a></td>
@@ -169,7 +154,7 @@
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
-            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
                 <div class="row">
                     <div class="col-sm-12 col-md-6"></div>
                     <div class="col-sm-12 col-md-6"></div>
@@ -177,29 +162,25 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                            role="grid" aria-describedby="datatables-dashboard-projects_info">
+                            role="grid">
                             <thead>
-                                <tr role="row">
-                                    <th class="sorting_asc" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                        rowspan="1" colspan="1" aria-sort="ascending"
-                                        aria-label="Name: activate to sort column descending">Name</th>
+                                <tr>
+                                    <th class="sorting_asc" tabindex="0"
+                                        rowspan="1" colspan="1">Name</th>
                                     <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Version: activate to sort column ascending">Version</th>
+                                         rowspan="1" colspan="1">Version</th>
                                     <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Created: activate to sort column ascending">Created</th>
-                                    <th class="sorting" tabindex="0" aria-controls="datatables-dashboard-projects"
-                                        rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                         rowspan="1" colspan="1">Created</th>
+                                    <th class="sorting" tabindex="0"
+                                        rowspan="1" colspan="1">
                                         Status</th>
                                     <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                        aria-controls="datatables-dashboard-projects" rowspan="1" colspan="1"
-                                        aria-label="Accessability: activate to sort column ascending">Accessability</th>
+                                         rowspan="1" colspan="1">Accessability</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for model in models %}
-                                <tr role="row" class="odd">
+                                <tr class="odd">
                                     <td class="sorting_1">{{ model.name }}</td>
                                     <td class="d-none d-xl-table-cell">{{ model.version }}</td>
                                     <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
