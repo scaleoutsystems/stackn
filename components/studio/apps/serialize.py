@@ -9,7 +9,7 @@ import modules.keycloak_lib as keylib
 import requests
 import flatten_json
 
-key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'csrfmiddlewaretoken']
+key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'export-cli', 'csrfmiddlewaretoken']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -220,7 +220,22 @@ def serialize_project(project):
         }
     return parameters
 
-def serialize_app(form_selection, project, aset):
+def serialize_cli(username, project, aset):
+    parameters = dict()
+    if 'export-cli' in aset and aset['export-cli']=='True':
+        kc = keylib.keycloak_init()
+        token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, username)
+        parameters['cli_setup'] = {
+            "url": settings.DOMAIN,
+            "project": project.name,
+            "user": username,
+            "token": token,
+            "refresh_token": refresh_token
+        }
+        
+    return parameters
+
+def serialize_app(form_selection, project, aset, username):
     print("SERIALIZING APP")
     parameters = dict()
 
@@ -253,5 +268,8 @@ def serialize_app(form_selection, project, aset):
 
     project_values = serialize_project(project)
     parameters.update(project_values)
+
+    cli_values = serialize_cli(username, project, aset)
+    parameters.update(cli_values)
 
     return parameters, app_deps, model_deps

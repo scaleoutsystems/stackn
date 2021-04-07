@@ -33,8 +33,6 @@ spec:
       imagePullSecrets:
         - name: {{ .Release.Name }}-pull-secret
     {{ end }}
-      #securityContext:
-      #  runAsUser: 65533  # to allow read of ssh key
       containers:
       - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest
@@ -83,8 +81,20 @@ spec:
             {{if .Values.flavor.gpu.enabled }}
             nvidia.com/gpu: "1"
             {{ end }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - mkdir -p /home/jovyan/.scaleout && cp -n /stackn.json /home/jovyan/.scaleout/stackn.json
         workingDir: /home/jovyan/work
         volumeMounts:
+        - name: cli-config-vol
+          mountPath: /home/jovyan/.scaleout
+        - name: cli-config
+          mountPath: /stackn.json
+          subPath: stackn.json
         - name: jupyterconf
           mountPath: /etc/jupyter/jupyter_notebook_config.py
           subPath: jupyter_notebook_config.py
@@ -98,6 +108,11 @@ spec:
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       volumes:
+      - name: cli-config-vol
+        emptyDir: {}
+      - name: cli-config
+        configMap:
+          name: {{ .Release.Name }}-cli-config
       - name: gatekeeper-config
         configMap:
           name: {{ .Release.Name }}-gatekeeper-config
