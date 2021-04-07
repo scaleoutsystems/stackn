@@ -192,7 +192,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
         print("INPUT")
         print(data)
         app_name = data.get('app_name')
-        parameters_out, app_deps, model_deps = serialize_app(data, project, aset)
+        parameters_out, app_deps, model_deps = serialize_app(data, project, aset, user.username)
 
         if data.get('app_action') == "Create":
             permission = AppPermission(name=app_name)

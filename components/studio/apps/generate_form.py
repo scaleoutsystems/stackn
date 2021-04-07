@@ -15,7 +15,7 @@ import flatten_json
 import uuid
 from datetime import datetime, timedelta
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'csrfmiddlewaretoken', 'S3']
+key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'export-cli', 'csrfmiddlewaretoken', 'S3']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
