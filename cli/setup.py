@@ -15,7 +15,7 @@ setup(
         "attrdict>=2.0.1",
         "certifi>=2018.11.29",
         "chardet>=3.0.4",
-        "Click>6.6",
+        "click==7.1.2",
         "cytoolz",
         "PyYAML>=4.2b1",
         "requests>=2.23.0",
