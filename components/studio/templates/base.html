@@ -15,7 +15,7 @@
     <link rel="icon" href="{% static 'dist/favicon_6.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
     <link rel="stylesheet" href="{% static 'dist/css/custom.css' %}">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     {% block extra_head %} {% endblock %}
 </head>
@@ -25,7 +25,7 @@
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" href="{% url 'models:index' %}">
-                    <img src="{% static 'dist/stackn.png' %}" width="108" height="44">
+                    <img src="{% static 'dist/stackn.png' %}" alt="STACKn Logo" width="108" height="44">
                 </a>
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
