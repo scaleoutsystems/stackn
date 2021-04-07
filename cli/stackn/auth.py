@@ -164,7 +164,7 @@ def get_config(inp_config=dict(), required=[], is_login=False):
     # 1. Values in inp_config
     # 2. Environment variables
     # 3. Config file
-    # Exception is STACKN_TOKEN, and STACKN_REFRESH_TOKEN, where config file
+    # Exception is STACKN_ACCESS_TOKEN, and STACKN_REFRESH_TOKEN, where config file
     # takes priority over environment variable (as they need to be updated)
     conf = dict()
     for var, val in env_vars.items():
@@ -194,7 +194,7 @@ def get_config(inp_config=dict(), required=[], is_login=False):
         config_file = _load_config_file_url(conf, is_login)
         if config_file:
             for key, val in config_file.items():
-                if not (key in conf) or not conf[key] or key=='STACKN_TOKEN' or key=='STACKN_REFRESH_TOKEN':
+                if not (key in conf) or not conf[key] or key=='STACKN_ACCESS_TOKEN' or key=='STACKN_REFRESH_TOKEN':
                     conf[key] = val
         elif not is_login:
             return conf, False
@@ -235,7 +235,7 @@ def _keycloak_user_auth(conf):
         print('User: '+username+' denied access to client: '+client_id)
         return False
 
-def get_token(conf, write_to_file=True):
+def get_token(conf={}, write_to_file=True):
     
     conf, status = get_config(conf, required=['STACKN_REFRESH_TOKEN'])
     if not status:
