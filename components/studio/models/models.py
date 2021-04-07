@@ -83,6 +83,8 @@ class Model(models.Model):
     object_type = models.ManyToManyField(ObjectType, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
     s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
+    bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
+    path = models.CharField(max_length=200, null=True, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(
         'projects.Project',
