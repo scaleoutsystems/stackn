@@ -1,6 +1,8 @@
 import click
 import logging
-from .version import __version__ as version
+
+import pkg_resources
+version = pkg_resources.require("scaleout-cli")[0].version
 
 logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)d] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')  # , level=logging.DEBUG)
 

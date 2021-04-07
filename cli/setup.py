@@ -1,15 +1,12 @@
 from setuptools import setup, find_packages
-import stackn.version as version
 
 setup(
     name='scaleout-cli',
-    version=version.__version__,
+    version='0.2.0',
     description="""Scaleout CLI""",
-    author='Morgan Ekmefjord',
-    author_email='morgan@scaleout.se',
     url='https://www.scaleoutsystems.com',
     include_package_data=True,
-    py_modules=['scaleout'],
+    py_modules=['stackn'],
     python_requires='>=3.5,<4',
     install_requires=[
         "attrdict>=2.0.1",
