@@ -14,7 +14,7 @@ from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus, Apps
 from models.models import Model, ObjectType
-from projects.models import S3, Environment, MLFlow, BasicAuth
+from projects.models import S3, Environment, MLFlow, BasicAuth, Project
 from studio.celery import app
 
 def get_URI(parameters):
@@ -597,6 +597,8 @@ def delete_old_clients():
         except:
             print("Failed to clean up in Keycloak.")
 
+@app.task
+def delete_old_clients_proj():
     deleted_projects = Project.objects.filter(status="archived")
     for proj in deleted_projects:
         try:
