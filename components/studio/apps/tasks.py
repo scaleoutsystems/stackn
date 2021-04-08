@@ -600,6 +600,7 @@ def delete_old_clients():
 @app.task
 def delete_old_clients_proj():
     deleted_projects = Project.objects.filter(status="archived")
+    kc = keylib.keycloak_init()
     for proj in deleted_projects:
         try:
             keylib.keycloak_delete_client(kc, proj.slug)
@@ -607,8 +608,10 @@ def delete_old_clients_proj():
             print("Project client already deleted")
             pass
         try:
+            print("SCOPE: {}".format(proj.slug+'-scope'))
             scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
             keylib.keycloak_delete_client_scope(kc, scope_id)
+            print("DELETED SCOPE: {}".format(proj.slug+'-scope'))
         except:
             print("Project client scope already deleted.")
             pass
