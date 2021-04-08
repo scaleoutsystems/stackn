@@ -141,26 +141,29 @@ def post_create_hooks(instance):
 
 
 def post_delete_hooks(instance):
-    if instance.app.slug == 'minio':
-        try:
-            s3obj = instance.s3obj
-            s3obj.delete()
-        except:
-            print("S3 object not connected to a Minio App")
+
+    print("Nothing to do in post_delete_hooks.")
+    # NOTE: WE SHOULDN'T DELETE THESE META OBJECTS, NO NEED TO DO THAT. ENOUGH TO ARCHIVE PROJECT.
+    # if instance.app.slug == 'minio':
+    #     try:
+    #         s3obj = instance.s3obj
+    #         s3obj.delete()
+    #     except:
+    #         print("S3 object not connected to a Minio App")
     
-    if instance.app.slug == 'environment':
-        print("POST DELETE ENVIRONMENT APP")
-        try:
-            env_obj = instance.envobj.all().delete()
-        except:
-            print("Didn't find any associated environment to delete.")
+    # if instance.app.slug == 'environment':
+    #     print("POST DELETE ENVIRONMENT APP")
+    #     try:
+    #         env_obj = instance.envobj.all().delete()
+    #     except:
+    #         print("Didn't find any associated environment to delete.")
     
-    if instance.app.slug == 'mlflow':
-        try:
-            mlflow_obj = instance.mlflowobj
-            mlflow_obj.delete()
-        except:
-            print("MLFlow instance has no project MLFlow meta object.")
+    # if instance.app.slug == 'mlflow':
+    #     try:
+    #         mlflow_obj = instance.mlflowobj
+    #         mlflow_obj.delete()
+    #     except:
+    #         print("MLFlow instance has no project MLFlow meta object.")
 
 @shared_task
 @transaction.atomic
@@ -299,6 +302,11 @@ def delete_resource(pk):
         
         try:
             keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+        except:
+            print("Failed to remove valid redirect URL from project client.")
+            print("Project client might already be deleted.")
+            pass
+        try:
             keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
             scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
             if not res_json['success']:
@@ -571,3 +579,34 @@ def clear_table_field():
     for app in all_apps:
         app.table_field = "{}"
         app.save()
+
+@app.task
+def delete_old_clients():
+    deleted_apps = AppInstance.objects.filter(state="Deleted")
+    for appinstance in deleted_apps:
+        kc = keylib.keycloak_init()
+        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+        
+        try:
+            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
+            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+            if not res_json['success']:
+                print("Failed to get client scope.")
+            else:
+                keylib.keycloak_delete_client_scope(kc, scope_id)
+        except:
+            print("Failed to clean up in Keycloak.")
+
+    deleted_projects = Project.objects.filter(status="archived")
+    for proj in deleted_projects:
+        try:
+            keylib.keycloak_delete_client(kc, proj.slug)
+        except:
+            print("Project client already deleted")
+            pass
+        try:
+            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
+            keylib.keycloak_delete_client_scope(kc, scope_id)
+        except:
+            print("Project client scope already deleted.")
+            pass
