@@ -33,7 +33,7 @@ def delete_project_resources(project):
     kc = keylib.keycloak_init()
     keylib.keycloak_delete_client(kc, project.slug)
     
-    scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
     keylib.keycloak_delete_client_scope(kc, scope_id)
     return True
 
