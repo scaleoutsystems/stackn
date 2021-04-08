@@ -384,6 +384,11 @@ def delete(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
 
+    print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+    from .tasks import delete_project_apps
+    delete_project_apps(project_slug)
+
+    print("DELETING KEYCLOAK PROJECT RESOURCES")
     retval = delete_project_resources(project)
 
     if not retval:
@@ -392,9 +397,7 @@ def delete(request, user, project_slug):
         return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
 
     print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
-    print("SCHEDULING DELETION OF ALL INSTALLED APPS")
-    from .tasks import delete_project_apps
-    delete_project_apps(project_slug)
+    
 
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
