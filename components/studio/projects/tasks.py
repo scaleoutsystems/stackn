@@ -12,7 +12,7 @@ from .exceptions import ProjectCreationException
 
 from django.conf import settings
 
-from .models import Flavor, Environment, Project, S3, MLFlow
+from .models import Flavor, Environment, Project, S3, MLFlow, ReleaseName
 # 
 
 
