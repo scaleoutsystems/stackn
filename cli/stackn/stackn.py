@@ -34,6 +34,7 @@ def get_endpoints(studio_url):
     endpoints['environments'] = base+'/projects/{}/environments/'
     endpoints['s3'] = base+'/projects/{}/s3/'
     endpoints['mlflow'] = base+'/projects/{}/mlflow/'
+    endpoints['project_del'] = base+'/projects/{}'
     endpoints['releasenames'] = base+'/projects/{}/releasenames/'
     endpoints['projects'] = base+'/projects/'
     return endpoints
