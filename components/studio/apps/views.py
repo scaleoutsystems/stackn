@@ -7,7 +7,7 @@ from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Flavor, Environment
+from projects.models import Project, Flavor, Environment, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -243,11 +243,39 @@ def create(request, user, project, app_slug, data=[], wait=False):
             
             create_instance_params(instance, "create")
             
+            rel_name_obj = []
+            if data.get('app_release_name') != '':
+                submitted_rn = data.get('app_release_name')
+                try:
+                    rel_name_obj = ReleaseName.objects.get(name=submitted_rn, project=project, status='active')
+                    rel_name_obj.status = 'in-use'
+                    rel_name_obj.save()
+                    instance.parameters['release'] = submitted_rn
+                except Exception as e:
+                    print("Error: Submitted release name is not owned by project.")
+                    print(e)
+                    return HttpResponseRedirect(
+                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
+                
+                
+
+            # Add field for table.    
+            if instance.app.table_field and instance.app.table_field != "":
+                django_engine = engines['django']
+                info_field = django_engine.from_string(instance.app.table_field).render(instance.parameters)
+                instance.table_field = eval(info_field)
+            else:
+                instance.table_field = {}
+
+
             # instance.state = "Waiting"
             status = AppStatus(appinstance=instance)
             status.status_type = 'Created'
             status.info = instance.parameters['release']
             instance.save()
+            if rel_name_obj:
+                rel_name_obj.app = instance
+                rel_name_obj.save()
             status.save()
             
             

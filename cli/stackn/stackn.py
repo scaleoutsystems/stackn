@@ -34,7 +34,7 @@ def get_endpoints(studio_url):
     endpoints['environments'] = base+'/projects/{}/environments/'
     endpoints['s3'] = base+'/projects/{}/s3/'
     endpoints['mlflow'] = base+'/projects/{}/mlflow/'
-    endpoints['project_del'] = base+'/projects/{}'
+    endpoints['releasenames'] = base+'/projects/{}/releasenames/'
     endpoints['projects'] = base+'/projects/'
     return endpoints
 
@@ -319,6 +319,23 @@ def create_object(model_name,
     print('Released model: {}, release_type: {}'.format(model_name, release_type))
     return True
 
+def create_releasename(name, studio_url, project, secure):
+    conf = {
+        'STACKN_URL': studio_url,
+        'STACKN_PROJECT': project,
+        'STACKN_SECURE': secure
+    }
+    conf, auth_headers, url = setup_project_endpoint_call(conf, 'releasenames')
+    params = {
+        "name": name
+    }
+    res = requests.post(url, json=params, headers=auth_headers, verify=conf['STACKN_SECURE'])
+    if res:
+        print(res.text)
+    else:
+        print("Failed to create release name.")
+        print('Status code: {}'.format(res.status_code))
+        print(res.text)
 
 
 def delete_app(name, studio_url=[], project=[], secure=True):

@@ -5,7 +5,7 @@ from django.db.models.signals import pre_delete, pre_save
 from django.conf import settings
 from django.template import engines
 from models.models import Model
-from projects.models import Project
+from projects.models import Project, ReleaseName
 from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
 from modules import keycloak_lib as keylib

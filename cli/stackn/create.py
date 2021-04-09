@@ -1,7 +1,7 @@
 import click
 
 from .main import main
-from .stackn import create_object, create_project, create_resource
+from .stackn import create_object, create_project, create_resource, create_releasename
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -32,6 +32,14 @@ def project(name, description, template, studio_url, secure):
 @click.option('--secure/--insecure', default=True)
 def resource(filename, studio_url, project, secure):
     create_resource(filename, studio_url=studio_url, project=project, secure=secure)
+
+@create.command('releasename')
+@click.argument('name')
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('-p', '--project', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def releasename(name, studio_url, project, secure):
+    create_releasename(name, studio_url=studio_url, project=project, secure=secure)
 
 @create.command('object')
 @click.argument('name')

@@ -4,7 +4,7 @@ from django.utils.text import slugify
 from django.db.models import Q
 from django.template import engines
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Flavor, Environment, S3
+from projects.models import Project, Flavor, Environment, S3, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
@@ -196,4 +196,9 @@ def generate_form(aset, project, app, user, appinstance=[]):
 
     form['primitives'] = get_form_primitives(aset, project, appinstance)
     form['dep_permissions'], form['form_permissions'] = get_form_permission(aset, project, appinstance)
+    release_names = ReleaseName.objects.filter(project=project, status='active')
+    form['release_names'] = list()
+    for rn in release_names:
+        form['release_names'].append({'name': rn.name})
+    form['base_url'] = settings.DOMAIN
     return form

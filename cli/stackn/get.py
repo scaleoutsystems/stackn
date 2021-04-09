@@ -120,8 +120,14 @@ def obj(object_type, project, studio_url):
     _print_table(objects, ['Name', 'Version', 'Type', 'Created'], ['name', 'version','object_type', 'uploaded_at'])
 
 @get.command('environment')
-def environment():
-    environments = call_project_endpoint('environments')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+def environment(project, studio_url):
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
+    environments = call_project_endpoint('environments', conf=conf)
     envlist = list()
     for env in environments:
         tmp = dict()
@@ -136,29 +142,76 @@ def environment():
     _print_table(envlist, header, fields)
 
 @get.command('flavor')
-def flavor():
-    flavors = call_project_endpoint('flavors')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+def flavor(project, studio_url):
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
+    flavors = call_project_endpoint('flavors', conf=conf)
     header = ['Name', 'CPU req', 'CPU lim', 'Mem req', 'Mem lim', 'GPUs', 'Eph mem req', 'Eph mem lim']
     fields = ['name', 'cpu_req', 'cpu_lim', 'mem_req', 'mem_lim', 'gpu_req', 'ephmem_req', 'ephmem_lim']
     _print_table(flavors, header, fields)
 
 @get.command('objecttypes')
-def objecttypes():
-    objecttypes = call_project_endpoint('objecttypes')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+def objecttypes(project, studio_url):
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
+    objecttypes = call_project_endpoint('objecttypes', conf=conf)
     _print_table(objecttypes, ['Name', 'Slug'], ['name', 'slug'])
 
+@get.command('releasenames')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+def releasenames(project, studio_url):
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
+    objects = call_project_endpoint('releasenames', conf=conf)
+    objlist = list()
+    for obj in objects:
+        tmp = dict()
+        tmp['name'] = obj['name']
+        if obj['app']:
+            tmp['app_name'] = obj['app']['name']
+        else:
+            tmp['app_name'] = ''
+        objlist.append(tmp)
+    objlist = sorted(objlist, key=lambda k: k['name'])
+    header = ['Name', 'App']
+    fields = ['name', 'app_name']
+    _print_table(objlist, header, fields)
+
 @get.command('S3')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
 @click.option('-n', '--name', required=False, default=[])
 def s3(name):
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
     params = []
     if name:
         params = {"name": name}
-    s3s = call_project_endpoint('s3', params=params)
+    s3s = call_project_endpoint('s3', params=params, conf=conf)
     _print_table(s3s, ['Name', 'Host', 'Region'], ['name', 'host', 'region'])
 
 @get.command('mlflow')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
 def mlflow():
-    mlflows = call_project_endpoint('mlflow')
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
+    mlflows = call_project_endpoint('mlflow', conf=conf)
     mlflowlist = list()
     for mlflow in mlflows:
         tmp = dict()
@@ -169,7 +222,13 @@ def mlflow():
     _print_table(mlflowlist, ['Name', 'URL', 'S3'], ['name', 'URL', 'S3'])
 
 @get.command('templates')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
 def templates():
+    conf = {
+        'STACKN_PROJECT': project,
+        'STACKN_URL': studio_url
+    }
     print('templates')
 
 ALIASES = {
