@@ -435,7 +435,6 @@ def delete_meta_resource(resource_type, name, project=[], studio_url=[], secure=
         print(res.text)
 
 
-
 def set_current(conf):
     res = stackn.auth._set_current(conf)
     if not res:

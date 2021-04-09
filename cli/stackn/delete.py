@@ -74,6 +74,14 @@ def delete_mlflow(name, project, studio_url, secure):
 def delete_s3(name, project, studio_url, secure):
     delete_meta_resource('s3', name, project=project, studio_url=studio_url, secure=secure)
 
+@delete.command('releasename')
+@click.argument('name')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def delete_s3(name, project, studio_url, secure):
+    delete_meta_resource('releasenames', name, project=project, studio_url=studio_url, secure=secure)
+
 ALIASES = {
     "projects": delete_proj,
     "app": app,
