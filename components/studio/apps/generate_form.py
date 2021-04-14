@@ -197,8 +197,10 @@ def generate_form(aset, project, app, user, appinstance=[]):
     form['primitives'] = get_form_primitives(aset, project, appinstance)
     form['dep_permissions'], form['form_permissions'] = get_form_permission(aset, project, appinstance)
     release_names = ReleaseName.objects.filter(project=project, status='active')
-    form['release_names'] = list()
-    for rn in release_names:
-        form['release_names'].append({'name': rn.name})
-    form['base_url'] = settings.DOMAIN
+    form['release_names'] = release_names
+    # if 'subdomain' in aset and aset['subdomain'] == 'True':
+    #     form['release_names'] = list()
+    #     for rn in release_names:
+    #         form['release_names'].append({'name': rn.name})
+    #     form['base_url'] = settings.DOMAIN
     return form
