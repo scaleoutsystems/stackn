@@ -244,7 +244,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
             create_instance_params(instance, "create")
             
             rel_name_obj = []
-            if data.get('app_release_name') != '':
+            if 'app_release_name' in data and data.get('app_release_name') != '':
                 submitted_rn = data.get('app_release_name')
                 try:
                     rel_name_obj = ReleaseName.objects.get(name=submitted_rn, project=project, status='active')

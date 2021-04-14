@@ -20,6 +20,7 @@
                         <label class="form-label">Name</label>
                         <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label">Subdomain</label>
                         <select name="app_release_name" id="app_release_name" class="form-control">
@@ -29,6 +30,7 @@
                             {% endfor %}
                         </select>
                     </div>
+
                     {% if form.dep_permissions %}
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
