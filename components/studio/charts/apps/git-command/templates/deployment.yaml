@@ -1,63 +1,54 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Values.namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    app: git-command
+    project: {{ .Values.project.slug }}
+    type: app
+    pod: git-command
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      release: {{ .Release.Name }}
-      app: git-sync
-      project: {{ .Values.project.slug }}
-      type: app
-      pod: git-sync
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-        app: git-sync
+        app: git-sync-job
         project: {{ .Values.project.slug }}
         type: app
-        pod: git-sync
+        pod: git-sync-job
     spec:
       securityContext:
         runAsUser: 1000
+      restartPolicy: OnFailure
       containers:
-      - image: k8s.gcr.io/git-sync/git-sync:v3.2.2
-        args:
+      - image: alpine/git
+        name: git-clone
+        command:
+        - /bin/sh
+        - -c
+        - git clone -b $GIT_SYNC_BRANCH $GIT_SYNC_REPO
         {{- range $key, $value := .Values.apps.volume }}
-        - server
-        - /home/stackn/{{ $key }}
         workingDir: /home/stackn/{{ $key }}
+        {{- end }}
         env:
         - name: GIT_SYNC_REPO
           value: {{ $.Values.repository.repository }}
         - name: GIT_SYNC_BRANCH
           value: {{ $.Values.repository.branch }}
-        - name: GIT_SYNC_ROOT
-          value: /home/stackn/{{ $key }}
         - name: GIT_SYNC_USERNAME
           value: {{ $.Values.credentials.username }}
         - name: GIT_SYNC_PASSWORD
-          value: {{ $.Values.credentials.token }}
-        {{- end }}
-        name: {{ .Release.Name }}
-        ports:
-        - containerPort: 9000
-        resources: {}
+          value: {{ $.Values.credentials.token }}   
         volumeMounts:
         {{- range $key, $value := .Values.apps.volume }}
         - name: {{ $key }}
           mountPath: /home/stackn/{{ $key }}
         {{- end }}
-      restartPolicy: Always
       volumes:
       {{- range $key, $value := .Values.apps.volume }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}
       {{- end }}
-status: {}
