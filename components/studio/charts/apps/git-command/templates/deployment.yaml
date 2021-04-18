@@ -23,12 +23,12 @@ spec:
         runAsUser: 1000
       restartPolicy: OnFailure
       containers:
-      - image: alpine/git
+      - image: scaleoutsystems/git:latest
         name: git-clone
         command:
         - /bin/sh
         - -c
-        - git clone -b $GIT_SYNC_BRANCH $GIT_SYNC_REPO
+        - git clone -b $GIT_SYNC_BRANCH $GIT_SYNC_REPO #&& git-lfs pull
         {{- range $key, $value := .Values.apps.volume }}
         workingDir: /home/stackn/{{ $key }}
         {{- end }}
