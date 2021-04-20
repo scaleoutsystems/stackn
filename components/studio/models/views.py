@@ -14,6 +14,8 @@ from reports.helpers import populate_report_by_id, get_download_link
 import markdown
 import ast
 from collections import defaultdict
+from random import randint
+
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -21,6 +23,9 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     models = Model.objects.filter(access='PU', project__isnull=False)
+
+    img_id = randint(8, 13)
+    img_name = "dist/img/patterns/image {}.png".format(img_id)
 
     return render(request, 'models_cards.html', locals())
 
