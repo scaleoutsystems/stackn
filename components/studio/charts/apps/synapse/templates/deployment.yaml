@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: synapse
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: synapse
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+      labels:
+        release: {{ .Release.Name }}
+        app: synapse
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: synapse
+    spec:
+      initContainers:
+      - name: synapse-generate
+        image: matrixdotorg/synapse:latest
+        imagePullPolicy: Always
+        env:
+        - name: SYNAPSE_SERVER_NAME
+          value: "{{ .Release.Name }}.{{ .Values.global.domain }}"
+        - name: SYNAPSE_REPORT_STATS
+          value: "no"
+        args:
+        - generate
+        resources:
+          requests:
+            memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
+          limits:
+            memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
+        volumeMounts:
+        - name: data-folder
+          mountPath: /data
+        - name: homeserver-config
+          mountPath: /data/homeserver.yaml
+          subPath: homeserver.yaml
+      containers:
+      - name: reverse-proxy
+        image: nginx:alpine
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: rp-conf
+          mountPath: /etc/nginx
+        - name: server
+          mountPath: /www/server
+          subPath: server
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      - name: synapse
+        image: matrixdotorg/synapse:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8008
+        resources:
+          requests:
+            memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
+          limits:
+            memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
+        volumeMounts:
+        - name: data-folder
+          mountPath: /data
+        - name: homeserver-config
+          mountPath: /data/homeserver.yaml
+          subPath: homeserver.yaml
+      volumes:
+      - name: server
+        configMap:
+          name: {{ .Release.Name }}-serv
+      - name: rp-conf
+        configMap:
+          name: {{ .Release.Name }}-rp-config
+      - name: homeserver-config
+        configMap:
+          name: {{ .Release.Name }}-hs
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: data-folder
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}
