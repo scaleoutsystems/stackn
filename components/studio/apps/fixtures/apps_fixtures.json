@@ -281,6 +281,7 @@
         "Persistent Volume": "many"
       },
       "flavor": "one",
+      "export-cli": "True",
       "environment": {
         "name": "from",
         "type": "match",
@@ -308,7 +309,7 @@
       "url": "https://{{ release }}.{{ global.domain }}"
     },
     "logo": "dist/applogos/jupyter_logo.svg",
-    "updated_on": "2021-03-10T19:22:08.506Z",
+    "updated_on": "2021-04-07T15:34:37.381Z",
     "created_on": "2021-02-19T21:38:15.625Z"
   }
 },
@@ -537,7 +538,8 @@
           "title": "Requests Memory",
           "default": "1Gi"
         }
-      }
+      },
+      "export-cli": "True"
     },
     "chart": "apps/wetty",
     "description": "",
@@ -545,7 +547,7 @@
       "url": "https://{{ release }}.{{ global.domain }}/wetty"
     },
     "logo": "dist/applogos/terminal_logo.png",
-    "updated_on": "2021-03-10T19:29:59.081Z",
+    "updated_on": "2021-04-14T14:36:34.661Z",
     "created_on": "2021-02-19T21:40:50.169Z"
   }
 },
@@ -593,7 +595,8 @@
     "settings": {
       "apps": {
         "Persistent Volume": "many"
-      }
+      },
+      "export-cli": "True"
     },
     "chart": "apps/vscode",
     "description": "",
@@ -601,7 +604,7 @@
       "url": "https://{{ release }}.{{ global.domain }}"
     },
     "logo": "dist/applogos/vscode_logo.svg",
-    "updated_on": "2021-03-10T19:54:04.579Z",
+    "updated_on": "2021-04-14T14:15:30.070Z",
     "created_on": "2021-02-19T21:41:41.509Z"
   }
 },
@@ -725,7 +728,20 @@
       "apps": {
         "Persistent Volume": "one"
       },
+      "git_sync": {
+        "meta": {
+          "title": "Git Sync Settings"
+        },
+        "one_time": {
+          "type": "boolean",
+          "title": "One Time",
+          "default": "False"
+        }
+      },
       "repository": {
+        "meta": {
+          "title": "Git"
+        },
         "branch": {
           "type": "string",
           "title": "Branch",
@@ -753,11 +769,11 @@
         }
       }
     },
-    "chart": "apps/git-sync",
+    "chart": "apps/git-sync-job",
     "description": "",
     "table_field": {},
     "logo": "dist/applogos/git_logo.png",
-    "updated_on": "2021-03-10T20:06:12.282Z",
+    "updated_on": "2021-04-14T15:27:31.333Z",
     "created_on": "2021-02-28T15:28:24.674Z"
   }
 },
@@ -976,6 +992,367 @@
     "logo": "dist/applogos/mlflow_logo.png",
     "updated_on": "2021-03-19T14:17:38.394Z",
     "created_on": "2021-03-18T13:40:11.231Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 48,
+  "fields": {
+    "name": "Backup Volume",
+    "slug": "backup-volume",
+    "category": "store",
+    "settings": {
+      "S3": "one",
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "logs": [
+        "create-archive",
+        "copy-archive"
+      ],
+      "backup": {
+        "meta": {
+          "title": "Backup"
+        },
+        "bucket": {
+          "type": "string",
+          "title": "Bucket",
+          "default": "backups"
+        },
+        "schedule": {
+          "type": "string",
+          "title": "Schedule",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/backup-job",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/stackn_logo_square.png",
+    "updated_on": "2021-03-24T19:58:09.071Z",
+    "created_on": "2021-03-24T19:51:38.710Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 49,
+  "fields": {
+    "name": "Python Serve Volume",
+    "slug": "python-serve-volume",
+    "category": "serve",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "logs": [
+        "serve"
+      ],
+      "flavor": "one",
+      "environment": {
+        "name": "from",
+        "type": "match",
+        "title": "Environment",
+        "quantity": "one"
+      },
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "true"
+        },
+        "private": {
+          "value": "false",
+          "option": "true"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      },
+      "model_volume": {
+        "meta": {
+          "title": "Model"
+        },
+        "path": {
+          "type": "string",
+          "title": "Path to model",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/fastapi-serve-from-volume",
+    "description": "",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}/predict"
+    },
+    "logo": "dist/applogos/stackn_logo_square.png",
+    "updated_on": "2021-04-12T20:15:55.674Z",
+    "created_on": "2021-03-25T15:07:28.858Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 50,
+  "fields": {
+    "name": "FEDn Dev Client",
+    "slug": "fedn-dev-client",
+    "category": "fedn",
+    "settings": {
+      "apps": {
+        "FEDn Reducer": "one",
+        "Persistent Volume": "one"
+      },
+      "logs": [
+        "client"
+      ],
+      "flavor": "one",
+      "requirements": {
+        "type": "textfield",
+        "title": "requirements.txt",
+        "default": ""
+      }
+    },
+    "chart": "apps/fedn/dev-client",
+    "description": "",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/fedn_logo.png",
+    "updated_on": "2021-03-26T16:02:51.316Z",
+    "created_on": "2021-03-26T15:38:42.647Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 51,
+  "fields": {
+    "name": "Thingsboard",
+    "slug": "thingsboard",
+    "category": "iotex",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "many"
+      },
+      "logs": [
+        "thingsboard"
+      ],
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "true",
+          "option": "true"
+        },
+        "project": {
+          "value": "false",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/thingsboard",
+    "description": "",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/thingsboard_logo.png",
+    "updated_on": "2021-03-30T14:17:44.943Z",
+    "created_on": "2021-03-30T12:31:36.633Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 52,
+  "fields": {
+    "name": "Pebble Backend",
+    "slug": "iotex",
+    "category": "iotex",
+    "settings": {
+      "S3": "one"
+    },
+    "chart": "apps/iotex",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/iotex_logo.png",
+    "updated_on": "2021-03-31T09:13:59.872Z",
+    "created_on": "2021-03-30T14:16:42.412Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 53,
+  "fields": {
+    "name": "Thingsboard Gateway",
+    "slug": "tboard-gw",
+    "category": "iotex",
+    "settings": {
+      "apps": {
+        "Thingsboard": "one",
+        "Pebble Backend": "one"
+      },
+      "thingsboard": {
+        "meta": {
+          "title": ""
+        },
+        "token": {
+          "type": "string",
+          "title": "Gateway Token",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/thingsboard-gw",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/thingsboard_logo.png",
+    "updated_on": "2021-03-31T10:18:03.939Z",
+    "created_on": "2021-03-30T14:37:27.870Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 54,
+  "fields": {
+    "name": "Mock Pebble Client",
+    "slug": "mock-pebble-client",
+    "category": "iotex",
+    "settings": {
+      "apps": {
+        "Pebble Backend": "one"
+      },
+      "logs": [
+        "client"
+      ]
+    },
+    "chart": "apps/pebble-client",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/iotex_logo.png",
+    "updated_on": "2021-03-31T09:14:33.391Z",
+    "created_on": "2021-03-31T08:50:50.163Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 55,
+  "fields": {
+    "name": "Git Clone",
+    "slug": "git-clone",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "repository": {
+        "meta": {
+          "title": "Git"
+        },
+        "branch": {
+          "type": "string",
+          "title": "Branch",
+          "default": "master"
+        },
+        "repository": {
+          "type": "string",
+          "title": "Repository",
+          "default": ""
+        }
+      },
+      "credentials": {
+        "meta": {
+          "title": "Credentials (if private repository, otherwise leave blank)"
+        },
+        "token": {
+          "type": "string",
+          "title": "Token",
+          "default": ""
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "default": ""
+        }
+      }
+    },
+    "chart": "apps/git-command",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/stackn_logo_square.png",
+    "updated_on": "2021-04-14T19:30:51.430Z",
+    "created_on": "2021-04-14T19:30:51.430Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 56,
+  "fields": {
+    "name": "Synapse",
+    "slug": "synapse",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Persistent Volume": "one"
+      },
+      "flavor": "one",
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "false",
+          "option": "false"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/synapse",
+    "description": "",
+    "table_field": {},
+    "logo": "dist/applogos/stackn_logo_square.png",
+    "updated_on": "2021-04-15T13:11:18.447Z",
+    "created_on": "2021-04-15T13:11:18.447Z"
+  }
+},
+{
+  "model": "apps.apps",
+  "pk": 57,
+  "fields": {
+    "name": "Element",
+    "slug": "element",
+    "category": "misc",
+    "settings": {
+      "apps": {
+        "Synapse": "one"
+      },
+      "flavor": "one",
+      "permissions": {
+        "public": {
+          "value": "false",
+          "option": "false"
+        },
+        "private": {
+          "value": "false",
+          "option": "false"
+        },
+        "project": {
+          "value": "true",
+          "option": "true"
+        }
+      }
+    },
+    "chart": "apps/element",
+    "description": "",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "logo": "dist/applogos/stackn_logo_square.png",
+    "updated_on": "2021-04-15T14:21:54.527Z",
+    "created_on": "2021-04-15T13:44:10.860Z"
   }
 }
 ]
