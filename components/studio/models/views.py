@@ -1,14 +1,12 @@
 import uuid
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
 from .models import Model, ModelLog, Metadata, ObjectType
-from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
-# from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
@@ -16,13 +14,12 @@ import ast
 from collections import defaultdict
 from random import randint
 
-
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
 def index(request):
-    models = Model.objects.filter(access='PU', project__isnull=False)
+    models = Model.objects.filter(access='PU', project__isnull=False).order_by('-uploaded_at')
 
     img_id = randint(8, 13)
     img_name = "dist/img/patterns/image {}.png".format(img_id)
@@ -65,7 +62,7 @@ def change_access(request, user, project, id):
             l.save()
 
     return HttpResponseRedirect(
-        reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
+        reverse('models:details_public', kwargs={'id': id}))
 
 
 @login_required
@@ -201,7 +198,9 @@ def get_chart_data(md_objects):
 
 def details_public(request, id):
     model = Model.objects.filter(pk=id).first()
-    deployments = DeploymentInstance.objects.filter(model=model)
+
+    model_access_choices = {'PU': 'Public', 'PR': 'Private', 'LI': 'Limited'}
+    del model_access_choices[model.access]
 
     reports = Report.objects.filter(model__pk=id, status='C').order_by('-created_at')
     report_dtos = []
