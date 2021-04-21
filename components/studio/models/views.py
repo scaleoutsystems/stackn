@@ -13,6 +13,7 @@ import markdown
 import ast
 from collections import defaultdict
 from random import randint
+from .helpers import get_download_url
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -23,6 +24,10 @@ def index(request):
 
     img_id = randint(8, 13)
     img_name = "dist/img/patterns/image {}.png".format(img_id)
+
+    dtos = {}
+    for m in models:
+        dtos[m.pk] = get_download_link(m.pk)
 
     return render(request, 'models_cards.html', locals())
 

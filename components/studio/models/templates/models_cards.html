@@ -14,6 +14,22 @@
         <div class="card">
             <img class="card-img-top" src="{% static img_name %}" alt="pattern">
             <div class="card-header">
+                <div class="card-actions float-end">
+                    <div class="dropdown show">
+                        <a href="#" data-bs-toggle="dropdown" data-display="static">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="feather feather-more-horizontal align-middle">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="{{ dtos[model.pk] }}" download="">Download model</a>
+                        </div>
+                    </div>
+                </div>
                 <h5 class="card-title mb-0">{{ model.name }}</h5>
             </div>
             <div class="card-body">
