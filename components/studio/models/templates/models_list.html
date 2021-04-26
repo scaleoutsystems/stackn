@@ -36,7 +36,7 @@
                                     {% for model in models %}
                                     <tr role="row" class="odd">
                                         <td>
-                                            <a href="{% url 'models:details' request.user project.slug model.id %}">
+                                            <a href="{% url 'models:details_public' model.id %}">
                                                 {{ model.name }}
                                             </a>
                                         </td>

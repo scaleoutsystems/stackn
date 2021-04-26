@@ -36,6 +36,8 @@ urlpatterns = [
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+# Since this is a production feature, it will only work if DEBUG is set to False
+handler404 = 'studio.views.handle_page_not_found'
 
 import os
 
