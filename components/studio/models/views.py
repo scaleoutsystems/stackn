@@ -22,12 +22,19 @@ logger = logging.getLogger(__name__)
 def index(request):
     models = Model.objects.filter(access='PU', project__isnull=False).order_by('-uploaded_at')
 
-    img_id = randint(8, 13)
-    img_name = "dist/img/patterns/image {}.png".format(img_id)
-
-    dtos = {}
+    dtos = []
     for m in models:
-        dtos[m.pk] = get_download_link(m.pk)
+        img_id = randint(8, 13)
+        img_name = "dist/img/patterns/image {}.png".format(img_id)
+
+        obj = {
+            "pk": m.pk,
+            "download_url": get_download_url(m.pk),
+            "img_name": img_name,
+            "name": m.name,
+            "description": m.description
+        }
+        dtos.append(obj)
 
     return render(request, 'models_cards.html', locals())
 

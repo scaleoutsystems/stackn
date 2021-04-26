@@ -76,9 +76,9 @@
                                             <option selected>
                                                 {{ model.get_access_display }}
                                             </option>
-                                            {% for choice in model_access_choices %}
-                                            <option value="{{ choice }}">{{ model_access_choices[choice] }}</option>
-                                            {% endfor%}
+                                            {% for k, v in model_access_choices.items %}
+                                            <option value="{{ k }}">{{ v }}</option>
+                                            {% endfor %}
                                         </select>
                                         <button type="submit" class="btn btn-primary btn-sm">
                                             <i class="fas fa-save"></i>

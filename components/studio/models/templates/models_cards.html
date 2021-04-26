@@ -5,14 +5,14 @@
 
 <div class="row">
 
-    {% if not models %}
+    {% if not dtos %}
     <p>No publicly published services available.</p>
     {% endif %}
 
-    {% for model in models %}
+    {% for model in dtos %}
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card">
-            <img class="card-img-top" src="{% static img_name %}" alt="pattern">
+            <img class="card-img-top" src="{% static model.img_name %}" alt="pattern">
             <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
@@ -26,7 +26,7 @@
                             </svg>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="{{ dtos[model.pk] }}" download="">Download model</a>
+                            <a class="dropdown-item" href="{{ model.download_url }}" download="">Download model</a>
                         </div>
                     </div>
                 </div>
