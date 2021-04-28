@@ -4,6 +4,7 @@ from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
+from django.utils.text import slugify
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
@@ -16,13 +17,13 @@ from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
 import modules.keycloak_lib as kc
-from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog
+from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName
 from models.models import ObjectType
 from apps.models import AppInstance
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
 from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
-from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer
+from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer, ReleaseNameSerializer
 
 from projects.tasks import create_resources_from_template
 from apps.tasks import delete_resource
@@ -410,6 +411,36 @@ class MLflowList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMod
 
     def get_queryset(self):
         return MLFlow.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
+
+class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+    permission_classes = (IsAuthenticated, ProjectPermission,)
+    serializer_class = ReleaseNameSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id','name', 'project']
+
+    def get_queryset(self):
+        return ReleaseName.objects.filter(project__pk=self.kwargs['project_pk'])
+
+    def create(self, request, *args, **kwargs):
+        name = slugify(request.data['name'])
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        if ReleaseName.objects.filter(name=name).exists():
+            if project.status != 'archived':
+                print("ReleaseName already in use.")
+                return HttpResponse("Release name already in use.", status=200)
+        status = 'active'
+        
+        rn = ReleaseName(name=name, status=status, project=project)
+        rn.save()
+        return HttpResponse("Created release name {}.".format(name), status=200)
 
     def destroy(self, request, *args, **kwargs):
         try:
