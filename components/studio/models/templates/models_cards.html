@@ -5,48 +5,37 @@
 
 <div class="row">
 
-    {% if not models %}
+    {% if not dtos %}
     <p>No publicly published services available.</p>
     {% endif %}
 
-    {% for model in models %}
-    <div class="col-12 col-md-6 col-lg-3">
+    {% for model in dtos %}
+    <div class="col-12 col-md-6 col-lg-4">
         <div class="card">
-
-            <div class="card-header px-4 pt-4">
+            <img class="card-img-top" src="{% static model.img_name %}" alt="pattern">
+            <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static">
-                            <i class="align-middle" data-feather="more-horizontal"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="feather feather-more-horizontal align-middle">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
                         </a>
-                        {% if request.user.is_authenticated %}
-                        {% if model.project.owner == request.user or request.user in model.project.authorized.all %}
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item"
-                                href="{% url 'models:details' request.user model.project.slug model.id %}">View model
-                                card</a>
+                            <a class="dropdown-item" href="{{ model.download_url }}" download="">Download model</a>
                         </div>
-                        {% else %}
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="{% url 'models:details_public' model.id %}">View model
-                                card</a>
-                        </div>
-                        {% endif %}
-                        {% else %}
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="{% url 'oidc_authentication_init' %}">View model card</a>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
                 <h5 class="card-title mb-0">{{ model.name }}</h5>
-                <div
-                    class="badge {% if model.status == 'CR' %}bg-warning{% elif model.status == 'DP' %}bg-success{% elif model.status == 'AR' %}bg-danger{% endif %} my-2">
-                    {{ model.get_status_display }}</div>
             </div>
-            <div class="card-body px-4 pt-2">
-                <p>{{ model.description }}</p>
-                <p>Uploaded at {{ model.uploaded_at }}</p>
+            <div class="card-body">
+                <p class="card-text">{{ model.description }}</p>
+                <a href="{% url 'models:details_public' model.pk %}"
+                   class="card-link">Open</a>
             </div>
         </div>
     </div>
