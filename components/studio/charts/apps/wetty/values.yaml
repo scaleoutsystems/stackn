@@ -5,7 +5,7 @@ project:
   slug: slug
 
 app:
-  image: scaleoutsystems/compute:tf-latest
+  image: scaleoutsystems/ubuntu-wetty:test
 
   resources:
     requests:

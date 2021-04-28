@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from models.models import Model, ModelLog, Metadata, ObjectType
-from projects.models import Project, S3, Flavor, Environment, MLFlow
+from projects.models import Project, S3, Flavor, Environment, MLFlow, ReleaseName
 from apps.models import AppInstance, Apps, AppCategories, AppStatus
 from django.contrib.auth.models import User
 
@@ -88,4 +88,10 @@ class EnvironmentSerializer(ModelSerializer):
     app = AppSerializer()
     class Meta:
         model = Environment
+        fields = '__all__'
+
+class ReleaseNameSerializer(ModelSerializer):
+    app = AppInstanceSerializer()
+    class Meta:
+        model = ReleaseName
         fields = '__all__'

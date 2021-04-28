@@ -1,0 +1,22 @@
+namespace: default
+
+volumes: {}
+
+  
+git_sync:
+  one_time: false
+
+credentials:
+  access_key: accesskey
+  secret_key: secretkey123
+
+ingress:
+  v1beta1: false
+
+repository:
+  repository: git-repository
+  branch: master
+
+credentials:
+  token: ""
+  username: ""

@@ -15,6 +15,13 @@
 },
 {
   "model": "apps.appcategories",
+  "pk": "iotex",
+  "fields": {
+    "name": "IoTeX"
+  }
+},
+{
+  "model": "apps.appcategories",
   "pk": "misc",
   "fields": {
     "name": "Misc"

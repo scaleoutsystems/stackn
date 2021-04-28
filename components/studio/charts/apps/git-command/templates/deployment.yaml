@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    app: git-command
+    project: {{ .Values.project.slug }}
+    type: app
+    pod: git-command
+spec:
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: git-sync-job
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: git-sync-job
+    spec:
+      securityContext:
+        runAsUser: 1000
+      restartPolicy: OnFailure
+      containers:
+      - image: scaleoutsystems/git:latest
+        name: git-clone
+        command:
+        - /bin/sh
+        - -c
+        - git clone -b $GIT_SYNC_BRANCH $GIT_SYNC_REPO #&& git-lfs pull
+        {{- range $key, $value := .Values.apps.volume }}
+        workingDir: /home/stackn/{{ $key }}
+        {{- end }}
+        env:
+        - name: GIT_SYNC_REPO
+          value: {{ $.Values.repository.repository }}
+        - name: GIT_SYNC_BRANCH
+          value: {{ $.Values.repository.branch }}
+        - name: GIT_SYNC_USERNAME
+          value: {{ $.Values.credentials.username }}
+        - name: GIT_SYNC_PASSWORD
+          value: {{ $.Values.credentials.token }}   
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /home/stackn/{{ $key }}
+        {{- end }}
+      volumes:
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

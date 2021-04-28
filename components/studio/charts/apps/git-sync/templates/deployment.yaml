@@ -23,6 +23,8 @@ spec:
         type: app
         pod: git-sync
     spec:
+      securityContext:
+        runAsUser: 1000
       containers:
       - image: k8s.gcr.io/git-sync/git-sync:v3.2.2
         args:

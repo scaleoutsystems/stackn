@@ -25,7 +25,7 @@ spec:
         type: app
         pod: lab
     spec:
-    {{ if .Values.labs.gpu.enabled }}
+    {{ if .Values.flavor.gpu.enabled }}
       affinity:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}

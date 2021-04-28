@@ -142,7 +142,17 @@ def post_create_hooks(instance):
 
 def post_delete_hooks(instance):
 
-    print("Nothing to do in post_delete_hooks.")
+    # print("Nothing to do in post_delete_hooks.")
+    # Free up release name (if reserved)
+    print("IN POST DELETE HOOK")
+    rel_names = instance.releasename_set.all()
+    for rel_name in rel_names:
+        rel_name.status = 'active'
+        rel_name.app = None
+        rel_name.save()
+
+
+
     # NOTE: WE SHOULDN'T DELETE THESE META OBJECTS, NO NEED TO DO THAT. ENOUGH TO ARCHIVE PROJECT.
     # if instance.app.slug == 'minio':
     #     try:
@@ -237,11 +247,15 @@ def deploy_resource(instance_pk, action='create'):
 
         # For backwards-compatibility with old ingress spec:
         print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
-        ingress = {
-            "ingress": {
-                "v1beta1": settings.INGRESS_V1BETA1
-            }
-        }
+        if 'ingress' not in parameters:
+            parameters['ingress'] = dict()
+
+        parameters['ingress']['v1beta1'] = settings.INGRESS_V1BETA1
+        # ingress = {
+        #     "ingress": {
+        #         "v1beta1": settings.INGRESS_V1BETA1
+        #     }
+        # }
 
 
         instance.parameters = parameters
@@ -329,6 +343,7 @@ def delete_resource(pk):
         status = AppStatus(appinstance=appinstance)
         status.status_type = "Terminated"
         status.save()
+        print("CALLING POST DELETE HOOKS")
         post_delete_hooks(appinstance)
     else:
         status = AppStatus(appinstance=appinstance)
