@@ -170,6 +170,8 @@ def create_project(name,
     res = requests.post(url, headers=auth_headers, json=data, verify=conf['STACKN_SECURE'])
     if res:
         print('Created project: '+name)
+        conf['STACKN_PROJECT'] = name
+        set_current(conf)
         # print('Setting {} as the active project.'.format(name))
         # self.set_project(name)
     else:
