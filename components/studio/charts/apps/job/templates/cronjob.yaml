@@ -8,6 +8,8 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
   labels:
     release: {{ .Release.Name }}
     app: job

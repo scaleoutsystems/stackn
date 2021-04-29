@@ -115,11 +115,14 @@ def get_form_permission(aset, project, appinstance=[]):
 
         if appinstance:
             try:
-                ai_vals = eval(appinstance.parameters)
-                form_permissions['public']['value'] = ai_vals['permissions.public']
-                form_permissions['project']['value'] = ai_vals['permissions.project']
-                form_permissions['private']['value'] = ai_vals['permissions.private']
-            except:
+                ai_vals = appinstance.parameters
+                print(ai_vals['permissions'])
+                form_permissions['public']['value'] = ai_vals['permissions']['public']
+                form_permissions['project']['value'] = ai_vals['permissions']['project']
+                form_permissions['private']['value'] = ai_vals['permissions']['private']
+                print(form_permissions)
+            except Exception as err:
+                print(err)
                 print("Permissions not set for app instance, using default.")
     return dep_permissions, form_permissions
 
