@@ -1,16 +1,23 @@
-FROM nginx
+# FROM nginx
 
-RUN apt-get update
-RUN apt-get install -y git fcgiwrap apache2-utils
-RUN sed -i 's/www-data/nginx/g' /etc/init.d/fcgiwrap
-RUN chown nginx:nginx /etc/init.d/fcgiwrap
-#RUN mkdir /var/www/html/git
-#RUN chown -R nginx:nginx /var/www/html/git
 
-RUN mkdir -p /var/www
-COPY static /var/www/static
-RUN chown -R nginx:nginx /var/www/
-WORKDIR /var/www
+# RUN apt-get update
+# RUN apt-get install -y git fcgiwrap apache2-utils
+# RUN sed -i 's/www-data/nginx/g' /etc/init.d/fcgiwrap
+# RUN chown nginx:nginx /etc/init.d/fcgiwrap
+# #RUN mkdir /var/www/html/git
+# #RUN chown -R nginx:nginx /var/www/html/git
 
-CMD /etc/init.d/fcgiwrap start \
-    && nginx -g 'daemon off;'
+# RUN mkdir -p /var/www
+# COPY static /var/www/static
+# RUN chown -R nginx:nginx /var/www/
+# WORKDIR /var/www
+
+# CMD /etc/init.d/fcgiwrap start \
+#     && nginx -g 'daemon off;'
+
+
+FROM nginx:alpine
+
+RUN mkdir -p /etc/nginx/html
+COPY static /etc/nginx/html/static
