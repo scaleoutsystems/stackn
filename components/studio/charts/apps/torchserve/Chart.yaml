@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "0.1"
-description: A Helm chart for Scaleout PyTorch Serve Deployment
-name: torchserve
-version: 0.1.0

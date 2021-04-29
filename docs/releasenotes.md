@@ -1,19 +1,5 @@
 # Release Notes
 
-## v0.5.0 (upcoming release)
-
-### New functionality
-- Studio Administration module to monitor and manage resources as an alternative to Django Admin
-- Brand new STACKn UI
-- Automated scaling of model deployments
-- New public portal for models
-- New model details page
-- Possibility to download a model from its S3 storage
-
-### Bug fixes
-
-### Other
-
 ## v0.4.0
 
 ### New functionality

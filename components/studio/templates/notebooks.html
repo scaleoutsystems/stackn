@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+
+    <main role="main">
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-md-2 d-none d-md-block sidebar">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'projects:details' project.id %}">
+                                <span data-feather="home"></span>
+                                {{ project.name }} <span class="sr-only">(current)</span>
+                            </a>
+                        </li>
+                        <li class="nav-item bg-light">
+                            <a class="nav-link active" href="#">
+                                <span data-feather="home"></span>
+                                Notebooks <span class="sr-only">(current)</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file"></span>
+                                Files
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="shopping-cart"></span>
+                                Datasets
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="users"></span>
+                                Workflows
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="layers"></span>
+                                Deployments
+                            </a>
+                        </li>
+                    </ul>
+                    <!--
+                           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                             <span>Saved reports</span>
+                             <a class="d-flex align-items-center text-muted" href="#">
+                               <span data-feather="plus-circle"></span>
+                             </a>
+                           </h6>
+                           <ul class="nav flex-column mb-2">
+                             <li class="nav-item">
+                               <a class="nav-link" href="#">
+                                 <span data-feather="file-text"></span>
+                                 Current month
+                               </a>
+                             </li>
+                             <li class="nav-item">
+                               <a class="nav-link" href="#">
+                                 <span data-feather="file-text"></span>
+                                 Last quarter
+                               </a>
+                             </li>
+                             <li class="nav-item">
+                               <a class="nav-link" href="#">
+                                 <span data-feather="file-text"></span>
+                                 Social engagement
+                               </a>
+                             </li>
+                             <li class="nav-item">
+                               <a class="nav-link" href="#">
+                                 <span data-feather="file-text"></span>
+                                 Year-end sale
+                               </a>
+                             </li>
+                           </ul>
+                         </div>-->
+                </nav>
+
+                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h2>Notebooks</h2>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group mr-2">
+                                <form action="{% url 'notebook:create' %}" method="get">
+                                    {% csrf_token %}
+                                    <input name="name" value="nb1">
+                                    <input type="hidden" name="namespace" value="{{ request.user }}">
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <input type="input" name="image" value="jupyter/minimal-notebook:latest">
+                                    <input type="submit" class="btn btn-sm btn-outline-secondary" value="Create">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Created</th>
+                                <th>State</th>
+                                <th>Address</th>
+                                <th>Image</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for nb in notebook %}
+                                <tr>
+                                    <td>{{ nb.id }}</td>
+                                    <td>{{ nb.name }}</td>
+                                    <td>{{ nb.created_at }}</td>
+                                    <td>{{ nb.state }}</td>
+                                    <td>
+                                        <a href="{{ nb.address }}" target="_blank">{{ nb.address }}</a>
+                                    </td>
+                                    <td>{{ nb.image }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-secondary">Pause</button>
+                                        <a href="{% url 'notebook:destroy' nb.id %} ">
+                                            <button id="delete" class="btn btn-sm btn-outline-warning">Delete</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <!--
+    <script>
+        $(function () {
+            $('#delete').on('click', function (e) {
+                e.preventDefault(); // disable the default form submit event
+
+                $.ajax({
+                    url: '/notebook/delete',
+                    type: 'POST',
+                    data: 'nb1',
+                    success: function (response) {
+                        alert('response received');
+                        // ajax success callback
+                    },
+                    error: function (response) {
+                        alert('ajax failed');
+                        // ajax error callback
+                    },
+                });
+
+            });
+        });
+    </script>-->
+
+        <script>window.jQuery || document.write('<script src="/docs/4.3/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+        <!--<script src="/docs/4.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+                crossorigin="anonymous"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+
+        </div>
+    </main>
+{% endblock %}

@@ -23,11 +23,3 @@ class GrantAccessForm(forms.Form):
         OPTIONS.append((user.pk, user.username))
 
     selected_users = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS)
-
-class FlavorForm(forms.Form):
-    cpu_req = forms.CharField(label="CPU request", max_length=10, initial="200m")
-    mem_req = forms.CharField(label="Memory request", max_length=15)
-    gpu_req = forms.CharField(label="GPU request", max_length=10)
-
-    cpu_lim = forms.CharField(label="CPU limit", max_length=10)
-    mem_lim = forms.CharField(label="Memory limit", max_length=15)

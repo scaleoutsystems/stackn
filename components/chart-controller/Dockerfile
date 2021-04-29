@@ -28,4 +28,4 @@ RUN pip install -r requirements.txt
 ENV FLASK_APP=controller/serve.py
 
 # comment out if running docker-compose
-ENTRYPOINT gunicorn --bind 0.0.0.0:80 --workers=2 --log-level=debug wsgi:app --limit-request-line 0 --reload
+ENTRYPOINT gunicorn --bind 0.0.0.0:80 --workers=2 --log-level=debug wsgi:app --limit-request-line 32768

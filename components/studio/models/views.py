@@ -1,60 +1,72 @@
 import uuid
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from projects.models import Project, ProjectLog
 from reports.models import Report, ReportGenerator
-from .models import Model, ModelLog, Metadata, ObjectType
+from .models import Model, ModelLog, Metadata
+from .forms import ModelForm
 from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
+from deployments.models import DeploymentDefinition, DeploymentInstance
 import logging
 from reports.helpers import populate_report_by_id, get_download_link
 import markdown
 import ast
 from collections import defaultdict
-from random import randint
-from .helpers import get_download_url
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
 def index(request):
-    models = Model.objects.filter(access='PU', project__isnull=False).order_by('-uploaded_at')
-
-    dtos = []
-    for m in models:
-        img_id = randint(8, 13)
-        img_name = "dist/img/patterns/image {}.png".format(img_id)
-
-        obj = {
-            "pk": m.pk,
-            "download_url": get_download_url(m.pk),
-            "img_name": img_name,
-            "name": m.name,
-            "description": m.description
-        }
-        dtos.append(obj)
+    models = Model.objects.filter(access='PU', project__isnull=False)
 
     return render(request, 'models_cards.html', locals())
 
 
 @login_required
 def list(request, user, project):
-    menu = dict()
-    menu['objects'] = 'active'
     template = 'models_list.html'
-    project = Project.objects.get(slug=project)
-    objects = []
+    project = Project.objects.filter(slug=project).first()
+
+    models = Model.objects.filter(project=project)
     
-    object_types = ObjectType.objects.all()
-    for object_type in object_types:
-        objects.append((object_type, Model.objects.filter(project=project, object_type__slug=object_type.slug)))
-    print("OBJECTS")
-    print(objects)
-    active_type = 'model'
+    # model_logs = ModelLog.objects.all()
+
+    # TODO: Filter by project and access.
+    deployments = DeploymentDefinition.objects.all()
 
     return render(request, template, locals())
+
+
+@login_required
+def create(request, user, project):
+    template = 'models_upload.html'
+
+    project = Project.objects.filter(slug=project).first()
+    uid = uuid.uuid4()
+
+    if request.method == 'POST':
+        obj = None
+
+        form = ModelForm(request.POST, request.FILES)
+        if form.is_valid():
+            obj = form.save()
+
+            l = ProjectLog(project=project, module='MO', headline='Model',
+                           description='A new Model {name} has been added'.format(name=obj.name))
+            l.save()
+
+            url = '/{}/{}/models/{}'.format(user, project.slug, obj.pk)
+        else:
+            url = '/{}/{}/models/'.format(user, project.slug)
+
+        return HttpResponseRedirect(url)
+    else:
+        form = ModelForm()
+
+        return render(request, template, locals())
 
 
 @login_required
@@ -74,7 +86,7 @@ def change_access(request, user, project, id):
             l.save()
 
     return HttpResponseRedirect(
-        reverse('models:details_public', kwargs={'id': id}))
+        reverse('models:details', kwargs={'user': user, 'project': project, 'id': id}))
 
 
 @login_required
@@ -210,9 +222,7 @@ def get_chart_data(md_objects):
 
 def details_public(request, id):
     model = Model.objects.filter(pk=id).first()
-
-    model_access_choices = {'PU': 'Public', 'PR': 'Private', 'LI': 'Limited'}
-    del model_access_choices[model.access]
+    deployments = DeploymentInstance.objects.filter(model=model)
 
     reports = Report.objects.filter(model__pk=id, status='C').order_by('-created_at')
     report_dtos = []
@@ -245,14 +255,18 @@ def details_public(request, id):
 
 @login_required
 def delete(request, user, project, id):
+    template = 'model_confirm_delete.html'
 
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
-    l = ProjectLog(project=project, module='MO', headline='Model',
-                    description='Model {name} has been removed'.format(name=model.name))
-    l.save()
+    if request.method == "POST":
+        l = ProjectLog(project=project, module='MO', headline='Model',
+                       description='Model {name} has been removed'.format(name=model.name))
+        l.save()
 
-    model.delete()
+        model.delete()
 
-    return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
+        return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project.slug}))
+
+    return render(request, template, locals())

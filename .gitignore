@@ -1,5 +1,3 @@
-components/studio/chartcontroller/values/
-
 # Byte-compiled / optimized / DLL files
 .idea/
 .DS_Store
@@ -129,6 +127,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Fonts and icons
+static/open-iconic/
+
 repos/
 media/datasets/
 media/generators/
@@ -138,7 +139,3 @@ tele_settings.py
 tele_settings_worker.py
 
 .vscode/
-
-bin/
-pyvenv.cfg
-share/

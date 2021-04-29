@@ -1,5 +1,5 @@
 {% extends 'baseproject.html' %}
-{% load static %}
+{% load staticfiles %}
 {% block content %}
 <div class="col-md-9">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
@@ -132,7 +132,10 @@
                     <tr>
                         <th scope="row">{{ d.pk }}</th>
                         <td>{{ d.model.name }}:{{ d.model.version }}</td>
-                        <td>https://{{ d.endpoint }}{{ d.path }}{{ d.deployment.path_predict }}</td>
+                        <td>
+                            <a href="https://{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}"
+                                target="_blank">{{ d.endpoint }}{{ d.path }}/{{ d.deployment.path_predict }}</a>
+                        </td>
                         <td>{{ d.created_at }}</td>
                     </tr>
                     {% endfor %}
