@@ -323,7 +323,10 @@ def stackn_login(studio_url=[], client_id=[], realm=[], username=[], password=[]
 
     if not conf['STACKN_PASS']:
         if conf['STACKN_REFRESH_TOKEN'] and conf['STACKN_REFRESH_TOKEN'] != '':
-            conf, status = get_token(conf, write_to_file=False)
+            try:
+                conf, status = get_token(conf, write_to_file=False)
+            except:
+                pass
             if not status:
                 print("Failed to login with set refresh token.")
                 print("Try with password instead.")
