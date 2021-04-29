@@ -7,7 +7,7 @@
 
 # What is STACKn?
 
-STACKn is an open source, cloud agnostic collaborative ML platform. 
+STACKn is an open source collaborative ML platform. 
 
 We aim to provide organizations and institutions with a complete end-to-end toolbox solution evolved by community feedback and adoption.
 

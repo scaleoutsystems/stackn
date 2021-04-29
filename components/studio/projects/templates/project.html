@@ -1,314 +1,131 @@
+
 {% extends 'baseproject.html' %}
-{% load static %}
+
+{% load staticfiles %}
+
 {% block content %}
-
-<h1 class="h3 mb-3">Overview</h1>
-
-<div class="row">
-    <!-- <div class="col-12 col-md-6 col-lg-4" style="padding-bottom: 24px;">
-        <div class="card" style="height: 100%;">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Description</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    {{ project.description }}
-                </p>
-            </div>
-        </div>
-    </div> -->
-    <div class="col-12 col-lg-6 col-xl-4 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Recent activity</h5>
-            </div>
-            <div class="card-body">
-                <ul class="timeline">
-                    {% for log in activity_logs %}
-                    <li class="timeline-item">
-                        <strong>{{ log.headline }}</strong>
-                        <span class="float-end text-muted text-sm">{{ log.created_at }}</span>
-                        <p>{{ log.description }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+{% if is_authorized %}
+<div class="col-md-9">
+    <div class="d-flex flex-column pt-3 pb-3 mb-5 border-bottom">
+        <h3>{{ project.name }}</h3>
+        <h5>{{ project.description }}</h5>
     </div>
-    <div class="col-12 col-lg-6 col-xl-4 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title">CPU</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                    <canvas id="totalCPUChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block;" class="chartjs-render-monitor"></canvas>
+    <div class="row">
+        <div class="col-sm-6">
+            {% if not readme %}
+            <h4>
+                Get started
+            </h4>
+            <div>
+                <div class="get-started-header">
+                    <h3 style="font-size: 20px;">Quick setup — if you don't know where to start</h3>
+                    <p class="mb-0">
+                        This is a quick introduction to Scaleout Studio which will get you through the basics
+                        and help you spin up your own project by creating a Jupyter Notebook in a new
+                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> environment.
+                    </p>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-lg-6 col-xl-4 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title">Memory</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-</div>
-
-<div class="row">
-    {% for objs in resources %}
-    <div class="col-6 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <div class="card-actions float-end">
-                    <div class="dropdown show">
-                        <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <button class="btn btn-outline-secondary">New</button>
-                        </a>
-
-                        <div class="dropdown-menu dropdown-menu-right">
-                            {% for app in objs.apps %}
-                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">{{ app.name }}</a>
-                            {% endfor %}
-                        </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Create a new
+                        <a href="{% url 'labs:index' request.user project.slug %}">Lab</a> session
+                    </h3>
+                    <p>
+                        Labs is the work area for experimentation and development of machine learning projects.
+                        It's based on Lab Session which is a provisioned Jupyter Notebook session running in a
+                        virtual environment.
+                    </p>
+                    <div class="d-flex flex-column">
+                        To create a Lab Session, do the following:
+                        <ol>
+                            <li>Go to <a href="{% url 'labs:index' request.user project.slug %}">Labs</a></li>
+                            <li>Select 1 CPU, 2 RAM to start an instance with 1 virtual CPU and 2 GB RAM from the
+                                Kubernestes cluster
+                            </li>
+                        </ol>
                     </div>
                 </div>
-                <h5 class="card-title mb-0">{{ objs.title }}</h5>
-            </div>
-            {% if objs.objs %}
-            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
-                <!-- <div class="row">
-                    <div class="col-sm-12 col-md-6"></div>
-                    <div class="col-sm-12 col-md-6"></div>
-                </div> -->
-                <div class="row">
-                    <div class="col-sm-12">
-                        <table id="datatables-dashboard-projects-{{ forloop.counter }}" class="table table-striped my-0 dataTable no-footer"
-                            role="grid">
-                            <thead>
-                                <tr>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1"></th> 
-                                    <th class="sorting_asc" tabindex="0" 
-                                        rowspan="1" colspan="1">App</th>
-                                    <th class="sorting_asc" tabindex="0" rowspan="1" colspan="1">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Created</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for obj in objs.objs %}
-                                <tr class="odd">
-                                    <td><img src="{% static obj.app.logo %}" class="img-fluid " alt="App Logo" style="max-height:25px;"></td>
-                                    <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
-                                    {% if obj.table_field.url %}
-                                    <td class="sorting_1"><a href="{{ obj.table_field.url }}">{{ obj.name }}</a></td>
-                                    {% else %}
-                                    <td class="sorting_1">{{ obj.name }}</td>
-                                    {% endif %}
-                                    <!-- <td class="d-none d-xl-table-cell">{{ obj.owner }}</td> -->
-                                    <td class="d-none d-xl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
-                                    <td id="status-{{ obj.pk }}"><span class="badge 
-                                        {% if obj.status.latest.status_type in status_success %}bg-success
-                                        {% elif obj.status.latest.status_type in status_warning %}bg-warning
-                                        {% else %}bg-danger
-                                        {% endif %}">{{ obj.status.latest.status_type }}</span></td>
-                                    <td class="table-action text-center">
-                                        <div class="dropdown show">
-                                            <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">Logs</a>
-                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">Settings</a>
-                                                <a class="dropdown-item bg-danger text-white" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">Delete</a>
-                                            </div>
-                                        </div>
-                                        <!-- <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
-                                        <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
-                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a> -->
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Upload datasets to MinIO S3 storage</h3>
+                    <p class="mb-0">
+                        You can also upload files to a
+                        <a href="https://{{ project.slug }}-minio.{{ url_domain }}/">MinIO</a>
+                        S3 storage.
+                        You can find the access and secret keys on the
+                        <a href="{% url 'projects:settings' request.user project.slug %}">Settings</a>
+                        page.
+                    </p>
                 </div>
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Check out our example projects</h3>
+                    <p class="mb-0">
+                        We have several example projects available in our
+                        <a href="https://github.com/scaleoutsystems" target="_blank">GitHub</a> page.
+                    </p>
+                    <p class="mb-0">
+                        Start with exploring the
+                        <a href="https://github.com/scaleoutsystems/aml-example-project" target="_blank">AML</a>
+                        example project.
+                    </p>
+                </div>
+                <!-- Not available with the first release!
+
+                <div class="get-started-box">
+                    <h3 style="font-size: 20px;">Import code from another repository</h3>
+                    <p>You're seeing this quick set-up guide because you haven't imported files from an
+                        existing GitHub repository. If you have such repository, you can still import its files
+                        and use them in your project.</p>
+                    <a href="#">
+                        <button type="button" class="btn btn-light">Import</button>
+                    </a>
+                </div>
+                -->
             </div>
             {% else %}
-            <!-- <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p> -->
+            <div class="readme-box">
+                {{ readme | safe }}
+            </div>
             {% endif %}
         </div>
-    </div>
-    {% endfor %}
-    <div class="col-6 d-flex">
-        <div class="card flex-fill">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Models</h5>
-            </div>
-            {% if models %}
-            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
-                <div class="row">
-                    <div class="col-sm-12 col-md-6"></div>
-                    <div class="col-sm-12 col-md-6"></div>
+        <div class="col-sm-6">
+            <form method="POST" id="project_activity"
+                  project-activity-url="{% url 'projects:project_activity' request.user project.slug %}" novalidate>
+                {% csrf_token %}
+
+                <h4 class="d-flex justify-content-start">
+                    <span style="padding-top: 3px; padding-right: 15px;">
+                        Project activity
+                    </span>
+                    <select id="id_time_period" class="form-control" style="width: 30%;">
+                        <option value="always">--</option>
+                        <option value="always">Always</option>
+                        <option value="month">Last month</option>
+                        <option value="week">Last week</option>
+                    </select>
+                </h4>
+                <div id="project_logs">
                 </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
-                            role="grid">
-                            <thead>
-                                <tr>
-                                    <th class="sorting_asc" tabindex="0"
-                                        rowspan="1" colspan="1">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Version</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Created</th>
-                                    <th class="sorting" tabindex="0"
-                                        rowspan="1" colspan="1">
-                                        Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Accessability</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for model in models %}
-                                <tr class="odd">
-                                    <td class="sorting_1">{{ model.name }}</td>
-                                    <td class="d-none d-xl-table-cell">{{ model.version }}</td>
-                                    <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
-                                    <td><span class="badge 
-                                        {% if model.status == 'CR' %}bg-warning
-                                        {% elif model.status == 'DP' %}bg-success
-                                        {% elif model.status == 'AR' %}bg-danger
-                                        {% endif %}">{{ model.get_status_display }}</span></td>
-                                    <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <p style="margin-left: 25px;">No models have been uploaded to this project yet.</p>
-            {% endif %}
+            </form>
         </div>
     </div>
 </div>
+{% endif %}
+{% endblock %}
 
-
-
-
+{% block extrascripts %}
 <script>
+    $("#id_time_period").change(function () {
+      var url = $("#project_activity").attr("project-activity-url");
+      var period = $(this).val();
 
-    function newChart(chart, labels, y_data, ylabel) {
-        new Chart(chart, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total CPU usage',
-                    fill: true,
-                    backgroundColor: 'transparent',
-                    borderColor: window.theme.primary,
-                    data: y_data
-                }]          
-            },
-            options: {
-                elements: {
-                    point: {
-                        radius: 0
-                    }
-                },
-                maintainAspectRatio: false,
-                legend: {
-                    display: false
-                },
-                tooltips: {
-                    intersect: false
-                },
-                hover: {
-                    intersect: true
-                },
-                plugins: {
-                    filler: {
-                    propagate: false
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        ticks: {
-                            maxTicksLimit: 10
-                        },
-                        reverse: true,
-                        gridLines: {
-                            color: "rgba(0,0,0,0.05)"
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            stepSize: 100,
-                            maxTicksLimit: 10
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: ylabel
-                        },
-                        display: true,
-                        borderDash: [5, 5],
-                        gridLines: {
-                            color: "rgba(0,0,0,0)",
-                            fontColor: "#fff"
-                        }
-                    }]
-                }
-            }
-        });
-    }
-
-    function resourceCharts(chart_id1, chart_id2) {
-        var $labsCPUChart = $(chart_id1);
-        var $labsMEMChart = $(chart_id2);
-        $.ajax({
-            url: "{% url 'monitor:usage' user project.slug %}",
-            success: function (data) {
-                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)')
-                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)')
-    
-            }
-        });
-  
-    };
-  
-    resourceCharts('#totalCPUChart', '#totalMEMChart');
-  
-</script>
-<script>
-    function update_status() {
-        var apps = {{ pk_list | safe }}
-        $.ajax({
-            type: "POST",
-            url: "{% url 'apps:get_status' request.user project.slug %}",
-            data: {'pk': apps},
-            success: function (data) {
-                console.log(data)
-                apps.split(',').forEach(function (item, index) {
-                    document.getElementById("status-"+item).innerHTML = data['status-'+item];
-                });
-            },
-            complete: function() {
-                setTimeout(update_status, 3000);
-            }
-        });
-    };
-    setTimeout(update_status, 3000);
+      $.ajax({
+        url: url,
+        data: {
+          'period': period
+        },
+        success: function (data) {
+          $("#project_logs").html(data);
+        }
+      });
+    });
 </script>
 {% endblock %}

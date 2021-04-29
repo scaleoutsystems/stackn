@@ -34,7 +34,6 @@ class FileModel(models.Model):
     name = models.CharField(max_length=255)
     bucket = models.CharField(max_length=255, default="dataset")
 
-
 class Dataset(models.Model):
     objects_version = ModelManager()
     objects = models.Manager()
@@ -47,9 +46,9 @@ class Dataset(models.Model):
     files = models.ManyToManyField(FileModel, blank=True)
     created_by = models.CharField(max_length=255) # Username
     created_on = models.DateTimeField(auto_now_add=True)
+    datasheet = models.FileField(upload_to='datasheets/', default=None)
     class Meta:
         unique_together = ('name', 'version', 'project_slug')
-
 
 @receiver(pre_save, sender=Dataset, dispatch_uid='dataset_pre_save_signal')
 def pre_save_model(sender, instance, using, **kwargs):
@@ -72,3 +71,9 @@ def pre_save_model(sender, instance, using, **kwargs):
         print('New version: '+instance.version)
         if not release_status:
             raise Exception('Failed to create new release for model {}-{}, release type {}.'.format(instance.name, instance.version, release_type))
+
+# @receiver(pre_delete, sender=Dataset, dispatch_uid='dataset_pre_delete_signal')
+# def pre_delete_dataset(sender, instance, using, **kwargs):
+#     files = instance.files
+#     for f in files:
+#         f.delete()

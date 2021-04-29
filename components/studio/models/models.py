@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_delete, pre_save
 from django import forms
 from django.utils.module_loading import import_string
-# from deployments.models import DeploymentInstance
+from deployments.models import DeploymentInstance
 from ast import literal_eval
 from functools import cmp_to_key
 from projects.helpers import get_minio_keys
@@ -45,13 +45,6 @@ class ModelManager(models.Manager):
 
         return []
 
-class ObjectType(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True, default="Model")
-    slug = models.CharField(max_length=100, null=True, blank=True, default="model")
-    apps = models.ManyToManyField('apps.Apps', blank=True)
-    def __str__(self):
-        return self.name
-
 class Model(models.Model):
 
     objects_version = ModelManager()
@@ -80,11 +73,7 @@ class Model(models.Model):
     description = models.CharField(max_length=255, null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
-    object_type = models.ManyToManyField(ObjectType, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
-    s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
-    bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
-    path = models.CharField(max_length=200, null=True, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(
         'projects.Project',
@@ -98,7 +87,7 @@ class Model(models.Model):
         unique_together = ('name', 'version', 'project')
 
     def __str__(self): 
-        return "{name}:{version}".format(name=self.name, version=self.version)
+        return "{name}".format(name=self.name)
 
 class ModelLog(models.Model):
     STARTED = 'ST'
@@ -169,10 +158,10 @@ def pre_delete_model(sender, instance, using, **kwargs):
     minio_url = '{}-minio.{}'.format(instance.project.slug, settings.DOMAIN)
     minio_keys = get_minio_keys(instance.project)
     try:
-        client = Minio(instance.project.s3storage.host,
-                      access_key=instance.project.s3storage.access_key,
-                      secret_key=instance.project.s3storage.secret_key,
-                      secure=settings.OIDC_VERIFY_SSL)
+        client = Minio(minio_url,
+                      access_key=minio_keys['project_key'],
+                      secret_key=minio_keys['project_secret'],
+                      secure=True)
         client.remove_object('models', instance.uid)
     except:
         print('Failed to delete model object {} from minio store.'.format(instance.uid))

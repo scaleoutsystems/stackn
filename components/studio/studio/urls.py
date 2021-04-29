@@ -27,17 +27,15 @@ urlpatterns = [
     path('workflows/', include('workflows.urls', namespace='workflows')),
     path('api/', include('api.urls', namespace='api')),
     path('', include('projects.urls', namespace='projects')),
+    path('<user>/<project>/labs/', include('labs.urls', namespace='labs')),
     path('<user>/<project>/datasets/', include('datasets.urls', namespace='datasets')),
     path('<user>/<project>/files/', include('files.urls', namespace='files')),
     path('<user>/<project>/reports/', include('reports.urls', namespace='reports')),
-    path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
-    path('<user>/<project>/apps/', include('apps.urls', namespace='apps')),
-    path('studio/admin/', include('studio_admin.urls', namespace='studio_admin'))
+    path('<user>/<project>/experiments/', include('experiments.urls', namespace='experiments')),
+    path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor'))
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-# Since this is a production feature, it will only work if DEBUG is set to False
-handler404 = 'studio.views.handle_page_not_found'
 
 import os
 

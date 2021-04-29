@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FilesConfig(AppConfig):
-    name = 'files'
+class DatasetConfig(AppConfig):
+    name = 'volumes'
     verbose_name = 'Scaleout Dataset'

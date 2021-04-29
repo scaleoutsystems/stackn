@@ -50,8 +50,7 @@ def get_count_over_time(name, app_name, path, status_code, time_span):
 
 
 def get_total_labs_cpu_usage_60s(project_slug):
-    query = 'sum(sum (rate (container_cpu_usage_seconds_total{image!=""}[60s])) by (pod) * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_app="lab"})'
-    print(query)
+    query = 'sum(sum (rate (container_cpu_usage_seconds_total{image!=""}[60s])) by (pod) * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="lab"})'
     response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query})
     result = response.json()['data']['result']
     if result:
@@ -70,7 +69,7 @@ def get_total_cpu_usage_60s_ts(project_slug, resource_type):
     return 0
 
 def get_total_labs_memory_usage_60s(project_slug):
-    query = 'sum(sum (rate (container_memory_usage_bytes{image!=""}[60s])) by (pod) * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_app="lab"})'
+    query = 'sum(sum (rate (container_memory_usage_bytes{image!=""}[60s])) by (pod) * on(pod) group_left kube_pod_labels{label_project="'+project_slug+'", label_type="lab"})'
     response = r.get(settings.PROMETHEUS_SVC+'/api/v1/query', params={'query':query})
     result = response.json()['data']['result']
     if result:

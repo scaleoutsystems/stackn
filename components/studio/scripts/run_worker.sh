@@ -16,5 +16,4 @@ cd ..
 
 sleep 1
 
-#  watchmedo auto-restart -R --patterns="*.py" -- 
-celery -A studio worker -l info --beat --scheduler django
+celery -A studio worker -l info

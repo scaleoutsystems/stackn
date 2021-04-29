@@ -1,60 +1,82 @@
 {% extends 'base.html' %}
-
 {% block content %}
-
-{% if request.user.is_authenticated %}
-<a href="{% url 'projects:create' %}" class="btn btn-square btn-primary float-end mt-n1"><i class="fas fa-plus"></i> New project</a>
-{% endif %}
-
-<h1 class="h3 mb-3">Projects</h1>
-
-<div class="row">
-    {% if request.user.is_authenticated %}
-        {% if not projects %}
-        <p>You don't have any projects yet.</p>
-        {% else %}
+<div class="col-md-11">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Projects</h2>
+    </div>
+    <div class="row">
+        {% if not request.user.is_authenticated %}
+        <p class="col-md-12">
+            You need to be
+            <a href="{% url 'oidc_authentication_init' %}">logged in</a>
+            to be able to create a project.
+        </p>
+        {% endif %}
         {% for project in projects %}
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card">
-
-                <div class="card-header px-4 pt-4">
-                    <!--<div class="card-actions float-end">
-                        <div class="dropdown show">
-                            <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                <i class="align-middle" data-feather="more-horizontal"></i>
-                            </a>
-
-                            <div class="dropdown-menu dropdown-menu-end">
-                                {% if request.user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'projects:details' request.user project.slug %}">View
-                                    project</a>
-                                {% else %}
-                                <a class="dropdown-item" href="{% url 'oidc_authentication_init' %}">View project</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>-->
-                    <h5 class="card-title mb-0">
-                        <a href="{% if request.user.is_authenticated %}{% url 'projects:details' request.user project.slug %}{% else %}{% url 'oidc_authentication_init' %}{% endif %}">{{ project.name }}</a>
+        <div class="col-sm-6">
+            <div class="card card-project">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <span style="font-weight:bolder;">{{ project.name }}</span>
                     </h5>
-                    <div class="my-2">Started {{ project.created_at }}</div>
-                </div>
-                <div class="card-body px-4 pt-2">
-                    <p>{{ project.description }}</p>
-                    <p>Members: {{ project.owner }}
-                        {% if project.authorized.all %}
+                    <p class="card-text"> {{ project.description }}</p>
+                    <p class="card-text">Project started: {{ project.created_at }}</p>
+                    <p class="card-text">Owner {{ project.owner }}</p>
+                    <p class="card-text">Members
                         {% for user in project.authorized.all %}
-                        , {{ user.username }}
+                        {{ user.username }} ,
                         {% endfor %}
-                        {% endif %}
                     </p>
+                    <a href="{% url 'projects:details' request.user project.slug %}" class="btn mt-auto btn-info"
+                       style="width: fit-content;">Open project</a>
                 </div>
             </div>
         </div>
         {% endfor %}
+        {% if request.user.is_authenticated %}
+        <div class="col-sm-6">
+            <div class="card card-add-project">
+                <div class="card-body d-flex flex-column">
+                    <form class="needs-validation form-add-project" action="{% url 'projects:create' %}" method="POST">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <input type="text" class="form-control" id="name" name="name"
+                                       placeholder="Give your project a name here..." required>
+                                <div class="invalid-feedback">
+                                    Valid project name is required.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                          placeholder="Write a short description here..."></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <input type="text" class="form-control" id="repository" name="repository"
+                                       placeholder="Import from...">
+                            </div>
+                        </div>
+                        {% if request.user.is_authenticated %}
+                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;">
+                            Create project
+                        </button>
+                        {% else %}
+                        <button class="btn mt-auto btn-primary" type="submit" style="width: fit-content;"
+                                disabled>
+                            Create project
+                        </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
         {% endif %}
-    {% else %}
-    <p>You need to be logged in to be able to manage your projects.</p>
-    {% endif %}
+
+    </div>
 </div>
 {% endblock %}

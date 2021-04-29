@@ -8,7 +8,7 @@ import re
 import time
 
 import modules.keycloak_lib as keylib
-from .tasks import create_keycloak_client_task
+from .tasks import create_keycloak_client_task, create_helm_resources_task
 
 def urlify(s):
 
@@ -23,6 +23,7 @@ def urlify(s):
     
 def create_project_resources(project, username, repository=None):
     res1 = create_keycloak_client_task.delay(project.slug, username, [])
+    res2 = create_helm_resources_task.delay(project.slug, project.project_key, project.project_secret, repository)
     # Wait for keycloak task to finish before returning (otherwise user wouldn't have
     # correct Keycloak roles)
     while not res1.ready():
@@ -30,13 +31,18 @@ def create_project_resources(project, username, repository=None):
 
 
 def delete_project_resources(project):
-    kc = keylib.keycloak_init()
-    keylib.keycloak_delete_client(kc, project.slug)
-    
-    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
-    keylib.keycloak_delete_client_scope(kc, scope_id)
-    return True
+    retval = r.get(settings.CHART_CONTROLLER_URL + '/delete?release={}'.format(str(project.slug)))
 
+    if retval:
+        # Delete Keycloak project client
+        kc = keylib.keycloak_init()
+        keylib.keycloak_delete_client(kc, project.slug)
+        
+        scope_id = keylib.keycloak_get_client_scope_id(kc, project.slug+'-scope')
+        keylib.keycloak_delete_client_scope(kc, scope_id)
+        return True
+
+    return False
 
 
 def get_minio_keys(project):

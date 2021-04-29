@@ -1,0 +1,165 @@
+body {
+    font-size: .875rem;
+    font-family: 'IBM Plex Sans', 'Roboto', sans-serif;
+}
+h2 {
+    font-weight: lighter;
+}
+.feather {
+    width: 16px;
+    height: 16px;
+    font-size: 0.75em;
+}
+
+/*
+ * Sidebar
+ */
+
+.new-sidebar {
+    background-color: #FBFCFC;
+    padding-top: 10px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* Behind the navbar */
+
+    background-color: #FBFCFC;
+    width:200px;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+
+
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 4px;
+    color: #999;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+    color: inherit;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+.sidebar-item {
+
+    background-color: #FBFCFC;
+    border: 0px;
+}
+
+.sidebar-item-icon {
+    padding-right: 5px;
+}
+
+/*
+ * Content
+ */
+
+[role="main"] {
+    height: 100%;
+}
+
+/*
+ * Projects
+ */
+
+.card-add-project {
+    margin-bottom: 15px;
+    background-color: #EAF2F8;
+}
+
+.form-add-project {
+    margin-bottom: 0px;
+    margin-top: 14px;
+}
+
+.card-project {
+    margin-bottom: 15px;
+    height: 302px;
+}
+
+/*
+ * Navbar
+ */
+
+.navbar {
+    /*background-color: #ECF0F1;*/
+    background-color: #f7f7f7;
+    border-bottom: #f3f3f3 1px solid;
+    /*height: 60px;*/
+    z-index: 10;
+}
+
+.navbar-brand {
+
+    padding-bottom: .75rem;
+    font-size: 1rem;
+}
+
+.navbar .form-control {
+
+    border-width: 0;
+    border-radius: 0;
+}
+
+.form-control-dark {
+    background-color: #FDFEFE;
+    border-color: #F7F9F9;
+}
+
+.form-control-dark:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+/*
+ * Breadcrumbs
+ */
+
+.breadcrumb {
+    padding-left: 0px;
+    margin-bottom: 0px;
+    background-color: #ffffff;
+}
+
+.footer-sticky {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
