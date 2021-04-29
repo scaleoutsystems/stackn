@@ -1,0 +1,43 @@
+app_action: Create
+app_id: ''
+app_name: ''
+appname: dask-cluster-test2-zrd-0352
+apps: {}
+chart: apps/dask
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: dask-cluster-test2-zrd-0352
+  client_secret: 1159e977-eac8-4741-a4f1-28a20a6b87f5
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: dask-cluster-test2-zrd-0352
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+scheduler:
+  limits:
+    cpu: 1000m
+    mem: 1Gi
+  requests:
+    cpu: 100m
+    mem: 0.5Gi
+service:
+  name: dask-cluster-test2-zrd-0352
+storageClass: microk8s-hostpath
+workers:
+  limits:
+    cpu: 1000m
+    mem: 8Gi
+  replicas: '3'
+  requests:
+    cpu: 100m
+    mem: 0.5Gi

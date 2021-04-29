@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name | replace "_" "-" }}-rp-config
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  nginx.conf: |-
+    worker_processes 1;
+    events { worker_connections 1024; }
+    http {
+        server {
+            listen 1234;
+
+            location / {
+                proxy_pass http://127.0.0.1:5000;
+                client_max_body_size 0;
+            }
+            location ~ ^/registry(/?)(.*) {
+              proxy_pass http://127.0.0.1:80/$2;
+            }
+        }
+    }

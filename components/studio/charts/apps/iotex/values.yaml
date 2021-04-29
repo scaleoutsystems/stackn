@@ -1,0 +1,5 @@
+namespace: default
+
+
+global:
+  domain: global.domain

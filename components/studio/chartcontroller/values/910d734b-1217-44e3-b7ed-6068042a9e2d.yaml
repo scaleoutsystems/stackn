@@ -1,0 +1,40 @@
+app_action: Settings
+app_id: '69'
+app_name: test
+appname: dask-cluster-test2-zrd-1023
+apps: {}
+chart: apps/dask
+gatekeeper:
+  skip_tls: '0'
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: dask-cluster-test2-zrd-1023
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+scheduler:
+  limits:
+    cpu: 1000m
+    mem: 1Gi
+  requests:
+    cpu: 100m
+    mem: 0.5Gi
+service:
+  name: dask-cluster-test2-zrd-1023
+storageClass: microk8s-hostpath
+workers:
+  limits:
+    cpu: 1000m
+    mem: 8Gi
+  replicas: '4'
+  requests:
+    cpu: 100m
+    mem: 0.5Gi

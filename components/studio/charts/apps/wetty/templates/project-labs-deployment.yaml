@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ $.Release.Name }}
+      app: wetty
+      project: {{ $.Values.project.slug }}
+      type: app
+      pod: wetty
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        release: {{ $.Release.Name }}
+        app: wetty
+        project: {{ $.Values.project.slug }}
+        type: app
+        pod: wetty
+    spec:
+    {{ if .Values.app.gpu.enabled }}
+      affinity:
+        {{ .Values.app.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+      - name: gatekeeper
+        image: scaleoutsystems/gatekeeper:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+
+      - name: wetty
+        image: scaleoutsystems/wetty:latest
+        imagePullPolicy: Always
+        args:
+          - --ssh-host=localhost
+          - --ssh-port=22
+          - --ssh-user=stackn
+          - --ssh-key=/ssh-key
+          - --ssh-auth=publickey
+          - --force-ssh=true
+          - --command=/bin/bash
+        ports:
+          - containerPort: 3000
+      - name: ubuntu
+        image: {{ .Values.app.image }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.mem | default "256Mi" }}
+            cpu: {{ .Values.resources.requests.cpu | default "200m" }}
+            {{if .Values.app.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+          limits:
+            memory: {{ .Values.resources.limits.mem | default "256Mi" }}
+            cpu: {{ .Values.resources.limits.cpu | default "200m" }}
+            {{if .Values.app.gpu.enabled }}
+            nvidia.com/gpu: "1"
+            {{ end }}
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+              - /bin/bash
+              - -c
+              - mkdir -p /home/stackn/.scaleout && cp -n /stackn.json /home/stackn/.scaleout/stackn.json && chown stackn:stackn /home/stackn/.scaleout/stackn.json && service ssh start
+        command: ["/bin/bash"]
+        args: ["-c", "sleep 3650d"]
+        securityContext:
+          allowPrivilegeEscalation: true
+        volumeMounts:
+        - name: cli-config-vol
+          mountPath: /home/stackn/.scaleout
+        - name: cli-config
+          mountPath: /stackn.json
+          subPath: stackn.json
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /home/stackn/{{ $key }}
+        {{- end }}
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+      - name: cli-config-vol
+        emptyDir: {}
+      - name: cli-config
+        configMap:
+          name: {{ .Release.Name }}-cli-config
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}
+

@@ -1,0 +1,22 @@
+namespace: default
+
+
+global:
+  domain: global.domain
+
+thingsboard:
+  token: default-token
+
+
+
+gatekeeper:
+  image: scaleoutsystems/gatekeeper:latest
+  client_secret: 75ffdab1-605a-49a9-9544-4807072d0908
+  client_id: wetty-test
+  auth_endpoint: https://keycloak.local.stackn.dev/auth/realms
+  skip_tls: 0
+  port: 9090
+
+ingress:
+  v1beta1: false
+

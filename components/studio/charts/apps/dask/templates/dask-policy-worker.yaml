@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-dask-policy-workers
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-dask-worker
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ .Release.Name }}-dask-scheduler
+          project: {{ .Values.project.slug }}
+          type: dask-cluster
+    - podSelector:
+        matchLabels:
+          project: {{ .Values.project.slug }}
+          type: lab
+    ports:
+    - protocol: TCP
+      port: {{ .Values.workers.port }}
+  egress:
+  - {}

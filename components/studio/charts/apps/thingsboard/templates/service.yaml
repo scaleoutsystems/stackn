@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    run: {{ .Values.release }}
+spec:
+  ports:
+  - name: ui
+    port: 80
+    targetPort: 9090
+    protocol: TCP
+  - name: backend
+    port: 1883
+    targetPort: 1883
+    protocol: TCP
+  selector:
+    release: {{ .Values.release }}

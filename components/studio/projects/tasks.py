@@ -2,6 +2,9 @@ from celery import shared_task
 import requests as r
 import yaml
 import base64
+import collections
+import json
+import time
 
 import modules.keycloak_lib as keylib
 
@@ -9,21 +12,29 @@ from .exceptions import ProjectCreationException
 
 from django.conf import settings
 
+from .models import Flavor, Environment, Project, S3, MLFlow, ReleaseName
+# 
+
+
+
+
+
 @shared_task
 def create_keycloak_client_task(project_slug, username, repository):
     # Create Keycloak client for project with default project role.
     # The creator of the project assumes all roles by default.
     print('Creating Keycloak resources.')
     HOST = settings.DOMAIN
-    print('host: '+HOST)
     RELEASE_NAME = str(project_slug)
-    print('release: '+RELEASE_NAME)
+    # This is just a dummy URL -- it doesn't go anywhere.
     URL = 'https://{}/{}/{}'.format(HOST, username, RELEASE_NAME)
-    print(URL)
-    
-    keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username, settings.PROJECT_ROLES, settings.PROJECT_ROLES)
 
-    print('Done Keycloak.')
+    
+    client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URL, RELEASE_NAME, username, settings.PROJECT_ROLES, settings.PROJECT_ROLES)
+    if not res_json['success']:
+        print("ERROR: Failed to create keycloak client for project.")
+    else:
+        print('Done creating Keycloak client for project.')
 
 
 def create_settings_file(project_slug):
@@ -36,28 +47,88 @@ def create_settings_file(project_slug):
 
     return yaml.dump(proj_settings)
 
+
+
 @shared_task
-def create_helm_resources_task(project_slug, project_key, project_secret, repository=None):
-    from .helpers import decrypt_key
-    proj_settings = create_settings_file(project_slug)
-    parameters = {'release': str(project_slug),
-                  'chart': 'project',
-                  'minio.access_key': decrypt_key(project_key),
-                  'minio.secret_key': decrypt_key(project_secret),
-                  'global.domain': settings.DOMAIN,
-                  'storageClassName': settings.STORAGECLASS,
-                  'settings_file': proj_settings}
-    if repository:
-        parameters.update({'labs.repository': repository})
+def create_resources_from_template(user, project_slug, template):
+    from apps.models import Apps
+    import apps.views as appviews
+    print(template)
+    decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
+    template = decoder.decode(template)
+    print(template)
+    project = Project.objects.get(slug=project_slug)
+    for key, item in template.items():
+        print(key)
+        if 'flavors' == key:
+            flavors = item
+            for key, item in flavors.items():
+                flavor = Flavor(name=key,
+                                cpu_req=item['cpu']['requirement'],
+                                cpu_lim=item['cpu']['limit'],
+                                mem_req=item['mem']['requirement'],
+                                mem_lim=item['mem']['limit'],
+                                gpu_req=item['gpu']['requirement'],
+                                gpu_lim=item['gpu']['limit'],
+                                ephmem_req=item['ephmem']['requirement'],
+                                ephmem_lim=item['ephmem']['limit'],
+                                project=project)
+                flavor.save()
+        if 'environments' == key:
+            environments = item
+            for key, item in environments.items():
+                app = Apps.objects.get(slug=item['app'])
+                environment = Environment(name=key,
+                                        project=project,
+                                        repository=item['repository'],
+                                        image=item['image'],
+                                        app=app)
+                environment.save()
+        # if 'S3' == key:
+        #     S3 = item
+        #     for key, item in S3.items():
+        #         app = Apps.objects.get(slug=item['app'])
+        #         environment = Environment(name=key,
+        #                                 project=project,
+        #                                 repository=item['repository'],
+        #                                 image=item['image'],
+        #                                 app=app)
+        #         environment.save()
+        
+        if 'apps' == key:
+            apps = item
+            for key, item in apps.items():
+                app_name = key
+                data = {
+                    "app_name": app_name,
+                    "app_action": "Create"
+                }
+                data = {**data, **item}
+                print("DATA TEMPLATE")
+                print(data)
+                res = appviews.create([], user, project.slug, app_slug=item['slug'], data=data, wait=True)
 
-    url = settings.CHART_CONTROLLER_URL + '/deploy'
+        if 'settings' == key:
+            print("PARSING SETTINGS")
+            if 'project-S3' in item:
+                print("SETTING DEFAULT S3")
+                s3storage=item['project-S3']
+                s3obj = S3.objects.get(name=s3storage, project=project)
+                project.s3storage = s3obj
+                project.save()
+            if 'project-MLflow' in item:
+                print("SETTING DEFAULT MLflow")
+                mlflow=item['project-MLflow']
+                mlflowobj = MLFlow.objects.get(name=mlflow, project=project)
+                project.mlflow = mlflowobj
+                project.save()
 
-    retval = r.get(url, parameters)
-    print("CREATE_PROJECT:helm chart creator returned {}".format(retval))
 
-    if retval.status_code >= 200 or retval.status_code < 205:
-        # return True
-        print('DONE CREATING PROJECT HELM DEPLOYMENT')
-    else:
-        print('FAILED TO CREATE PROJECT HELM DEPLOYMENT')
-        raise ProjectCreationException(__name__)
+@shared_task
+def delete_project_apps(project_slug):
+    project = Project.objects.get(slug=project_slug)
+    from apps.models import AppInstance
+    from apps.tasks import delete_resource
+    apps = AppInstance.objects.filter(project=project)
+    for app in apps:
+        delete_resource.delay(app.pk)

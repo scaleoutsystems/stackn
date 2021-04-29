@@ -3,6 +3,7 @@ import requests as r
 import logging
 import jwt
 import time
+import json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -17,6 +18,11 @@ class KeycloakInit:
         self.token = token
 
 
+def keycloak_output(res, caller):
+    success = False
+    if res:
+        success = True
+    return {"success": success, "info":{"status_code": res.status_code, "msg": res.text, "caller": caller}}
 
 def keycloak_user_auth(username, password, client_id, admin_url, realm):
     token_url = '{}/realms/{}/protocol/openid-connect/token'.format(admin_url, realm)
@@ -106,6 +112,7 @@ def keycloak_get_detailed_user_info(request, aud='account', renew_token_if_expir
         return None
     try:
         # print('Decoding user token: {}'.format(request.user))
+        # print(access_token)
         user_json = jwt.decode(access_token, public_key, algorithms='RS256', audience=aud)
         # print('Successfully decoded token.')
         # print('Token expires: {}'.format(request.session['oidc_id_token_expiration']))
@@ -173,21 +180,43 @@ def keycloak_verify_user_role(request, resource, roles, aud='account'):
     
     return False
 
+def keycloak_update_client(kc, client_id, client_rep):
+    get_clients_url = '{}/admin/realms/{}/clients/{}'.format(kc.admin_url, kc.realm, client_id)
+    print(client_rep[0])
+    res = r.put(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, json=client_rep[0], verify=settings.OIDC_VERIFY_SSL)
+    if res:
+        print("UPDATED CLIENT")
+        success = True
+    else:
+        print('Failed to update client.')
+        print('Request returned status: '+str(res.status_code))
+        print(res.text)
+        success = False
+
+    return {"success": success, "info":{"status_code": res.status_code, "msg": res.text}}
 
 def keycloak_get_clients(kc, payload):
     get_clients_url = '{}/admin/realms/{}/clients'.format(kc.admin_url, kc.realm)
-    res = r.get(get_clients_url, headers={'Authorization': 'bearer '+kc.token}, params=payload, verify=settings.OIDC_VERIFY_SSL)
+    res = r.get(get_clients_url, headers={'Authorization': 'Bearer '+kc.token}, params=payload, verify=settings.OIDC_VERIFY_SSL)
+    clients = []
     if res:
-        clients = res.json() 
-        return clients
+        clients = res.json()
+        success = True
+        # return clients
     else:
-        print('Failed to fetch clients.')
-        print('Request returned status: '+str(res.status_code))
-        print(res.text)
+        # print('Failed to fetch clients.')
+        # print('Request returned status: '+str(res.status_code))
+        # print(get_clients_url)
+        # print('Payload: ')
+        # print(payload)
+        # print({'Authorization': 'Bearer '+kc.token})
+        # print(res.text)
+        success = False
+    return clients, keycloak_output(res, "keycloak_get_clients")
 
 def keycloak_delete_client(kc, client_id):
     # Get id (not clientId)
-    clients = keycloak_get_clients(kc, {'clientId': client_id})
+    clients, res = keycloak_get_clients(kc, {'clientId': client_id})
     try:
         client_nid = clients[0]['id']
     except:
@@ -215,9 +244,11 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
     client_rep = {'clientId': client_id,
                   'baseUrl': base_url,
                   'rootUrl': root_url,
-                  'redirectUris': redirectUris}
+                  'redirectUris': redirectUris,
+                  'fullScopeAllowed': "False"}
     logger.debug("Client rep: ")
     logger.debug(client_rep)
+
     res = r.post(create_client_url,
                  json=client_rep,
                  headers={'Authorization': 'bearer '+kc.token},
@@ -225,23 +256,92 @@ def keycloak_create_client(kc, client_id, base_url, root_url=[], redirectUris=[]
     if res:
         logger.debug('Created new client with clientId {}'.format(client_id))
         logger.debug('Status code returned: {}'.format(res.status_code))
-        return True
+        success = True
     else:
-        print('Failed to create new client.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
+        print(client_rep)
+        print(create_client_url)
+        success = False
+
+    return keycloak_output(res, "keycloak_create_client")
+
+def keycloak_client_allow_implicit_flow(kc, client_id):
+    clients, res_json = keycloak_get_clients(kc, {'clientId': client_id})
+    if not res_json['success']:
+        return res_json
+
+    try:
+        clients[0]['implicitFlowEnabled'] = "True"
+    except Exception as err:
+        res_json['success'] = False
+        res_json['info']['msg'] = "Failed to set implicit flow in client rep."
+        return res_json
+
+    
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    
+    if res['success']:
+        print("Allowed implicit flow for client: {}.".format(client_id))
+    else:
+        print("Failed to allow implicit flow for client: {}.".format(client_id))
+    return res
+
+def keycloak_add_client_valid_redirect(kc, client_id, redirectUri):    
+    clients, res_json = keycloak_get_clients(kc, {'clientId': client_id})
+    if not res_json['success']:
+        return res_json
+
+    try:
+        clients[0]['redirectUris'].append(redirectUri)
+    except Exception as err:
+        print("Failed to find redirectUris in client[0]")
+        print(err)
+        res_json['success'] = False
+        res_json['info']['msg'] = "Failed to find redirectUris in client[0]"
+        return res_json
+
+    
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    
+    if res['success']:
+        print("Added valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    else:
+        print("Failed to add valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    return res
+
+def keycloak_remove_client_valid_redirect(kc, client_id, redirectUri):
+    print("GETTING CLIENT: {}".format(client_id))
+    clients, res = keycloak_get_clients(kc, {'clientId': client_id})
+    print(clients[0]['redirectUris'])
+    try:
+        clients[0]['redirectUris'].remove(redirectUri)
+    except:
+        print("WARN: Client didn't contain redirect URI.")
         return False
+    res = keycloak_update_client(kc, clients[0]['id'], clients)
+    if res:
+        print("Removed redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    else:
+        print("Failed to remove valid redirect URI: {} to client: {}.".format(redirectUri, client_id))
+    return res
 
 def keycloak_get_client_secret(kc, client_nid):
     get_client_secret_url = '{}/admin/realms/{}/clients/{}/client-secret'.format(kc.admin_url, kc.realm, client_nid)
     res = r.get(get_client_secret_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
+    client_secret = []
     if res:
-        res = res.json()
-        if 'value' in res:
-            return res['value']
-    print('Failed to get client secret for client: '+client_nid)
-    print('Status code: '+str(res.status_code))
-    print(res.text)
+        client_secret = res.json()
+        if 'value' in client_secret:
+            client_secret = client_secret['value']
+
+    # print('Failed to get client secret for client: '+client_nid)
+    # print('Status code: '+str(res.status_code))
+    # print(res.text)
+    return client_secret, keycloak_output(res, "keycloak_get_client_secret")
+
+def keycloak_get_client_secret_by_id(kc, client_id):
+    clients, res = keycloak_get_clients(kc, {'clientId': client_id})
+    client_nid = clients[0]['id']
+    return keycloak_get_client_secret(kc, client_nid)
 
 def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect', 
                                                  attributes={'include.in.token.scope': 'true',
@@ -254,29 +354,36 @@ def keycloak_create_client_scope(kc, scope_name, protocol='openid-connect',
                  json=client_scope_body,
                  headers={'Authorization': 'bearer '+kc.token},
                  verify=settings.OIDC_VERIFY_SSL)
+    success = False
     if res:
-        return True
-    else:
-        print('Failed to create client scope '+scope_name)
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+        success = True
+    # else:
+    #     print('Failed to create client scope '+scope_name)
+    #     print('Status code: '+str(res.status_code))
+    #     print(res.text)
+    #     return False
+    return keycloak_output(res, "keycloak_create_client_scope")
 
 def keycloak_get_client_scope_id(kc, scope_name):
     client_scope_url = '{}/admin/realms/{}/client-scopes'.format(kc.admin_url, kc.realm)
     res = r.get(client_scope_url, headers={'Authorization': 'bearer '+kc.token}, verify=settings.OIDC_VERIFY_SSL)
+    # TODO: There has to be a better way to fetch scope id than to loop over all scopes...!?
+    success = False
+    scope_id = []
     if res:
+        success = True
         scopes = res.json()
         scope_id = None
         for scope in scopes:
             if scope['name'] == scope_name:
                 scope_id = scope['id']
-        return scope_id
-    else:
-        print('Failed to get client scopes.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+        # return scope_id
+    # else:
+    #     print('Failed to get client scopes.')
+    #     print('Status code: '+str(res.status_code))
+    #     print(res.text)
+    #     return False
+    return scope_id, keycloak_output(res, "keycloak_get_client_scope_id")
 
 def keycloak_delete_client_scope(kc, scope_id):
     # /{realm}/client-scopes/{id}
@@ -292,6 +399,8 @@ def keycloak_delete_client_scope(kc, scope_id):
         print(res.text)
         return False
 
+
+# Audience mapper
 def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
     create_client_scope_mapper_url = '{}/admin/realms/{}/client-scopes/{}/protocol-mappers/models'.format(kc.admin_url, kc.realm, scope_id)
     scope_mapper = {'name': mapper_name,
@@ -306,26 +415,48 @@ def keycloak_create_scope_mapper(kc, scope_id, mapper_name, client_audience):
                  json=scope_mapper,
                  headers={'Authorization': 'bearer '+kc.token},
                  verify=settings.OIDC_VERIFY_SSL)
+    success = False
     if res:
-        return True
-    else:
-        print('Failed to create scope mapper.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+        success = True
+
+    return keycloak_output(res, "keycloak_create_scope_mapper")
+
+# User role mapper
+def keycloak_create_scope_mapper_roles(kc, scope_id, client_id, mapper_name, claim_name):
+    create_client_scope_mapper_url = '{}/admin/realms/{}/client-scopes/{}/protocol-mappers/models'.format(kc.admin_url, kc.realm, scope_id)
+    scope_mapper = {'name': mapper_name,
+                    'protocol': 'openid-connect',
+                    'protocolMapper': 'oidc-usermodel-client-role-mapper',
+                    "consentRequired": False,
+                    "config": {
+                        "multivalued": "true",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "userinfo.token.claim": "true",
+                        "usermodel.clientRoleMapping.clientId": client_id,
+                        "claim.name": claim_name,
+                        "jsonType.label": "String"
+                    }}
+
+    res = r.post(create_client_scope_mapper_url,
+                 json=scope_mapper,
+                 headers={'Authorization': 'bearer '+kc.token},
+                 verify=settings.OIDC_VERIFY_SSL)
+    success = False
+    if res:
+        success = True
+
+    return keycloak_output(res, "keycloak_create_scope_mapper_roles")
 
 def keycloak_add_scope_to_client(kc, client_id, scope_id):
     add_default_scope_url = '{}/admin/realms/{}/clients/{}/default-client-scopes/{}'.format(kc.admin_url, kc.realm, client_id, scope_id)
     res = r.put(add_default_scope_url,
                 headers={'Authorization': 'bearer '+kc.token},
                 verify=settings.OIDC_VERIFY_SSL)
+    success = False
     if res:
-        return True
-    else:
-        print('Failed to add scope to client.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False        
+        success = True
+    return keycloak_output(res, "keycloak_add_scope_to_client")    
 
 def keycloak_create_client_role(kc, client_nid, role_name, session):
     client_role_url = '{}/admin/realms/{}/clients/{}/roles'.format(kc.admin_url, kc.realm, client_nid)
@@ -334,30 +465,43 @@ def keycloak_create_client_role(kc, client_nid, role_name, session):
                       json=role_rep,
                       headers={'Authorization': 'bearer '+kc.token},
                       verify=settings.OIDC_VERIFY_SSL)
+    success = False
     if res:
-        return True
-    else:
-        print('Failed to create client role.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+        success = True
+    # else:
+    #     print('Failed to create client role.')
+    #     print('Status code: '+str(res.status_code))
+    #     print(res.text)
+    #     return False
+    return keycloak_output(res, "keycloak_create_client_role")
 
 def keycloak_get_user_id(kc, username):
+    user_id = []
     get_users_url =  '{}/admin/realms/{}/users'.format(kc.admin_url, kc.realm)
     res = r.get(get_users_url,
                 params={'username': username},
                 headers={'Authorization': 'bearer '+kc.token},
                 verify=settings.OIDC_VERIFY_SSL).json()
+    
+
     if not res:
         print('Failed to get user id.')
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+        res_json = {"success": False, "info": {"status_code":"-1", "msg": "Failed to get user id.", "caller": "keycloak_get_user_id"}}
+        return user_id, res_json
+
     if len(res) != 1:
         print("Didn't find user: "+username+" in realm: "+kc.realm)
-        return False
-    res = res[0]
-    return res['id']
+        res_json = {"success": False, "info": {"status_code":"-1", "msg": "Didn't find user: "+username+" in realm: "+kc.realm, "caller": "keycloak_get_user_id"}}
+        return user_id, res_json
+
+    try:
+        user_id = res[0]['id']
+    except Exception as err:
+        res_json = {"success": False, "info": {"status_code":"-1", "msg": "Failed to find id in user: "+username+" in realm: "+kc.realm, "caller": "keycloak_get_user_id"}}
+        return user_id, res_json
+    
+    res_json = {"success": True, "info": {"status_code":"200", "msg": "", "caller": "keycloak_get_user_id"}}
+    return user_id, res_json
 
 def keycloak_get_client_role_id(kc, role_name, client_nid, session=[]):
     if not session:
@@ -366,28 +510,42 @@ def keycloak_get_client_role_id(kc, role_name, client_nid, session=[]):
     res = r.get(client_role_url,
                 headers={'Authorization': 'bearer '+kc.token},
                 verify=settings.OIDC_VERIFY_SSL)
+    success = True
+    client_role_id = []
     if res:
-        client_roles = res.json()
-        for role in client_roles:
-            if role['name'] == role_name:
-                return role['id']
+        try:
+            client_roles = res.json()
+            for role in client_roles:
+                if role['name'] == role_name:
+                    client_role_id = role['id']
+        except Exception as err:
+            print("Failed to find role_id in client.")
+            print(err)
+            success = False
     else:
         print('Failed to get client role id.')
         print('Status code: '+str(res.status_code))
         print(res.text)
-        return False
+        success = False
+    
+    return client_role_id, keycloak_output(res, "keycloak_get_client_role_id")
 
 def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, session=[], action='add'):
     if not session:
         session = r.session()
-    user_id = keycloak_get_user_id(kc, username)
+    user_id, res_json = keycloak_get_user_id(kc, username)
+    if not res_json['success']:
+        return res_json
+
     add_user_to_role_url = '{}/admin/realms/{}/users/{}/role-mappings/clients/{}'.format(kc.admin_url,
                                                                                          kc.realm,
                                                                                          user_id,
                                                                                          client_nid)
     
     # Get role id
-    role_id = keycloak_get_client_role_id(kc, role_name, client_nid, session)
+    role_id, res_json = keycloak_get_client_role_id(kc, role_name, client_nid, session)
+    if not res_json['success']:
+        return res_json
 
     role_rep = [{'name': role_name, 'id': role_id}]
     if action=='add':
@@ -405,63 +563,105 @@ def keycloak_add_user_to_client_role(kc, client_nid, username, role_name, sessio
                        json=role_rep,
                        headers={'Authorization': 'bearer '+kc.token},
                        verify=settings.OIDC_VERIFY_SSL)
-    if res:
-        return True
-    else:
-        print('Failed to {} user {} to client role {}.'.format(action, username, role_name))
-        print('Status code: '+str(res.status_code))
-        print(res.text)
-        return False
+    success = True
+    if not res:
+        success = False
+    # else:
+    #     print('Failed to {} user {} to client role {}.'.format(action, username, role_name))
+    #     print('Status code: '+str(res.status_code))
+    #     print(res.text)
+    #     return False
+    return keycloak_output(res, "keycloak_add_user_to_client_role")
 
 def keycloak_add_role_to_user(clientId, username, role, action='add'):
     logger.info('Adding role {} to user {}. Client is {}.'.format(role, username, clientId))
     kc = keycloak_init()
     # Get client id
-    clients = keycloak_get_clients(kc, {'clientId': clientId})
+    clients, res_json = keycloak_get_clients(kc, {'clientId': clientId})
+    if not res_json['success']:
+        return res_json
     client_nid = clients[0]['id']
     # Add role to user
-    keycloak_add_user_to_client_role(kc, client_nid, username, role, action=action)
+    res_json = keycloak_add_user_to_client_role(kc, client_nid, username, role, action=action)
+    return res_json
 
 def keycloak_remove_role_from_user(clientId, username, roles):
     kc = keycloak_init()
-    clients = keycloak_get_clients(kc, {'clientId': clientId})
+    clients, res = keycloak_get_clients(kc, {'clientId': clientId})
     client_nid = clients[0]['id']
     for role in roles:
         logger.info('Removing role {} from user {}. Client is {}.'.format(role, username, clientId))
 
 
 def keycloak_setup_base_client(base_url, client_id, username, roles=['default'], default_user_role=['default']):
+    client_secret = []
     kc = keycloak_init()
-    client_status = keycloak_create_client(kc, client_id, base_url)
+
+    res_json = keycloak_create_client(kc, client_id, base_url)
     # Create client
-    if not client_status:
-        return False
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+    
     # Fetch client info
-    clients = keycloak_get_clients(kc, {'clientId': client_id})
-    client_nid = clients[0]['id']
-    client_secret = keycloak_get_client_secret(kc, client_nid)
+    clients, res_json = keycloak_get_clients(kc, {'clientId': client_id})
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+
+    try:
+        client_nid = clients[0]['id']
+    except Exception as err:
+        print("keycloak_setup_base_client:ERROR: Didn't find client_nid in client_id.")
+        print(err)
+        res_json['success'] = False
+        res_json['info']['msg'] = "Didn't find client_nid in client_id."
+        res_json['info']['caller'] = "keycloak_setup_base_client"
+        return client_id, client_secret, res_json
+
+    client_secret, res_json = keycloak_get_client_secret(kc, client_nid)
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+
     # Create client scope
-    if not keycloak_create_client_scope(kc, client_id+'-scope'):
-        return False
+    res_json = keycloak_create_client_scope(kc, client_id+'-scope')
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+
     # __Create mapper__
     # Get scope id
-    scope_id = keycloak_get_client_scope_id(kc, client_id+'-scope')
+    scope_id, res_json = keycloak_get_client_scope_id(kc, client_id+'-scope')
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+
     #Create mapper
-    keycloak_create_scope_mapper(kc, scope_id, client_id+'-audience', client_id)
+    res_json = keycloak_create_scope_mapper(kc, scope_id, client_id+'-audience', client_id)
+    if not res_json['success']:
+        return client_id, client_secret, res_json
     # _________________
+   
+
     # Add the scope to the client
-    keycloak_add_scope_to_client(kc, client_nid, scope_id)
+    res_json = keycloak_add_scope_to_client(kc, client_nid, scope_id)
+    if not res_json['success']:
+        return client_id, client_secret, res_json
+
     # Create client roles
     session = r.session()
     for role in roles:
-        res = keycloak_create_client_role(kc, client_nid, role, session)
-        if res:
-            print(role)
+        res_json = keycloak_create_client_role(kc, client_nid, role, session)
+        if not res_json['success']:
+            return client_id, client_secret, res_json
     
     # Give user default roles
     for default_role in default_user_role:
-        res = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session=session)
-        if res:
-            print(default_role)
+        res_json = keycloak_add_user_to_client_role(kc, client_nid, username, default_role, session=session)
+        if not res_json['success']:
+            return client_id, client_secret, res_json
     session.close()
-    return client_id, client_secret
+
+    res_json = {"success": True,
+                "info": {
+                    "msg": "",
+                    "status_code": "200",
+                    "caller": "keycloak_setup_base_client"
+                }}
+    return client_id, client_secret, res_json

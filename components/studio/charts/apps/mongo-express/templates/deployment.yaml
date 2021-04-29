@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: mongo-express
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: mongo-express
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: mongo-express
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: mongo-express
+    spec:
+      containers:
+      - name: gatekeeper
+        image: scaleoutsystems/gatekeeper:latest
+        imagePullPolicy: Always
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+
+      - name: mongo-express
+        image: mongo-express:latest
+        {{- range $key, $val := .Values.apps.mongodb }}
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: "{{ $val.release }}"
+        - name: ME_CONFIG_MONGODB_PORT
+          value: "27017"
+        - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+          value: "true"
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          value: "{{ $val.credentials.username }}"
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          value: "{{ $val.credentials.password }}"
+        {{- end }}
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8081
+      volumes:
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config

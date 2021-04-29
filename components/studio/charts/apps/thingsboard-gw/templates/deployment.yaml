@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.release }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: thingsboard-gw
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: thingsboard-gw
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: thingsboard-gw
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: thingsboard-gw
+    spec:
+      volumes:
+      - name: mqtt-config
+        configMap:
+          name: {{ .Values.release }}-mqtt
+      - name: config
+        configMap:
+          name: {{ .Values.release }}-main
+      containers:
+      - name: tb-gateway
+        image: thingsboard/tb-gateway:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: mqtt-config
+          mountPath: /thingsboard_gateway/config/mqtt.json
+          subPath: mqtt.json
+        - name: config
+          mountPath: /thingsboard_gateway/config/tb_gateway.yaml
+          subPath: tb_gateway.yaml
+        

@@ -1,0 +1,24 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.release }}-main
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  tb_gateway.yaml: |-
+    thingsboard:
+    {{- range $key, $val := .Values.apps.thingsboard }}
+        host: {{ $val.release }}
+    {{- end }}
+        port: 1883
+        security:
+            accessToken: {{ .Values.thingsboard.token }}
+    storage:
+        type: memory
+        read_records_count: 100
+        max_records_count: 100000
+
+    connectors:
+        - name: MQTT Broker Connector
+          type: mqtt
+          configuration: mqtt.json

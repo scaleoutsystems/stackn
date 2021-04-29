@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    release: {{ .Release.Name }}
+    app: fastapi-push-model
+    project: {{ .Values.project.slug }}
+    type: app
+    pod: fastapi-push-model
+spec:
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: fastapi-push-model
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: fastapi-push-model
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=/build/Dockerfile"
+        - "--context=dir://build/"
+        {{- range $key, $value := .Values.apps.docker_registry }}
+        - "--destination={{ $value.release }}.{{ $.Values.global.domain }}/{{ $.Values.container.name }}:{{ $.Values.container.tag }}"
+        {{- end }}
+        env:
+        - name: S3_ACCESS_KEY_ID
+          value: {{ .Values.model.access_key }}
+        - name: S3_SECRET_ACCESS_KEY
+          value: {{ .Values.model.secret_key }}
+        - name: AWS_REGION
+          value: us-east-1
+        - name: S3_ENDPOINT
+          value: http://{{ .Values.project.slug }}-minio:9000
+        - name: STACKN_MODEL_BUCKET
+          value: {{ .Values.model.bucket }}
+        - name: STACKN_MODEL_FILE
+          value: {{ .Values.model.obj }}
+        volumeMounts:
+        - name: dockerfile
+          mountPath: /build
+        - name: auth
+          mountPath: /kaniko/.docker
+        imagePullPolicy: Always  
+        resources:
+          limits:
+            cpu: {{ .Values.flavor.limits.cpu }}
+            memory: {{ .Values.flavor.limits.memory }}
+          requests:
+            cpu: {{ .Values.flavor.requests.cpu }}
+            memory: {{ .Values.flavor.requests.memory }}
+      volumes:
+      - name: dockerfile
+        configMap:
+          name: {{ .Release.Name }}-df
+      - name: auth
+        configMap:
+          name: {{ .Release.Name }}-auth

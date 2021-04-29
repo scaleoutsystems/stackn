@@ -1,0 +1,187 @@
+{% extends 'baseproject.html' %}
+{% load static %}
+{% block content %}
+
+<h1 class="h3 mb-3">{{ app_action }} {{ app.name }}</h1>
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <!-- <div class="card-header">
+                <h5 class="card-title">Basic form</h5>
+                <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
+            </div> -->
+            <div class="card-body">
+                <form action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post">
+                    {% csrf_token %}
+                    
+                    <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">
+                    <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Subdomain</label>
+                        <select name="app_release_name" id="app_release_name" class="form-control">
+                            <option value="" selected>---- Generated ----</option>
+                            {% for item in form.release_names %}
+                                <option value="{{ item.name }}">{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if form.dep_permissions %}
+                    <div class="mb-3">
+                        <label class="form-label">Permissions</label>
+                        <select name="permission" id="permission" class="form-control">
+                            {% for name, value in form.form_permissions.items %}
+                                {% if value.option == "true" %}
+                                    {% if value.value %}
+                                    <option value="{{ name }}" selected>{{ name }}</option>
+                                    {% else %}
+                                    <option value="{{ name }}">{{ name }}</option> 
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if form.dep_model %}
+                    <div class="mb-3">
+                        <label class="form-label">Model</label>
+                        <select name="model" id="model" class="form-control">
+                            {% for model in form.models %}
+                            <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if form.dep_S3 %}
+                    <div class="mb-3">
+                        <label class="form-label">S3</label>
+                        <select name="S3" id="S3" class="form-control">
+                            {% for s3 in form.s3stores %}
+                            <option value="{{ s3.pk }}" {{ s3.selected }}>{{ s3.name }}</option> 
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    {% if form.dep_flavor %}
+                    <div class="mb-3">
+                        <label class="form-label">Flavors</label>
+                        <select name="flavor" id="flavor" class="form-control">
+                            {% for flavor in form.flavors %}
+                            <option value="{{ flavor.pk }}">{{ flavor.name }}</option> 
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if form.dep_environment %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.environments.title }}</label>
+                        <select name="environment" id="environment" class="form-control">
+                            {% for environment in form.environments.objs %}
+                            {% if environment.pk == form.environments.selected %}
+                            <option value="{{ environment.pk }}" selected>{{ environment.name }}</option> 
+                            {% else %}
+                            <option value="{{ environment.pk }}">{{ environment.name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+
+                    {% if form.dep_volumes %}
+                    <div class="mb-3">
+                        <label class="form-label">Volumes</label>
+                        <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
+                            {% for volume in form.volumes %}
+                            <option value="{{ volume.pk }}">{{ volume.name }}</option> 
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+
+
+                    {% if form.dep_apps %}
+                    
+                        {% for app_name, appinstances in form.app_deps.items %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ app_name }}</label>
+                            <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
+                            {% for appinstance in appinstances.instances %}
+                                <option value="{{ appinstance.pk }}" {{ appinstance.selected }}>{{ appinstance.name }}</option> 
+                            {% endfor %}
+                            </select>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    
+                    {% for key, vals in form.primitives.items %}
+                    
+                        <!-- <label class="form-label">{{ key }}</label> -->
+                        <h6> {{ vals.meta_title }}</h6>
+                        {% for subkey, subval in vals.items %}
+                        <div class="mb-3">
+                            {% if subval.type == "boolean" %}
+                            <label class="form-label">{{ subval.title }}</label>
+                            <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
+                                {% if subval.default == "False" %}
+                                <option value="True">True</option>
+                                <option value="False" selected>False</option>
+                                {% else %}
+                                <option value="True" selected>True</option>
+                                <option value="False">False</option>
+                                {% endif %}
+                            </select>
+                            {% endif %}
+                            
+                            {% if subval.type == "string" %}
+                            <label class="form-label">{{ subval.title }}</label>
+                            <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% endif %}
+
+                            {% if subval.type == "textfield" %}
+                            <label class="form-label">{{ subval.title }}</label>
+                            <textarea id="{{ subkey }}" name="{{ key }}.{{ subkey }}" class="form-control" rows="20">{{ subval.default }}</textarea>
+                            {% endif %}
+
+                            {% if subval.type == "number" %}
+                            <label class="form-label">{{ subval.title }}</label>
+                            <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    
+                    {% endfor %}
+
+                    {% if form.dep_appobj %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.appobjs.title }}</label>
+                        <select name="appobj" id="appobj" class="form-control" {{ appobjs.type }}>
+                        {% for app in form.appobjs.objs %}
+                        <option value="{{ app.pk }}">{{ app.name }}</option> 
+                        {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if app_action == "Create" %}
+                    <button class="btn btn-primary" type="submit">Create</button>
+                    {% else %}
+                    <button class="btn btn-primary" type="submit">Update</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>      
+    </div>
+</div>
+{% endblock %}

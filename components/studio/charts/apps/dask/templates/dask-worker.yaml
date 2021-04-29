@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-dask-worker
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: {{ .Values.workers.replicas }}
+  selector:
+    matchLabels:
+      target: {{ .Release.Name }}-dask-worker
+      release: {{ .Release.Name }}
+      app: dask-cluster
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: worker
+  template:
+    metadata:
+      labels:
+        target: {{ .Release.Name }}-dask-worker
+        release: {{ .Release.Name }}
+        app: dask-cluster
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: worker
+    spec:
+      containers:
+      - name: worker
+        image: daskdev/dask
+        command: ["dask-worker", "tcp://{{ .Release.Name }}:{{ .Values.scheduler.port }}", "--worker-port={{ .Values.workers.port }}"]
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: {{ .Values.workers.limits.cpu }}
+            memory: {{ .Values.workers.limits.memory }}
+          requests:
+            cpu: {{ .Values.workers.requests.cpu }}
+            memory: {{ .Values.workers.requests.memory }}

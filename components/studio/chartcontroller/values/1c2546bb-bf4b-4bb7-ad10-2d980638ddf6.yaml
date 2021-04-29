@@ -1,0 +1,60 @@
+app_action: Create
+app_id: ''
+app_name: registry
+appname: docker-registry-test2-zrd-118a
+apps:
+  volume:
+    test:
+      app_action: Create
+      app_id: ''
+      app_name: test
+      appname: volume-test2-zrd-052d
+      apps: {}
+      chart: apps/volume
+      gatekeeper:
+        skip_tls: '0'
+      global:
+        domain: studio-dev.local.stackn.dev
+      namespace: studio-develop
+      permission: private
+      permissions:
+        private: true
+        project: false
+        public: false
+      project:
+        name: test2
+        slug: test2-zrd
+      release: volume-test2-zrd-052d
+      s3sync:
+        image: scaleoutsystems/s3-sync:latest
+      service:
+        name: volume-test2-zrd-052d
+      storageClass: microk8s-hostpath
+      volume:
+        size: 1Gi
+chart: apps/docker-registry
+credentials:
+  password: password
+  username: admin
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: docker-registry-test2-zrd-118a
+  client_secret: a8903c7d-4d12-4484-ab19-c872b9ef190d
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: docker-registry-test2-zrd-118a
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: docker-registry-test2-zrd-118a
+storageClass: microk8s-hostpath

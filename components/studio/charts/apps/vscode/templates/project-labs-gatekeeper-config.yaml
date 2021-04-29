@@ -1,0 +1,27 @@
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-gatekeeper-config
+  namespace: {{ .Values.namespace }}
+data:
+  # Configuration values can be set as key-value properties
+  gatekeeper.yaml: |-
+    resources:
+    - uri: /*
+      roles:
+      - {{ .Values.gatekeeper.client_id }}:owner
+      require-any-role: true
+    discovery-url: {{ .Values.gatekeeper.auth_endpoint }}/{{ .Values.gatekeeper.realm }}
+    client-id: {{ .Values.gatekeeper.client_id }}
+    client-secret: {{ .Values.gatekeeper.client_secret }}
+    listen: 0.0.0.0:9090
+    enable-session-cookies: true
+    enable-logging: true
+    enable-json-logging: true
+    encryption-key: {{ randAlphaNum 32 }}
+    enable-refresh-tokens: true
+    upstream-url: http://localhost:1234
+    {{ if .Values.gatekeeper.skip_tls }}
+    skip-openid-provider-tls-verify: true
+    {{ end }}

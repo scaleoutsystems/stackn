@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+data:
+  settings.yaml: |-
+    network_id: {{ .Values.global.network | default "fedn-test-network" }}
+
+    control:
+      state: idle
+      helper: {{ .Values.global.control.helper | default "keras"}}
+
+    statestore:
+      type: MongoDB
+      mongo_config:
+      {{- range $key, $val := .Values.apps.mongodb }}
+        username: {{ $val.credentials.username }}
+        password: {{ $val.credentials.password }}
+        host: {{ $val.release }}
+        port: 27017
+      {{- end }}
+
+    storage:
+      storage_type: S3
+      storage_config:
+        storage_hostname: {{ .Values.s3.host }}
+        storage_port: 443
+        storage_access_key: {{ .Values.s3.access_key }}
+        storage_secret_key: {{ .Values.s3.secret_key }}
+        storage_bucket: fedn-models
+        context_bucket: fedn-context
+        storage_secure_mode: True

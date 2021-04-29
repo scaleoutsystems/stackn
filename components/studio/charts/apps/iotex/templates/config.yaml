@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.release }}-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.json: |-
+    {
+        "workerNum": 128,
+        "port": "1883",
+        "host": "0.0.0.0",
+        "plugins": {
+            "bridge": "minio"
+        }
+    }

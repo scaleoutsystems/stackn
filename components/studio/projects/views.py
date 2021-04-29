@@ -1,7 +1,7 @@
 from django.shortcuts import render, reverse
 from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from .exceptions import ProjectCreationException
 from .helpers import delete_project_resources
 from django.contrib.auth.models import User
@@ -15,11 +15,18 @@ from models.models import Model
 import requests as r
 import base64
 from projects.helpers import get_minio_keys
+from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
+from .forms import FlavorForm
+from apps.models import AppInstance, AppCategories
+from apps.models import Apps
 import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
 from modules.project_auth import get_permissions
 from .helpers import create_project_resources
-
+from .tasks import create_resources_from_template
+from models.models import Model
+# from deployments.models import DeploymentInstance
+from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +34,29 @@ logger = logging.getLogger(__name__)
 def index(request):
     template = 'index_projects.html'
     try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user)).distinct('pk')
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
         projects = []
         print(err)
 
     request.session['next'] = '/projects/'
+    return render(request, template, locals())
+
+@login_required
+def create_environment(request, user, project_slug):
+    template = 'create_environment.html'
+    project = Project.objects.get(slug=project_slug)
+    action = "Create"
+
+    apps = Apps.objects.all()
+
+    return render(request, template, locals())
+
+@login_required
+def environments(request, user, project_slug):
+    template = 'environments.html'
+    project = Project.objects.get(slug=project_slug)
+
     return render(request, template, locals())
 
 
@@ -44,11 +68,12 @@ def settings(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
-    environments = Environment.objects.all()
+    environments = Environment.objects.filter(project=project)
+    apps = Apps.objects.all()
 
-    minio_keys = get_minio_keys(project)
-    decrypted_key = minio_keys['project_key']
-    decrypted_secret = minio_keys['project_secret']
+    s3instances = S3.objects.filter(project=project)
+    flavors = Flavor.objects.filter(project=project)
+    mlflows = MLFlow.objects.filter(project=project)
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -86,6 +111,116 @@ def change_description(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
+@login_required
+def create_environment(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create environment in this project.
+    if request.method == 'POST':
+        project = Project.objects.get(slug=project_slug)
+        name = request.POST.get('environment_name')
+        repo = request.POST.get('environment_repository')
+        image = request.POST.get('environment_image')
+        app_pk = request.POST.get('environment_app')
+        app = Apps.objects.get(pk=app_pk)
+        environment = Environment(name=name, slug=name, project=project, repository=repo, image=image, app=app)
+        environment.save()
+    return HttpResponseRedirect(reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_environment(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('environment_pk')
+        # TODO: Check that the user has permission to delete this environment.
+        environment = Environment.objects.get(pk=pk, project=project)
+        environment.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def create_flavor(request, user, project_slug):
+    # TODO: Ensure that user is allowed to create flavor in this project.
+    if request.method == 'POST':
+        # TODO: Check input
+        project = Project.objects.get(slug=project_slug)
+        print(request.POST)
+        name = request.POST.get('flavor_name')
+        cpu_req = request.POST.get('cpu_req')
+        mem_req = request.POST.get('mem_req')
+        gpu_req = request.POST.get('gpu_req')
+        cpu_lim = request.POST.get('cpu_lim')
+        mem_lim = request.POST.get('mem_lim')
+        flavor = Flavor(name=name,
+                        project=project,
+                        cpu_req=cpu_req,
+                        mem_req=mem_req,
+                        gpu_req=gpu_req,
+                        cpu_lim=cpu_lim,
+                        mem_lim=mem_lim)
+        flavor.save()
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def delete_flavor(request, user, project_slug):
+    if request.method == "POST":
+        project = Project.objects.get(slug=project_slug)
+        pk = request.POST.get('flavor_pk')
+        # TODO: Check that the user has permission to delete this flavor.
+        flavor = Flavor.objects.get(pk=pk, project=project)
+        flavor.delete()
+    
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def set_s3storage(request, user, project_slug, s3storage=[]):
+    # TODO: Ensure that the user has the correct permissions to set this specific
+    # s3 object to storage in this project (need to check that the user has access to the
+    # project as well.)
+    if request.method == 'POST' or s3storage:
+        project = Project.objects.get(slug=project_slug)
+        
+        if s3storage:
+            s3obj = S3.objects.get(name=s3storage, project=project)
+        else:
+            pk = request.POST.get('s3storage')
+            if pk == 'blank':
+                s3obj = None
+            else:
+                s3obj = S3.objects.get(pk=pk)
+
+        project.s3storage = s3obj
+        project.save()
+
+        if s3storage:
+            return JsonResponse({"status": "ok"})
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
+
+@login_required
+def set_mlflow(request, user, project_slug, mlflow=[]):
+    # TODO: Ensure that the user has the correct permissions to set this specific
+    # MLFlow object to MLFlow Server in this project (need to check that the user has access to the
+    # project as well.)
+    if request.method == 'POST' or mlflow:
+        project = Project.objects.get(slug=project_slug)
+        
+        if mlflow:
+            mlflowobj = MLFlow.objects.get(name=mlflow, project=project)
+        else:
+            pk = request.POST.get('mlflow')
+            mlflowobj = MLFlow.objects.get(pk=pk)
+
+        project.mlflow = mlflowobj
+        project.save()
+
+        if mlflow:
+            return JsonResponse({"status": "ok"})
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
 def grant_access_to_project(request, user, project_slug):
@@ -143,7 +278,8 @@ def revoke_access_to_project(request, user, project_slug):
 
 @login_required
 def create(request):
-    template = 'index_projects.html'
+    template = 'project_create.html'
+    templates = ProjectTemplate.objects.all()
 
     if request.method == 'POST':
 
@@ -165,8 +301,13 @@ def create(request):
             success = False
 
         try:
-            # Create project resources
+            # Create project resources (Keycloak only)
             create_project_resources(project, request.user.username, repository)
+
+            # Create resources from the chosen template
+            project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
+
             # Reset user token
             request.session['oidc_id_token_expiration'] = time.time()-100
             request.session.save()
@@ -189,6 +330,7 @@ def create(request):
 
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
+    
     return render(request, template, locals())
 
 
@@ -208,23 +350,30 @@ def details(request, user, project_slug):
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        message = 'No project found'
+        message = 'Project not found.'
 
-    filename = None
-    readme = None
-    url = 'http://{}-file-controller/readme'.format(project.slug)
-    try:
-        response = r.get(url)
-        if response.status_code == 200 or response.status_code == 203:
-            payload = response.json()
-            if payload['status'] == 'OK':
-                filename = payload['filename']
+    if project:
+        pk_list = ''
+        
+        status_success, status_warning = get_status_defs()
+        activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
+        resources = list()
+        cats = AppCategories.objects.all()
+        rslugs = []
+        for cat in cats:
+            rslugs.append({"slug": cat.slug, "name": cat.name})
 
-                md = markdown.Markdown(extensions=['extra'])
-                readme = md.convert(payload['readme'])
-    except Exception as e:
-        logger.error("Failed to get response from {} with error: {}".format(url, e))
-
+        for rslug in rslugs:
+            tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
+            for instance in tmp:
+                pk_list += str(instance.pk)+','
+            
+            apps = Apps.objects.filter(category__slug=rslug['slug'])
+            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
+        pk_list = pk_list[:-1]
+        pk_list = "'"+pk_list+"'"
+        models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
+    
     return render(request, template, locals())
 
 
@@ -235,20 +384,28 @@ def delete(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
 
+    print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+    from .tasks import delete_project_apps
+    delete_project_apps(project_slug)
+
+    print("DELETING KEYCLOAK PROJECT RESOURCES")
     retval = delete_project_resources(project)
 
     if not retval:
         next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
-        print("could not delete!")
+        print("could not delete Keycloak resources!")
         return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
 
-    print("PROJECT RESOURCES DELETED SUCCESFULLY!")
+    print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
+    
 
+    print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
     for model in models:
         model.status = 'AR'
         model.save()
-    project.delete()
+    project.status = 'archived'
+    project.save()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 
@@ -295,28 +452,28 @@ def publish_project(request, user, project_slug):
 
 
 @login_required
-def load_project_activity(request, user, project_slug):
-    template = 'project_activity.html'
-
-    member = None
+def project_readme(request, user, project_slug):
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    
     project = None
+    username = request.user.username
     try:
-        member = User.objects.get(username=user)
-        project = Project.objects.get(Q(slug=project_slug), Q(owner=member) | Q(authorized=member))
+        owner = User.objects.get(username=username)
+        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
     except Exception as e:
-        print(e)
+        print('Project not found.')
 
-    if member and project:
-        time_period = request.GET.get('period')
-        if time_period == 'week':
-            last_week = datetime.today() - timedelta(days=7)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_week).order_by('-created_at')
-        elif time_period == 'month':
-            last_month = datetime.today() - timedelta(days=30)
-            project_logs = ProjectLog.objects.filter(project=project, created_at__gte=last_month).order_by('-created_at')
-        else:
-            project_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')
-    else:
-        project_logs = ProjectLog.objects.none()
-
-    return render(request, template, {'project_logs': project_logs})
+    readme = None
+    if project:     
+        url = 'http://{}-file-controller/readme'.format(project.slug)
+        try:
+            response = r.get(url)
+            if response.status_code == 200 or response.status_code == 203:
+                payload = response.json()
+                if payload['status'] == 'OK':
+                    md = markdown.Markdown(extensions=['extra'])
+                    readme = md.convert(payload['readme'])
+        except Exception as e:
+            logger.error("Failed to get response from {} with error: {}".format(url, e))
+    
+    return render(request, "project_readme.html", locals())

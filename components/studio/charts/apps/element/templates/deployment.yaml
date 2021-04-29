@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: element
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: element
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+      labels:
+        release: {{ .Release.Name }}
+        app: element
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: element
+    spec:
+      containers:
+      - name: element
+        image: vectorim/element-web
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
+          limits:
+            memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.json
+          subPath: config.json
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}

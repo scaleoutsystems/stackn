@@ -1,0 +1,69 @@
+app_action: Create
+app_id: ''
+app_name: rstudio
+appname: rstudio-test2-zrd-440c
+apps:
+  volume:
+    mnist:
+      app_action: Create
+      app_id: ''
+      app_name: mnist
+      appname: volume-test2-zrd-af26
+      apps: {}
+      chart: apps/volume
+      gatekeeper:
+        auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+        client_id: volume-test2-zrd-af26
+        client_secret: d4518295-0048-449d-9d37-d7ae6012d24c
+        realm: STACKn
+      global:
+        domain: studio-dev.local.stackn.dev
+      namespace: studio-develop
+      permission: private
+      permissions:
+        private: true
+        project: false
+        public: false
+      project:
+        name: test2
+        slug: test2-zrd
+      release: volume-test2-zrd-af26
+      s3sync:
+        image: scaleoutsystems/s3-sync:latest
+      service:
+        name: volume-test2-zrd-af26
+      storageClass: microk8s-hostpath
+      volume:
+        size: 3Gi
+chart: apps/rstudio
+flavor:
+  gpu:
+    enabled: false
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+gatekeeper:
+  auth_endpoint: https://keycloak-dev.local.stackn.dev/auth/realms
+  client_id: rstudio-test2-zrd-440c
+  client_secret: d1c29c08-a212-4dfc-81e9-3014e792d2af
+  realm: STACKn
+global:
+  domain: studio-dev.local.stackn.dev
+namespace: studio-develop
+permission: private
+permissions:
+  private: true
+  project: false
+  public: false
+project:
+  name: test2
+  slug: test2-zrd
+release: rstudio-test2-zrd-440c
+s3sync:
+  image: scaleoutsystems/s3-sync:latest
+service:
+  name: rstudio-test2-zrd-440c
+storageClass: microk8s-hostpath
