@@ -338,18 +338,18 @@ def delete_resource(pk):
 
 
 
-    results = controller.delete(parameters)
-    if results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8'):
-        status = AppStatus(appinstance=appinstance)
-        status.status_type = "Terminated"
-        status.save()
-        print("CALLING POST DELETE HOOKS")
-        post_delete_hooks(appinstance)
-    else:
-        status = AppStatus(appinstance=appinstance)
-        status.status_type = "FailedToDelete"
-        status.save()
-        # appinstance.state = "FailedToDelete"
+        results = controller.delete(parameters)
+        if results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8'):
+            status = AppStatus(appinstance=appinstance)
+            status.status_type = "Terminated"
+            status.save()
+            print("CALLING POST DELETE HOOKS")
+            post_delete_hooks(appinstance)
+        else:
+            status = AppStatus(appinstance=appinstance)
+            status.status_type = "FailedToDelete"
+            status.save()
+            # appinstance.state = "FailedToDelete"
 
     # print("NEW STATE:")
     # print(appinstance.state)

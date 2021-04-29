@@ -396,7 +396,8 @@ def delete_object(name, version=None, studio_url=[], project=[], secure=True):
 def delete_project(name, studio_url=[], secure=True):
     conf = {
         "STACKN_URL": studio_url,
-        "STACKN_SECURE": secure
+        "STACKN_SECURE": secure,
+        "STACKN_PROJECT": name
     }
     conf, auth_headers, url = setup_project_endpoint_call(conf, 'project_del')
     res = requests.delete(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
