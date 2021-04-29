@@ -37,10 +37,10 @@
                         <select name="permission" id="permission" class="form-control">
                             {% for name, value in form.form_permissions.items %}
                                 {% if value.option == "true" %}
-                                    {% if value.value == "false" %}
-                                    <option value="{{ name }}">{{ name }}</option>
+                                    {% if value.value %}
+                                    <option value="{{ name }}" selected>{{ name }}</option>
                                     {% else %}
-                                    <option value="{{ name }}" selected>{{ name }}</option> 
+                                    <option value="{{ name }}">{{ name }}</option> 
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
