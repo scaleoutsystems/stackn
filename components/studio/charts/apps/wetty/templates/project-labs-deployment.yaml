@@ -25,9 +25,9 @@ spec:
         type: app
         pod: wetty
     spec:
-    {{ if .Values.app.gpu.enabled }}
+    {{ if .Values.flavor.gpu.enabled }}
       affinity:
-        {{ .Values.app.affinity | toYaml | nindent 8 | trim }}
+        {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -62,17 +62,17 @@ spec:
         image: {{ .Values.app.image }}
         imagePullPolicy: Always
         resources:
-          requests:
-            memory: {{ .Values.resources.requests.mem | default "256Mi" }}
-            cpu: {{ .Values.resources.requests.cpu | default "200m" }}
-            {{if .Values.app.gpu.enabled }}
-            nvidia.com/gpu: "1"
-            {{ end }}
           limits:
-            memory: {{ .Values.resources.limits.mem | default "256Mi" }}
-            cpu: {{ .Values.resources.limits.cpu | default "200m" }}
-            {{if .Values.app.gpu.enabled }}
-            nvidia.com/gpu: "1"
+            memory: {{ .Values.flavor.limits.memory }}
+            cpu: {{ .Values.flavor.limits.cpu }}
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
+            {{ end }}
+          requests:
+            memory: {{ .Values.flavor.requests.memory }}
+            cpu: {{ .Values.flavor.requests.cpu }}
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
             {{ end }}
         lifecycle:
           postStart:

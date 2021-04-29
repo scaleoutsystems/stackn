@@ -74,14 +74,14 @@ spec:
           requests:
             memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
             cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
-            {{if .Values.flavor.gpu.enabled }}
-            nvidia.com/gpu: "1"
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
             {{ end }}
           limits:
             memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
             cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
-            {{if .Values.flavor.gpu.enabled }}
-            nvidia.com/gpu: "1"
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
             {{ end }}
         lifecycle:
           postStart:
