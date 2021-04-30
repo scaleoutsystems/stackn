@@ -21,5 +21,9 @@ python3 manage.py migrate
 
 
 echo "starting serving..."
-python3 manage.py runserver 0.0.0.0:8080
+if [ -z "${DEBUG}" ]; then
+    gunicorn studio.wsgi -b 0.0.0.0:8080 -w 4
+else
+    python3 manage.py runserver 0.0.0.0:8080
+fi
 
