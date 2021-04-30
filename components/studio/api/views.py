@@ -67,6 +67,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             model_name = request.data['name']
             release_type = request.data['release_type']
             description = request.data['description']
+            model_card= request.data['model_card']
             model_uid = request.data['uid']
             object_type_slug = request.data['object_type']
             object_type = ObjectType.objects.get(slug=object_type_slug)
@@ -78,6 +79,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             new_model = Model(name=model_name,
                             release_type=release_type,
                             description=description,
+                            model_card=model_card,
                             uid=model_uid,
                             project=project,
                             s3=project.s3storage)
