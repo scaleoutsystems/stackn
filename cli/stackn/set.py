@@ -19,10 +19,12 @@ def set():
 @set.command('current')
 @click.option('-p', '--project', required=False, default='')
 @click.option('-u', '--studio-url', required=False, default='')
-def setc(project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def setc(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     set_current(conf)
 

@@ -51,9 +51,9 @@ def get_remote():
     keys = stackn.auth._get_remote(conf)
     return keys
 
-def get_current():
+def get_current(secure=True):
     res = {'STACKN_URL': False, 'STACKN_PROJECT': False}
-    conf, status = stackn.auth.get_config()
+    conf, status = stackn.auth.get_config({'STACKN_SECURE': secure})
     if not status:
         print("Failed to get current STACKn and project.")
     else:
@@ -257,7 +257,7 @@ def create_object(model_name,
         print("Failed to set authentication headers.")
         return False
 
-    project = get_projects(conf=conf['STACKN_URL'], params={'name': conf['STACKN_PROJECT']}, auth_headers=auth_headers)
+    project = get_projects(conf=conf, params={'name': conf['STACKN_PROJECT']}, auth_headers=auth_headers)
     if len(project)>1:
         print('Found several matching projects.')
         return

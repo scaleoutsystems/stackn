@@ -14,4 +14,5 @@ def login(url, secure, username, password, client_id, realm):
                  username=username,
                  password=password,
                  client_id=client_id,
-                 realm=realm)
+                 realm=realm,
+                 secure=secure)

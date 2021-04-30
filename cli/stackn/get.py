@@ -33,7 +33,8 @@ def get():
   pass
 
 @get.command('remote')
-def get_rem():
+@click.option('--secure/--insecure', required=False, default=True)
+def get_rem(secure):
     current = get_remote()
     for curr in current:
         print(curr)
@@ -41,8 +42,9 @@ def get_rem():
 
 
 @get.command('current')
-def get_curr():
-    current = get_current()
+@click.option('--secure/--insecure', required=False, default=True)
+def get_curr(secure):
+    current = get_current(secure=secure)
     if current['STACKN_URL']:
         print("Studio: {}".format(current['STACKN_URL']))
         if current['STACKN_PROJECT']:
@@ -54,9 +56,11 @@ def get_curr():
 
 @get.command('project')
 @click.option('-u', '--studio-url', required=False, default=[])
-def project(studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def project(studio_url, secure):
     conf = {
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     projects = get_projects(conf=conf)
     if projects:
@@ -66,11 +70,12 @@ def project(studio_url):
 
 @get.command('app')
 @click.option('-c', '--category', required=False, default=[])
-def app(category):
+@click.option('--secure/--insecure', required=False, default=True)
+def app(category, secure):
     params = []
     if category:
         params = {"app__category": category.lower()}
-    apps = call_project_endpoint('appinstances', params=params)
+    apps = call_project_endpoint('appinstances', params=params, conf={"STACKN_SECURE": secure})
     applist = list()
     for app in apps:
         tmp = dict()
@@ -94,11 +99,13 @@ def app(category):
 @click.option('-t', '--object-type', required=False, default="model")
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def obj(object_type, project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def obj(object_type, project, studio_url, secure):
     conf = {
         'STACKN_OBJECT_TYPE': object_type,
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     params = []
     object_types = call_project_endpoint('objecttypes', conf=conf)
@@ -122,10 +129,12 @@ def obj(object_type, project, studio_url):
 @get.command('environment')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def environment(project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def environment(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     environments = call_project_endpoint('environments', conf=conf)
     envlist = list()
@@ -144,10 +153,12 @@ def environment(project, studio_url):
 @get.command('flavor')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def flavor(project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def flavor(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     flavors = call_project_endpoint('flavors', conf=conf)
     header = ['Name', 'CPU req', 'CPU lim', 'Mem req', 'Mem lim', 'GPUs', 'Eph mem req', 'Eph mem lim']
@@ -157,10 +168,12 @@ def flavor(project, studio_url):
 @get.command('objecttypes')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def objecttypes(project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def objecttypes(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     objecttypes = call_project_endpoint('objecttypes', conf=conf)
     _print_table(objecttypes, ['Name', 'Slug'], ['name', 'slug'])
@@ -168,10 +181,12 @@ def objecttypes(project, studio_url):
 @get.command('releasenames')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def releasenames(project, studio_url):
+@click.option('--secure/--insecure', required=False, default=True)
+def releasenames(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     objects = call_project_endpoint('releasenames', conf=conf)
     objlist = list()
@@ -192,10 +207,12 @@ def releasenames(project, studio_url):
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('-n', '--name', required=False, default=[])
-def s3(name):
+@click.option('--secure/--insecure', required=False, default=True)
+def s3(project, studio_url, name, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     params = []
     if name:
@@ -206,10 +223,12 @@ def s3(name):
 @get.command('mlflow')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def mlflow():
+@click.option('--secure/--insecure', required=False, default=True)
+def mlflow(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     mlflows = call_project_endpoint('mlflow', conf=conf)
     mlflowlist = list()
@@ -224,10 +243,12 @@ def mlflow():
 @get.command('templates')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
-def templates():
+@click.option('--secure/--insecure', required=False, default=True)
+def templates(project, studio_url, secure):
     conf = {
         'STACKN_PROJECT': project,
-        'STACKN_URL': studio_url
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
     }
     print('templates')
 
