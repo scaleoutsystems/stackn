@@ -202,7 +202,7 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
             conf['STACKN_PROJECT'] = current['STACKN_PROJECT']
     # if 'STACKN_SECURE' not in conf:
     if 'STACKN_SECURE' in current:
-        if print_warnings:
+        if print_warnings and current['STACKN_SECURE'] == False:
             print("Insecure mode is set in config, will not verify charts.")
             print("Use stackn set current --secure to disable.")
         conf['STACKN_SECURE'] = current['STACKN_SECURE']
