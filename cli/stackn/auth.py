@@ -203,7 +203,7 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     # if 'STACKN_SECURE' not in conf:
     if 'STACKN_SECURE' in current:
         if print_warnings and current['STACKN_SECURE'] == False:
-            print("Insecure mode is set in config, will not verify charts.")
+            print("Insecure mode is set in config, will not verify certificates.")
             print("Use stackn set current --secure to disable.")
         conf['STACKN_SECURE'] = current['STACKN_SECURE']
     # If we have a currently set remote URL, fetch from config file.
