@@ -78,6 +78,7 @@ class Model(models.Model):
     version = models.CharField(max_length=255)
     release_type = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
+    model_card = models.TextField(null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
     object_type = models.ManyToManyField(ObjectType, blank=True)

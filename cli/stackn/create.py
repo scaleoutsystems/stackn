@@ -47,17 +47,19 @@ def releasename(name, studio_url, project, secure):
 @click.option('-f', '--file-name', required=False, default="")
 @click.option('-r', '--release-type', required=False, default="minor")
 @click.option('-d', '--description', required=False, default="")
+@click.option('-m', '--model-card', required=False, default="")
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('-s', '--s3-storage', required=False, default=None)
 @click.option('--secure/--insecure', default=True)
-def obj(name, object_type, file_name, release_type, description, project, studio_url, s3_storage, secure):
+def obj(name, object_type, file_name, release_type, description, model_card, project, studio_url, s3_storage, secure):
     create_object(name,
                   model_file=file_name,
                   project_name=project,
                   release_type=release_type,
                   object_type=object_type,
                   model_description=description,
+                  model_card=model_card,
                   studio_url=studio_url,
                   s3storage=s3_storage,
                   secure_mode=secure)

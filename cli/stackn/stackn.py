@@ -228,6 +228,7 @@ def create_object(model_name,
                   release_type='minor',
                   object_type='model',
                   model_description=None,
+                  model_card=None,
                   s3storage=None,
                   is_file=True,
                   secure_mode=True):
@@ -287,7 +288,12 @@ def create_object(model_name,
         f = open(model_file, 'w')
         f.close()
         res = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, '.'], stdout=subprocess.PIPE)
-
+    
+    if model_card == "":
+        model_card_html_string = ""
+    else:
+        with open(model_card, 'r') as f:
+            model_card_html_string = f.read()
     # # Upload model.
     status = stackn.s3.set_artifact(model_uid,
                                     model_file,
@@ -305,6 +311,7 @@ def create_object(model_name,
                   "name": model_name,
                   "release_type": release_type,
                   "description": model_description,
+                  "model_card": model_card_html_string,
                   "object_type": object_type}
 
     endpoints = get_endpoints(conf['STACKN_URL'])
