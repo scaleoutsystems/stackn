@@ -5,6 +5,8 @@ import base64
 import collections
 import json
 import time
+import secrets
+import string
 
 import modules.keycloak_lib as keylib
 
@@ -53,11 +55,12 @@ def create_settings_file(project_slug):
 def create_resources_from_template(user, project_slug, template):
     from apps.models import Apps
     import apps.views as appviews
-    print(template)
+    # print(template)
     decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
     template = decoder.decode(template)
-    print(template)
+    # print(template)
     project = Project.objects.get(slug=project_slug)
+    alphabet = string.ascii_letters + string.digits
     for key, item in template.items():
         print(key)
         if 'flavors' == key:
@@ -103,6 +106,15 @@ def create_resources_from_template(user, project_slug, template):
                     "app_name": app_name,
                     "app_action": "Create"
                 }
+                if 'credentials.access_key' in item:
+                    item['credentials.access_key'] = ''.join(secrets.choice(alphabet) for i in range(8))
+                if 'credentials.secret_key' in item:
+                    item['credentials.secret_key'] = ''.join(secrets.choice(alphabet) for i in range(14))
+                if 'credentials.username' in item:
+                    item['credentials.username'] = 'admin'
+                if 'credentials.password' in item:
+                    item['credentials.password'] = ''.join(secrets.choice(alphabet) for i in range(14))
+                
                 data = {**data, **item}
                 print("DATA TEMPLATE")
                 print(data)
