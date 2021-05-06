@@ -27,6 +27,7 @@ spec:
     spec:
       initContainers:
       - image: alpine:latest
+        imagePullPolicy: IfNotPresent
         name: init-auth
         command: ["/bin/sh"]
         args: ["-c", "apk add apache2-utils && htpasswd -Bbn {{ .Values.credentials.username }} {{ .Values.credentials.password }} > /auth/htpasswd"]
@@ -36,13 +37,13 @@ spec:
       containers:
       - name: reverse-proxy
         image: nginx:alpine
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: rp-conf
           mountPath: /etc/nginx
       - name: gatekeeper
         image: {{ .Values.gatekeeper.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:

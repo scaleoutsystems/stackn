@@ -39,8 +39,8 @@ spec:
             - name: USER
               value: test
 
-          image: scaleoutsystems/fedn-reducer:develop
-          imagePullPolicy: Always
+          image: scaleoutsystems/fedn-reducer:master
+          imagePullPolicy: IfNotPresent
           name: reducer
           ports:
             - containerPort: 8090

@@ -40,13 +40,13 @@ spec:
       containers:
       - name: reverse-proxy
         image: nginx:alpine
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: rp-conf
           mountPath: /etc/nginx
       - name: gatekeeper
         image: keycloak/keycloak-gatekeeper:latest #quay.io/gambol99/keycloak-proxy:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -56,7 +56,7 @@ spec:
           mountPath: /etc/secrets/
       - name: rstudio
         image: {{ .Values.environment.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8787
         env:

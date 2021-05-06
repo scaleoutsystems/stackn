@@ -29,7 +29,7 @@ spec:
       - name: scheduler
         image: daskdev/dask
         command: ["dask-scheduler", "--port={{ .Values.scheduler.port }}"]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         resources:
           limits:
             cpu: {{ .Values.scheduler.limits.cpu }}

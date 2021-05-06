@@ -45,6 +45,7 @@ spec:
         - name: MINIO_IDENTITY_OPENID_SCOPES
           value: {{ .Values.release }}-scope
         image: minio/minio:latest
+        imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
             command:

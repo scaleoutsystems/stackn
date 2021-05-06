@@ -41,7 +41,7 @@ spec:
       containers:
       - name: gatekeeper
         image: {{ .Values.gatekeeper.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:

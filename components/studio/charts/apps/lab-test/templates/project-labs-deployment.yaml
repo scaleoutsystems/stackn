@@ -37,8 +37,8 @@ spec:
     {{ end }}
       containers:
       - name: gatekeeper
+        imagePullPolicy: IfNotPresent
         image: scaleoutsystems/gatekeeper:latest
-        imagePullPolicy: Always
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -48,7 +48,7 @@ spec:
           mountPath: /etc/secrets/
       - name: labs
         image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8888
         env:

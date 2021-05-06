@@ -29,14 +29,14 @@ spec:
       affinity:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}
-    {{- with .Values.imagePullSecrets }}
+    {{ if .Values.environment.registry }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+        - name: {{ .Release.Name }}-pull-secret
+    {{ end }}
       containers:
       - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -47,7 +47,7 @@ spec:
 
       - name: wetty
         image: scaleoutsystems/wetty:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --ssh-host=localhost
           - --ssh-port=22
@@ -59,8 +59,8 @@ spec:
         ports:
           - containerPort: 3000
       - name: ubuntu
-        image: {{ .Values.app.image }}
-        imagePullPolicy: Always
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        imagePullPolicy: IfNotPresent
         resources:
           limits:
             memory: {{ .Values.flavor.limits.memory }}

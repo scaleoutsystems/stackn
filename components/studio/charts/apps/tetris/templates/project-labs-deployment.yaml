@@ -26,7 +26,7 @@ spec:
       containers:
       - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest #registry-dev.local.stackn.dev/gatekeeper:latest #
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -37,7 +37,7 @@ spec:
 
       - name: tetris
         image: ociotec/tetris
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 80
       volumes:

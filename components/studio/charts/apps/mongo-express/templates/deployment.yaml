@@ -26,7 +26,7 @@ spec:
       containers:
       - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -50,7 +50,7 @@ spec:
         - name: ME_CONFIG_MONGODB_ADMINPASSWORD
           value: "{{ $val.credentials.password }}"
         {{- end }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8081
       volumes:

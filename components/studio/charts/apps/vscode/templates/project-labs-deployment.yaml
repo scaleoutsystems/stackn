@@ -36,7 +36,7 @@ spec:
       containers:
       - name: gatekeeper
         image: scaleoutsystems/gatekeeper:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --config=/etc/secrets/gatekeeper.yaml
         ports:
@@ -47,7 +47,7 @@ spec:
 
       - name: vscode
         image: scaleoutsystems/vscode:user
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 1234
         volumeMounts:
