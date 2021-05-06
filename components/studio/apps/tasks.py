@@ -386,7 +386,12 @@ def check_status():
         if 'deletionTimestamp' in item['metadata']:
             deletion_timestamp = item['metadata']['deletionTimestamp']
             phase = "Terminated"
-        num_containers = len(item['status']['containerStatuses'])
+        num_containers = -1
+        try:
+            num_containers = len(item['status']['containerStatuses'])
+        except:
+            print("Failed to get number of containers.")
+            pass
         num_cont_ready = 0
         if 'containerStatuses' in item['status']:
             for container in item['status']['containerStatuses']:
@@ -467,7 +472,7 @@ def get_resource_usage():
     results_pod = subprocess.run(args_pod, capture_output=True)
     results_pod_json = json.loads(results_pod.stdout.decode('utf-8'))
     for pod in results_pod_json['items']:
-        if 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
+        if 'metadata' in pod and 'labels' in pod['metadata'] and 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
     #         pod_release = pod['metadata']['labels']['release']
     #         for label in pod['metadata']['labels']:
     #             resources[label] = pod['metadata']['labels'][label]
