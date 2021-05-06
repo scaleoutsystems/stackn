@@ -19,7 +19,7 @@ from .generate_form import generate_form
 
 def create_instance_params(instance, action="create"):
 
-    RELEASE_NAME = instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+    RELEASE_NAME = 'r'+uuid.uuid4().hex[0:8] #instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
     print("RELEASE_NAME: "+RELEASE_NAME)
 
     SERVICE_NAME = RELEASE_NAME
