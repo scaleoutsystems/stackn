@@ -14,9 +14,6 @@
                     <a class="nav-link" href="#tab-3" data-bs-toggle="tab" role="tab">Metrics</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#tab-4" data-bs-toggle="tab" role="tab">README.md</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="#tab-5" data-bs-toggle="tab" role="tab">Model Card</a>
                 </li>
             </ul>
@@ -140,13 +137,6 @@
                     <div class="col-md-12 d-flex justify-content-center">
                         No metrics available for this model.
                     </div>
-                    {% endif %}
-                </div>
-                <div class="tab-pane" id="tab-4" role="tabpanel">
-                    {% if readme %}
-                    {{ readme | safe }}
-                    {% else %}
-                    <p>No README.md file available to present.</p>
                     {% endif %}
                 </div>
                 <div class="tab-pane" id="tab-5" role="tabpanel">
