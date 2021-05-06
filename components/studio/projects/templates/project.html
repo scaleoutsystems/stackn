@@ -209,13 +209,13 @@
 
 <script>
 
-    function newChart(chart, labels, y_data, ylabel) {
+    function newChart(chart, labels, y_data, ylabel, dataset_label) {
         new Chart(chart, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Total CPU usage',
+                    label: dataset_label,
                     fill: true,
                     backgroundColor: 'transparent',
                     borderColor: window.theme.primary,
@@ -280,8 +280,8 @@
         $.ajax({
             url: "{% url 'monitor:usage' user project.slug %}",
             success: function (data) {
-                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)')
-                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)')
+                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
+                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
     
             }
         });
@@ -305,10 +305,10 @@
                 });
             },
             complete: function() {
-                setTimeout(update_status, 3000);
+                setTimeout(update_status, 5000);
             }
         });
     };
-    setTimeout(update_status, 3000);
+    setTimeout(update_status, 5000);
 </script>
 {% endblock %}
