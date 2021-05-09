@@ -1,4 +1,4 @@
-FROM python:3.7 as pybuild1
+FROM python:3.8.10 as pybuild1
 #-alpine
 LABEL maintainer="morgan@scaleoutsystems.com"
 #RUN apk update
@@ -6,8 +6,6 @@ LABEL maintainer="morgan@scaleoutsystems.com"
 RUN mkdir /app
 COPY requirements.txt /app/
 RUN pip install -r /app/requirements.txt
-
-
 
 RUN apt update
 RUN apt install -y curl
