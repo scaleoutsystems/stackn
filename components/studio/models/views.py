@@ -14,6 +14,7 @@ import ast
 from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
+from .forms import UploadModelImageForm
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -24,15 +25,23 @@ def index(request):
 
     dtos = []
     for m in models:
-        img_id = randint(8, 13)
-        img_name = "dist/img/patterns/image {}.png".format(img_id)
+        img_name = ""
+        img_source = "default"
+        if not m.img:
+            img_id = randint(8, 13)
+            img_name = "dist/img/patterns/image {}.png".format(img_id)
+        else:
+            img_name = m.img.url
+            img_source = "custom"
 
         obj = {
             "pk": m.pk,
             "download_url": get_download_url(m.pk),
             "img_name": img_name,
+            "img_source": img_source,
             "name": m.name,
-            "description": m.description
+            "description": m.description,
+            "project_slug": m.project.slug
         }
         dtos.append(obj)
 
@@ -75,6 +84,27 @@ def change_access(request, user, project, id):
 
     return HttpResponseRedirect(
         reverse('models:details_public', kwargs={'id': id}))
+
+
+@login_required
+def upload_image(request, user, project, id):
+    if request.method == 'POST':
+        form = UploadModelImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            model = Model.objects.get(pk=id)
+            model.img = request.FILES['file']
+            model.save()
+
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Uploaded new headline image.')
+            l.save()
+
+            return HttpResponseRedirect('/')
+    else:
+        form = UploadModelImageForm()
+
+    return render(request, 'models_upload_image.html', {'form': form})
 
 
 @login_required

@@ -11,9 +11,13 @@
     {% endif %}
 
     {% for model in dtos %}
-    <div class="col-12 col-md-6 col-lg-4">
-        <div class="card">
+    <div class="col-12 col-md-6 col-lg-4 card-holder-custom">
+        <div class="card card-custom">
+            {% if model.img_source == "default" %}
             <img class="card-img-top" src="{% static model.img_name %}" alt="pattern">
+            {% else %}
+            <img class="card-img-top" src="{{ m.img_name }}" alt="pattern">
+            {% endif %}
             <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
@@ -28,6 +32,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
                             <a class="dropdown-item" href="{{ model.download_url }}" download="">Download model</a>
+                            <a class="dropdown-item" href="{% url 'models:upload_image' request.user model.project_slug model.pk %}">Change headline image</a>
                         </div>
                     </div>
                 </div>
