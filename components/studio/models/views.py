@@ -2,7 +2,7 @@ import uuid
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from projects.models import Project, ProjectLog
+from projects.models import Project, ProjectLog, Environment
 from reports.models import Report, ReportGenerator
 from .models import Model, ModelLog, Metadata, ObjectType
 from reports.forms import GenerateReportForm
@@ -14,7 +14,7 @@ import ast
 from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
-from .forms import UploadModelImageForm
+from .forms import UploadModelImageForm, EnvironmentForm
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -41,7 +41,8 @@ def index(request):
             "img_source": img_source,
             "name": m.name,
             "description": m.description,
-            "project_slug": m.project.slug
+            "project_slug": m.project.slug,
+            "owner": m.project.owner
         }
         dtos.append(obj)
 
@@ -105,6 +106,48 @@ def upload_image(request, user, project, id):
         form = UploadModelImageForm()
 
     return render(request, 'models_upload_image.html', {'form': form})
+
+
+@login_required
+def add_docker_image(request, user, project, id):
+    model = Model.objects.get(pk=id)
+
+    if request.method == 'POST':
+        form = EnvironmentForm(request.POST)
+
+        if form.is_valid():
+            registry = form.cleaned_data['registry']
+            username = form.cleaned_data['username']
+            repository = form.cleaned_data['repository']
+            image = form.cleaned_data['image']
+            tag = form.cleaned_data['tag']
+
+            environment = Environment(
+                name=registry+'/'+username,
+                slug=None,
+                project=model.project,
+                repository=repository,
+                image=image+':'+tag,
+                registry=None,
+                appenv=None,
+                app=None
+            )
+            environment.save()
+
+            model.docker_image = environment
+            model.save()
+
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Added reference to a Docker image.')
+            l.save()
+
+            return HttpResponseRedirect(
+                reverse('models:details_public', kwargs={'id': id}))
+    else:
+        form = EnvironmentForm()
+
+    return render(request, 'models_docker_image.html', {'form': form})
 
 
 @login_required

@@ -100,6 +100,8 @@ class Model(models.Model):
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     # tag = models.CharField(max_length=10, default='latest')
     img = models.ImageField(upload_to=upload_image_path, null=True, blank=True, default=None)
+    docker_image = models.OneToOneField('projects.Environment', null=True, blank=True,
+                                        on_delete=models.CASCADE, default=None)
 
     class Meta:
         unique_together = ('name', 'version', 'project')

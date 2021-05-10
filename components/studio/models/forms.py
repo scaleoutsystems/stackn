@@ -26,3 +26,11 @@ class Metadata(forms.ModelForm):
 
 class UploadModelImageForm(forms.Form):
     file = forms.ImageField()
+
+
+class EnvironmentForm(forms.Form):
+    registry = forms.CharField(label='Registry DNS', max_length=100)
+    username = forms.CharField(label='Username', max_length=100)
+    repository = forms.CharField(label='Repository', max_length=100)
+    image = forms.CharField(label='Image', max_length=100)
+    tag = forms.CharField(label='Tag', max_length=100)
