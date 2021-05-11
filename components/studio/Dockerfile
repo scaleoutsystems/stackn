@@ -1,5 +1,4 @@
 FROM python:3.8.10 as pybuild1
-#-alpine
 LABEL maintainer="morgan@scaleoutsystems.com"
 #RUN apk update
 #RUN apk add musl-dev postgresql-dev gcc python3-dev linux-headers
