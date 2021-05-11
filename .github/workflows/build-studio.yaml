@@ -5,7 +5,11 @@ on:
   push:
     branches: '*'
     paths:
-    - 'components/studio/**'
+    - 'components/**'
+  pull_request:
+    branches: '*'
+    paths:
+    - 'components/**'
 
 jobs:
  
