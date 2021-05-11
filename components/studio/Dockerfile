@@ -6,6 +6,7 @@ RUN mkdir /app
 COPY requirements.txt /app/
 RUN pip install -r /app/requirements.txt
 
+
 RUN apt update
 RUN apt install -y curl
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
