@@ -2,13 +2,13 @@ name: File Controller CI
 
 on:
   push:
-    branches: [ master ]
+    branches: '*'
     paths:
-    - 'components/file-controller/**'
+    - 'components/**'
   pull_request:
-    branches: [ master ]
+    branches: '*'
     paths:
-    - 'components/file-controller/**'
+    - 'components/**'
     
 jobs:
 
