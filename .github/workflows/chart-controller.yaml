@@ -4,11 +4,11 @@ on:
   push:
     branches: '*'
     paths:
-    - 'components/**'
+    - 'components/chart-controller/**'
   pull_request:
     branches: '*'
     paths:
-    - 'components/**'
+    - 'components/chart-controller/**'
 
 jobs:
 
