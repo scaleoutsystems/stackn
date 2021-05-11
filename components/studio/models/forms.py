@@ -24,7 +24,7 @@ class Metadata(forms.ModelForm):
         fields = (
             'run_id', 'trained_model', 'project', 'model_details', 'parameters', 'metrics')
 
-class UploadModelImageForm(forms.Form):
+class UploadModelCardHeadlineForm(forms.Form):
     file = forms.ImageField()
 
 

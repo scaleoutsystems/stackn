@@ -14,7 +14,7 @@ import ast
 from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
-from .forms import UploadModelImageForm, EnvironmentForm
+from .forms import UploadModelCardHeadlineForm, EnvironmentForm
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -25,20 +25,20 @@ def index(request):
 
     dtos = []
     for m in models:
-        img_name = ""
-        img_source = "default"
-        if not m.img:
-            img_id = randint(8, 13)
-            img_name = "dist/img/patterns/image {}.png".format(img_id)
+        headline_name = ""
+        headline_source = "default"
+        if not m.model_card_headline:
+            headline_id = randint(8, 13)
+            headline_name = "dist/img/patterns/image {}.png".format(headline_id)
         else:
-            img_name = m.img.url
-            img_source = "custom"
+            headline_name = m.model_card_headline.url
+            headline_source = "custom"
 
         obj = {
             "pk": m.pk,
             "download_url": get_download_url(m.pk),
-            "img_name": img_name,
-            "img_source": img_source,
+            "img_name": headline_name,
+            "img_source": headline_source,
             "name": m.name,
             "description": m.description,
             "project_slug": m.project.slug,
@@ -88,12 +88,12 @@ def change_access(request, user, project, id):
 
 
 @login_required
-def upload_image(request, user, project, id):
+def upload_model_headline(request, user, project, id):
     if request.method == 'POST':
-        form = UploadModelImageForm(request.POST, request.FILES)
+        form = UploadModelCardHeadlineForm(request.POST, request.FILES)
         if form.is_valid():
             model = Model.objects.get(pk=id)
-            model.img = request.FILES['file']
+            model.model_card_headline = request.FILES['file']
             model.save()
 
             project_obj = Project.objects.get(slug=project)
@@ -103,9 +103,9 @@ def upload_image(request, user, project, id):
 
             return HttpResponseRedirect('/')
     else:
-        form = UploadModelImageForm()
+        form = UploadModelCardHeadlineForm()
 
-    return render(request, 'models_upload_image.html', {'form': form})
+    return render(request, 'models_upload_headline.html', {'form': form})
 
 
 @login_required
