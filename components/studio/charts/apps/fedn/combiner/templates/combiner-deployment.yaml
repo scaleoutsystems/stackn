@@ -25,6 +25,10 @@ spec:
         type: app
         pod: combiner
     spec:
+      {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+      {{ end }}
       containers:
         - args:
             - sh
@@ -33,8 +37,8 @@ spec:
           env:
             - name: PYTHONUNBUFFERED
               value: "0"
-          image: scaleoutsystems/fedn-combiner:master
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+          imagePullPolicy: {{ .Values.combiner.pullPolicy }}
           name: combiner
           ports:
             - containerPort: 443

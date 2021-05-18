@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
+    if 'oidc_states' in request.session:
+        print('___________________')
+        print(request.session['oidc_states'], flush=True)
+        print('___________________', flush=True)
     template = 'index_projects.html'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')

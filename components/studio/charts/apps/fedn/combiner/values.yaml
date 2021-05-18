@@ -10,3 +10,6 @@ replicaCount: 1
 
 ingress:
   secretName: prod-ingress
+
+combiner:
+  pullPolicy: IfNotPresent

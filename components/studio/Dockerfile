@@ -37,5 +37,6 @@ RUN apt install -y kubectl
 FROM pybuild1
 
 COPY . /app/
+RUN cd /app/mozilla-django-oidc && pip3 install -e . && cd /app
 
 WORKDIR /app

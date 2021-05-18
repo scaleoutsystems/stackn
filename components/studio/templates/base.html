@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="{% static 'dist/css/custom.css' %}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
+    {% load plotly_dash%}
+    {% plotly_header %}
+
     {% block extra_head %} {% endblock %}
 </head>
 
@@ -191,5 +194,5 @@
 
     {% block extra_scripts %} {% endblock %}
 </body>
-
+{% plotly_footer %}
 </html>
