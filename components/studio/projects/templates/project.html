@@ -109,7 +109,7 @@
                                     <td><img src="{% static obj.app.logo %}" class="img-fluid " alt="App Logo" style="max-height:25px;"></td>
                                     <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
                                     {% if obj.table_field.url %}
-                                    <td class="sorting_1"><a href="{{ obj.table_field.url }}">{{ obj.name }}</a></td>
+                                    <td class="sorting_1"><a href="{{ obj.table_field.url }}" target="_blank">{{ obj.name }}</a></td>
                                     {% else %}
                                     <td class="sorting_1">{{ obj.name }}</td>
                                     {% endif %}
