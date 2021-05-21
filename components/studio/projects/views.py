@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
+    if 'oidc_states' in request.session:
+        print('___________________')
+        print(request.session['oidc_states'], flush=True)
+        print('___________________', flush=True)
     template = 'index_projects.html'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
@@ -62,6 +66,12 @@ def environments(request, user, project_slug):
 
 @login_required
 def settings(request, user, project_slug):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
     print(user_permissions)
     template = 'settings.html'
@@ -337,6 +347,12 @@ def create(request):
 @login_required
 def details(request, user, project_slug):
 
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
     
     template = 'project.html'
@@ -453,6 +469,12 @@ def publish_project(request, user, project_slug):
 
 @login_required
 def project_readme(request, user, project_slug):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
     
     project = None
