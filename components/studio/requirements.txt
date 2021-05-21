@@ -51,3 +51,4 @@ channels-redis
 dash-bootstrap-components
 pymongo
 Pillow
+mozilla-django-oidc
