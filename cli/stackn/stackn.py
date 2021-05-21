@@ -289,7 +289,7 @@ def create_object(model_name,
         f.close()
         res = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, '.'], stdout=subprocess.PIPE)
     
-    if model_card == "":
+    if model_card == "" or model_card == None:
         model_card_html_string = ""
     else:
         with open(model_card, 'r') as f:
