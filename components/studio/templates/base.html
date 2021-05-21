@@ -106,6 +106,9 @@
                         </div>
                     </li>
                 </ul>
+
+                {% block projects_dropdown %} {% endblock %}
+
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav navbar-align">
                         {% if request.user.is_authenticated %}

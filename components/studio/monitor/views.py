@@ -84,6 +84,12 @@ def liveout(request, user, project):
 
 @login_required
 def overview(request, user, project):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     is_authorized = True
     user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
     if not user_permissions['view']:
