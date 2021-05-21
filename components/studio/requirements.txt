@@ -50,3 +50,4 @@ django-redis
 channels-redis
 dash-bootstrap-components
 pymongo
+Pillow

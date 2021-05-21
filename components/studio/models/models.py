@@ -52,6 +52,11 @@ class ObjectType(models.Model):
     def __str__(self):
         return self.name
 
+
+def upload_headline_path(instance, filename):
+    return 'models/model_{0}/{1}'.format(instance.pk, filename)
+
+
 class Model(models.Model):
 
     objects_version = ModelManager()
@@ -94,7 +99,10 @@ class Model(models.Model):
         null=True)
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     # tag = models.CharField(max_length=10, default='latest')
-    
+    model_card_headline = models.ImageField(upload_to=upload_headline_path, null=True, blank=True, default=None)
+    docker_image = models.OneToOneField('projects.Environment', null=True, blank=True,
+                                        on_delete=models.CASCADE, default=None)
+
     class Meta:
         unique_together = ('name', 'version', 'project')
 
