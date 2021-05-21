@@ -9,6 +9,7 @@
 - New public portal for models
 - New model details page
 - Possibility to download a model from its S3 storage
+- Quick navigation between projects
 
 ### Bug fixes
 
