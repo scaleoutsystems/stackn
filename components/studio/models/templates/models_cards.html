@@ -11,9 +11,13 @@
     {% endif %}
 
     {% for model in dtos %}
-    <div class="col-12 col-md-6 col-lg-4">
-        <div class="card">
-            <img class="card-img-top" src="{% static model.img_name %}" alt="pattern">
+    <div class="col-12 col-md-6 col-lg-4 card-holder-custom">
+        <div class="card card-custom">
+            {% if model.headline_source == "default" %}
+            <img class="card-img-top" src="{% static model.headline_name %}" alt="pattern">
+            {% else %}
+            <img class="card-img-top" src="{{ model.headline_name }}" alt="pattern">
+            {% endif %}
             <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
@@ -28,6 +32,10 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
                             <a class="dropdown-item" href="{{ model.download_url }}" download="">Download model</a>
+                            {% if user.is_authenticated and user == model.owner %}
+                            <a class="dropdown-item" href="{% url 'models:upload_model_headline' request.user model.project_slug model.pk %}">Change headline</a>
+                            <a class="dropdown-item" href="{% url 'models:add_docker_image' request.user model.project_slug model.pk %}">Add Docker image</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
