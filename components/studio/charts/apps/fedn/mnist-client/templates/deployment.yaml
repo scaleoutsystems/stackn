@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appname }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: fedn-mnist-client
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: fedn-mnist-client
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: fedn-mnist-client
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: fedn-mnist-client
+    spec:
+      {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+      {{ end }}
+      containers:
+      - name: client
+        resources:
+          limits:
+            cpu: {{ .Values.flavor.limits.cpu }}
+            memory: {{ .Values.flavor.limits.memory }}
+          requests:
+            cpu: {{ .Values.flavor.requests.cpu }}
+            memory: {{ .Values.flavor.requests.memory }}
+        env:
+        {{- range $key, $val := .Values.apps.reducer }}
+        - name: DISCOVER_HOST
+          value: {{ $val.release }}.{{ $val.global.domain }}
+        {{- end }}
+        - name: DISCOVER_PORT
+          value: "443"
+        - name: TOKEN
+          value: some-token
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        imagePullPolicy: IfNotPresent

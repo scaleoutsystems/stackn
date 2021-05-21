@@ -60,11 +60,11 @@ INSTALLED_APPS = [
     'files',
     'datasets',
     'workflows',
-    'experiments',
     'deployments',
     'bootstrap_modal_forms',
     'studio_admin',
-    'apps'
+    'apps',
+    'django_plotly_dash'
 ]
 
 REST_FRAMEWORK = {
@@ -115,6 +115,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'studio.wsgi.application'
+ASGI_APPLICATION = 'studio.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

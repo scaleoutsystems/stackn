@@ -52,6 +52,16 @@
                             <dd class="col-8 col-xxl-9 mb-0">
                                 <p class="mb-0">{{ model.resource }}</p>
                             </dd>
+                            {% if model.docker_image %}
+                            <dt class="col-4 col-xxl-3 mb-0">Docker image</dt>
+                            <dd class="col-8 col-xxl-9 mb-0">
+                                <p class="mb-0">
+                                    {{ model.docker_image.name }}/
+                                    {{ model.docker_image.repository }}/
+                                    {{ model.docker_image.image }}
+                                </p>
+                            </dd>
+                            {% endif %}
                         </dl>
                         <hr>
                         <dl class="row">

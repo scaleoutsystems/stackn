@@ -1,3 +1,11 @@
 .row-custom {
     padding: 0 12px 0 12px;
 }
+
+.card-holder-custom {
+    margin-bottom: 24px;
+}
+
+.card-custom {
+    height: 100%;
+}

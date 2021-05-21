@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="{% static 'dist/css/custom.css' %}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
+    {% load plotly_dash%}
+    {% plotly_header %}
+
     {% block extra_head %} {% endblock %}
 </head>
 
@@ -103,6 +106,9 @@
                         </div>
                     </li>
                 </ul>
+
+                {% block projects_dropdown %} {% endblock %}
+
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav navbar-align">
                         {% if request.user.is_authenticated %}
@@ -191,5 +197,5 @@
 
     {% block extra_scripts %} {% endblock %}
 </body>
-
+{% plotly_footer %}
 </html>

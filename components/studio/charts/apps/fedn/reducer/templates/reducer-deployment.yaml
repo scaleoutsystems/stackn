@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.release }}-reducer
+  name: {{ .Values.release }}
   namespace: {{ .Values.namespace }}
   annotations:
     reloader.stakater.com/auto: "true"
@@ -25,7 +25,10 @@ spec:
         type: app
         pod: reducer
     spec:
-
+      {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+      {{ end }}
       containers:
         - args:
             - sh
@@ -39,8 +42,8 @@ spec:
             - name: USER
               value: test
 
-          image: scaleoutsystems/fedn-reducer:master
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+          imagePullPolicy: {{ .Values.reducer.pullPolicy }}
           name: reducer
           ports:
             - containerPort: 8090

@@ -34,7 +34,6 @@ PyYAML
 django-bootstrap-modal-forms
 django-yamlfield
 Markdown
-mozilla-django-oidc
 pyjwt
 drf-nested-routers
 flatten_json
@@ -43,3 +42,13 @@ argh
 django-celery-beat
 django-cryptography
 gunicorn
+django_plotly_dash
+dash
+channels
+daphne
+django-redis
+channels-redis
+dash-bootstrap-components
+pymongo
+Pillow
+mozilla-django-oidc

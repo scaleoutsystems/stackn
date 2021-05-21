@@ -20,7 +20,6 @@ from models.models import Model
 from apps.models import AppInstance, ResourceData
 from modules.project_auth import get_permissions
 
-
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
     for resource in resources:
@@ -66,8 +65,31 @@ def get_cpu_mem(resources, project_slug, resource_type):
 
     return res_list
 
+
+@login_required
+def liveout(request, user, project):
+    is_authorized = True
+    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
+    
+    if not user_permissions['view']:
+        request.session['oidc_id_token_expiration'] = -1
+        request.session.save()
+        # return HttpResponse('Not authorized', status=401)
+        is_authorized = False
+    template = 'monitor2.html'
+    project = Project.objects.filter(slug=project).first()
+
+
+    return render(request, template, locals())
+
 @login_required
 def overview(request, user, project):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+    except TypeError as err:
+        projects = []
+        print(err)
+
     is_authorized = True
     user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
     if not user_permissions['view']:
@@ -75,6 +97,8 @@ def overview(request, user, project):
         request.session.save()
         # return HttpResponse('Not authorized', status=401)
         is_authorized = False
+    
+    request.session['current_project'] = project
     template = 'monitor_new.html'
     project = Project.objects.filter(slug=project).first()
 

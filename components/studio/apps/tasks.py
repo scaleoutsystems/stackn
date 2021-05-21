@@ -235,6 +235,7 @@ def deploy_resource(instance_pk, action='create'):
         gatekeeper = {
             "gatekeeper": {
                 "realm": settings.KC_REALM,
+                "host": settings.KC_URL,
                 "client_secret": client_secret,
                 "client_id": client_id,
                 "auth_endpoint": settings.OIDC_OP_REALM_AUTH,
