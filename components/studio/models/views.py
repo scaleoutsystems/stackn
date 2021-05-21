@@ -2,7 +2,7 @@ import uuid
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from projects.models import Project, ProjectLog
+from projects.models import Project, ProjectLog, Environment
 from reports.models import Report, ReportGenerator
 from .models import Model, ModelLog, Metadata, ObjectType
 from reports.forms import GenerateReportForm
@@ -14,6 +14,7 @@ import ast
 from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
+from .forms import UploadModelCardHeadlineForm, EnvironmentForm
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -24,15 +25,24 @@ def index(request):
 
     dtos = []
     for m in models:
-        img_id = randint(8, 13)
-        img_name = "dist/img/patterns/image {}.png".format(img_id)
+        headline_name = ""
+        headline_source = "default"
+        if not m.model_card_headline:
+            headline_id = randint(8, 13)
+            headline_name = "dist/img/patterns/image {}.png".format(headline_id)
+        else:
+            headline_name = m.model_card_headline.url
+            headline_source = "custom"
 
         obj = {
             "pk": m.pk,
             "download_url": get_download_url(m.pk),
-            "img_name": img_name,
+            "img_name": headline_name,
+            "img_source": headline_source,
             "name": m.name,
-            "description": m.description
+            "description": m.description,
+            "project_slug": m.project.slug,
+            "owner": m.project.owner
         }
         dtos.append(obj)
 
@@ -75,6 +85,69 @@ def change_access(request, user, project, id):
 
     return HttpResponseRedirect(
         reverse('models:details_public', kwargs={'id': id}))
+
+
+@login_required
+def upload_model_headline(request, user, project, id):
+    if request.method == 'POST':
+        form = UploadModelCardHeadlineForm(request.POST, request.FILES)
+        if form.is_valid():
+            model = Model.objects.get(pk=id)
+            model.model_card_headline = request.FILES['file']
+            model.save()
+
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Uploaded new headline image.')
+            l.save()
+
+            return HttpResponseRedirect('/')
+    else:
+        form = UploadModelCardHeadlineForm()
+
+    return render(request, 'models_upload_headline.html', {'form': form})
+
+
+@login_required
+def add_docker_image(request, user, project, id):
+    model = Model.objects.get(pk=id)
+
+    if request.method == 'POST':
+        form = EnvironmentForm(request.POST)
+
+        if form.is_valid():
+            registry = form.cleaned_data['registry']
+            username = form.cleaned_data['username']
+            repository = form.cleaned_data['repository']
+            image = form.cleaned_data['image']
+            tag = form.cleaned_data['tag']
+
+            environment = Environment(
+                name=registry+'/'+username,
+                slug=None,
+                project=model.project,
+                repository=repository,
+                image=image+':'+tag,
+                registry=None,
+                appenv=None,
+                app=None
+            )
+            environment.save()
+
+            model.docker_image = environment
+            model.save()
+
+            project_obj = Project.objects.get(slug=project)
+            l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
+                           description='Added reference to a Docker image.')
+            l.save()
+
+            return HttpResponseRedirect(
+                reverse('models:details_public', kwargs={'id': id}))
+    else:
+        form = EnvironmentForm()
+
+    return render(request, 'models_docker_image.html', {'form': form})
 
 
 @login_required
