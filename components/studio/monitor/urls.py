@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
 
+from .dash_demo import app
+
 app_name = 'monitor'
 
 urlpatterns = [
     path('', views.overview, name='overview'),
+    path('liveout', views.liveout, name='liveout'),
     path('usage', views.usage, name='usage'),
     path('<resource_type>/cpuchart', views.cpuchart, name='cpuchart'),
     path('lab/delete/<uid>', views.delete_lab, name='delete_lab'),
