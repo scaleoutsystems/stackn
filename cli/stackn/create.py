@@ -1,7 +1,7 @@
 import click
 
 from .main import main
-from .stackn import create_object, create_project, create_resource, create_releasename
+from .stackn import create_object, create_project, create_resource, create_releasename, create_app
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -64,11 +64,32 @@ def obj(name, object_type, file_name, release_type, description, model_card, pro
                   s3storage=s3_storage,
                   secure_mode=secure)
 
+
+# Admin commands
+
+@create.command('app')
+@click.option('-t', '--settings', required=False, default="config.json")
+@click.option('-a', '--chart', required=False, default="chart")
+@click.option('-l', '--logo', required=False, default="logo.png")
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def app(settings, chart, logo, studio_url, secure):
+    print("CREATING APP")
+    create_app(settings,
+               chart,
+               logo=logo,
+               studio_url=studio_url,
+               secure_mode=secure)
+    #, studio_url=studio_url, project=project, secure=secure)
+
+
+
+
 ALIASES = {
     "projects": project,
     "resources": resource,
-    "app": resource,
-    "apps": resource,
+    "app": app,
+    "apps": app,
     "objects": obj,
     "environments": resource,
     "environment": resource,

@@ -6,9 +6,11 @@ from .exceptions import ProjectCreationException
 from .helpers import delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings as sett
+from django.core.files import File
 import logging
 import markdown
 import time
+import random
 from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
 from models.models import Model
@@ -32,13 +34,22 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    if 'oidc_states' in request.session:
-        print('___________________')
-        print(request.session['oidc_states'], flush=True)
-        print('___________________', flush=True)
+    base_template = 'base.html'
+    if 'project' in request.session:
+        project_slug = request.session['project']
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            try:
+                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+                base_template = 'baseproject.html'
+            except Exception as err:
+                projects = []
+                print(err)
     template = 'index_projects.html'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+        media_url = sett.MEDIA_URL
+        print(sett.STATIC_ROOT)
     except TypeError as err:
         projects = []
         print(err)
@@ -79,7 +90,7 @@ def settings(request, user, project_slug):
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.filter(project=project)
-    apps = Apps.objects.all()
+    apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
 
     s3instances = S3.objects.filter(project=project)
     flavors = Flavor.objects.filter(project=project)
@@ -302,10 +313,15 @@ def create(request):
         
         # Try to create database project object.
         try:
+            img = sett.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+            print(img)
+            img_file = open(img, 'rb')
             project = Project.objects.create_project(name=name,
                                                      owner=request.user,
                                                      description=description,
                                                      repository=repository)
+            project.project_image.save('default.png', File(img_file))
+            img_file.close()
         except ProjectCreationException as e:
             print("ERROR: Failed to create project database object.")
             success = False
@@ -346,7 +362,7 @@ def create(request):
 
 @login_required
 def details(request, user, project_slug):
-
+    
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
@@ -354,10 +370,13 @@ def details(request, user, project_slug):
         print(err)
 
     is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    
+    if is_authorized:
+        request.session['project'] = project_slug
+        
     template = 'project.html'
 
     url_domain = sett.DOMAIN
+    media_url = sett.MEDIA_URL
 
     project = None
     message = None
@@ -365,6 +384,8 @@ def details(request, user, project_slug):
     try:
         owner = User.objects.filter(username=username).first()
         project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
+        if is_authorized:
+            request.session['project_name'] = project.name
     except Exception as e:
         message = 'Project not found.'
 
@@ -383,8 +404,7 @@ def details(request, user, project_slug):
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
                 pk_list += str(instance.pk)+','
-            
-            apps = Apps.objects.filter(category__slug=rslug['slug'])
+            apps = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
             resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"

@@ -37,6 +37,9 @@ def get_endpoints(studio_url):
     endpoints['project_del'] = base+'/projects/{}'
     endpoints['releasenames'] = base+'/projects/{}/releasenames/'
     endpoints['projects'] = base+'/projects/'
+    endpoints['admin'] = dict()
+    # endpoints['admin']['apps'] = base+'/projects/{}/apps/'
+    endpoints['admin']['apps'] = base+'/apps/'
     return endpoints
 
 def get_auth_headers(conf):
@@ -140,6 +143,75 @@ def setup_project_endpoint_call(conf, endpoint_type):
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints[endpoint_type].format(project['id'])
     return conf, auth_headers, url
+
+def create_app(settings="config.json",
+               chart_archive="chart",
+               logo="logo.png",
+               studio_url=[],
+               secure_mode=True):
+
+    # Get STACKn config
+    conf = {
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure_mode
+    }
+    conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
+    # if not status:
+    #     print("Missing required input (studio URL, project name).")
+    #     return False
+
+    auth_headers, conf = get_auth_headers(conf)
+    if not auth_headers:
+        print("Failed to set authentication headers.")
+        return False
+    
+    
+    chart_uid = str(uuid.uuid1().hex)
+    res = subprocess.run(['tar', '-C', chart_archive, '-czvf', chart_uid, '.'], stdout=subprocess.PIPE)
+    print(res)
+    file_ob = {'chart': open(chart_uid, 'rb'), 'logo': open(logo, 'rb')}
+    print(file_ob)
+
+    ftable = open(settings, 'r')
+    config = json.load(ftable)
+    settings = config['settings']
+    table_field = config['table_field']
+    description = config['description']
+    name = config['name']
+    slug = config['slug']
+    category = config['category']
+    ftable.close()
+    
+
+    payload = {
+        'name': name,
+        'slug': slug,
+        'cat': category,
+        'description': description,
+        'settings': json.dumps(settings),
+        'table_field': json.dumps(table_field)
+    }
+    print(payload)
+
+   
+
+    endpoints = get_endpoints(conf['STACKN_URL'])
+
+    # if conf['STACKN_PROJECT']:
+    #     project = get_projects(conf, params={'name': conf['STACKN_PROJECT']})
+    # else:
+    #     print("No project name specified.")
+    #     return False
+    url = endpoints['admin']['apps'] #.format(project[0]['id'])
+    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload) 
+
+    os.system('rm {}'.format(chart_uid))
+
+    print(r.text)
+    print(r.status_code)
+    print(r.reason)
+
+
 
 def create_project(name, 
                    description="",

@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends base_template %}
 
+{% load static %}
 {% block content %}
 
 {% if request.user.is_authenticated %}
@@ -14,41 +15,25 @@
         <p>You don't have any projects yet.</p>
         {% else %}
         {% for project in projects %}
-        <div class="col-12 col-md-6 col-lg-3 card-holder-custom">
-            <div class="card card-custom">
-
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
+            <div class="card h-100">
+                <img class="card-img-top" src="{{ media_url }}{{ project.project_image }}" alt="Card image cap" style="height:350px">
                 <div class="card-header px-4 pt-4">
-                    <!--<div class="card-actions float-end">
-                        <div class="dropdown show">
-                            <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                <i class="align-middle" data-feather="more-horizontal"></i>
-                            </a>
 
-                            <div class="dropdown-menu dropdown-menu-end">
-                                {% if request.user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'projects:details' request.user project.slug %}">View
-                                    project</a>
-                                {% else %}
-                                <a class="dropdown-item" href="{% url 'oidc_authentication_init' %}">View project</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>-->
-                    <h5 class="card-title mb-0">
-                        <a href="{% if request.user.is_authenticated %}{% url 'projects:details' request.user project.slug %}{% else %}{% url 'oidc_authentication_init' %}{% endif %}">{{ project.name }}</a>
-                    </h5>
-                    <div class="my-2">Started {{ project.created_at }}</div>
+                    <h3>
+                        {{ project.name }}
+                    </h3>
+                    <!-- <div class="my-2">Started {{ project.created_at }}</div> -->
                 </div>
                 <div class="card-body px-4 pt-2">
                     <p>{{ project.description }}</p>
-                    <p>Members: {{ project.owner }}
-                        {% if project.authorized.all %}
-                        {% for user in project.authorized.all %}
-                        , {{ user.username }}
-                        {% endfor %}
-                        {% endif %}
-                    </p>
+                    <div style="position:absolute;bottom:0.5em;">
+                        <h4>
+                            <a href="{% if request.user.is_authenticated %}{% url 'projects:details' request.user project.slug %}{% else %}{% url 'oidc_authentication_init' %}{% endif %}">Open</a>
+                        </h4>
+                    </div>
                 </div>
+                
             </div>
         </div>
         {% endfor %}

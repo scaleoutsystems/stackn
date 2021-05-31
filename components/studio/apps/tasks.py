@@ -5,6 +5,7 @@ import time
 import requests
 from celery import shared_task
 # from celery.decorators import periodic_task
+from django.template import engines
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
@@ -268,6 +269,7 @@ def deploy_resource(instance_pk, action='create'):
     if keycloak_success:
         instance.info['keycloak'].update({"success": True})
         print("Deploying resource")
+
         results = controller.deploy(instance.parameters)
         stdout, stderr = process_helm_result(results)
         if results.returncode == 0:

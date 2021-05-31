@@ -24,7 +24,8 @@ echo "starting serving..."
 if [ -z "${DEBUG}" ] && [ -z "${TELEPRESENCE_ROOT}" ]; then
     gunicorn studio.wsgi -b 0.0.0.0:8080 -w 4
 else
-    watchmedo auto-restart -R --patterns="*.py" -- daphne studio.asgi:application -b 0.0.0.0 -p 8080
-    # python3 manage.py runserver 0.0.0.0:8080
+    # watchmedo auto-restart -R --patterns="*.py" -- daphne studio.asgi:application -b 0.0.0.0 -p 8080
+    python3 manage.py runserver 0.0.0.0:8080
+    # gunicorn studio.wsgi -b 0.0.0.0:8080 --reload
 fi
 

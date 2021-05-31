@@ -148,15 +148,19 @@ class Project(models.Model):
 
     status = models.CharField(max_length=20, null=True, blank=True, default="active")
 
+
+    project_image = models.ImageField(upload_to='projects/images/', null=True, blank=True, default=None)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
     # These fields should be removed.
     image = models.CharField(max_length=2048, blank=True, null=True)
     project_key = models.CharField(max_length=512)
     project_secret = models.CharField(max_length=512)
     # ----------------------
-
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
     # These fields should be removed.
     repository = models.CharField(max_length=512, null=True, blank=True)
     repository_imported = models.BooleanField(default=False)

@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'studio_admin',
     'apps',
-    'django_plotly_dash'
+    'django_plotly_dash',
+    'portal'
 ]
 
 REST_FRAMEWORK = {

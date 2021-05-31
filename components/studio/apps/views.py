@@ -26,6 +26,7 @@ def get_status_defs():
     status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
     return status_success, status_warning
 
+
 # Create your views here.
 def index(request, user, project):
     print("hello")
@@ -84,18 +85,26 @@ def logs(request, user, project, ai_id):
 
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     status_success, status_warning = get_status_defs()
     menu = dict()
 
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
     menu[category] = 'active'
-    apps = Apps.objects.filter(category=cat_obj)
+    media_url = settings.MEDIA_URL
+    try:
+        apps = Apps.objects.filter(category=cat_obj).order_by('slug', '-revision').distinct('slug')
+    except Exception as err:
+        print(err)
     project = Project.objects.get(slug=project)
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
-    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj, project=project).order_by('-created_on')
+    appinstances = AppInstance.objects.filter(
+        Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+        ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold),
+        app__category=cat_obj,
+        project=project).order_by('-created_on')
     pk_list = ''
     for instance in appinstances:
         pk_list += str(instance.pk)+','
@@ -179,7 +188,8 @@ def create(request, user, project, app_slug, data=[], wait=False):
 
     existing_app_name = ""
     project = Project.objects.get(slug=project)
-    app = Apps.objects.get(slug=app_slug)
+    app = Apps.objects.filter(slug=app_slug).order_by('-revision')[0]
+        
 
     aset = app.settings
 
@@ -318,6 +328,28 @@ def create(request, user, project, app_slug, data=[], wait=False):
         else:
             return JsonResponse({"status": "ok"})
     return render(request, template, locals())
+
+def publish(request, user, project, category, ai_id):
+    print("Publish app {}".format(ai_id))
+    print(project)
+    try:
+        app = AppInstance.objects.get(pk=ai_id)
+        print(app)
+        # TODO: Check that user is allowed to publish this app.
+        print("setting public")
+        if app.access == "private":
+            app.access = "public"
+        else:
+            app.access = "private"
+        print("saving")
+        app.save()
+        print("done")
+    except Exception as err:
+        print(err)
+
+    return HttpResponseRedirect(
+                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+
 
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))

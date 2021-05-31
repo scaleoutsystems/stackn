@@ -15,7 +15,20 @@ import flatten_json
 import uuid
 from datetime import datetime, timedelta
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'export-cli', 'csrfmiddlewaretoken', 'S3']
+key_words = ['appobj',
+             'model',
+             'flavor',
+             'environment',
+             'volumes',
+             'apps',
+             'logs',
+             'permissions',
+             'keycloak-config',
+             'default_values',
+             'export-cli',
+             'csrfmiddlewaretoken',
+             'S3',
+             'env_variables']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
@@ -147,7 +160,7 @@ def get_form_environments(aset, project, app, appinstance=[]):
     if 'environment' in aset:
         dep_environment = True
         if aset['environment']['type'] == "match":
-            environments['objs'] = Environment.objects.filter(project=project, app=app)
+            environments['objs'] = Environment.objects.filter(project=project, app__slug=app.slug)
         elif aset['environment']['type'] == "any":
             environments['objs'] = Environment.objects.filter(project=project)
         elif 'apps' in aset['environment']:

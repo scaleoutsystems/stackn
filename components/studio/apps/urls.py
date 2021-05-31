@@ -11,4 +11,5 @@ urlpatterns = [
     path('logs/<ai_id>', views.logs, name='logs'),
     path('settings/<ai_id>', views.appsettings, name='appsettings'),
     path('delete/<category>/<ai_id>', views.delete, name='delete'),
+    path('publish/<category>/<ai_id>', views.publish, name='publish'),
 ]

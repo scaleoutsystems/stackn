@@ -39,6 +39,8 @@ def create_instance_params(instance, action="create"):
         "release": RELEASE_NAME,
         "chart": str(instance.app.chart),
         "namespace": NAMESPACE,
+        "app_slug": str(instance.app.slug),
+        "app_revision": str(instance.app.revision),
         "appname": RELEASE_NAME,
         # "project": {
         #     "name": instance.project.name,

@@ -2,36 +2,33 @@
 {% load static %}
 {% block extra_sidebar_items %}
 
+
+
 <li class="sidebar-header">
-    {{ project.name }}
+    Project
 </li>
 <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
         <i class="align-middle" data-feather="home"></i>
-        <span class="align-middle">Overview</span>
+        <span class="align-middle">Dashboard</span>
     </a>
 </li>
-<li class="sidebar-item">
+<!-- <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
         <i class="align-middle" data-feather="trending-up"></i>
         <span class="align-middle">Monitor</span>
     </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
-        <i class="align-middle" data-feather="settings"></i>
-        <span class="align-middle">Settings</span>
-    </a>
-</li>
-<li class="sidebar-item">
+</li> -->
+
+<!-- <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:project_readme' request.user project.slug %}">
         <i class="align-middle" data-feather="code"></i>
         <span class="align-middle">README.md</span>
     </a>
-</li>
-<li class="sidebar-header">
+</li> -->
+<!-- <li class="sidebar-header">
     Resources
-</li>
+</li> -->
 <li class="sidebar-item {{ menu.objects }}">
     <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
         <i class="align-middle" data-feather="layers"></i>
@@ -66,6 +63,13 @@
 <li class="sidebar-item {{ menu.fedn }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'fedn' %}" class="sidebar-link">
        <span class="align-middle" style="padding-right:10px;"><img class="align-middle" alt="FEDn Logo" src="{% static 'dist/applogos/fedn_logo.png' %}" width="20"  /> </span><span class="align-middle">FEDn</span>
+    </a>
+</li>
+
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
+        <i class="align-middle" data-feather="settings"></i>
+        <span class="align-middle">Settings</span>
     </a>
 </li>
 
