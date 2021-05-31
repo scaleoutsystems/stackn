@@ -79,8 +79,9 @@ def create_resources_from_template(user, project_slug, template):
                 flavor.save()
         if 'environments' == key:
             environments = item
+            print(item)
             for key, item in environments.items():
-                app = Apps.objects.get(slug=item['app'])
+                app = Apps.objects.filter(slug=item['app']).order_by('-revision')[0]
                 environment = Environment(name=key,
                                         project=project,
                                         repository=item['repository'],
