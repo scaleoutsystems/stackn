@@ -131,6 +131,7 @@ class ProjectTemplate(models.Model):
     slug = models.CharField(max_length=512, default="")
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='projecttemplates/images/', null=True, blank=True, default=None)
     def __str__(self):
         return '{}'.format(self.name)
 

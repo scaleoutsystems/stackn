@@ -6,6 +6,7 @@ app_name = 'projects'
 urlpatterns = [
     path('projects/', views.index, name='index'),
     path('projects/create', views.create, name='create'),
+    path('projects/templates', views.project_templates, name='project_templates'),
     path('<user>/<project_slug>', views.details, name='details'),
     path('<user>/<project_slug>/environments', views.environments, name='environments'),
     path('<user>/<project_slug>/environments/create', views.create_environment, name='create_environment'),

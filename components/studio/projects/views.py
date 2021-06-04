@@ -43,8 +43,10 @@ def index(request):
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
             except Exception as err:
-                projects = []
+                project = []
                 print(err)
+            if not project:
+                base_template = 'base.html'
     template = 'index_projects.html'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
@@ -298,9 +300,21 @@ def revoke_access_to_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+def project_templates(request):
+    template = 'project_templates.html'
+    templates = ProjectTemplate.objects.all()
+    media_url = sett.MEDIA_URL
+    return render(request, template, locals())
+
+@login_required
 def create(request):
     template = 'project_create.html'
     templates = ProjectTemplate.objects.all()
+
+    template_selected = 'STACKn Default'
+    if 'template' in request.GET:
+        template_selected = request.GET.get('template')
+
 
     if request.method == 'POST':
 
