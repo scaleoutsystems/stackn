@@ -58,9 +58,11 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
         app_deps = dict()
         apps = aset['apps']
         for app_name, option_type in apps.items():
+            print(">>>>>")
             print(app_name)
-            app_obj = Apps.objects.get(name=app_name)
-
+            app_obj = Apps.objects.filter(name=app_name).order_by('-revision').first()
+            print(app_obj)
+            print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
             app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                                       ~Q(state="Deleted"),

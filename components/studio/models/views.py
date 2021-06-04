@@ -39,39 +39,15 @@ def index(request):
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
             except Exception as err:
-                projects = []
+                project = []
                 print(err)
+            if not project:
+                base_template = 'base.html'
+            print(base_template)
 
     media_url = settings.MEDIA_URL
     published_models = PublishedModel.objects.all()
 
-    # models = Model.objects.filter(access='PU', project__isnull=False).order_by('-uploaded_at')
-    # print("MODELS")
-    # media_url = settings.MEDIA_URL
-    # dtos = []
-    # for m in models:
-    #     # headline_name = ""
-    #     # headline_source = "default"
-    #     # if not m.model_card_headline:
-    #     #     headline_id = randint(8, 13)
-    #     #     headline_name = "dist/img/patterns/image {}.png".format(headline_id)
-    #     # else:
-    #     #     headline_name = m.model_card_headline.url
-    #     #     headline_source = "custom"
-
-    #     obj = {
-    #         "pk": m.pk,
-    #         "download_url": "http://foo.com", #get_download_url(m.pk),
-    #         # "img_name": headline_name,
-    #         # "img_source": headline_source,
-    #         "img_url": m.model_card_headline,
-    #         "name": m.name,
-    #         "description": m.description,
-    #         "project_slug": m.project.slug,
-    #         "owner": m.project.owner
-    #     }
-    #     dtos.append(obj)
-    # print("DONE MODELS")
     return render(request, 'models_cards.html', locals())
 
 
@@ -87,13 +63,6 @@ def list(request, user, project):
     
     models = Model.objects.filter(project=project).order_by('name', '-version').distinct('name')
 
-    # object_types = ObjectType.objects.all()
-    # try:
-    #     for object_type in object_types:
-    #         objects.append((object_type, Model.objects.filter(project=project, object_type__slug=object_type.slug).order_by('name', '-version').distinct('name')))
-    # except Exception as err:
-    #     print(err)
-    # active_type = 'model'
 
     return render(request, template, locals())
 
@@ -382,8 +351,10 @@ def details_public(request, id):
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
             except Exception as err:
-                projects = []
+                project = []
                 print(err)
+            if not project:
+                base_template = 'base.html'
 
     media_url = settings.MEDIA_URL
     published_model = PublishedModel(pk=id)

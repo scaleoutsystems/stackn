@@ -30,9 +30,10 @@ def index(request):
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
             except TypeError as err:
-                projects = []
+                project = []
                 print(err)
-            
+            if not project:
+                base_template = 'base.html'
     # if project_selected:
     #     print("Project is selected")
     #     print(project)
