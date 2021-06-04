@@ -148,9 +148,16 @@ def serialize_apps(form_selection, project):
             
             app_name = key[4:]
             try:
-                app = Apps.objects.get(name=app_name)
-            except:
-                app = Apps.objects.get(slug=app_name)
+                app = Apps.objects.filter(name=app_name).order_by('-revision').first()
+                if not app:
+                    app = Apps.objects.filter(slug=app_name).order_by('-revision').first()
+            except Exception as err:
+                print("Failed to fetch app: {}".format(app_name))
+                print(err)
+                raise
+            if not app:
+                print("App not found: {}".format(app_name))
+                
             parameters['apps'][app.slug] = dict()
             print(app_name)
             print('id: '+str(form_selection[key]))

@@ -194,8 +194,9 @@ def create(request, user, project, app_slug, data=[], wait=False):
     aset = app.settings
 
     # Set up form
+    print("GENERATING FORM")
     form = generate_form(aset, project, app, user, [])
-
+    print("FORM DONE")
     if data or request.method == "POST":
         if not data:
             data = request.POST
