@@ -34,9 +34,14 @@
             </div>
 
             <div class="list-group list-group-flush" role="tablist">
+                
                 <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#projdesc"
                     role="tab">
                     Description
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#image"
+                    role="tab">
+                    Image
                 </a>
                 {% if user_permissions.add_member %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
@@ -91,6 +96,23 @@
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" rows="5" id="description" name="description"
                                     contenteditable="true">{{ project.description }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Save</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="image" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Change project image</h5>
+
+                        <form action="{% url 'projects:update_image' request.user project.slug %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <input type="file" class="form-control" id="image" name="image">
                             </div>
 
                             <button type="submit" class="btn btn-square btn-primary">Save</button>

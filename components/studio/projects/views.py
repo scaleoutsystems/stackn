@@ -117,8 +117,21 @@ def settings(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+def update_image(request, user, project_slug):
+    project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
+    if request.method == 'POST' and request.FILES['image']:
+        image = request.FILES['image']
+        project.project_image = image
+        project.save()
+
+    return HttpResponseRedirect(
+        reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
+
+
+
+@login_required
 def change_description(request, user, project_slug):
-    project = Project.objects.filter(slug=project_slug).first()
+    project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
 
     if request.method == 'POST':
         description = request.POST.get('description', '')
