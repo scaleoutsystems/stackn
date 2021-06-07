@@ -24,7 +24,8 @@ key_words = ['appobj',
              'default_values',
              'export-cli',
              'csrfmiddlewaretoken',
-             'env_variables']
+             'env_variables',
+             'publishable']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")

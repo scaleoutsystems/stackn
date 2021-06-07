@@ -27,7 +27,7 @@
                             <tr role="row" class="odd">
                                 <td>{{ model.object_type.all.first.name }}</td>
                                 <td>
-                                    <a href="{% url 'models:details_public' model.id %}">
+                                    <a href="{% url 'models:details_private' request.user project.slug model.id %}">
                                         {{ model.name }}
                                     </a>
                                 </td>

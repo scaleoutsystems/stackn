@@ -57,7 +57,8 @@ def list(request, user, project):
     menu['objects'] = 'active'
     template = 'models_list.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
-    project = Project.objects.get(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project)
+
+    project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
     current_project = project.name
     objects = []
     
@@ -336,6 +337,38 @@ def get_chart_data(md_objects):
 
 def import_model(request, id):
     print("IMPORTING MODEL")
+
+@login_required
+def details_private(request, user, project, id):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+    except Exception as err:
+        print("User not logged in.")
+    base_template = 'base.html'
+
+    project_slug = project
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    if is_authorized:
+        try:
+            project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+            base_template = 'baseproject.html'
+        except Exception as err:
+            project = []
+            print(err)
+        if not project:
+            base_template = 'base.html'
+
+    media_url = settings.MEDIA_URL
+    # TODO: Check that user has access to this model (though already checked that user has access to project)
+    model = Model.objects.get(pk=id) 
+    # published_model = PublishedModel(pk=id)
+    # model_objs = published_model.model_obj.order_by('-model__version')
+    # latest_model_obj = model_objs[0]
+    # model = latest_model_obj.model
+    # print(model_objs)
+    # print(latest_model_obj)
+
+    return render(request, 'models_details_public.html', locals())
 
 def details_public(request, id):
     try:

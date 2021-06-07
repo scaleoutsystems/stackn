@@ -28,7 +28,8 @@ key_words = ['appobj',
              'export-cli',
              'csrfmiddlewaretoken',
              'S3',
-             'env_variables']
+             'env_variables',
+             'publishable']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
