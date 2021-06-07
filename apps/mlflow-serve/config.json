@@ -1,0 +1,35 @@
+{
+    "name": "MLFlow Serve",
+    "slug": "mlflow-serve",
+    "category": "serve",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}/invocations"
+    },
+    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "settings": {
+        "model": {
+            "quantity": "one",
+            "object_type": "mlflow-model"
+        },
+        "flavor": "one",
+        "environment": {
+            "name": "from",
+            "title": "Environment",
+            "quantity": "one",
+            "type": "match"
+        },
+        "logs": ["serve"],
+        "default_values": {
+            "is_tar": "False",
+            "port": "5000"
+        },
+        "permissions": {
+            "public": {"value":"false", "option": "true"},
+            "project": {"value":"false", "option": "true"},
+            "private": {"value":"true", "option": "true"}
+        },
+        "env_variables": {
+            "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/invocation"
+        }
+    }
+}

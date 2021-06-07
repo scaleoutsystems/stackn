@@ -1,0 +1,21 @@
+{
+  "name": "FEDn Client",
+  "slug": "fedn-client",
+  "category": "fedn",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}"
+  },
+  "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+  "settings": {
+    "apps": {
+      "FEDn Reducer": "one"
+    },
+    "environment": {
+      "name": "from",
+      "title": "Client Image",
+      "quantity": "one",
+      "type": "match"
+    },
+    "logs": ["client"]
+  }
+}

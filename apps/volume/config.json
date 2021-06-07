@@ -1,0 +1,15 @@
+{
+    "name": "Persistent Volume",
+    "slug": "volume",
+    "category": "store",
+    "table_field": {},
+    "description": "",
+    "settings": {
+        "volume": {
+            "size": {"type":"string", "default":"1Gi", "title":"Size"},
+            "storageClass": {"type":"string", "default":"", "title":"StorageClass"},
+            "accessModes": {"type": "string", "default":"ReadWriteMany", "title": "AccessModes"}
+        }
+    }
+}
+

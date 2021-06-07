@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.release }}-fedn-network
+  namespace: {{ .Values.namespace }}
+data:
+  fedn-network.yaml: |-
+    network_id: fedn-test-network
+    controller:
+        discover_host: {{ .Values.release }}.{{ .Values.global.domain }}
+        discover_port: 443
+        token: token

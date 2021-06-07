@@ -315,14 +315,14 @@ def revoke_access_to_project(request, user, project_slug):
 @login_required
 def project_templates(request):
     template = 'project_templates.html'
-    templates = ProjectTemplate.objects.all()
+    templates = ProjectTemplate.objects.all().order_by('slug', '-revision').distinct('slug')
     media_url = sett.MEDIA_URL
     return render(request, template, locals())
 
 @login_required
 def create(request):
     template = 'project_create.html'
-    templates = ProjectTemplate.objects.all()
+    templates = ProjectTemplate.objects.all().order_by('slug', '-revision').distinct('slug')
 
     template_selected = 'STACKn Default'
     if 'template' in request.GET:

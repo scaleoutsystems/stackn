@@ -1,0 +1,57 @@
+{{ if .Values.ingress.v1beta1 }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.org/ssl-services: "{{ .Values.release }}"
+spec:
+  rules:
+    - host: {{ .Values.release }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Values.release }}
+            servicePort: 80
+  tls:
+    - secretName: {{ .Values.ingress.secret }}
+      hosts:
+        - {{ .Values.release }}.{{ .Values.global.domain }}
+
+{{ else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.org/ssl-services: "{{ .Values.release }}"
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: {{ .Values.release }}.{{ .Values.global.domain }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: {{ .Values.release }}
+            port:
+              number: 80
+  tls:
+  - secretName: {{ .Values.ingress.secret }}
+    hosts:
+      - {{ .Values.release }}.{{ .Values.global.domain }}
+{{- end }}

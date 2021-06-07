@@ -1,7 +1,8 @@
 import click
 
 from .main import main
-from .stackn import create_object, create_project, create_resource, create_releasename, create_app
+from .stackn import create_object, create_project, create_resource, create_releasename, create_app, create_apps
+from .stackn import create_template, create_templates
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -74,22 +75,42 @@ def obj(name, object_type, file_name, release_type, description, model_card, pro
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def app(settings, chart, logo, studio_url, secure):
-    print("CREATING APP")
     create_app(settings,
                chart,
                logo=logo,
                studio_url=studio_url,
                secure_mode=secure)
-    #, studio_url=studio_url, project=project, secure=secure)
+
+@create.command('apps')
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def apps(studio_url, secure):
+    create_apps(studio_url=studio_url,
+               secure_mode=secure)
 
 
+@create.command('projecttemplate')
+@click.option('-t', '--settings', required=False, default="template.json")
+@click.option('-i', '--image', required=False, default="image.png")
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def template(settings, image, studio_url, secure):
+    create_template(template=settings,
+                    image=image,
+                    studio_url=studio_url,
+                    secure_mode=secure)
 
+@create.command('projecttemplates')
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def templates(studio_url, secure):
+    create_templates(studio_url=studio_url,
+                     secure_mode=secure)
 
 ALIASES = {
     "projects": project,
     "resources": resource,
     "app": app,
-    "apps": app,
     "objects": obj,
     "environments": resource,
     "environment": resource,

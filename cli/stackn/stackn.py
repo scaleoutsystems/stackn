@@ -37,6 +37,7 @@ def get_endpoints(studio_url):
     endpoints['project_del'] = base+'/projects/{}'
     endpoints['releasenames'] = base+'/projects/{}/releasenames/'
     endpoints['projects'] = base+'/projects/'
+    endpoints['project_templates'] = base+'/projecttemplates/'
     endpoints['admin'] = dict()
     # endpoints['admin']['apps'] = base+'/projects/{}/apps/'
     endpoints['admin']['apps'] = base+'/apps/'
@@ -85,6 +86,24 @@ def get_projects(conf={}, params=[], auth_headers=[]):
         return projects
     else:
         print("Fetching projects failed.")
+        print('Returned status code: {}'.format(r.status_code))
+        print('Reason: {}'.format(r.reason))
+        return None
+
+def call_admin_endpoint(name, conf={}, params=[]):
+    conf, status = stackn.auth.get_config(conf)
+    auth_headers, conf = get_auth_headers(conf)
+    endpoints = get_endpoints(conf['STACKN_URL'])
+    url = endpoints[name]
+    if params:
+        r = requests.get(url, headers=auth_headers, params=params, verify=conf['STACKN_SECURE'])
+    else:
+        r = requests.get(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+    if r:
+        objs = json.loads(r.content)
+        return objs
+    else:
+        print("Fetching {} failed.".format(name))
         print('Returned status code: {}'.format(r.status_code))
         print('Reason: {}'.format(r.reason))
         return None
@@ -144,6 +163,59 @@ def setup_project_endpoint_call(conf, endpoint_type):
     url = endpoints[endpoint_type].format(project['id'])
     return conf, auth_headers, url
 
+def create_template(template='template.json', image="image.png", studio_url=[], secure_mode=True):
+    # Get STACKn config
+    conf = {
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure_mode
+    }
+    conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
+    auth_headers, conf = get_auth_headers(conf)
+    if not auth_headers:
+        print("Failed to set authentication headers.")
+        return False
+
+    with open(template, 'r') as templ_file:
+        try:
+            settings = json.load(templ_file)
+        except Exception as err:
+            print("Failed to load JSON from settings file.")
+            print(err)
+
+    payload = {
+        'settings': json.dumps(settings)
+    }
+
+    file_ob = {'image': open(image, 'rb')}
+
+    endpoints = get_endpoints(conf['STACKN_URL'])
+    url = endpoints['project_templates']
+    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload) 
+
+    if r:
+        print("Created template.")
+    else:
+        print("Failed to create template.")
+        print(r.status_code)
+        print(r.text)
+        print(r.reason)
+
+def create_templates(folder='.', studio_url=[], secure_mode=True):
+    subfolders = [f.path for f in os.scandir(folder) if f.is_dir()]
+    curr_dir = os.getcwd()
+    for folder in subfolders:
+        os.chdir(folder)
+        create_template(studio_url=studio_url, secure_mode=secure_mode)
+        os.chdir(curr_dir)
+
+def create_apps(folder='.', studio_url=[], secure_mode=True):
+    subfolders = [f.path for f in os.scandir(folder) if f.is_dir()]
+    curr_dir = os.getcwd()
+    for folder in subfolders:
+        os.chdir(folder)
+        create_app(studio_url=studio_url, secure_mode=secure_mode)
+        os.chdir(curr_dir)
+
 def create_app(settings="config.json",
                chart_archive="chart",
                logo="logo.png",
@@ -168,9 +240,8 @@ def create_app(settings="config.json",
     
     chart_uid = str(uuid.uuid1().hex)
     res = subprocess.run(['tar', '-C', chart_archive, '-czvf', chart_uid, '.'], stdout=subprocess.PIPE)
-    print(res)
     file_ob = {'chart': open(chart_uid, 'rb'), 'logo': open(logo, 'rb')}
-    print(file_ob)
+
 
     ftable = open(settings, 'r')
     config = json.load(ftable)
@@ -191,7 +262,6 @@ def create_app(settings="config.json",
         'settings': json.dumps(settings),
         'table_field': json.dumps(table_field)
     }
-    print(payload)
 
    
 
@@ -207,9 +277,14 @@ def create_app(settings="config.json",
 
     os.system('rm {}'.format(chart_uid))
 
-    print(r.text)
-    print(r.status_code)
-    print(r.reason)
+    if r:
+        print("Created app {}.".format(name))
+    else:
+        print("Failed to create app {}.".format(name))
+        print(r.status_code)
+        print(r.text)
+        print(r.reason)
+
 
 
 

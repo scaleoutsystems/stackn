@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ $.Release.Name }}
+      app: vscode
+      project: {{ $.Values.project.slug }}
+      type: app
+      pod: vscode
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        release: {{ $.Release.Name }}
+        app: vscode
+        project: {{ $.Values.project.slug }}
+        type: app
+        pod: vscode
+    spec:
+    {{ if .Values.app.gpu.enabled }}
+      affinity:
+        {{ .Values.app.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+      - name: gatekeeper
+        image: scaleoutsystems/gatekeeper:latest
+        imagePullPolicy: IfNotPresent
+        args:
+          - --config=/etc/secrets/gatekeeper.yaml
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: gatekeeper-config
+          mountPath: /etc/secrets/
+
+      - name: vscode
+        image: scaleoutsystems/vscode:user
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 1234
+        volumeMounts:
+        - name: cli-config-vol
+          mountPath: /home/stackn/.scaleout
+        - name: cli-config
+          mountPath: /stackn.json
+          subPath: stackn.json
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /home/stackn/{{ $key }}
+        {{- end }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - mkdir -p /home/stackn/.scaleout && cp -n /stackn.json /home/stackn/.scaleout/stackn.json
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+      - name: cli-config-vol
+        emptyDir: {}
+      - name: cli-config
+        configMap:
+          name: {{ .Release.Name }}-cli-config
+      - name: gatekeeper-config
+        configMap:
+          name: {{ .Release.Name }}-gatekeeper-config
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

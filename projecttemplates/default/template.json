@@ -1,0 +1,89 @@
+{
+  "name": "STACKn Default",
+  "slug": "default",
+  "description": "Default project template.",
+  "template": {
+    "flavors": {
+        "Medium": {
+            "cpu": {
+                "requirement": "100m",
+                "limit": "1000m"
+            },
+            "mem": {
+                "requirement": "1Gi",
+                "limit": "8Gi"
+            },
+            "gpu": {
+                "requirement": "0",
+                "limit": "0"
+            },
+            "ephmem": {
+                "requirement": "50Mi",
+                "limit": "100Mi"
+            }
+        }
+    },
+    "environments": {
+        "Jupyter Notebook": {
+            "repository": "scaleoutsystems",
+            "image": "jupyter-stackn:v0.1.5",
+            "app": "lab"
+        },
+        "Default Serving": {
+            "repository": "scaleoutsystems",
+            "image": "default-python:latest",
+            "app": "fastapi-serve"
+        },
+        "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+        }
+    },
+    "apps": {
+        "minio-vol": {
+            "slug": "volume",
+            "volume.size": "5Gi",
+            "permission": "private"
+        },
+        "mlflow-vol": {
+            "slug": "volume",
+            "volume.size": "5Gi",
+            "permission": "private"
+        },
+        "reg-vol": {
+            "slug": "volume",
+            "volume.size": "5Gi",
+            "permission": "private"
+        },
+        "project-vol": {
+            "slug": "volume",
+            "volume.size": "5Gi",
+            "permission": "private"
+        },
+        "project-minio": {
+            "slug": "minio",
+            "app:volume": ["minio-vol"],
+            "credentials.access_key": "accesskey2",
+            "credentials.secret_key": "secretkey193"
+        },
+        "mlflow-server": {
+            "slug": "mlflow",
+            "app:volume": ["mlflow-vol"],
+            "S3": "project-minio",
+            "credentials.username": "username",
+            "credentials.password": "password"
+        },
+        "project-registry": {
+            "slug": "docker_registry",
+            "app:volume": ["reg-vol"],
+            "credentials.username": "username123",
+            "credentials.password": "pass999111222"
+        }
+    },
+    "settings": {
+        "project-S3": "project-minio",
+        "project-MLflow": "mlflow-server"  
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+    "name": "Dash App",
+    "slug": "dash-app",
+    "category": "serve",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "settings": {
+        "apps": {
+            "Persistent Volume":"one"
+        },
+        "deployment": {
+            "debug": {"type":"boolean", "default":"False", "title":"Debug deployment"},
+            "path": {"type": "string", "default": "", "title": "Path to folder"}
+        },
+        "permissions": {
+            "public": {"value":"false", "option": "true"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        },
+        "logs": ["dash"]
+    }
+}

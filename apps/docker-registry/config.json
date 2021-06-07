@@ -1,0 +1,18 @@
+{
+  "name": "Docker Registry",
+  "slug": "docker_registry",
+  "category": "store",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}/registry/"
+  },
+  "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+  "settings": {
+    "apps":{
+        "Persistent Volume":"one"
+    },
+    "credentials": {
+        "username": {"type": "string", "default":"admin","title":"Username"},
+        "password": {"type": "string", "default":"password","title":"Password"}
+    }
+  }
+}
