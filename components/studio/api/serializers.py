@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from models.models import Model, ModelLog, Metadata, ObjectType
-from projects.models import Project, S3, Flavor, Environment, MLFlow, ReleaseName
+from projects.models import Project, S3, Flavor, Environment, MLFlow, ReleaseName, ProjectTemplate
 from apps.models import AppInstance, Apps, AppCategories, AppStatus
 from django.contrib.auth.models import User
 
@@ -94,4 +94,9 @@ class ReleaseNameSerializer(ModelSerializer):
     app = AppInstanceSerializer()
     class Meta:
         model = ReleaseName
+        fields = '__all__'
+
+class ProjectTemplateSerializer(ModelSerializer):
+    class Meta:
+        model = ProjectTemplate
         fields = '__all__'

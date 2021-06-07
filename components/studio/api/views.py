@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files import File
 import modules.keycloak_lib as kc
-from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName
+from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
 from models.models import ObjectType
 from apps.models import AppInstance, Apps, AppCategories
 from portal.models import PublishedModel, PublicModelObject
@@ -27,7 +27,7 @@ from portal.models import PublishedModel, PublicModelObject
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
 from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
 from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer, ReleaseNameSerializer
-from .serializers import AppSerializer
+from .serializers import AppSerializer, ProjectTemplateSerializer
 
 from projects.tasks import create_resources_from_template
 from apps.tasks import delete_resource
@@ -548,3 +548,46 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
     #         return HttpResponse("No such object.", status=400)
     #     obj.delete()
     #     return HttpResponse("Deleted object.", status=200)
+
+
+
+class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProjectTemplateSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'name', 'slug']
+
+    def get_queryset(self):
+        return ProjectTemplate.objects.all()
+    
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        try:
+            settings = json.loads(request.data['settings'])
+            name = settings['name']
+            slug = settings['slug']
+            description = settings['description']
+            template = settings['template']
+            image = request.FILES['image']
+        except Exception as err:
+            print(request.data)
+            print(err)
+            return HttpResponse("Failed to create new template.".format(name), status=400)
+
+        try:
+            template_latest_rev = ProjectTemplate.objects.filter(slug=slug).order_by('-revision')
+            if template_latest_rev:
+                revision = template_latest_rev[0].revision+1
+            else:
+                revision = 1
+            template = ProjectTemplate(name=name,
+                                       slug=slug,
+                                       revision=revision,
+                                       description=description,
+                                       template=template,
+                                       image=image)
+            template.save()
+        except Exception as err:
+            print(err)
+        return HttpResponse("Created new template: {}.".format(name), status=200)
