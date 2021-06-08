@@ -61,14 +61,14 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
         for app_name, option_type in apps.items():
             print(">>>>>")
             print(app_name)
-            app_obj = Apps.objects.filter(name=app_name).order_by('-revision').first()
+            app_obj = Apps.objects.filter(name=app_name) #.order_by('-revision').first()
             print(app_obj)
             print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
             app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                                       ~Q(state="Deleted"),
                                                       project=project,
-                                                      app=app_obj)
+                                                      app__name=app_name)
             # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
@@ -77,7 +77,7 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
                 app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                                            ~Q(state="Deleted"),
                                                            project=project,
-                                                           app=app_obj,
+                                                           app__name=app_name,
                                                            parameters__contains={
                                                                "appobj": {
                                                                     myapp.slug: True

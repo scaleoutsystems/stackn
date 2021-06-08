@@ -19,6 +19,7 @@
             "project": {"value":"true", "option": "true"},
             "private": {"value":"false", "option": "true"}
         },
-        "logs": ["dash"]
+        "logs": ["dash"],
+        "publishable": "true"
     }
 }

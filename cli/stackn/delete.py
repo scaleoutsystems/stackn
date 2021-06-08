@@ -1,6 +1,6 @@
 import click
 from .main import main
-from .stackn import delete_app, delete_object, delete_project, delete_meta_resource
+from .stackn import delete_app, delete_object, delete_project, delete_meta_resource, delete_app_obj
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -28,6 +28,13 @@ def delete_proj(name, studio_url, secure):
 @click.option('--secure/--insecure', default=True)
 def app(name, studio_url, project, secure):
     delete_app(name, studio_url, project, secure)
+
+@delete.command('appobj')
+@click.argument('slug')
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def app(slug, studio_url, secure):
+    delete_app_obj(slug, studio_url=studio_url, secure=secure)
 
 @delete.command('object')
 @click.argument('name')

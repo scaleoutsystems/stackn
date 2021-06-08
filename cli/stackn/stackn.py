@@ -523,6 +523,43 @@ def delete_app(name, studio_url=[], project=[], secure=True):
             print('Status code: {}'.format(res.status_code))
             print(res.text)
 
+def delete_app_obj(slug, studio_url=[], secure=True):
+    conf = {
+        'STACKN_URL': studio_url,
+        'STACKN_SECURE': secure
+    }
+    conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
+    auth_headers, conf = get_auth_headers(conf)
+    if not auth_headers:
+        print("Failed to set authentication headers.")
+        return False
+
+    payload = {
+        'slug': slug
+    }
+    endpoints = get_endpoints(conf['STACKN_URL'])
+    url = endpoints['admin']['apps']
+
+    apps = requests.get(url, headers=auth_headers, params=payload)
+    apps = apps.json()
+    for app in apps:
+        print("Deleting {}, revision {}.".format(app['name'], app['revision']))
+        print(url+str(app['id'])+'/')
+        r = requests.delete(url+str(app['id'])+'/', headers=auth_headers, verify=conf['STACKN_SECURE'])
+        print(r.text)
+
+    print(url)
+
+    # r = requests.delete(url, headers=auth_headers, data=payload) 
+
+    # if r:
+    #     print("Created template.")
+    # else:
+    #     print("Failed to create template.")
+    #     print(r.status_code)
+    #     print(r.text)
+    #     print(r.reason)
+
 def delete_object(name, version=None, studio_url=[], project=[], secure=True):
     if version:
         params = {'name': name, 'version': version}
