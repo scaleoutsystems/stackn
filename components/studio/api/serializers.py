@@ -60,7 +60,7 @@ class AppSerializer(ModelSerializer):
     category = AppCategorySerializer()
     class Meta:
         model = Apps
-        fields = ('name', 'category')
+        fields = ('id', 'revision', 'name', 'category')
 
 class AppStatusSerializer(ModelSerializer):
     class Meta:

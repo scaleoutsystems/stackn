@@ -497,7 +497,7 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
     permission_classes = (IsAuthenticated, )
     serializer_class = AppSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id', 'name', 'category']
+    filterset_fields = ['id', 'name', 'slug', 'category']
 
     def get_queryset(self):
         return Apps.objects.all()
@@ -541,13 +541,13 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
             print(err)
         return HttpResponse("Created new app.", status=200)
 
-    # def destroy(self, request, *args, **kwargs):
-    #     try:
-    #         obj = self.get_object()
-    #     except:
-    #         return HttpResponse("No such object.", status=400)
-    #     obj.delete()
-    #     return HttpResponse("Deleted object.", status=200)
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
 
 
 
@@ -585,7 +585,7 @@ class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin
                                        slug=slug,
                                        revision=revision,
                                        description=description,
-                                       template=template,
+                                       template=json.dumps(template),
                                        image=image)
             template.save()
         except Exception as err:
