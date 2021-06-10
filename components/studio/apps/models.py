@@ -26,6 +26,7 @@ class AppPermission(models.Model):
 class AppCategories(models.Model):
     name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, default="", primary_key=True)
+    priority = models.IntegerField(default=100)
     def __str__(self):
         return str(self.name)
 
@@ -43,6 +44,9 @@ class Apps(models.Model):
     table_field = models.JSONField(blank=True, null=True)
     logo = models.CharField(max_length=512, default="dist/applogos/stackn_logo_square.png")
     logo_file = models.FileField(upload_to='apps/logos/', null=True, blank=True)
+    priority = models.IntegerField(default=100)
+    access = models.CharField(max_length=20, blank=True, null=True, default="public")
+    projects = models.ManyToManyField('projects.Project')
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     
