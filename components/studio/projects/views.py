@@ -395,10 +395,13 @@ def details(request, user, project_slug):
     except TypeError as err:
         projects = []
         print(err)
-
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    if is_authorized:
-        request.session['project'] = project_slug
+    if request.user.is_superuser:
+        is_authorized = True
+    else:
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            request.session['project'] = project_slug
+    
         
     template = 'project.html'
 
@@ -407,10 +410,10 @@ def details(request, user, project_slug):
 
     project = None
     message = None
-    username = request.user.username
+    # username = request.user.username
     try:
-        owner = User.objects.filter(username=username).first()
-        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
+        # owner = User.objects.filter(username=username).first()
+        project = Project.objects.get(slug=project_slug)
         if is_authorized:
             request.session['project_name'] = project.name
     except Exception as e:
