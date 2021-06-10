@@ -25,7 +25,7 @@
                             <tbody>
                                 {% for project in projects %}
                                 <tr role="row" class="odd">
-                                    <td>{{ project.name }}</td>
+                                    <td><a href="{% url 'projects:details' project.owner project.slug  %}">{{ project.name }}</a></td>
                                     <td>{{ project.owner }}</td>
                                     <td>{{ project.created_at }}</td>
                                     <td>{{ project.status }}</td>

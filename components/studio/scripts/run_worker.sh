@@ -17,4 +17,8 @@ cd ..
 sleep 1
 
 #  watchmedo auto-restart -R --patterns="*.py" -- 
-watchmedo auto-restart -R --patterns="*.py" -- celery -A studio worker -l info --beat --scheduler django
+if [ -z "${DEBUG}" ] && [ -z "${TELEPRESENCE_ROOT}" ]; then
+    celery -A studio worker -l info --scheduler django
+else
+    watchmedo auto-restart -R --patterns="*.py" -- celery -A studio worker -l info --scheduler django
+fi
