@@ -255,7 +255,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     
     def destroy(self, request, *args, **kwargs):
         project = self.get_object()
-        if request.user == project.owner and project.status.lower() != "deleted":
+        if (request.user == project.owner or request.user.is_superuser) and project.status.lower() != "deleted":
             print("Delete project")
 
             print("Cleaning up Keycloak.")
@@ -511,6 +511,21 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
             description = request.data['description']
             settings = json.loads(request.data['settings'])
             table_field = json.loads(request.data['table_field'])
+            priority = request.data['priority']
+            access = 'public'
+            proj_list = []
+            if 'access' in request.data:
+                try:
+                    access = request.data['access']
+                    if access != "public":
+                        projs = access.split(',')
+                        for proj in projs:
+                            tmp = Project.objects.get(slug=proj)
+                            proj_list.append(tmp)
+                except Exception as err:
+                    print("Invalid access field")
+                    return HttpResponse("Invalid access field.", status=400)
+
             print(request.data)
             print("SETTINGS")
             print(settings)
@@ -518,6 +533,7 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
         except Exception as err:
             print(request.data)
             print(err)
+            return HttpResponse("Invalid app specification.", status=400)
         print("ADD APP")
         print(name)
         print(slug)
@@ -535,8 +551,11 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
                     revision=revision,
                     description=description,
                     table_field=table_field,
+                    priority=int(priority),
+                    access=access,
                     logo_file=request.FILES['logo'])
             app.save()
+            app.projects.add(*proj_list)
         except Exception as err:
             print(err)
         return HttpResponse("Created new app.", status=200)

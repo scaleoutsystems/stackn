@@ -6,6 +6,7 @@
     "url": "https://{{ release }}.{{ global.domain }}/wetty"
   },
   "description": "",
+  "priority": "100",
   "settings": {
     "apps": {
         "Persistent Volume":"many"

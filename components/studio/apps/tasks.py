@@ -589,7 +589,19 @@ def clean_resource_usage():
 
 @app.task
 def remove_deleted_app_instances():
-    AppInstance.objects.filter(state="Deleted").delete()
+    apps = AppInstance.objects.filter(state="Deleted")
+    print("NUMBER OF APPS TO DELETE: {}".format(len(apps)))
+    print(len(apps))
+    # apps.delete()
+    for app in apps:
+        try:
+            name = app.name
+            print("Deleting app instance: {}".format(name))
+            app.delete()
+            print("Deleted app instance: {}".format(name))
+        except Exception as err:
+            print("Failed to delete app instances.")
+            print(err)
 
 @app.task
 def clear_table_field():

@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect, reverse, redirect
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils.text import slugify
-from django.db.models import Q
+from django.db.models import Q, Subquery
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
@@ -93,11 +93,14 @@ def filtered(request, user, project, category):
     cat_obj = AppCategories.objects.get(slug=category)
     menu[category] = 'active'
     media_url = settings.MEDIA_URL
+    project = Project.objects.get(slug=project)
     try:
-        apps = Apps.objects.filter(category=cat_obj).order_by('slug', '-revision').distinct('slug')
+        apps = Apps.objects.filter(pk__in=Subquery(
+            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj).order_by('slug', '-revision').distinct('slug').values('pk')
+        )).order_by('-priority')
     except Exception as err:
         print(err)
-    project = Project.objects.get(slug=project)
+    
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
     appinstances = AppInstance.objects.filter(

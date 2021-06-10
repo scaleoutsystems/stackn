@@ -251,6 +251,12 @@ def create_app(settings="config.json",
     name = config['name']
     slug = config['slug']
     category = config['category']
+    access = 'public'
+    if 'access' in config:
+        access = config['access']
+    priority = 100
+    if 'priority' in config:
+        priority = config['priority']
     ftable.close()
     
 
@@ -260,7 +266,9 @@ def create_app(settings="config.json",
         'cat': category,
         'description': description,
         'settings': json.dumps(settings),
-        'table_field': json.dumps(table_field)
+        'table_field': json.dumps(table_field),
+        'access': access,
+        'priority': priority
     }
 
    
