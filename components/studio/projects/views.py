@@ -422,7 +422,7 @@ def details(request, user, project_slug):
         status_success, status_warning = get_status_defs()
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
         resources = list()
-        cats = AppCategories.objects.all()
+        cats = AppCategories.objects.all().order_by('-priority')
         rslugs = []
         for cat in cats:
             rslugs.append({"slug": cat.slug, "name": cat.name})
@@ -440,27 +440,16 @@ def details(request, user, project_slug):
     return render(request, template, locals())
 
 
-@login_required
-def delete(request, user, project_slug):
-    next_page = request.GET.get('next', '/projects/')
-
-    owner = User.objects.filter(username=user).first()
-    project = Project.objects.filter(owner=owner, slug=project_slug).first()
+def delete_project(project):
 
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
     from .tasks import delete_project_apps
-    delete_project_apps(project_slug)
+    delete_project_apps(project.slug)
 
     print("DELETING KEYCLOAK PROJECT RESOURCES")
     retval = delete_project_resources(project)
-
     if not retval:
-        next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
-        print("could not delete Keycloak resources!")
-        return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
-
-    print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
-    
+        print("Failed to delete Keycloak resources.")
 
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
@@ -469,6 +458,37 @@ def delete(request, user, project_slug):
         model.save()
     project.status = 'archived'
     project.save()
+
+@login_required
+def delete(request, user, project_slug):
+    next_page = request.GET.get('next', '/projects/')
+
+    owner = User.objects.filter(username=user).first()
+    project = Project.objects.filter(owner=owner, slug=project_slug).first()
+
+    delete_project(project)
+    # print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+    # from .tasks import delete_project_apps
+    # delete_project_apps(project_slug)
+
+    # print("DELETING KEYCLOAK PROJECT RESOURCES")
+    # retval = delete_project_resources(project)
+
+    # if not retval:
+    #     next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
+    #     print("could not delete Keycloak resources!")
+    #     return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
+
+    # print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
+    
+
+    # print("ARCHIVING PROJECT MODELS")
+    # models = Model.objects.filter(project=project)
+    # for model in models:
+    #     model.status = 'AR'
+    #     model.save()
+    # project.status = 'archived'
+    # project.save()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 
