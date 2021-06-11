@@ -2,7 +2,7 @@ minio
 certifi
 chardet
 
-django>=2.2.20
+django>=2.2.24
 django-appconf
 django-compressor
 django-cors-middleware
@@ -19,7 +19,7 @@ requests
 rjsmin
 six
 sqlparse
-urllib3>=1.25.8
+urllib3>=1.26.5
 vine
 gitdb2
 GitPython
