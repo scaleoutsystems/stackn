@@ -2,13 +2,13 @@ minio
 certifi
 chardet
 
-Django
+django>=2.2.24
 django-appconf
 django-compressor
 django-cors-middleware
 django-filter
 django-oauth-toolkit
-djangorestframework
+djangorestframework>=3.11.2
 
 idna
 oauthlib
@@ -19,7 +19,7 @@ requests
 rjsmin
 six
 sqlparse
-urllib3
+urllib3>=1.26.5
 vine
 gitdb2
 GitPython
@@ -30,7 +30,7 @@ kombu
 redis
 websocket-client
 kubernetes
-PyYAML
+PyYAML>=5.4
 django-bootstrap-modal-forms
 django-yamlfield
 Markdown

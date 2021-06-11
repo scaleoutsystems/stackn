@@ -1,13 +1,10 @@
-FROM python:3.7 as pybuild1
-#-alpine
+FROM python:3.8.10 as pybuild1
 LABEL maintainer="morgan@scaleoutsystems.com"
 #RUN apk update
 #RUN apk add musl-dev postgresql-dev gcc python3-dev linux-headers
 RUN mkdir /app
 COPY requirements.txt /app/
 RUN pip install -r /app/requirements.txt
-
-
 
 RUN apt update
 RUN apt install -y curl
