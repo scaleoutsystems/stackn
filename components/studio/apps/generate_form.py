@@ -112,8 +112,11 @@ def get_form_primitives(aset, project, appinstance=[]):
             if appinstance:
                 for subkey, subval in aset[key].items():
                     print(subkey)
-                    if subkey != 'meta' and subkey!='meta_title':
-                        primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
+                    try:
+                        if subkey != 'meta' and subkey!='meta_title':
+                            primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
+                    except Exception as err:
+                        print(err)
     print(primitives)
     return primitives
 
