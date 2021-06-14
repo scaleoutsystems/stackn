@@ -6,10 +6,26 @@ from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
 from projects.helpers import get_minio_keys
 import modules.keycloak_lib as keylib
+from django.template import engines
 import requests
 import flatten_json
+import json
 
-key_words = ['appobj', 'model', 'flavor', 'S3', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'export-cli', 'csrfmiddlewaretoken']
+key_words = ['appobj',
+             'model',
+             'flavor',
+             'S3',
+             'environment',
+             'volumes',
+             'apps',
+             'logs',
+             'permissions',
+             'keycloak-config',
+             'default_values',
+             'export-cli',
+             'csrfmiddlewaretoken',
+             'env_variables',
+             'publishable']
 
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
@@ -133,9 +149,16 @@ def serialize_apps(form_selection, project):
             
             app_name = key[4:]
             try:
-                app = Apps.objects.get(name=app_name)
-            except:
-                app = Apps.objects.get(slug=app_name)
+                app = Apps.objects.filter(name=app_name).order_by('-revision').first()
+                if not app:
+                    app = Apps.objects.filter(slug=app_name).order_by('-revision').first()
+            except Exception as err:
+                print("Failed to fetch app: {}".format(app_name))
+                print(err)
+                raise
+            if not app:
+                print("App not found: {}".format(app_name))
+                
             parameters['apps'][app.slug] = dict()
             print(app_name)
             print('id: '+str(form_selection[key]))
@@ -235,6 +258,30 @@ def serialize_cli(username, project, aset):
         
     return parameters
 
+def serialize_env_variables(username, project, aset):
+    print("SERIALIZING ENV VARIABLES")
+    parameters = dict()
+    parameters['app_env'] = dict()
+    print("fetching apps")
+    try:
+        apps = AppInstance.objects.filter(Q(owner__username=username) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), ~Q(state="Deleted"), project=project)
+    except Exception as err:
+        print(err)
+    print("Creating template engine")
+    django_engine = engines['django']
+    print(apps)
+    for app in apps:
+        params = app.parameters
+        appsettings = app.app.settings
+        if 'env_variables' in appsettings:
+            tmp = json.dumps(appsettings['env_variables'])
+            env_vars = json.loads(django_engine.from_string(tmp).render(params))
+            for key in env_vars.keys():
+                parameters['app_env'][slugify(key)] = env_vars[key]
+    print(parameters)
+ 
+    return parameters
+
 def serialize_app(form_selection, project, aset, username):
     print("SERIALIZING APP")
     parameters = dict()
@@ -271,5 +318,8 @@ def serialize_app(form_selection, project, aset, username):
 
     cli_values = serialize_cli(username, project, aset)
     parameters.update(cli_values)
+
+    env_variables = serialize_env_variables(username, project, aset)
+    parameters.update(env_variables)
 
     return parameters, app_deps, model_deps

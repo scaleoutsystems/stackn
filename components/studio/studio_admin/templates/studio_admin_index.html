@@ -2,107 +2,50 @@
 {% load static %}
 {% block content %}
 <div class="col-md-11">
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Studio administration</h2>
-    </div>
+    <div><h2>Studio administration</h2></div>
     {% if request.user.is_superuser %}
-    <div class="container-fluid">
-        <div class="row" style="min-height: 500px;">
-            <div class="col-md-4">
-                <table class="table studio-table">
-                    <thead class="studio-table-header">
-                        <tr>
-                            <th scope="col">Deployments</th>
-                            <th scope="col"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">Deployment Instances</th>
-                            <td class="studio-table-actions-column">
-                                <span>
-                                    <a href="{% url 'studio_admin:deployment_resources' %}" class="studio-table-a">
-                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
-                                            alt="pencil">
-                                        Edit
-                                    </a>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="table studio-table">
-                    <thead class="studio-table-header">
-                        <tr>
-                            <th scope="col">Labs</th>
-                            <th scope="col"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">Lab Sessions</th>
-                            <td class="studio-table-actions-column">
-                                <span>
-                                    <a href="{% url 'studio_admin:lab_resources' %}" class="studio-table-a">
-                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
-                                            alt="pencil">
-                                        Edit
-                                    </a>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="table studio-table">
-                    <thead class="studio-table-header">
-                        <tr>
-                            <th scope="col">Projects</th>
-                            <th scope="col"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">Projects</th>
-                            <td class="studio-table-actions-column">
-                                <span>
-                                    <a href="{% url 'studio_admin:project_resources' %}" class="studio-table-a">
-                                        <img class="studio-table-icon" src="{% static '/icons/pencil.svg' %}"
-                                            alt="pencil">
-                                        Edit
-                                    </a>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div class="row">
+        <div class="card flex-fill">
+            <div class="card-header">
             </div>
-            <div class="col-md-2 recent-actions">
-                <h4 class="recent-actions-h4">
-                    Recent actions
-                </h4>
-                <h6 class="recent-actions-h6">
-                    My actions
-                </h6>
-                <div id="activity_logs">
-                    <ul class="timeline">
-                        {% for log in activity_logs %}
-                        <li>
-                            <a target="_blank" href="#" class="studio-table-a">{{ log.headline }}</a>
-                            <p>{{ log.description }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
+            {% if projects %}
+            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="table-{{ object_type.slug }}" class="table">
+                            <thead>
+                                <tr role="row">
+                                    <th>Name</th>
+                                    <th>Owner</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                <tr role="row" class="odd">
+                                    <td><a href="{% url 'projects:details' project.owner project.slug  %}">{{ project.name }}</a></td>
+                                    <td>{{ project.owner }}</td>
+                                    <td>{{ project.created_at }}</td>
+                                    <td>{{ project.status }}</td>
+                                    <td>
+                                        <a href="{% url 'studio_admin:delete_project' project.slug %}">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+            {% else %}
+            <p style="margin-left: 25px;">No active projects.</p>
+            {% endif %}
         </div>
     </div>
     {% else %}
-    <div class="container-fluid">
-        <div class="row">
-            <p>You don't have permission to access this resource.</p>
-        </div>
-    </div>
+    <p>{{ request.user }} is not authorized.</p>
     {% endif %}
-</div>
+    
 {% endblock %}

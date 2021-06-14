@@ -7,8 +7,6 @@
     <div class="col-12 col-xl-6">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">Project</h5>
-                <h6 class="card-subtitle text-muted">To create a new project, fill in the form below.</h6>
             </div>
             <div class="card-body">
                 <form action="{% url 'projects:create' %}" method="POST">
@@ -29,7 +27,11 @@
                         <div class="col-sm-10">
                             <select class="form-control" id="project-template" name="project-template">
                                 {% for template in templates %}
-                                <option value="{{ template.pk }}">{{ template.name }}</option>
+                                  {% if template_selected == template.name %}
+                                  <option value="{{ template.pk }}" selected>{{ template.name }}</option>
+                                  {% else %}
+                                  <option value="{{ template.pk }}">{{ template.name }}</option>
+                                  {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -40,13 +42,6 @@
                         <div class="col-sm-10">
                             <textarea class="form-control" placeholder="Project description" rows="3" id="description"
                                 name="description"></textarea>
-                        </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="repository" class="col-form-label col-sm-2 text-sm-right">Git repository</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" placeholder="Git repository" id="repository"
-                                name="repository">
                         </div>
                     </div>
                     <div class="mb-3 row">

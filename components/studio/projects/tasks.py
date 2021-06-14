@@ -79,14 +79,32 @@ def create_resources_from_template(user, project_slug, template):
                 flavor.save()
         if 'environments' == key:
             environments = item
+            print(item)
             for key, item in environments.items():
-                app = Apps.objects.get(slug=item['app'])
-                environment = Environment(name=key,
-                                        project=project,
-                                        repository=item['repository'],
-                                        image=item['image'],
-                                        app=app)
-                environment.save()
+                try:
+                    app = Apps.objects.filter(slug=item['app']).order_by('-revision')[0]
+                except Exception as err:
+                    print("App for environment not found.")
+                    print(item['app'])
+                    print(project_slug)
+                    print(user)
+                    print(err)
+                    raise
+                try:
+                    environment = Environment(name=key,
+                                            project=project,
+                                            repository=item['repository'],
+                                            image=item['image'],
+                                            app=app)
+                    environment.save()
+                except Exception as err:
+                    print("Failed to create new environment: {}".format(key))
+                    print(project)
+                    print(item['repository'])
+                    print(item['image'])
+                    print(app)
+                    print(user)
+                    print(err)
         # if 'S3' == key:
         #     S3 = item
         #     for key, item in S3.items():

@@ -5,6 +5,7 @@ import time
 import requests
 from celery import shared_task
 # from celery.decorators import periodic_task
+from django.template import engines
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
@@ -268,6 +269,7 @@ def deploy_resource(instance_pk, action='create'):
     if keycloak_success:
         instance.info['keycloak'].update({"success": True})
         print("Deploying resource")
+
         results = controller.deploy(instance.parameters)
         stdout, stderr = process_helm_result(results)
         if results.returncode == 0:
@@ -587,7 +589,19 @@ def clean_resource_usage():
 
 @app.task
 def remove_deleted_app_instances():
-    AppInstance.objects.filter(state="Deleted").delete()
+    apps = AppInstance.objects.filter(state="Deleted")
+    print("NUMBER OF APPS TO DELETE: {}".format(len(apps)))
+    print(len(apps))
+    # apps.delete()
+    for app in apps:
+        try:
+            name = app.name
+            print("Deleting app instance: {}".format(name))
+            app.delete()
+            print("Deleted app instance: {}".format(name))
+        except Exception as err:
+            print("Failed to delete app instances.")
+            print(err)
 
 @app.task
 def clear_table_field():

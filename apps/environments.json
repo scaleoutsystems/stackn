@@ -1,0 +1,14 @@
+{
+  "environments": {
+    "Jupyter STACKn": {
+        "repository": "scaleoutsystems",
+        "image": "jupyter-stackn:v0.1.5",
+        "app": "my-lab"
+    },
+    "Ubuntu": {
+        "repository": "scaleoutsystems",
+        "image": "wetty-ubuntu:v0.1.2",
+        "app": "ubuntu-terminal"
+    }
+  }
+}

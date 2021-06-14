@@ -1,0 +1,15 @@
+{
+    "name": "VS Code",
+    "slug": "vscode",
+    "category": "develop",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "settings": {
+        "apps": {
+            "Persistent Volume":"many"
+        },
+        "export-cli": "True"
+    }
+}

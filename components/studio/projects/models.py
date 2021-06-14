@@ -127,12 +127,18 @@ class MLFlow(models.Model):
         return '{} ({})'.format(self.name, self.project.slug)
 
 class ProjectTemplate(models.Model):
-    name = models.CharField(max_length=512, unique=True)
+    name = models.CharField(max_length=512)
     slug = models.CharField(max_length=512, default="")
+    revision = models.IntegerField(default=1)
     description = models.TextField(null=True, blank=True)
     template = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='projecttemplates/images/', null=True, blank=True, default=None)
+    
+    class Meta:
+        unique_together = ('slug', 'revision',)
+    
     def __str__(self):
-        return '{}'.format(self.name)
+        return '{} ({})'.format(self.name, self.revision)
 
 class Project(models.Model):
     objects = ProjectManager()
@@ -148,15 +154,19 @@ class Project(models.Model):
 
     status = models.CharField(max_length=20, null=True, blank=True, default="active")
 
+
+    project_image = models.ImageField(upload_to='projects/images/', null=True, blank=True, default=None)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
     # These fields should be removed.
     image = models.CharField(max_length=2048, blank=True, null=True)
     project_key = models.CharField(max_length=512)
     project_secret = models.CharField(max_length=512)
     # ----------------------
-
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
     # These fields should be removed.
     repository = models.CharField(max_length=512, null=True, blank=True)
     repository_imported = models.BooleanField(default=False)

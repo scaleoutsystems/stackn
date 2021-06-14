@@ -2,35 +2,16 @@
 {% load static %}
 {% block extra_sidebar_items %}
 
+
+
 <li class="sidebar-header">
-    {{ project.name }}
+    Project
 </li>
 <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
         <i class="align-middle" data-feather="home"></i>
-        <span class="align-middle">Overview</span>
+        <span class="align-middle">Dashboard</span>
     </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'monitor:overview' request.user project.slug %}">
-        <i class="align-middle" data-feather="trending-up"></i>
-        <span class="align-middle">Monitor</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
-        <i class="align-middle" data-feather="settings"></i>
-        <span class="align-middle">Settings</span>
-    </a>
-</li>
-<li class="sidebar-item">
-    <a class="sidebar-link" href="{% url 'projects:project_readme' request.user project.slug %}">
-        <i class="align-middle" data-feather="code"></i>
-        <span class="align-middle">README.md</span>
-    </a>
-</li>
-<li class="sidebar-header">
-    Resources
 </li>
 <li class="sidebar-item {{ menu.objects }}">
     <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
@@ -69,11 +50,18 @@
     </a>
 </li>
 
+<li class="sidebar-item">
+    <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
+        <i class="align-middle" data-feather="settings"></i>
+        <span class="align-middle">Settings</span>
+    </a>
+</li>
+
 
 {% endblock %}
 
 {% block extra_topnav_items %}
-
+<!-- 
 <li class="nav-item dropdown">
     <a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
         <div class="position-relative">
@@ -139,5 +127,5 @@
             <a href="#" class="text-muted">Show all notifications</a>
         </div>
     </div>
-</li>
+</li> -->
 {% endblock %}

@@ -15,7 +15,21 @@ import flatten_json
 import uuid
 from datetime import datetime, timedelta
 
-key_words = ['appobj', 'model', 'flavor', 'environment', 'volumes', 'apps', 'logs', 'permissions', 'keycloak-config', 'default_values', 'export-cli', 'csrfmiddlewaretoken', 'S3']
+key_words = ['appobj',
+             'model',
+             'flavor',
+             'environment',
+             'volumes',
+             'apps',
+             'logs',
+             'permissions',
+             'keycloak-config',
+             'default_values',
+             'export-cli',
+             'csrfmiddlewaretoken',
+             'S3',
+             'env_variables',
+             'publishable']
 
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
@@ -45,14 +59,16 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
         app_deps = dict()
         apps = aset['apps']
         for app_name, option_type in apps.items():
+            print(">>>>>")
             print(app_name)
-            app_obj = Apps.objects.get(name=app_name)
-
+            app_obj = Apps.objects.filter(name=app_name) #.order_by('-revision').first()
+            print(app_obj)
+            print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
             app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                                       ~Q(state="Deleted"),
                                                       project=project,
-                                                      app=app_obj)
+                                                      app__name=app_name)
             # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
@@ -61,7 +77,7 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
                 app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
                                                            ~Q(state="Deleted"),
                                                            project=project,
-                                                           app=app_obj,
+                                                           app__name=app_name,
                                                            parameters__contains={
                                                                "appobj": {
                                                                     myapp.slug: True
@@ -96,8 +112,11 @@ def get_form_primitives(aset, project, appinstance=[]):
             if appinstance:
                 for subkey, subval in aset[key].items():
                     print(subkey)
-                    if subkey != 'meta' and subkey!='meta_title':
-                        primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
+                    try:
+                        if subkey != 'meta' and subkey!='meta_title':
+                            primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
+                    except Exception as err:
+                        print(err)
     print(primitives)
     return primitives
 
@@ -147,7 +166,7 @@ def get_form_environments(aset, project, app, appinstance=[]):
     if 'environment' in aset:
         dep_environment = True
         if aset['environment']['type'] == "match":
-            environments['objs'] = Environment.objects.filter(project=project, app=app)
+            environments['objs'] = Environment.objects.filter(project=project, app__slug=app.slug)
         elif aset['environment']['type'] == "any":
             environments['objs'] = Environment.objects.filter(project=project)
         elif 'apps' in aset['environment']:

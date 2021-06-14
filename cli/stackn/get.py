@@ -3,6 +3,7 @@ import prettytable
 
 from .main import main
 from .stackn import get_projects, call_project_endpoint, get_current, get_remote
+from .stackn import call_admin_endpoint
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -241,16 +242,21 @@ def mlflow(project, studio_url, secure):
     _print_table(mlflowlist, ['Name', 'URL', 'S3'], ['name', 'URL', 'S3'])
 
 @get.command('templates')
-@click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', required=False, default=True)
-def templates(project, studio_url, secure):
+def templates(studio_url, secure):
     conf = {
-        'STACKN_PROJECT': project,
         'STACKN_URL': studio_url,
         'STACKN_SECURE': secure
     }
-    print('templates')
+    templates = call_admin_endpoint('project_templates', conf=conf)
+    templateslist = list()
+    for template in templates:
+        tmp = dict()
+        tmp['name'] = template['name']
+        tmp['description'] = template['description']
+        templateslist.append(tmp)
+    _print_table(templateslist, ['Name', 'Description'], ['name', 'description'])
 
 ALIASES = {
     "projects": project,

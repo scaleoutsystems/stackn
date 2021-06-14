@@ -1,164 +1,55 @@
-{% extends 'base.html' %}
+{% extends base_template %}
 
 {% block content %}
 <h1 class="h3 mb-3">Model Details</h1>
 
 <div class="row">
     <div class="col-12 col-lg-12">
-        <div class="tab">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#tab-1" data-bs-toggle="tab" role="tab">General</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#tab-3" data-bs-toggle="tab" role="tab">Metrics</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#tab-5" data-bs-toggle="tab" role="tab">Model Card</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane active" id="tab-1" role="tabpanel">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">{{ model.name }}</h5>
-                        <p>{{ model.description }}</p>
-                    </div>
-                    <div class="card-body">
-                        <dl class="row">
-                            <dt class="col-4 col-xxl-3">Project</dt>
-                            <dd class="col-8 col-xxl-9">
-                                {{ model.project.name }}
-                            </dd>
-                            <dt class="col-4 col-xxl-3 mb-0">Project Owner</dt>
-                            <dd class="col-8 col-xxl-9 mb-0">
-                                {{ model.project.owner }}
-                            </dd>
-                        </dl>
-                        <hr>
-                        <dl class="row">
-                            <dt class="col-4 col-xxl-3">Version</dt>
-                            <dd class="col-8 col-xxl-9">
-                                <p class="mb-1">{{ model.version }}</p>
-                            </dd>
-                            <dt class="col-4 col-xxl-3 mb-0">Uploaded</dt>
-                            <dd class="col-8 col-xxl-9 mb-0">
-                                <p class="mb-0">{{ model.uploaded_at }}</p>
-                            </dd>
-                            <dt class="col-4 col-xxl-3 mb-0">URL</dt>
-                            <dd class="col-8 col-xxl-9 mb-0">
-                                <p class="mb-0">{{ model.url }}</p>
-                            </dd>
-                            <dt class="col-4 col-xxl-3 mb-0">Resource URL</dt>
-                            <dd class="col-8 col-xxl-9 mb-0">
-                                <p class="mb-0">{{ model.resource }}</p>
-                            </dd>
-                            {% if model.docker_image %}
-                            <dt class="col-4 col-xxl-3 mb-0">Docker image</dt>
-                            <dd class="col-8 col-xxl-9 mb-0">
-                                <p class="mb-0">
-                                    {{ model.docker_image.name }}/
-                                    {{ model.docker_image.repository }}/
-                                    {{ model.docker_image.image }}
-                                </p>
-                            </dd>
-                            {% endif %}
-                        </dl>
-                        <hr>
-                        <dl class="row">
-                            <dt class="col-4 col-xxl-3">Status</dt>
-                            <dd class="col-8 col-xxl-9">
-                                <span class="badge
-                                {% if model.status == 'DP' %}bg-success
-                                {% elif model.status == 'AR' %}bg-danger
-                                {% else %}bg-info
-                                {% endif%} mb-1">{{ model.get_status_display }}</span>
-                            </dd>
-                            {% if user.is_authenticated and user == model.project.owner %}
-                            <form method="POST"
-                                  action="{% url 'models:change_access' request.user model.project.slug model.id %}">
-                                {% csrf_token %}
-
-                                <div class="mb-3 row">
-                                    <dt class="col-4 col-xxl-3 mb-0">Access Level</dt>
-                                    <dd class="col-8 col-xxl-9 mb-0">
-                                        <select id="id_access" type="text" name="access" maxlength="2" required
-                                                class="form-control">
-                                            <option selected>
-                                                {{ model.get_access_display }}
-                                            </option>
-                                            {% for k, v in model_access_choices.items %}
-                                            <option value="{{ k }}">{{ v }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-save"></i>
-                                            Save
-                                        </button>
-                                    </dd>
-                                </div>
-                            </form>
-                            {% else %}
-                            <p class="mb-0">{{ model.get_access_display }}</p>
-                            {% endif%}
-                        </dl>
-                    </div>
-                </div>
-                <div class="tab-pane" id="tab-3" role="tabpanel">
-                    {% if report_dtos %}
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th style="width:20%;">ID</th>
-                            <th style="width:40%">Description</th>
-                            <th class="d-none d-md-table-cell" style="width:30%">Created</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for report in report_dtos %}
-                        <tr>
-                            <td>{{ report.id }}</td>
-                            <td>{{ report.description }}</td>
-                            <td class="d-none d-md-table-cell">{{ report.created_at }}</td>
-                            <td class="table-action">
-                                <a href="{% url 'reports:visualize_public' report.id %}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                         stroke-linejoin="round" class="feather feather-edit align-middle">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </a>
-                                <a href="{{ report.filename }}" download="">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                         stroke-linejoin="round" class="feather feather-download align-middle">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="7 10 12 15 17 10"></polyline>
-                                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                                    </svg>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="col-md-12 d-flex justify-content-center">
-                        No metrics available for this model.
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="tab-pane" id="tab-5" role="tabpanel">
-                    {% if model.model_card %}
-                    {{ model.model_card |safe }}
-                    {% else %}
-                    <div class="col-md-12 d-flex justify-content-center">
-                        <p>No model card available to present.</p>
-                    </div>
-                    {% endif %}
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ model.name }}</h5>
+                <p>{{ model.description }}</p>
             </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3">Project</dt>
+                    <dd class="col-8 col-xxl-9">
+                        {{ model.project.name }}
+                    </dd>
+                    <dt class="col-4 col-xxl-3 mb-0">Project Owner</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        {{ model.project.owner }}
+                    </dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3">Version</dt>
+                    <dd class="col-8 col-xxl-9">
+                        <p class="mb-1">{{ model.version }}</p>
+                    </dd>
+                    <dt class="col-4 col-xxl-3 mb-0">Uploaded</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        <p class="mb-0">{{ model.uploaded_at }}</p>
+                    </dd>
+                </dl>
+                <hr>
+                <a href="{{ media_url }}{{ latest_model_obj.obj }}">Download</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            {% if model.model_card %}
+            <div class="card-header">
+                <h5 class="card-title mb-0">Model Card</h5>
+            </div>
+            <div class="card-body">
+            {{ model.model_card | safe }}
+            </div>
+            {% else %}
+            <div class="card-body">
+                <p>No model card available.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,5 +1,6 @@
 import uuid
 import json
+import random
 from ast import literal_eval
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, JsonResponse
@@ -16,14 +17,17 @@ from projects.helpers import create_project_resources
 from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.files import File
 import modules.keycloak_lib as kc
-from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName
+from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
 from models.models import ObjectType
-from apps.models import AppInstance
+from apps.models import AppInstance, Apps, AppCategories
+from portal.models import PublishedModel, PublicModelObject
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
 from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
 from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer, ReleaseNameSerializer
+from .serializers import AppSerializer, ProjectTemplateSerializer
 
 from projects.tasks import create_resources_from_template
 from apps.tasks import delete_resource
@@ -65,11 +69,26 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 
         try:
             model_name = request.data['name']
+            prev_model = Model.objects.filter(name=model_name, project=project).order_by('-version')
+            print(prev_model)
+            if len(prev_model)>0:
+                print("ACCESS")
+                access = prev_model[0].access
+                print(access)
+                
+            else:
+                access = "PR"
             release_type = request.data['release_type']
             description = request.data['description']
             model_card= request.data['model_card']
             model_uid = request.data['uid']
             object_type_slug = request.data['object_type']
+            # if 'image' not in request.FILES:
+            #     img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+            #     img_file = open(img, 'rb')
+            #     image = File(img_file)
+            # else:
+            #     image = request.FILES['image']
             object_type = ObjectType.objects.get(slug=object_type_slug)
         except Exception as err:
             print(err)
@@ -82,9 +101,22 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
                             model_card=model_card,
                             uid=model_uid,
                             project=project,
-                            s3=project.s3storage)
+                            s3=project.s3storage,
+                            access=access)
             new_model.save()
+            img_uid = str(uuid.uuid1().hex)
+            # new_model.model_card_headline.save(img_uid, image)
             new_model.object_type.set([object_type])
+
+            pmodel = PublishedModel.objects.get(name=new_model.name, project=new_model.project)
+            if pmodel:
+                # Model is published, so we should create a new
+                # PublishModelObject.
+                
+                from models.helpers import add_pmo_to_publish
+                add_pmo_to_publish(new_model, pmodel)
+
+
         except Exception as err:
             print(err)
             return HttpResponse('Failed to create object: failed to save object.', 400)
@@ -223,7 +255,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     
     def destroy(self, request, *args, **kwargs):
         project = self.get_object()
-        if request.user == project.owner and project.status.lower() != "deleted":
+        if (request.user == project.owner or request.user.is_superuser) and project.status.lower() != "deleted":
             print("Delete project")
 
             print("Cleaning up Keycloak.")
@@ -451,3 +483,130 @@ class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
             return HttpResponse("No such object.", status=400)
         obj.delete()
         return HttpResponse("Deleted object.", status=200)
+
+# STACKn admin API endpoints
+
+# class AdminList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
+#     permission_classes = (IsAuthenticated, ProjectPermission,)
+
+#     def get_queryset(self):
+#         return HttpResponse("Admin endpoints.", status=200)
+
+class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = AppSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'name', 'slug', 'category']
+
+    def get_queryset(self):
+        return Apps.objects.all()
+    
+    def create(self, request, *args, **kwargs):
+        print("IN CREATE")
+        try:
+            name = request.data['name']
+            slug = request.data['slug']
+            category = AppCategories.objects.get(slug=request.data['cat'])
+            description = request.data['description']
+            settings = json.loads(request.data['settings'])
+            table_field = json.loads(request.data['table_field'])
+            priority = request.data['priority']
+            access = 'public'
+            proj_list = []
+            if 'access' in request.data:
+                try:
+                    access = request.data['access']
+                    if access != "public":
+                        projs = access.split(',')
+                        for proj in projs:
+                            tmp = Project.objects.get(slug=proj)
+                            proj_list.append(tmp)
+                except Exception as err:
+                    print("Invalid access field")
+                    return HttpResponse("Invalid access field.", status=400)
+
+            print(request.data)
+            print("SETTINGS")
+            print(settings)
+            print(table_field)
+        except Exception as err:
+            print(request.data)
+            print(err)
+            return HttpResponse("Invalid app specification.", status=400)
+        print("ADD APP")
+        print(name)
+        print(slug)
+        try:
+            app_latest_rev = Apps.objects.filter(slug=slug).order_by('-revision')
+            if app_latest_rev:
+                revision = app_latest_rev[0].revision+1
+            else:
+                revision = 1
+            app = Apps(name=name,
+                    slug=slug,
+                    category=category,
+                    settings=settings,
+                    chart_archive=request.FILES['chart'],
+                    revision=revision,
+                    description=description,
+                    table_field=table_field,
+                    priority=int(priority),
+                    access=access,
+                    logo_file=request.FILES['logo'])
+            app.save()
+            app.projects.add(*proj_list)
+        except Exception as err:
+            print(err)
+        return HttpResponse("Created new app.", status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            obj = self.get_object()
+        except:
+            return HttpResponse("No such object.", status=400)
+        obj.delete()
+        return HttpResponse("Deleted object.", status=200)
+
+
+
+class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  ListModelMixin):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProjectTemplateSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'name', 'slug']
+
+    def get_queryset(self):
+        return ProjectTemplate.objects.all()
+    
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        try:
+            settings = json.loads(request.data['settings'])
+            name = settings['name']
+            slug = settings['slug']
+            description = settings['description']
+            template = settings['template']
+            image = request.FILES['image']
+        except Exception as err:
+            print(request.data)
+            print(err)
+            return HttpResponse("Failed to create new template.".format(name), status=400)
+
+        try:
+            template_latest_rev = ProjectTemplate.objects.filter(slug=slug).order_by('-revision')
+            if template_latest_rev:
+                revision = template_latest_rev[0].revision+1
+            else:
+                revision = 1
+            template = ProjectTemplate(name=name,
+                                       slug=slug,
+                                       revision=revision,
+                                       description=description,
+                                       template=json.dumps(template),
+                                       image=image)
+            template.save()
+        except Exception as err:
+            print(err)
+        return HttpResponse("Created new template: {}.".format(name), status=200)

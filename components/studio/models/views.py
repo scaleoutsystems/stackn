@@ -2,6 +2,9 @@ import uuid
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.conf import settings
+from django.db.models import Q
+from django.core.files import File
 from projects.models import Project, ProjectLog, Environment
 from reports.models import Report, ReportGenerator
 from .models import Model, ModelLog, Metadata, ObjectType
@@ -15,36 +18,35 @@ from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
 from .forms import UploadModelCardHeadlineForm, EnvironmentForm
+import modules.keycloak_lib as kc
+from portal.models import PublicModelObject, PublishedModel
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 
 def index(request):
-    models = Model.objects.filter(access='PU', project__isnull=False).order_by('-uploaded_at')
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+    except Exception as err:
+        print("User not logged in.")
+    base_template = 'base.html'
+    if 'project' in request.session:
+        project_slug = request.session['project']
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            try:
+                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+                base_template = 'baseproject.html'
+            except Exception as err:
+                project = []
+                print(err)
+            if not project:
+                base_template = 'base.html'
+            print(base_template)
 
-    dtos = []
-    for m in models:
-        headline_name = ""
-        headline_source = "default"
-        if not m.model_card_headline:
-            headline_id = randint(8, 13)
-            headline_name = "dist/img/patterns/image {}.png".format(headline_id)
-        else:
-            headline_name = m.model_card_headline.url
-            headline_source = "custom"
-
-        obj = {
-            "pk": m.pk,
-            "download_url": get_download_url(m.pk),
-            "img_name": headline_name,
-            "img_source": headline_source,
-            "name": m.name,
-            "description": m.description,
-            "project_slug": m.project.slug,
-            "owner": m.project.owner
-        }
-        dtos.append(obj)
+    media_url = settings.MEDIA_URL
+    published_models = PublishedModel.objects.all()
 
     return render(request, 'models_cards.html', locals())
 
@@ -54,17 +56,68 @@ def list(request, user, project):
     menu = dict()
     menu['objects'] = 'active'
     template = 'models_list.html'
-    project = Project.objects.get(slug=project)
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+
+    project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+    current_project = project.name
     objects = []
     
-    object_types = ObjectType.objects.all()
-    for object_type in object_types:
-        objects.append((object_type, Model.objects.filter(project=project, object_type__slug=object_type.slug)))
-    print("OBJECTS")
-    print(objects)
-    active_type = 'model'
+    models = Model.objects.filter(project=project).order_by('name', '-version').distinct('name')
+
 
     return render(request, template, locals())
+
+
+@login_required
+def unpublish_model(request, user, project, id):
+    # TODO: Check that user has access to this particular model.
+    model = Model.objects.get(pk=id)
+
+    try:
+        pmodel = PublishedModel.objects.get(name=model.name, project=model.project)
+        pmos = pmodel.model_obj.all()
+        pmos.delete()
+        pmodel.delete()
+    except Exception as err:
+        print(err)
+    model.access = "PR"
+    model.save()
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project}))
+
+@login_required
+def publish_model(request, user, project, id):
+    print("PUBLISHING MODEL")
+    import s3fs
+    import random
+    from .helpers import add_pmo_to_publish
+    # TODO: Check that user has access to this particular model.
+    
+    
+    model = Model.objects.get(pk=id)
+    print(model)
+    # Default behavior is that all versions of a model are published.
+    models = Model.objects.filter(name=model.name, project=model.project)
+    
+    
+    img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+    img_file = open(img, 'rb')
+    image = File(img_file)
+    
+    pmodel = PublishedModel(name=model.name, project=model.project)
+    pmodel.save()
+    img_uid = str(uuid.uuid1().hex)
+    pmodel.img.save(img_uid, image)
+
+    # Copy files to public location
+    for mdl in models:
+        add_pmo_to_publish(mdl, pmodel)
+    
+    model.access = "PU"
+    model.save()
+
+    return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project}))
+
+    
 
 
 @login_required
@@ -152,6 +205,7 @@ def add_docker_image(request, user, project, id):
 
 @login_required
 def details(request, user, project, id):
+    
     project = Project.objects.filter(slug=project).first()
     model = Model.objects.filter(id=id).first()
     model_access_choices = ['PU', 'PR', 'LI']
@@ -281,37 +335,67 @@ def get_chart_data(md_objects):
     return metrics
 
 
-def details_public(request, id):
-    model = Model.objects.filter(pk=id).first()
+def import_model(request, id):
+    print("IMPORTING MODEL")
 
-    model_access_choices = {'PU': 'Public', 'PR': 'Private', 'LI': 'Limited'}
-    del model_access_choices[model.access]
-
-    reports = Report.objects.filter(model__pk=id, status='C').order_by('-created_at')
-    report_dtos = []
-    for report in reports:
-        report_dtos.append({
-            'id': report.id,
-            'description': report.description,
-            'created_at': report.created_at,
-            'filename': get_download_link(model.project.pk, 'report_{}.json'.format(report.id))
-        })
-
-    filename = None
-    readme = None
-    import requests as r
-    url = 'http://{}-file-controller/models/{}/readme'.format(model.project.slug, model.name)
+@login_required
+def details_private(request, user, project, id):
     try:
-        response = r.get(url)
-        if response.status_code == 200 or response.status_code == 203:
-            payload = response.json()
-            if payload['status'] == 'OK':
-                filename = payload['filename']
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+    except Exception as err:
+        print("User not logged in.")
+    base_template = 'base.html'
 
-                md = markdown.Markdown(extensions=['extra'])
-                readme = md.convert(payload['readme'])
-    except Exception as e:
-        logger.error("Failed to get response from {} with error: {}".format(url, e))
+    project_slug = project
+    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    if is_authorized:
+        try:
+            project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+            base_template = 'baseproject.html'
+        except Exception as err:
+            project = []
+            print(err)
+        if not project:
+            base_template = 'base.html'
+
+    media_url = settings.MEDIA_URL
+    # TODO: Check that user has access to this model (though already checked that user has access to project)
+    model = Model.objects.get(pk=id) 
+    # published_model = PublishedModel(pk=id)
+    # model_objs = published_model.model_obj.order_by('-model__version')
+    # latest_model_obj = model_objs[0]
+    # model = latest_model_obj.model
+    # print(model_objs)
+    # print(latest_model_obj)
+
+    return render(request, 'models_details_public.html', locals())
+
+def details_public(request, id):
+    try:
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+    except Exception as err:
+        print("User not logged in.")
+    base_template = 'base.html'
+    if 'project' in request.session:
+        project_slug = request.session['project']
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            try:
+                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+                base_template = 'baseproject.html'
+            except Exception as err:
+                project = []
+                print(err)
+            if not project:
+                base_template = 'base.html'
+
+    media_url = settings.MEDIA_URL
+    published_model = PublishedModel(pk=id)
+    model_objs = published_model.model_obj.order_by('-model__version')
+    latest_model_obj = model_objs[0]
+    model = latest_model_obj.model
+    print(model_objs)
+    print(latest_model_obj)
 
     return render(request, 'models_details_public.html', locals())
 

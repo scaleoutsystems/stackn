@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect, reverse, redirect
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils.text import slugify
-from django.db.models import Q
+from django.db.models import Q, Subquery
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
@@ -25,6 +25,7 @@ def get_status_defs():
     status_success = ['Running', 'Succeeded', 'Success']
     status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
     return status_success, status_warning
+
 
 # Create your views here.
 def index(request, user, project):
@@ -84,18 +85,29 @@ def logs(request, user, project, ai_id):
 
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     status_success, status_warning = get_status_defs()
     menu = dict()
 
     template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
     menu[category] = 'active'
-    apps = Apps.objects.filter(category=cat_obj)
+    media_url = settings.MEDIA_URL
     project = Project.objects.get(slug=project)
+    try:
+        apps = Apps.objects.filter(pk__in=Subquery(
+            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj).order_by('slug', '-revision').distinct('slug').values('pk')
+        )).order_by('-priority')
+    except Exception as err:
+        print(err)
+    
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
-    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                              ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold), app__category=cat_obj, project=project).order_by('-created_on')
+    appinstances = AppInstance.objects.filter(
+        Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+        ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold),
+        app__category=cat_obj,
+        project=project).order_by('-created_on')
     pk_list = ''
     for instance in appinstances:
         pk_list += str(instance.pk)+','
@@ -179,13 +191,15 @@ def create(request, user, project, app_slug, data=[], wait=False):
 
     existing_app_name = ""
     project = Project.objects.get(slug=project)
-    app = Apps.objects.get(slug=app_slug)
+    app = Apps.objects.filter(slug=app_slug).order_by('-revision')[0]
+        
 
     aset = app.settings
 
     # Set up form
+    print("GENERATING FORM")
     form = generate_form(aset, project, app, user, [])
-
+    print("FORM DONE")
     if data or request.method == "POST":
         if not data:
             data = request.POST
@@ -318,6 +332,28 @@ def create(request, user, project, app_slug, data=[], wait=False):
         else:
             return JsonResponse({"status": "ok"})
     return render(request, template, locals())
+
+def publish(request, user, project, category, ai_id):
+    print("Publish app {}".format(ai_id))
+    print(project)
+    try:
+        app = AppInstance.objects.get(pk=ai_id)
+        print(app)
+        # TODO: Check that user is allowed to publish this app.
+        print("setting public")
+        if app.access == "private":
+            app.access = "public"
+        else:
+            app.access = "private"
+        print("saving")
+        app.save()
+        print("done")
+    except Exception as err:
+        print(err)
+
+    return HttpResponseRedirect(
+                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+
 
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends base_template %}
 {% load static %}
 
 {% block content %}
@@ -6,43 +6,19 @@
 
 <div class="row">
 
-    {% if not dtos %}
+    {% if not publish_models %}
     <p>No publicly published services available.</p>
     {% endif %}
 
-    {% for model in dtos %}
-    <div class="col-12 col-md-6 col-lg-4 card-holder-custom">
-        <div class="card card-custom">
-            {% if model.headline_source == "default" %}
-            <img class="card-img-top" src="{% static model.headline_name %}" alt="pattern">
-            {% else %}
-            <img class="card-img-top" src="{{ model.headline_name }}" alt="pattern">
-            {% endif %}
+    {% for model in published_models %}
+    <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <img class="card-img-top" src="{{ media_url }}{{ model.img }}" alt="pattern">
+
             <div class="card-header">
-                <div class="card-actions float-end">
-                    <div class="dropdown show">
-                        <a href="#" data-bs-toggle="dropdown" data-display="static">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="feather feather-more-horizontal align-middle">
-                                <circle cx="12" cy="12" r="1"></circle>
-                                <circle cx="19" cy="12" r="1"></circle>
-                                <circle cx="5" cy="12" r="1"></circle>
-                            </svg>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="{{ model.download_url }}" download="">Download model</a>
-                            {% if user.is_authenticated and user == model.owner %}
-                            <a class="dropdown-item" href="{% url 'models:upload_model_headline' request.user model.project_slug model.pk %}">Change headline</a>
-                            <a class="dropdown-item" href="{% url 'models:add_docker_image' request.user model.project_slug model.pk %}">Add Docker image</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
                 <h5 class="card-title mb-0">{{ model.name }}</h5>
             </div>
             <div class="card-body">
-                <p class="card-text">{{ model.description }}</p>
                 <a href="{% url 'models:details_public' model.pk %}"
                    class="card-link">Open</a>
             </div>

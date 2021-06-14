@@ -1,0 +1,22 @@
+{
+    "name": "Minio",
+    "slug": "minio",
+    "category": "store",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "settings": {
+        "apps":{
+            "Persistent Volume":"one"
+        },
+        "credentials": {
+            "access_key": {"type": "string", "default":"accesskey", "title": "Access Key"},
+            "secret_key": {"type": "string", "default": "secretkey123", "title": "Secret Key"}
+        },
+        "keycloak-config": {
+            "roles": ["readwrite"],
+            "default-roles": ["readwrite"]
+        }
+    }
+}

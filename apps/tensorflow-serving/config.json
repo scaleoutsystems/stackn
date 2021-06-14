@@ -1,0 +1,23 @@
+{
+    "name": "Tensorflow Serving",
+    "slug": "tensorflow-serving",
+    "category": "serve",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}/v1/models/models:predict"
+    },
+    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "settings": {
+        "model":"one",
+        "flavor": "one",
+        "logs": ["serve", "gatekeeper"],
+        "permissions": {
+            "public": {"value":"false", "option": "true"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        },
+        "env_variables": {
+            "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/v1/models/models:predict"
+        },
+        "publishable": "true"
+    }
+}
