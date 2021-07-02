@@ -251,7 +251,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         for the currently authenticated user.
         """
         current_user = self.request.user
-        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk), ~Q(status='archived'))
+        return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk), ~Q(status='archived')).distinct('name')
     
     def destroy(self, request, *args, **kwargs):
         project = self.get_object()
