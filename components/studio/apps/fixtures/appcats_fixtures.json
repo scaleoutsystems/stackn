@@ -15,16 +15,9 @@
 },
 {
   "model": "apps.appcategories",
-  "pk": "iotex",
+  "pk": "develop",
   "fields": {
-    "name": "IoTeX"
-  }
-},
-{
-  "model": "apps.appcategories",
-  "pk": "misc",
-  "fields": {
-    "name": "Misc"
+    "name": "Develop"
   }
 },
 {
