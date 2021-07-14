@@ -122,16 +122,16 @@ def filtered(request, user, project, category):
 @csrf_exempt
 def get_status(request, user, project):
     status_success, status_warning = get_status_defs()
-    print("GET_STATUS")
-    print(request.POST)
+    #print("GET_STATUS")
+    #print(request.POST)
     pk = request.POST.get('pk')
     # print(pk)
     pk = pk.split(',')
-    print(pk)
+    #print(pk)
     res = {}
     if len(pk)>0 and not (len(pk)==1 and pk[0]==''):
         appinstances = AppInstance.objects.filter(pk__in=pk)
-        print(appinstances)
+        #print(appinstances)
         res = dict()
         for instance in appinstances:
             try:
@@ -146,8 +146,8 @@ def get_status(request, user, project):
             else:
                 span_class = 'bg-danger'
             res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
-            print(status)
-        print(pk)
+            #print(status)
+        #print(pk)
     return JsonResponse(res)
     # if 'pk' in request.POST:
     #     pk = request.POST['pk']
