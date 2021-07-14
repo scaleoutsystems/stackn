@@ -1,5 +1,5 @@
 {% extends base_template %}
-
+{% load custom_tags %}
 {% block content %}
 <h1 class="h3 mb-3">Model Details</h1>
 
@@ -32,6 +32,69 @@
                         <p class="mb-0">{{ model.uploaded_at }}</p>
                     </dd>
                 </dl>
+                {% if user and user.is_authenticated and user == model.project.owner %}
+                <hr>
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3 mb-0">Tags</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        {% with model.tags|split:"," as tags %}
+                        {% for tag in tags %}
+                        <span class="badge bg-success mb-1">{{ tag }}</span>
+                        {% endfor %}
+                        {% endwith %}
+                    </dd>
+                </dl>
+                <form method="POST" autocomplete="off"
+                                  action="{% url 'models:add_tag' published_model.id model.id %}">
+                                {% csrf_token %}
+
+                                <div class="mb-3 row">
+                                    <dt class="col-4 col-xxl-3 mb-0">Add Tag</dt>
+                                    <dd class="col-8 col-xxl-9 mb-0">
+                                        <input id="id_access" type="text" name="tag" required
+                                                class="form-control" list="add_tags"/>
+                                            <datalist id="add_tags">
+                                            <!-- <option selected>
+                                                {{ model.get_access_display }}
+                                            </option> -->
+                                            {% for tag in all_tags %}
+                                            <option value="{{ tag }}">{{ tag }}</option>
+                                            {% endfor %}
+                                            </datalist>
+                                        <button type="submit" class="btn btn-info btn-sm">
+                                            <i class="fas fa-save"></i>
+                                            Add
+                                        </button>
+                                    </dd>
+                                </div>
+                            </form>
+                            <form method="POST" autocomplete="off"
+                            action="{% url 'models:remove_tag' published_model.id model.id %}">
+                          {% csrf_token %}
+
+                          <div class="mb-3 row">
+                              <dt class="col-4 col-xxl-3 mb-0">Remove Tag</dt>
+                              <dd class="col-8 col-xxl-9 mb-0">
+                                  <input id="id_access" type="text" name="tag" required
+                                          class="form-control" list="remove_tags"/>
+                                      <datalist id="remove_tags">
+                                      <!-- <option selected>
+                                          {{ model.get_access_display }}
+                                      </option> -->
+                                      {% with model.tags|split:"," as tags %}
+                                      {% for tag in tags %}
+                                      <option value="{{ tag }}">{{ tag }}</option>
+                                      {% endfor %}
+                                      {% endwith %}
+                                      </datalist>
+                                  <button type="submit" class="btn btn-danger btn-sm">
+                                      <i class="fas fa-save"></i>
+                                      Remove
+                                  </button>
+                              </dd>
+                          </div>
+                      </form>
+                {% endif%}
                 <hr>
                 <a href="{{ media_url }}{{ latest_model_obj.obj }}">Download</a>
             </div>
