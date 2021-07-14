@@ -9,3 +9,95 @@
 .card-custom {
     height: 100%;
 }
+
+.tag-count {
+    font-size: .650rem;
+    /* width: 40px; */
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    height: 1.5rem;
+    /* background: #f4f5f7; */
+    /* color: #95999d; */
+}
+
+.btn-circle {
+    width: 20px;
+    height: 20px;
+    padding: 0px 0px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.tag {
+    margin-right: .25rem;
+    margin-bottom: .25rem;
+    display: inline-flex;
+    height: 1.5rem;
+    max-width: 100%;
+    flex: none;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-width: 1px;
+    border-radius: .3rem;
+    border-color: transparent;
+    font-size: .65rem;
+    background-image: linear-gradient(180deg, #fafbfc, #f3f4f6);
+    color: #374151 !important;
+    text-decoration: none !important;
+}
+
+.tag-list {
+    background-image: linear-gradient(180deg, #eef2ff, #eef2ff)!important;
+}
+
+.ghost-number {
+    margin-right: 10px;
+    margin-right: 20px;
+    margin-left: 5px;
+    margin-top: 0.5px;
+    color: #9ca3af;
+    background: #f0f8ff00;
+    border-color: #f0f8ff00;
+}
+.tag-list-ico {
+    display: flex;
+    height: 1.75rem;
+    width: 1.4rem;
+    flex: none;
+    align-items: center;
+    background-image: linear-gradient(0deg, var(--tw-gradient-stops));
+    --tw-gradient-to: #d06d6a;
+    --tw-gradient-from: #d66e6b;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(239, 246, 255, 0));
+    padding-left: .5rem;
+}
+
+.tag:hover {
+    background-image: linear-gradient(180deg, #d8d8da,#cdcfd1);
+}
+
+.tag-ico {
+    display: flex;
+    height: 1.75rem;
+    width: 1.4rem;
+    flex: none;
+    align-items: center;
+    background-image: linear-gradient(0deg, var(--tw-gradient-stops));
+    --tw-gradient-to: #c7c1c1;
+    --tw-gradient-from: #eff6ff;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(239, 246, 255, 0));
+    padding-left: .5rem;
+}
+
+.tag>span {
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
+.tag.inactive {
+    opacity: .5;
+    filter: grayscale(100%);
+}
