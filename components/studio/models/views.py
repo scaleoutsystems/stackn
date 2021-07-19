@@ -195,44 +195,50 @@ def add_tag(request, published_id, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
     if request.method == 'POST':
-        newTag = request.POST.get('tag', '')
-        print("New Tag: ",newTag)
-        model.tags.add(newTag)
+        new_tag = request.POST.get('tag', '')
+        print("New Tag: ",new_tag)
+        model.tags.add(new_tag)
         model.save()
-        # visibility = request.POST.get('access', '')
-        # if visibility != model.access:
-        #     model.access = visibility
-        #     model.save()
-        #     project_obj = Project.objects.get(slug=project)
-        #     l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
-        #                    description='Changed Access Level from {previous} to {current}'.format(previous=previous,
-        #                                                                                           current=model.get_access_display()))
-        #     l.save()
-    print("Add tag ID: ",published_id)
-    return HttpResponseRedirect(
-        reverse('models:details_public', kwargs={'id': published_id}))
+    return HttpResponseRedirect(reverse('models:details_public', kwargs={'id': published_id}))
 
 @login_required
 def remove_tag(request, published_id, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
     if request.method == 'POST':
-        newTag = request.POST.get('tag', '')
-        print("Remove Tag: ",newTag)
-        model.tags.remove(newTag)
+        print(request.POST)
+        new_tag = request.POST.get('tag', '')
+        print("Remove Tag: ",new_tag)
+        model.tags.remove(new_tag)
         model.save()
-        # visibility = request.POST.get('access', '')
-        # if visibility != model.access:
-        #     model.access = visibility
-        #     model.save()
-        #     project_obj = Project.objects.get(slug=project)
-        #     l = ProjectLog(project=project_obj, module='MO', headline='Model - {name}'.format(name=model.name),
-        #                    description='Changed Access Level from {previous} to {current}'.format(previous=previous,
-        #                                                                                           current=model.get_access_display()))
-        #     l.save()
 
-    return HttpResponseRedirect(
-        reverse('models:details_public', kwargs={'id': published_id}))
+    return HttpResponseRedirect(reverse('models:details_public', kwargs={'id': published_id}))
+
+@login_required
+def add_tag_private(request, user, project, id):
+    model = Model.objects.filter(pk=id).first()
+    previous = model.get_access_display()
+    if request.method == 'POST':
+        new_tag = request.POST.get('tag', '')
+        print("New Tag: ",new_tag)
+        model.tags.add(new_tag)
+        model.save()
+
+    return HttpResponseRedirect(reverse('models:details_private', kwargs={'user':user, 'project':project, 'id':id}))
+
+
+@login_required
+def remove_tag_private(request, user, project, id):
+    model = Model.objects.filter(pk=id).first()
+    previous = model.get_access_display()
+    if request.method == 'POST':
+        print(request.POST)
+        new_tag = request.POST.get('tag', '')
+        print("Remove Tag: ",new_tag)
+        model.tags.remove(new_tag)
+        model.save()
+
+    return HttpResponseRedirect(reverse('models:details_private', kwargs={'user':user, 'project':project, 'id':id}))
 
 @login_required
 def upload_model_headline(request, user, project, id):
@@ -456,6 +462,8 @@ def details_private(request, user, project, id):
     # TODO: Check that user has access to this model (though already checked that user has access to project)
     model = Model.objects.get(pk=id) 
     all_tags = Model.tags.tag_model.objects.all()
+    private = True
+    print("MY TAGS: ",model.tags,user)
     # published_model = PublishedModel(pk=id)
     # model_objs = published_model.model_obj.order_by('-model__version')
     # latest_model_obj = model_objs[0]
@@ -466,6 +474,7 @@ def details_private(request, user, project, id):
     return render(request, 'models_details_public.html', locals())
 
 def details_public(request, id):
+    private = False
     all_tags = Model.tags.tag_model.objects.all()
     print("Details tag ID:",id)
     try:
