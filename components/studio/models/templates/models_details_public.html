@@ -32,7 +32,6 @@
                         <p class="mb-0">{{ model.uploaded_at }}</p>
                     </dd>
                 </dl>
-                {{user.is_authenticated}}
                 {% if request.user and request.user.is_authenticated and request.user == model.project.owner or request.user.is_superuser %}
                 <hr>
                 <form method="POST" autocomplete="off" action="{% if private  %}{% url 'models:add_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:add_tag' published_model.id model.id %}{% endif %}">
