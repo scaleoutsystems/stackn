@@ -1,5 +1,6 @@
 {% extends 'baseproject.html' %}
 {% load static %}
+{% load custom_tags %}
 {% block content %}
 
 <h1 class="h3 mb-3">{{ app_action }} {{ app.name }}</h1>
@@ -184,4 +185,66 @@
         </div>      
     </div>
 </div>
+{% if app_action == "Settings" %}
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <!-- <div class="card-header">
+                <h5 class="card-title">Basic form</h5>
+                <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
+            </div> -->
+            <div class="card-body">                    
+                <form method="POST" autocomplete="off" action="{% url 'apps:add_tag' request.user project.slug appinstance.pk %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3 row">
+                        <dt class="col-4 col-xxl-3 mb-0">Add Tag</dt>
+                        <dd class="col-4 col-xxl-9 mb-0">
+                            {% if request.user.is_superuser %}
+                            <input id="id_access" placeholder="Add Tag ..." type="text" name="tag" required class="form-control tag-form" list="add_tags" style="width: 50%;" />
+                            <datalist id="add_tags">
+                                {% for tag in all_tags %}
+                                <option value="{{ tag }}">{{ tag }}</option>
+                                {% endfor %}
+                            </datalist>
+                            {% else %}
+                            <select id="id_access_add" type="text" name="tag" required class="search-select-tag form-select tag-form" style="width: 50%;">
+                                <option></option>
+                                {% for tag in all_tags %}
+                                <option value="{{ tag }}">{{ tag }}</option>
+                                {% endfor %}
+                            </select>
+                            {% endif %}
+                            <button type="submit" class="btn btn-info btn-sm">
+                                <i class="fas fa-save"></i>
+                                Add
+                            </button>
+                        </dd>
+                    </div>
+                </form>
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3 mb-0">Tags</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        <div>
+                        {% with appinstance.tags|split:"," as tags %}
+                        {% for tag in tags %}
+                        <!-- <span class="tag tag-model-details">{{ tag }}</span> -->
+                        <form  style="display: inline-flex;" method="POST" action="{% url 'apps:remove_tag' request.user project.slug appinstance.pk %}">
+                            {% csrf_token %}
+                        <div  class="tag tag-list tag-model-details"><button class="tag-list-ico fas fa-times" style="color: #fffafa;" type="submit" name="tag" value="{{ tag }}"></button><span style="font-weight: 500;">{{ tag }}</span></div>
+                        </form>
+                        {% endfor %}
+                        {% endwith %}
+
+                        {% if appinstance.tags.count == 0 %}
+                        <span>None</span>
+                        {% endif %}
+                    </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>      
+    </div>
+</div>
+{% endif %}
 {% endblock %}

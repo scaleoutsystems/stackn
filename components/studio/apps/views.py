@@ -155,6 +155,7 @@ def get_status(request, user, project):
     #     print(appinstances)
 
 def appsettings(request, user, project, ai_id):
+    all_tags = AppInstance.tags.tag_model.objects.all()
     template = 'create.html'
     app_action = "Settings"
 
@@ -169,10 +170,30 @@ def appsettings(request, user, project, ai_id):
     app = appinstance.app
 
     aset = appinstance.app.settings
-
     form = generate_form(aset, project, app, request.user, appinstance)
     return render(request, template, locals())
 
+def add_tag(request, user, project, ai_id):
+    appinstance = AppInstance.objects.get(pk=ai_id)
+    if request.method == 'POST':
+        new_tag = request.POST.get('tag', '')
+        print("New Tag: ",new_tag)
+        appinstance.tags.add(new_tag)
+        appinstance.save()
+
+    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
+
+
+def remove_tag(request, user, project, ai_id):
+    appinstance = AppInstance.objects.get(pk=ai_id)
+    if request.method == 'POST':
+        print(request.POST)
+        new_tag = request.POST.get('tag', '')
+        print("Remove Tag: ",new_tag)
+        appinstance.tags.remove(new_tag)
+        appinstance.save()
+
+    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
 
 def create(request, user, project, app_slug, data=[], wait=False):
     template = 'create.html'
