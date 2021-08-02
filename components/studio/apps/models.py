@@ -12,6 +12,7 @@ from modules import keycloak_lib as keylib
 import uuid
 import flatten_json
 from datetime import datetime, timedelta
+from tagulous.models import TagField
 
 
 class AppPermission(models.Model):
@@ -72,7 +73,7 @@ class AppInstance(models.Model):
     table_field = models.JSONField(blank=True, null=True)
 
     access = models.CharField(max_length=20, default="private", null=True, blank=True)
-
+    tags = TagField()
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     deleted_on = models.DateTimeField(null=True, blank=True)
