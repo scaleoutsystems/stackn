@@ -190,7 +190,7 @@ def create_template(template='template.json', image="image.png", studio_url=[], 
 
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['project_templates']
-    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload) 
+    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
 
     if r:
         print("Created template.")
@@ -281,7 +281,7 @@ def create_app(settings="config.json",
     #     print("No project name specified.")
     #     return False
     url = endpoints['admin']['apps'] #.format(project[0]['id'])
-    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload) 
+    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
 
     os.system('rm {}'.format(chart_uid))
 
