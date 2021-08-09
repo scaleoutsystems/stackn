@@ -548,7 +548,7 @@ def delete_app_obj(slug, studio_url=[], secure=True):
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['admin']['apps']
 
-    apps = requests.get(url, headers=auth_headers, params=payload)
+    apps = requests.get(url, headers=auth_headers, params=payload, verify=conf['STACKN_SECURE'])
     apps = apps.json()
     for app in apps:
         print("Deleting {}, revision {}.".format(app['name'], app['revision']))
@@ -557,7 +557,7 @@ def delete_app_obj(slug, studio_url=[], secure=True):
         print(r.text)
 
     print(url)
-
+ 
     # r = requests.delete(url, headers=auth_headers, data=payload) 
 
     # if r:

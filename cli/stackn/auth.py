@@ -144,8 +144,8 @@ def _set_current(conf):
         stackn_config['current']['STACKN_PROJECT'] = current['STACKN_PROJECT']
     if current['STACKN_SECURE'] != 'NOTSET':
         stackn_config['current']['STACKN_SECURE'] = current['STACKN_SECURE']
-
-
+    # print("SET CURRENT")
+    # print(stackn_config)
     if 'STACKN_URL' in os.environ and stackn_config['current']['STACKN_URL'] != '':
         print("STACKN_URL set as environment variable and this takes priority.")
         print("Set by 'export STACKN_URL={}'".format(stackn_config['current']['STACKN_URL']))
@@ -201,7 +201,9 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         if 'STACKN_PROJECT' in current:
             conf['STACKN_PROJECT'] = current['STACKN_PROJECT']
     # if 'STACKN_SECURE' not in conf:
-    if 'STACKN_SECURE' in current:
+    # print("AAA")
+    # print(conf)
+    if 'STACKN_SECURE' in current and (conf['STACKN_SECURE']=="" or conf['STACKN_SECURE']==None):
         if print_warnings and current['STACKN_SECURE'] == False:
             print("Insecure mode is set in config, will not verify certificates.")
             print("Use stackn set current --secure to disable.")
@@ -209,6 +211,7 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     # If we have a currently set remote URL, fetch from config file.
     if conf['STACKN_URL']:
         try:
+            # print(conf)
             conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
         except:
             print("Failed to call studio endpoint at: {}".format(conf['STACKN_URL']))
@@ -340,7 +343,7 @@ def stackn_login(studio_url=[], client_id=[], realm=[], username=[], password=[]
 
     if not conf['STACKN_URL']:
         conf['STACKN_URL'] = input('Studio URL: ')
-        conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'])
+        conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
 
     if not conf['STACKN_USER']:
         conf['STACKN_USER'] = input('Username: ')
