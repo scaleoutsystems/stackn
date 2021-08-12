@@ -11,7 +11,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from .APIpermissions import ProjectPermission
+from .APIpermissions import ProjectPermission, AdminPermission
 from deployments.helpers import build_definition
 from projects.helpers import create_project_resources
 from projects.tasks import create_resources_from_template, delete_project_apps
@@ -494,7 +494,7 @@ class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
 
 class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, AdminPermission,)
     serializer_class = AppSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id', 'name', 'slug', 'category']
@@ -572,7 +572,7 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
 
 class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, AdminPermission,)
     serializer_class = ProjectTemplateSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id', 'name', 'slug']
