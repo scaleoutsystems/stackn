@@ -1,11 +1,18 @@
 {% extends base_template %}
 
 {% load static %}
+{% load custom_tags %}
 {% block content %}
 
-
-<h1 class="h3 mb-3">Apps</h1>
-
+<div style="display: inline-flex;">
+<h1 class="h3 mb-3" style="margin-right: 5px;">Apps</h1>
+<h1 class="h3 mb-3 ghost-number">{% if published_apps|length > 0  %}{{ published_apps|length }}{% endif %}</h1>
+<div>
+    {% for tf in request.session.app_tag_filters %}
+    <div class="tag tag-list"><a class="tag-list-ico fas fa-times" style="color: #fffafa;" href="{% url 'portal:index' %}?tf_remove={{ tf | urlencode }}"></a><span style="font-weight: 500;">{{ tf }}</span></div>
+    {% endfor %}
+</div>
+</div>
 <div class="row">
       {% for app in published_apps %}
       <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
@@ -18,7 +25,43 @@
                 <!-- <div class="my-2">Started {{ project.created_at }}</div> -->
             </div>
             <div class="card-body px-4 pt-2">
-                <p>Some text here</p>
+                <div>
+                    {% if request.session.app_tags|exists:app.id %}
+                    {% with app.tags|split:"," as tags %}
+                    {% for tag in tags %}
+                    <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
+                        href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
+                        <div class="tag-ico fas fa-tag fa-sm"></div><span>{{ tag }}</span>
+                    </a>
+                    {% endfor %}
+                    <a href="{% url 'portal:index' %}?app_id_remove={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
+                        style="display: inline-flex;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-circle tag-count"><span
+                                class="fas fa-minus"></span></button>
+                    </a>
+                    {% endwith %}
+                    {% else %}
+                    {% with app.tags|split:"," as tags %}
+                    {% with tags|count_str as tag_limit %}
+                    {% for tag in tags|slice:tag_limit %}
+                    <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
+                        href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
+                        <div class="tag-ico fas fa-tag fa-sm "></div><span>{{ tag }}</span>
+                    </a>
+                    {% endfor %}
+                    {% if tags.count > tag_limit %}
+                    <a href="{% url 'portal:index' %}?app_id_add={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
+                        style="display: inline-flex;">
+                        {% csrf_token %}
+                        <button style="font-weight: 600;" type="submit" class="btn btn-light tag-count">+{{ tags.count|subtract:tag_limit }}</button>
+                    </a>
+                    {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endif %}
+                </div>
+                <!-- <p>Some text here</p> -->
                 <div style="position:absolute;bottom:0.5em;">
                     <h4>
                         <a href="{{ app.table_field.url }}">Open</a>

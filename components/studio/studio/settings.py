@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     'studio_admin',
     'apps',
     'django_plotly_dash',
-    'portal'
+    'portal',
+    'tagulous',
 ]
 
 REST_FRAMEWORK = {
@@ -111,6 +112,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'custom_tags': 'models.templatetags.custom_tags',
+            }
         },
     },
 ]

@@ -9,7 +9,7 @@ from ast import literal_eval
 from functools import cmp_to_key
 from projects.helpers import get_minio_keys
 from minio import Minio
-
+from tagulous.models import TagField
 
 
 def compare_version(v1, v2):
@@ -92,6 +92,7 @@ class Model(models.Model):
     bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
     path = models.CharField(max_length=200, null=True, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    tags = TagField()
     project = models.ForeignKey(
         'projects.Project',
         on_delete=models.SET_NULL,
