@@ -17,9 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('account/',views.account, name='account'),
+    path('requestaccount/',views.request_account, name='requestaccount'),
+    path('',views.home, name='home'),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('', include('portal.urls', namespace='portal')),

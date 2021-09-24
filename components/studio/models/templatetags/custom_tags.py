@@ -31,6 +31,8 @@ def count_str(value):
         num_tags += 1
     if num_tags == 0:
         num_tags = 1
+    if num_tags >= 2:
+        num_tags=2
     print("LIMITS: ", num_tags,total_length)
     return num_tags
 

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'django_plotly_dash',
     'portal',
     'tagulous',
+    'studio',
 ]
 
 REST_FRAMEWORK = {

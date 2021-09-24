@@ -17,6 +17,8 @@ from apps.models import Apps, AppInstance
 from projects.models import Project
 
 def index(request,id=0):
+    menu = dict()
+    menu['portal'] = 'active'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     except Exception as err:

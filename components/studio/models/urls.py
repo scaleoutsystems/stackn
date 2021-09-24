@@ -5,7 +5,7 @@ app_name = 'models'
 
 urlpatterns = [
 
-    path('', views.index, name='index'),
+    path('models/', views.index, name='index'),
     path('<user>/<project>/models', views.list, name='list'),
     path('<user>/<project>/models/<int:id>', views.details_private, name='details_private'),
     path('models/<int:id>', views.details_public, name='details_public'),

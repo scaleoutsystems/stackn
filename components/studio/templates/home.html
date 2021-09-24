@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center">
+    <h1 class="h1" style="font-weight: 800;">Sci</h1><h1 class="h1" style="color: #8eab3e; font-weight: 800;">Life</h1><h1 class="h1" style="font-weight: 800;">Lab</h1><h1 class="h1" style="margin-left: 5px;"> Serve</h1>
+</div>
+
+<div class="row" style="margin-top: 30px; font-size: medium;">
+<p>SciLifeLab Serve is a service under development for model and app deployment offered to life science researchers in Sweden. Currently, the service is accepting pilot users. SciLifeLab Serve allows to serve Tensorflow models, PyTorch models, Dash apps, General Python models, and R Shiny apps. The service is available to researchers in Sweden, both with and without an affiliation SciLifeLab, as well as to SciLifeLab platforms. SciLifeLab Serve, powered by <a href="https://www.stackn.ai/">STACKn</a>, is developed and maintained by the <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. SciLifeLab Serve is free of charge for Swedish researchers and SciLifeLab platforms. During the development stage, a number of projects will be accepted as pilot users.</p>
+<span>
+    <p style="font-weight: 700;">Why use the SciLifeLab Serve
+        <ul>
+            <li>Easy serving of machine learning models with versioning</li>
+            <li>Get FastAPI endpoints for your models</li>
+            <li>Allow users to use your trained machine learning models for their own predictions by adding a GUI</li>
+            <li>Host interactive dashboards created with R Shiny and Dash</li>
+            <li>Allow others to explore your data or results with with R Shiny and Dash apps</li>
+            <li>Opportunity to host any general Python models (get in touch with the team behind SciLifeLab Serve to discuss your particular needs)</li>
+            <li>Free of charge for Swedish researchers and SciLifeLab platforms</li>
+        </ul>
+    </p>
+</span>
+<span>
+    <p style="font-weight: 700;">Getting an account
+        <ul>
+            SciLifeLab Serve is being developed and maintained by the <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. At this time, the service is running in pilot mode and pilot users are accepted. The pilot projects can make full use of the resources but some interruptions may occur. Pilot projects will be used as test cases for technology development. The team behind the service is happy to discuss the particular needs of each project. In order to sign up, please <a href="{% url 'account' %}">fill out this form</a> or send an email to data@scilifelab.se. The team will get in touch with you shortly to discuss your particular needs.
+        </ul>
+    </p>
+</span>
+<span>
+    <p style="font-weight: 700;">Infrastructure behind SciLifeLab Serve
+        <ul>
+            SciLifeLab serve is an instance of the open-source machine learning platform STACKn, developed by ScaleOut Systems, a spinoff from the Department of Information Technology at Uppsala University. It is a cloud native platform that is deployed on Kubernetes cluster managed by the Data Centre. The platform is vendor agnostic and based on plugin architecture so the list of supported frameworks can be easily extended depending on the demand from the research community. Currently, the platform supports serving of different types of models and apps. TensorFlow models are served using integration with the official TensorFlow Serving docker image. Similarly, PyTorch models are served through a PyTorch Serve docker image that is integrated with the model on the platform. The platform also supports serving of other machine learning models using a FastAPI server. In addition to this, the platform can serve applications built wit Dash and R Shiny as well.
+        </ul>
+    </p>
+</span>
+<span>
+    <p style="font-weight: 700;">Resource limitations
+        <ul>
+            At the moment, SciLifeLab Serve does not have any resource limitations. No specific decisions about the future resource limitations have been taken yet. When the service is launched, there are likely to be default limitations in terms of CPU and memory but we aim to cover the needs of most of the research projects.
+        </ul>
+    </p>
+</span>
+</div>
+{% endblock %}

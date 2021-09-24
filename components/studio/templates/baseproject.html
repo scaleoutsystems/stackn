@@ -7,7 +7,7 @@
 <li class="sidebar-header">
     Project
 </li>
-<li class="sidebar-item">
+<li class="sidebar-item {{ menu.dashboard }}">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
         <i class="align-middle" data-feather="home"></i>
         <span class="align-middle">Dashboard</span>
@@ -50,7 +50,7 @@
     </a>
 </li>
 
-<li class="sidebar-item">
+<li class="sidebar-item {{ menu.settings }}">
     <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
         <i class="align-middle" data-feather="settings"></i>
         <span class="align-middle">Settings</span>

@@ -25,6 +25,8 @@ new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
 def index(request,id=0):
+    menu = dict()
+    menu['models'] = 'active'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     except Exception as err:
@@ -150,7 +152,7 @@ def publish_model(request, user, project, id):
     models = Model.objects.filter(name=model.name, project=model.project)
     
     
-    img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+    img = settings.STATIC_ROOT+'dist/scilogo-green.png'
     img_file = open(img, 'rb')
     image = File(img_file)
     

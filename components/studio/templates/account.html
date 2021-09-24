@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mask d-flex align-items-center h-100 gradient-custom-3">
+    <div class="container h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-9 ">
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body p-5">
+              <h2 class="text-uppercase text-center mb-5">Request an account</h2>
+            <p>You can fill in the form below to request an account or send us an email at data@scilifelab.se.</p>
+              <form action="{% url 'requestaccount' %}" method="post">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                      <div class="form-outline">
+                        <input type="text" id="fname" name="fname" class="form-control form-control-lg" />
+                        <label class="form-label" for="fname">First name</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                      <div class="form-outline">
+                        <input type="text" id="lname" name="lname" class="form-control form-control-lg" />
+                        <label class="form-label" for="lname">Last name</label>
+                      </div>
+                    </div>
+                  </div>
+
+                <div class="form-outline mb-4">
+                  <input type="email" id="email" name="email" class="form-control form-control-lg" />
+                  <label class="form-label" for="email">Email</label>
+                </div>
+
+                <div class="form-outline mb-4">
+                  <input type="text" id="org" name="org" class="form-control form-control-lg" />
+                  <label class="form-label" for="org">Affiliation/Organisation</label>
+                </div>
+
+                <div class="form-outline mb-4">
+                    <textarea id="use" name="use" class="form-control form-control-lg"></textarea>
+                    <label class="form-label" for="use">What do you want to use the platform for?</label>
+                </div>
+
+                <div class="form-outline mb-4">
+                    <textarea id="deployed" name="deployed" class="form-control form-control-lg"></textarea>
+                    <label class="form-label" for="deployed">If you want to deploy a mode/service, has it been deployed somewhere else?</label>
+                </div>
+
+                <div class="form-outline mb-4">
+                    <textarea id="resources" name="resources" class="form-control form-control-lg"></textarea>
+                    <label class="form-label" for="resources">Requirements for the deployment - CPU, Memory and other resources</label>
+                </div>
+
+                <!-- <div class="form-check d-flex justify-content-center mb-5">
+                  <input
+                    class="form-check-input me-2"
+                    type="checkbox"
+                    value=""
+                    id="form2Example3cg"
+                  />
+                  <label class="form-check-label" for="form2Example3g">
+                    I agree with all statements in the <a href="#!" class="text-body"><u>Terms of service</u></a>
+                  </label>
+                </div> -->
+
+                <div class="d-flex justify-content-center">
+                  <button type="submit" style="background-color: #beb9c9; border-color: #beb9c9; color: #051e3b!important;" type="button" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Send Request</button>
+                </div>
+
+                <p class="text-center text-muted mt-5 mb-0">Have already an account? <a href="{% url 'oidc_authentication_init' %}" class="fw-bold text-body"><u>Login here</u></a></p>
+
+              </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

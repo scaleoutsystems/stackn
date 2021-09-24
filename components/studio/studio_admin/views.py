@@ -16,6 +16,8 @@ from projects.views import delete_project as del_proj
 
 @login_required
 def index(request):
+    menu = dict()
+    menu['admin'] = 'active'
     activity_logs = ActivityLog.objects.filter(
         user=request.user).order_by('-created_at')[:5]
 

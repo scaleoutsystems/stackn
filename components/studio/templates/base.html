@@ -35,34 +35,40 @@
 <body data-theme="light" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
-            <div class="sidebar-content js-simplebar">
+            <div style="border-right: 1px solid #dddddd;" class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" href="{% url 'models:index' %}">
-                    <img src="{% static 'dist/scaleout-studio.svg' %}" alt="STACKn Logo" width="200" >
+                    <img src="{% static 'dist/scaleout-studio.svg' %}" alt="STACKn Logo" width="220" >
                 </a>
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
                         Catalogs
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ menu.home }}">
+                        <a class="sidebar-link" href="{% url 'home' %}">
+                            <i class="align-middle" data-feather="home"></i>
+                            <span class="align-middle">Home</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item {{ menu.portal }}">
                         <a class="sidebar-link" href="{% url 'portal:index' %}">
                             <i class="align-middle" data-feather="box"></i>
                             <span class="align-middle">Apps</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ menu.models }}">
                         <a class="sidebar-link" href="{% url 'models:index' %}">
                             <i class="align-middle" data-feather="layers"></i>
                             <span class="align-middle">Models</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ menu.projects }}">
                         <a class="sidebar-link" href="{% url 'projects:index' %}">
                             <i class="align-middle" data-feather="folder"></i>
                             <span class="align-middle">Projects</span>
                         </a>
                     </li>
                     {% if user.is_superuser %}
-                    <li class="sidebar-item">
+                    <li class="sidebar-item {{ menu.admin }}">
                         <a class="sidebar-link" href="{% url 'studio_admin:index' %}">
                             <i class="align-middle" data-feather="settings"></i>
                             <span class="align-middle">Admin</span>
@@ -189,7 +195,8 @@
                             </div>
                         </li>
                         {% else %}
-                        <a href="{% url 'oidc_authentication_init' %}">Sign in</a>
+                        <div style="margin-right: 10px;"><a href="{% url 'account' %}"><button class="btn btn-sm btn-light model-card-a model-card-button" href="">Request an account</button></a></div>
+                        <a href="{% url 'oidc_authentication_init' %}"><button class="btn btn-sm btn-light model-card-a model-card-button" href="">Sign in</button></a>
                         {% endif %}
                     </ul>
                 </div>
@@ -203,7 +210,7 @@
                 <div class="container-fluid">
                     <div class="row text-muted">
                         <div class="col-6 text-start">
-                            <ul class="list-inline">
+                            <ul class="list-inline" style="display: flex;">
                                 <li class="list-inline-item">
                                     <a class="text-muted" href="https://twitter.com/scaleoutsystem">
                                         <button class="btn mb-1 btn-twitter">
@@ -223,6 +230,11 @@
                                         <button class="btn mb-1 btn-github">
                                             <i class="align-middle fab my-1 fa-github"></i>
                                         </button>
+                                    </a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="https://www.scaleoutsystems.com/">
+                                        <img src="{% static 'dist/scaleout-logo.svg' %}" alt="STACKn Logo" width="160" >
                                     </a>
                                 </li>
                             </ul>

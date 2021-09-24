@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
+    menu = dict()
+    menu['projects'] = 'active'
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
@@ -79,6 +81,8 @@ def environments(request, user, project_slug):
 
 @login_required
 def settings(request, user, project_slug):
+    menu = dict()
+    menu['settings'] = 'active'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
@@ -389,7 +393,8 @@ def create(request):
 
 @login_required
 def details(request, user, project_slug):
-    
+    menu = dict()
+    menu['dashboard'] = 'active'
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:

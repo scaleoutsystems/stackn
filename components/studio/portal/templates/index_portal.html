@@ -14,62 +14,72 @@
 </div>
 </div>
 <div class="row">
+    {% if not published_apps %}
+    <p>No published apps available.</p>
+    {% endif %}
       {% for app in published_apps %}
       <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
-        <div class="card h-100">
-            <img class="card-img-top" src="{{ media_url }}{{ app.app.logo_file }}" alt="Card image cap" style="height:350px">
-            <div class="card-header px-4 pt-4">
-                <h3>
-                    {{ app.name }}
-                </h3>
-                <!-- <div class="my-2">Started {{ project.created_at }}</div> -->
-            </div>
-            <div class="card-body px-4 pt-2">
-                <div>
-                    {% if request.session.app_tags|exists:app.id %}
-                    {% with app.tags|split:"," as tags %}
-                    {% for tag in tags %}
-                    <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
-                        href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
-                        <div class="tag-ico fas fa-tag fa-sm"></div><span>{{ tag }}</span>
-                    </a>
-                    {% endfor %}
-                    <a href="{% url 'portal:index' %}?app_id_remove={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
-                        style="display: inline-flex;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-circle tag-count"><span
-                                class="fas fa-minus"></span></button>
-                    </a>
-                    {% endwith %}
-                    {% else %}
-                    {% with app.tags|split:"," as tags %}
-                    {% with tags|count_str as tag_limit %}
-                    {% for tag in tags|slice:tag_limit %}
-                    <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
-                        href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
-                        <div class="tag-ico fas fa-tag fa-sm "></div><span>{{ tag }}</span>
-                    </a>
-                    {% endfor %}
-                    {% if tags.count > tag_limit %}
-                    <a href="{% url 'portal:index' %}?app_id_add={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
-                        style="display: inline-flex;">
-                        {% csrf_token %}
-                        <button style="font-weight: 600;" type="submit" class="btn btn-light tag-count">+{{ tags.count|subtract:tag_limit }}</button>
-                    </a>
-                    {% endif %}
-                    {% endwith %}
-                    {% endwith %}
-                    {% endif %}
-                </div>
-                <!-- <p>Some text here</p> -->
-                <div style="position:absolute;bottom:0.5em;">
-                    <h4>
-                        <a href="{{ app.table_field.url }}">Open</a>
-                    </h4>
+        <div class="card h-100">  
+            <div class="card-body">
+                <div class="row g-0 w-100 h-100">
+                    <div class="col-12  d-flex flex-row">
+                        <div class="col-8 d-flex">
+                            <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3>
+                        </div>
+                        <div class="col-4 d-flex justify-content-end">
+                            <img src="{{ media_url }}{{ app.app.logo_file }}" class="img-fluid float-end" style="height:50px;" alt="App Logo">
+                        </div>
+                    </div>
+                    <div class="col-12  d-flex align-items-bottom flex-column">
+                        <div class="h-100">
+                            <div> 
+                                {% if request.session.app_tags|exists:app.id %}
+                                {% with app.tags|split:"," as tags %}
+                                {% for tag in tags %}
+                                <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
+                                    href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
+                                    <div class="tag-ico fas fa-tags fa-sm"></div><span>{{ tag }}</span>
+                                </a>
+                                {% endfor %}
+                                <a href="{% url 'portal:index' %}?app_id_remove={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
+                                    style="display: inline-flex;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-circle tag-count"><span
+                                            class="fas fa-minus"></span></button>
+                                </a>
+                                {% endwith %}
+                                {% else %}
+                                {% with app.tags|split:"," as tags %}
+                                {% with tags|count_str as tag_limit %}
+                                {% for tag in tags|slice:tag_limit %}
+                                <a class="tag {% if tag in request.session.app_tag_filters%}disabled{% endif %}"
+                                    href="{% url 'portal:index' %}?tf_add={{ tag | urlencode }}">
+                                    <div class="tag-ico fas fa-tags fa-sm "></div><span>{{ tag }}</span>
+                                </a>
+                                {% endfor %}
+                                {% if tags.count > tag_limit %}
+                                <a href="{% url 'portal:index' %}?app_id_add={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
+                                    style="display: inline-flex;">
+                                    {% csrf_token %}
+                                    <button style="font-weight: 600;" type="submit" class="btn btn-light tag-count">+{{ tags.count|subtract:tag_limit }}</button>
+                                </a>
+                                {% endif %}
+                                {% endwith %}
+                                {% endwith %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12  d-flex flex-row">
+                        <div style="align-self: flex-end;">
+                            <a class="model-card-a" href="{{ app.table_field.url }}"><button class="btn btn-sm btn-light model-card-a model-card-button" >Open</button></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+      
       {% endfor %}
 </div>
 {% endblock %}

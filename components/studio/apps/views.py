@@ -114,6 +114,7 @@ def filtered(request, user, project, category):
     pk_list = pk_list[:-1]
     pk_list = "'"+pk_list+"'"
     apps_installed = False
+    print("PRINTINGGG: ",appinstances)
     if appinstances:
         apps_installed = True
         
@@ -158,7 +159,6 @@ def appsettings(request, user, project, ai_id):
     all_tags = AppInstance.tags.tag_model.objects.all()
     template = 'create.html'
     app_action = "Settings"
-
     if 'from' in request.GET:
         from_page = request.GET.get('from')
     else:
@@ -172,6 +172,20 @@ def appsettings(request, user, project, ai_id):
     aset = appinstance.app.settings
     form = generate_form(aset, project, app, request.user, appinstance)
     return render(request, template, locals())
+
+def add_releasename(request, user, project, ai_id, rn=None):
+    count_rn = ReleaseName.objects.filter(name = request.POST.get('rn')).count()
+    available = "false"
+    if count_rn == 0:
+        available = "true"
+        release=ReleaseName()
+        release.name = request.POST.get('rn')
+        release.status = 'active'
+        release.project = Project.objects.get(slug=project)
+        release.save()
+    print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
+    
+    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id})+"?available="+available+"&rn="+request.POST.get('rn'))
 
 def add_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
