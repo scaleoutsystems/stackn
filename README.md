@@ -7,14 +7,18 @@
 
 # What is STACKn?
 
-STACKn is an open source, cloud agnostic collaborative ML platform. 
+STACKn is a customizible and cloud agnostic Machine Learning (ML) platform for collaborative end-to-end workflows. 
+STACKn can be deployed on any solution that implements the Kubernetes api.
+
+
+# Why use STACKn
+STACKn provides an essential stack of containerized open-source data science tools all collected in one single platform, enabling seamless end-to-end ML workflows where data scientists can collaborate and focus on improving and serving their models rather than tedious infrastructure tasks. 
+
+With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks which enables a highly customizible experience.
+
+STACKn is also integrated with [FEDn](https://github.com/scaleoutsystems/fedn), a framwork for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private,  regulatory or impractical reasons.   
 
 We aim to provide organizations and institutions with a complete end-to-end toolbox solution evolved by community feedback and adoption.
-
-# Why use STACKn?
-The aim of the STACKn solution is to provide an end-to-end solution for working on collaborative machine learning projects. With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks. 
-
-STACKn is cloud-native and can be deployed on any solution that implements the Kubernetes api. 
 
 # Core features
 
@@ -51,7 +55,7 @@ This guide lets you quickly get started with STACKn.
 
 - Ensure you have a Kubernetes compliant cluster.
 - Your user must have a KUBECONFIG in env configured such that you can access kubectl.
-- Helm 3 client installed.
+- Helm 3 (>= v3.7.1) client installed.
 - You need a domain name with a wildcard SSL certificate. If your domain is your-domain.com, you will need a certificate for *.your-domain.com and *.studio.your-domain.com.
 
 #### Kubernetes prerequisites
