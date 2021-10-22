@@ -16,7 +16,7 @@ setup(
         "cytoolz",
         "PyYAML>=4.2b1",
         "requests",
-        "urllib3",
+        "urllib3>=1.26.5",
         "minio==7.0.2",
         "six>=1.14.0",
         "python-slugify",
