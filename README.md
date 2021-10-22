@@ -27,7 +27,7 @@ STACKn is also integrated with [FEDn](https://github.com/scaleoutsystems/fedn), 
 This deployment is for Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
 <br />
 
-## Setup microk8s
+## Setup single-node microk8s
 
 1. Install microk8s
 
@@ -38,7 +38,6 @@ sudo snap install microk8s --classic
 
 ```
 sudo usermod -a -G microk8s $USER
-sudo chown -f -R $USER ~/.kube
 ```
 3. Enable extensions
 ```
@@ -46,6 +45,7 @@ microk8s.enable dns rbac ingress storage
 ```
 4. If kubectl is installed on host add cluster config to kubectl config
 ```
+sudo chown -f -R $USER ~/.kube
 microk8s config >> ~/.kube/config
 ```
 5. Finally, install Helm since microk8s is usually not packaged with the latest Helm version.
@@ -64,7 +64,7 @@ Follow the instructions in this file to set required values:
 - For the domain one can use a wildcard dns such as [nip.io](http://nip.io)
 - Set global passwords as desired, if these are left blank passwords will be generated
 
-3. After the values.yaml is set install STACKn via helm, should take several minutes before finishied:
+3. After the values.yaml is set install STACKn via helm, should take several minutes:
 ```
 helm install stackn charts/scaleout/stackn -f values.yaml
 ```
@@ -80,7 +80,7 @@ https://studio.\<your-domain\>
 ```
 https://studio.\<your-domain\>/admin
 ```
-- Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values was ommitted, one can find the password in the Secret "stackn" and superUser is by default "admin".
+- Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
 
 - Go to "Users" tab and click on the user you created earlier.
 
