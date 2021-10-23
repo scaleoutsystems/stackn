@@ -7,24 +7,25 @@
 
 # What is STACKn?
 
-STACKn is Machine Learning platform for data scientist to collaborate on projects where they can share datasets, work in various development environments, deploy and serve trained models without worrying about the underlying DevOps.
+STACKn is a machine learning platform that let data scientist collaborate on projects where they can share datasets, work in various development environments, deploy and serve trained models without worrying about the underlying DevOps.
 
 <p align="center">
   <img src="docs/images/stackn_overview.jpg" width="85%" title="hover text">
 </p>
 
 With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as 
-- Data store: project volumes and databases for storing and sharing datasets
-- Development: jupyter notebooks, vscode etc. for experimenting and training models with pre-configured data science environments.
-- STACKn Models: enables trained models to be deployed and served for production    
+- Data store: project storage volumes, object stores, and databases for storing and sharing datasets.
+- Development: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
+- STACKn Models: enables trained models to be deployed and served in production using tools such as Tensorflow Serving, TorchServe and MLFlow. 
+- STACKn Apps: enables deployment of analytics apps and custom UIs usign model enpoints (Dash, Flask etc)     
 
-STACKn has been designed to be highly customizible (but is packaged with pre-configured applications) and cloud agnostic. Deploying STACKn can be configured on any solution that implements the Kubernetes API, and is packaged using Helm charts.
+STACKn has been designed to be highly customizible (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
-STACKn is also integrated with [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private,  regulatory or impractical reasons.   
+STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
 <br />
 <br />
-# Setup local deployment
-This deployment is for Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
+# Setup a local deployment
+This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
 <br />
 
 ## Setup single-node microk8s
@@ -64,11 +65,10 @@ Follow the instructions in this file to set required values:
 - For the domain one can use a wildcard dns such as [nip.io](http://nip.io)
 - Set global passwords as desired, if these are left blank passwords will be generated
 
-3. After the values.yaml is set install STACKn via helm, should take several minutes:
+3. After the values.yaml is set install STACKn via helm, this will take several minutes:
 ```
 helm install stackn charts/scaleout/stackn -f values.yaml
 ```
-
 
 4. Go to studio in your browser:
 ```
