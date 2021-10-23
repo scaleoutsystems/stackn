@@ -17,7 +17,7 @@ With an intuitive web UI, users can create private or shared projects in which v
 - Data store: project storage volumes, object stores, and databases for storing and sharing datasets.
 - Development: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
 - STACKn Models: enables trained models to be deployed and served in production using tools such as Tensorflow Serving, TorchServe and MLFlow. 
-- STACKn Apps: enables deployment of analytics apps and custom UIs usign model enpoints (Dash, Flask etc)     
+- STACKn Apps: enables deployment of analytics apps and custom UIs usign served model endpoints (Dash, Flask etc)     
 
 STACKn has been designed to be highly customizible (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
