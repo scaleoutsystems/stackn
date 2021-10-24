@@ -7,7 +7,7 @@
 
 # What is STACKn?
 
-STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analyics apps without worrying about DevOps.
+STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
 
 <p align="center">
   <img src="docs/images/stackn_overview.jpg" width="85%" title="hover text">
