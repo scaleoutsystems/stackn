@@ -51,13 +51,15 @@ spec:
         volumeMounts:
         - name: gatekeeper-config
           mountPath: /etc/secrets/
-      - image:  joxit/docker-registry-ui:static
+      - image:  joxit/docker-registry-ui:latest
         name: registry-ui
         env:
-        - name: "REGISTRY_URL"
+        - name: "SINGLE_REGISTRY"
+          value: "true"
+        - name: "NGINX_PROXY_PASS_URL"
           value: "http://{{ .Release.Name }}:5000"
         - name: "REGISTRY_TITLE"
-          value: "TEST"
+          value: "REGISTRY_STUDIO"
         - name: "NGINX_PROXY_HEADER_Authorization"
           value: "Basic {{ tpl ("{{ .Values.credentials.username }}:{{ .Values.credentials.password }}") . | b64enc }}"
       - image: registry:2
