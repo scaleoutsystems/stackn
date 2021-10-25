@@ -5,7 +5,8 @@
   "table_field": {
     "url": "https://{{ release }}.{{ global.domain }}"
   },
-  "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+  "description": "",
+  "priority": "500",
   "settings": {
     "S3": "one",
     "apps":{
@@ -18,6 +19,11 @@
       "quantity": "one",
       "type": "match"
     },
-    "logs": ["reducer"]
+    "logs": ["reducer"],
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
   }
 }

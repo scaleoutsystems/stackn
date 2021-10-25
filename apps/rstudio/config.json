@@ -1,28 +1,21 @@
 {
-  "name": "Jupyter Lab",
-  "slug": "lab",
+  "name": "RStudio",
+  "slug": "rstudio",
   "category": "compute",
   "table_field": {
-    "url": "https://{{ release }}.{{ global.domain }}"
+      "url": "https://{{ release }}.{{ global.domain }}/"
   },
   "description": "",
-  "priority": "500",
+  "priority": "400",
   "settings": {
     "apps": {
         "Persistent Volume":"many"
     },
     "flavor": "one",
-    "environment": {
-        "name": "from",
-        "title": "Image",
-        "quantity": "one",
-        "type": "match"
-    },
     "permissions": {
         "public": {"value":"false", "option": "false"},
         "project": {"value":"true", "option": "true"},
         "private": {"value":"false", "option": "true"}
-    },
-    "export-cli": "True"
+    }
   }
 }

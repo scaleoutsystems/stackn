@@ -39,7 +39,7 @@ ingress:
   secretName: prod-ingress
 
 gatekeeper:
-  image: scaleoutsystems/gatekeeper:latest #registry.scilifelab.stackn.dev/keycloak-gatekeeper:latest #keycloak/keycloak-gatekeeper:latest
+  image: scaleoutsystems/gatekeeper:latest
   realm: STACKn
   client_secret: 75ffdab1-605a-49a9-9544-4807072d0908
   client_id: wetty-test

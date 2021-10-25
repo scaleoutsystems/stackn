@@ -5,7 +5,8 @@
     "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
     },
-    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "description": "",
+    "priority": "200",
     "settings": {
         "apps":{
             "Persistent Volume":"one"
@@ -17,6 +18,11 @@
         "keycloak-config": {
             "roles": ["readwrite"],
             "default-roles": ["readwrite"]
+        },
+        "permissions": {
+            "public": {"value":"false", "option": "false"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
         }
     }
 }

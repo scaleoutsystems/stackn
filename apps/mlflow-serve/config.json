@@ -5,7 +5,8 @@
     "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/invocations"
     },
-    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "description": "",
+    "priority": "400",
     "settings": {
         "model": {
             "quantity": "one",
@@ -25,8 +26,8 @@
         },
         "permissions": {
             "public": {"value":"false", "option": "true"},
-            "project": {"value":"false", "option": "true"},
-            "private": {"value":"true", "option": "true"}
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
         },
         "env_variables": {
             "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/invocation"

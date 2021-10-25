@@ -5,7 +5,8 @@
     "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/v1/models/models:predict"
     },
-    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "description": "",
+    "priority": "600",
     "settings": {
         "model":"one",
         "flavor": "one",
