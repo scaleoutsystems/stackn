@@ -63,6 +63,7 @@ Follow the instructions in this file to set required values:
 
 - StorageClass for microk8s is “microk8s-hostpath”
 - For the domain one can use a wildcard dns such as [nip.io](http://nip.io)
+- Set oidc.verify = false, this will enable insecure options (without certificates)
 - Set global passwords as desired, if these are left blank passwords will be generated
 
 3. After the values.yaml is set install STACKn via helm, this will take several minutes:
