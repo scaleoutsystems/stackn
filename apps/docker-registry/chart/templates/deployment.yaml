@@ -59,7 +59,7 @@ spec:
         - name: "NGINX_PROXY_PASS_URL"
           value: "http://{{ .Release.Name }}:5000"
         - name: "REGISTRY_TITLE"
-          value: "REGISTRY_STUDIO"
+          value: "Studio - {{ .Values.project.slug }}"
         - name: "NGINX_PROXY_HEADER_Authorization"
           value: "Basic {{ tpl ("{{ .Values.credentials.username }}:{{ .Values.credentials.password }}") . | b64enc }}"
       - image: registry:2
