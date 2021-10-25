@@ -13,6 +13,12 @@
     "credentials": {
         "username": {"type": "string", "default":"admin","title":"Username"},
         "password": {"type": "string", "default":"password","title":"Password"}
+    },
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
     }
   }
 }
+
