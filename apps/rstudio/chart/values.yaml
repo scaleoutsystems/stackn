@@ -37,11 +37,6 @@ global:
 imagePullSecrets:
   - name: regcred
 
-minio:
-  access_key: minio
-  secret_key: minio123
-  bucket: dataset
-
 ingress:
   v1beta1: false
   secretName: prod-ingress
