@@ -38,52 +38,61 @@
             "repository": "scaleoutsystems",
             "image": "mlflow-serve:latest",
             "app": "mlflow-serve"
+        },
+        "Ubuntu": {
+            "repository": "scaleoutsystems",
+            "image": "wetty-ubuntu:v0.1.2",
+            "app": "ubuntu-terminal"
+        },
+        "Dask": {
+            "repository": "daskdev",
+            "image": "dask",
+            "app": "dask-cluster"
+        },
+        "FEDn Reducer": {
+            "repository": "scaleoutsystems",
+            "image": "fedn-reducer:master",
+            "app": "reducer"
+        },
+        "FEDn Combiner": {
+            "repository": "scaleoutsystems",
+            "image": "fedn-combiner:master",
+            "app": "combiner"
         }
     },
     "apps": {
         "minio-vol": {
             "slug": "volume",
             "volume.size": "5Gi",
-            "permission": "private"
-        },
-        "mlflow-vol": {
-            "slug": "volume",
-            "volume.size": "5Gi",
-            "permission": "private"
+            "permission": "project"
         },
         "reg-vol": {
             "slug": "volume",
             "volume.size": "5Gi",
-            "permission": "private"
+            "permission": "project"
         },
         "project-vol": {
             "slug": "volume",
             "volume.size": "5Gi",
-            "permission": "private"
+            "permission": "project"
         },
         "project-minio": {
             "slug": "minio",
             "app:volume": ["minio-vol"],
             "credentials.access_key": "accesskey2",
-            "credentials.secret_key": "secretkey193"
-        },
-        "mlflow-server": {
-            "slug": "mlflow",
-            "app:volume": ["mlflow-vol"],
-            "S3": "project-minio",
-            "credentials.username": "username",
-            "credentials.password": "password"
+            "credentials.secret_key": "secretkey193",
+            "permission": "project"
         },
         "project-registry": {
             "slug": "docker_registry",
             "app:volume": ["reg-vol"],
             "credentials.username": "username123",
-            "credentials.password": "pass999111222"
+            "credentials.password": "pass999111222",
+            "permission": "project"
         }
     },
     "settings": {
-        "project-S3": "project-minio",
-        "project-MLflow": "mlflow-server"  
+        "project-S3": "project-minio"
     }
   }
 }

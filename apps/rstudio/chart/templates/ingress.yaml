@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
 spec:
@@ -13,7 +15,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-keycloak-proxy-svc
+            serviceName: {{ .Release.Name }}
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -25,6 +27,8 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
 spec:
@@ -35,8 +39,8 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-keycloak-proxy-svc
-              port: 
+              name: {{ .Release.Name }}
+              port:
                 number: 80
           pathType: ImplementationSpecific
   tls:

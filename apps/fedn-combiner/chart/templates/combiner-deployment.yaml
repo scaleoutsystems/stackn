@@ -40,6 +40,13 @@ spec:
           image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
           imagePullPolicy: {{ .Values.combiner.pullPolicy }}
           name: combiner
+          # resources:
+          #   limits:
+          #     cpu: {{ .Values.flavor.limits.cpu }}
+          #     memory: {{ .Values.flavor.limits.memory }}
+          #   requests:
+          #     cpu: {{ .Values.flavor.requests.cpu }}
+          #     memory: {{ .Values.flavor.requests.memory }}
           ports:
             - containerPort: 443
           resources: {}

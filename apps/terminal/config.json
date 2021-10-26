@@ -6,7 +6,7 @@
     "url": "https://{{ release }}.{{ global.domain }}/wetty"
   },
   "description": "",
-  "priority": "100",
+  "priority": "300",
   "settings": {
     "apps": {
         "Persistent Volume":"many"
@@ -18,6 +18,11 @@
       "quantity": "one",
       "type": "match"
     },
-    "export-cli": "True"
+    "export-cli": "True",
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
   }
 }

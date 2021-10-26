@@ -33,7 +33,7 @@ spec:
         - args:
             - sh
             - -c
-            - fedn run reducer -n reducer  --init=/config/settings.yaml
+            - fedn run reducer -n {{ .Values.release }}.{{ .Values.global.domain }} -d {{ .Values.release }}.{{ .Values.global.domain }} -p 443  --init=/config/settings.yaml
           env:
             - name: GET_HOSTS_FROM
               value: dns
@@ -46,7 +46,7 @@ spec:
           imagePullPolicy: {{ .Values.reducer.pullPolicy }}
           name: reducer
           ports:
-            - containerPort: 8090
+            - containerPort: 443
           resources: {}
           volumeMounts:
             - mountPath: /config/settings.yaml

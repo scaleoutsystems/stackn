@@ -34,24 +34,24 @@
             "image": "wetty-ubuntu:v0.1.2",
             "app": "ubuntu-terminal"
         },
-        "Dask Worker": {
+        "Dask": {
             "repository": "daskdev",
             "image": "dask",
             "app": "dask-cluster"
         },
         "FEDn Reducer": {
             "repository": "scaleoutsystems",
-            "image": "reducer:dev-test",
+            "image": "fedn-reducer:master",
             "app": "reducer"
         },
         "FEDn Combiner": {
             "repository": "scaleoutsystems",
-            "image": "combiner:dev-test",
+            "image": "fedn-combiner:master",
             "app": "combiner"
         },
         "MNIST Client": {
             "repository": "scaleoutsystems",
-            "image": "mnist-client:v0.5.0",
+            "image": "mnist-client:v0.6.0",
             "app": "fedn-client"
         }
     },
@@ -66,7 +66,7 @@
             "volume.size": "20Gi",
             "permission": "private"
         },
-        "project-volume": {
+        "project-vol": {
             "slug": "volume",
             "volume.size": "20Gi",
             "permission": "private"

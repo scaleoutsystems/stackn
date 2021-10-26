@@ -5,11 +5,16 @@
     "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
     },
-    "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+    "description": "",
     "settings": {
         "apps": {
             "Persistent Volume":"many"
         },
-        "export-cli": "True"
+        "export-cli": "True",
+        "permissions": {
+            "public": {"value":"false", "option": "false"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        }
     }
 }

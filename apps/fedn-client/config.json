@@ -2,10 +2,9 @@
   "name": "FEDn Client",
   "slug": "fedn-client",
   "category": "fedn",
-  "table_field": {
-    "url": "https://{{ release }}.{{ global.domain }}"
-  },
-  "description": "Etiam rhoncus. Maecenas tempus, tellus condimentum rhoncus, sem quam libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, vel.",
+  "table_field": {},
+  "description": "",
+  "priority": "300",
   "settings": {
     "apps": {
       "FEDn Reducer": "one"
@@ -16,6 +15,12 @@
       "quantity": "one",
       "type": "match"
     },
-    "logs": ["client"]
+    "flavor": "one",
+    "logs": ["client"],
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
   }
 }

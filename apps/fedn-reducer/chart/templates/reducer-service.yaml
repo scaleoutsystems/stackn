@@ -5,9 +5,9 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-    - name: "8090"
+    - name: "443"
       port: 80
-      targetPort: 8090
+      targetPort: 443
   selector:
     release: {{ .Values.release }}
 status:
