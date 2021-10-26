@@ -10,7 +10,7 @@
 STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
 
 <p align="center">
-  <img src="docs/images/stackn_overview.jpg" width="85%" title="hover text">
+  <img src="docs/images/STACKn_overview.svg" width="85%" title="hover text">
 </p>
 
 With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as 
