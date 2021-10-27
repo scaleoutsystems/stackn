@@ -1,7 +1,7 @@
 ![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
 
 * [What is STACKn?](#what-is-stackn)
-* [Setup local deployment](#setup-local-deployment)
+* [Setup a local deployment](#setup-a-local-deployment)
 * [Where is STACKn used?](#where-is-stackn-used)
 * [Maintainers](#maintainers)
 
@@ -18,13 +18,12 @@ STACKn is a machine learning platform that lets data scientist collaborate on pr
 
 
 
-With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as 
-- Data store: project storage volumes, object stores, and databases for storing and sharing datasets.
-- Development: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
-- STACKn Models: enables trained models to be deployed and served in production using tools such as Tensorflow Serving, TorchServe and MLFlow. 
-- STACKn Apps: enables deployment of analytics apps and custom UIs usign served model endpoints (Dash, Flask etc)     
+With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
+- Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
+- Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
+- STACKn Models: enables trained models to be deployed and served using tools such as Tensorflow Serving, PyTorch Serve and MLFlow Serve, which in turn enables deployment of analytics apps and custom UIs using served model endpoints (Dash, Flask etc).     
 
-STACKn has been designed to be highly customizible (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
+STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
 STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
 <br />
@@ -78,19 +77,19 @@ helm install stackn charts/scaleout/stackn -f values.yaml
 
 4. Go to studio in your browser:
 ```
-https://studio.\<your-domain\>
+https://studio.<your-domain>
 ```
 5. Register a new user. Press "sign in"  
 
 6. Go to django admin page:
 ```
-https://studio.\<your-domain\>/admin
+https://studio.<your-domain>/admin
 ```
 - Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
 
 - Go to "Users" tab and click on the user you created earlier.
 
-- Give the user all permission (admin, staff), then “save”.
+- Give the user all permission (superuser, staff), then “save”.
 
  ## Install default apps and project templates
 
