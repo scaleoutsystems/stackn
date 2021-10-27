@@ -68,8 +68,8 @@ Follow the instructions in this file to set required values:
 
 - StorageClass for microk8s is “microk8s-hostpath”
 - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
-- Set oidc.verify_ssl = false, this will enable insecure options (without certificates)
-- Set global passwords as desired, if these are left blank passwords will be generated
+- Set  `oidc.verify_ssl = false`, this will enable insecure options (without certificates)
+- Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated. 
 
 3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
 ```
@@ -102,7 +102,7 @@ https://studio.<your-domain.com>/admin
 
 1.  Clone this repository
 ```
-git clone git@github.com:scaleoutsystems/stackn.git
+git clone https://github.com/scaleoutsystems/stackn.git
 ```
 2. Install STACKn CLI
 ```
