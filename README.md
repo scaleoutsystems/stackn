@@ -39,10 +39,12 @@ This deployment is for quick testing on Debian/Ubuntu and will not require any T
 ```bash
 sudo snap install microk8s --classic
 ```
-2. Add user to microk8s group
+2. Add user to microk8s group and give permissions to the k8s config folder
 
 ```
 sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+newgrp microk8s
 ```
 3. Enable extensions
 ```
@@ -50,10 +52,9 @@ microk8s.enable dns rbac ingress storage
 ```
 4. If kubectl is installed on host add cluster config to kubectl config
 ```
-sudo chown -f -R $USER ~/.kube
 microk8s config >> ~/.kube/config
 ```
-5. Finally, install Helm since microk8s is usually not packaged with the latest Helm version.
+5. Finally, install the latest version of Helm since microk8s is usually not packaged with the latest Helm version.
 **Follow the instructions** [here](https://helm.sh/docs/intro/install/#from-apt-debianubuntu)
 
 ## Install STACKn
@@ -66,24 +67,30 @@ git clone https://github.com/scaleoutsystems/charts.git
 Follow the instructions in this file to set required values:
 
 - StorageClass for microk8s is “microk8s-hostpath”
-- For the domain one can use a wildcard dns such as [nip.io](http://nip.io)
+- Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
 - Set oidc.verify = false, this will enable insecure options (without certificates)
 - Set global passwords as desired, if these are left blank passwords will be generated
 
-3. After the values.yaml is set install STACKn via helm, this will take several minutes:
+3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
 ```
 helm install stackn charts/scaleout/stackn -f values.yaml
 ```
-
-4. Go to studio in your browser:
+**Note:** Instead of directly using the `values.yaml` file, one could make a copy out of it and use that. For instance:
+```bash
+cp values.yaml my-values.yaml
+vim my-values.yaml # perform all the necessary changes
+helm install stackn charts/scaleout/stackn -f my-values.yaml
 ```
-https://studio.<your-domain>
+
+4. Go to studio in your browser: (for example `studio.stackn.192.168.1.10.nip.io`)
+```
+https://studio.<your-domain.com>
 ```
 5. Register a new user. Press "sign in"  
 
 6. Go to django admin page:
 ```
-https://studio.<your-domain>/admin
+https://studio.<your-domain.com>/admin
 ```
 - Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
 
@@ -104,7 +111,7 @@ sudo python3 setup.py install
 ```
 3. Login with the user (which you created in studio)
 ```
-stackn login -u <user-email> -p <password> --insecure --url studio.<your-domain>
+stackn login -u <user-email> -p <password> --insecure --url studio.<your-domain.com>
 ```
 
 4. Install the project templates.
