@@ -64,12 +64,21 @@ microk8s config >> ~/.kube/config
 git clone https://github.com/scaleoutsystems/charts.git
 ```
 2. A template file for values.yaml can be found in “charts/scaleout/stackn”
-Follow the instructions in this file to set required values:
+Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
 
 - StorageClass for microk8s is “microk8s-hostpath”
+
 - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
+
 - Set  `oidc.verify_ssl = false`, this will enable insecure options (without certificates)
-- Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated. 
+
+- Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
+
+- Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
+
+```
+microk8s config
+```
 
 3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
 ```
