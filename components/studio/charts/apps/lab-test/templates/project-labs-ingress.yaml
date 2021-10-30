@@ -8,6 +8,8 @@ metadata:
     io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+    #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+    #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -39,7 +41,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-keycloak-proxy-svc
+              name: {{ .Release.Name }}-labs-svc
               port:
                 number: 80
           pathType: ImplementationSpecific
