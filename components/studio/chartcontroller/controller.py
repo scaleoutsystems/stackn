@@ -8,11 +8,13 @@ import yaml
 from django.conf import settings
 from apps.models import Apps
 
+KUBEPATH='/root/.kube/config'
+
 def deploy(options):
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
         volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
+    kubeconfig = os.path.join(volume_root, KUBEPATH)
     
     print("JOB DEPLOY")
     app = Apps.objects.get(slug=options['app_slug'], revision=options['app_revision'])
@@ -46,10 +48,10 @@ def deploy(options):
     # print(yaml.dump(options))
 
     args = ['helm', 'upgrade', '--install', '--kubeconfig', kubeconfig, '-n', options['namespace'], options['release'], chart, '-f', unique_filename]
-    # print("PROCESSING INPUT TO CONTROLLER")
+    print("PROCESSING INPUT TO CONTROLLER")
 
     result = subprocess.run(args, capture_output=True)
-    # print(result, flush=True)
+    print(result, flush=True)
     print('JOB DEPLOY DONE')
     return result
 
@@ -57,7 +59,7 @@ def delete(options):
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
         volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
+    kubeconfig = os.path.join(volume_root, KUBEPATH)
     args = ['helm', '--kubeconfig', str(kubeconfig), '-n', options['namespace'], 'delete', options['release']]
     result = subprocess.run(args, capture_output=True)
     print("DELETE STATUS FROM CONTROLLER")

@@ -8,15 +8,16 @@ import uuid
 
 def refresh_charts(branch='master'):
 
-    cwd = os.getcwd()
-    try:
-        charts_url = os.environ['CHARTS_URL']
-    except Exception:
-        charts_url = 'https://github.com/scaleoutsystems/charts/archive/{}.zip'.format(branch)
+    print("REFRESH CHARTS - NOT IMPLEMENTED!")
+    #cwd = os.getcwd()
+    #try:
+    #    charts_url = os.environ['CHARTS_URL']
+    #except Exception:
+    #    charts_url = 'https://github.com/scaleoutsystems/charts/archive/{}.zip'.format(branch)
 
-    status = subprocess.run('rm -rf charts-{}'.format(branch).split(' '), cwd=cwd)
-    status = subprocess.run('wget -O {}.zip {}'.format(branch.replace('/', '-'), charts_url).split(' '), cwd=cwd)
-    status = subprocess.run('unzip {}.zip'.format(branch.replace('/', '-')).split(' '),cwd=cwd)
+    #status = subprocess.run('rm -rf charts-{}'.format(branch).split(' '), cwd=cwd)
+    #status = subprocess.run('wget -O {}.zip {}'.format(branch.replace('/', '-'), charts_url).split(' '), cwd=cwd)
+    #status = subprocess.run('unzip {}.zip'.format(branch.replace('/', '-')).split(' '),cwd=cwd)
 
 
 class Controller:
@@ -36,11 +37,11 @@ class Controller:
             if not 'chart' in options:
                 print('Chart option not specified.')
                 return json.dumps({'status':'failed', 'reason':'Option chart not set.'})
-            chart = 'charts/scaleout/'+options['chart']
+            chart = 'charts/apps/'+options['chart']
         else:
             refresh_charts(self.branch)
             fname = self.branch.replace('/', '-')
-            chart = 'charts-{}/scaleout/{}'.format(fname, options['chart'])
+            chart = 'charts/apps/{}'.format(fname, options['chart'])
 
         if not 'release' in options:
             print('Release option not specified.')
