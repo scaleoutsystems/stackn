@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Q
 from datetime import datetime
 import time
-from modules import keycloak_lib as keylib
+#from modules import keycloak_lib as keylib
 import chartcontroller.controller as controller
 from .models import AppInstance, ResourceData, AppStatus, Apps
 from models.models import Model, ObjectType
@@ -24,6 +24,7 @@ def get_URI(parameters):
     URI = URI.strip('/')
     return URI
 
+"""
 def add_valid_redirect_uri(instance):
     print("Adding valid redirect.")
     URI = get_URI(instance.parameters)
@@ -44,7 +45,7 @@ def add_valid_redirect_uri(instance):
     instance.save()
 
     return res['success']
-
+"""
 def process_helm_result(results):
     stdout = results.stdout.decode('utf-8')
     stderr = results.stderr.decode('utf-8')
@@ -63,20 +64,20 @@ def post_create_hooks(instance):
     # hard coded hooks for now, we can make this dynamic and loaded from the app specs
     if instance.app.slug == 'minio':
         # Create a user role mapper for SSO (mapping readwrite role to 'minio_policy' claim.):
-        kc = keylib.keycloak_init()
+        #kc = keylib.keycloak_init()
         client_id = instance.parameters['release']
-        scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, client_id+'-scope')
-        res_json = keylib.keycloak_create_scope_mapper_roles(kc, scope_id, client_id, client_id+'-role-mapper', 'minio-policy')
+        #scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, client_id+'-scope')
+        #res_json = keylib.keycloak_create_scope_mapper_roles(kc, scope_id, client_id, client_id+'-role-mapper', 'minio-policy')
         
-        if not res_json['success']:
-            print("Failed to create user role mapper for Minio instance: {}".format(instance.parameters['release']))
-            # TODO: Update instance to reflect failure (User can still log in with root credentials)
+        #if not res_json['success']:
+        #    print("Failed to create user role mapper for Minio instance: {}".format(instance.parameters['release']))
+        #    # TODO: Update instance to reflect failure (User can still log in with root credentials)
 
         # Allow implicit flow for client:
-        res_json = keylib.keycloak_client_allow_implicit_flow(kc, client_id)
-        if not res_json['success']:
-            print("Failed to allow implicit flow for Minio instance client: {}".format(instance.parameters['release']))
-            # TODO: Update instance to reflect failure (User can still log in with root credentials)
+        #res_json = keylib.keycloak_client_allow_implicit_flow(kc, client_id)
+       # if not res_json['success']:
+        #    print("Failed to allow implicit flow for Minio instance client: {}".format(instance.parameters['release']))
+        #    # TODO: Update instance to reflect failure (User can still log in with root credentials)
 
         # Create project S3 object
         # TODO: If the instance is being updated, update the existing S3 object.
@@ -184,7 +185,7 @@ def deploy_resource(instance_pk, action='create'):
     username = str(instance.owner)
     status = AppStatus(appinstance=instance)
     # If app is new, we need to create a Keycloak client.
-    keycloak_success = True
+    #keycloak_success = True
     if action == "create":
 
         parameters = instance.parameters
@@ -199,65 +200,69 @@ def deploy_resource(instance_pk, action='create'):
         # Create client for new resource
         
  
-        if not add_valid_redirect_uri(instance):
-            keycloak_success = False
+        #if not add_valid_redirect_uri(instance):
+        #    keycloak_success = False
 
         print(parameters)
         print("IN DEPLOY_RESOURCE: RELEASE:")
         print(parameters['release'])
 
         # Default keycloak roles if none specified in config:
-        keycloak_roles = ['owner']
-        keycloak_default_roles = ['owner']
+        #keycloak_roles = ['owner']
+        #keycloak_default_roles = ['owner']
         # Check if app defines custom Keycloak roles and default roles:
-        if 'keycloak-config' in instance.app.settings:
-            keycloak_roles = instance.app.settings['keycloak-config']['roles']
-            keycloak_default_roles = instance.app.settings['keycloak-config']['default-roles']
+        #if 'keycloak-config' in instance.app.settings:
+       #     keycloak_roles = instance.app.settings['keycloak-config']['roles']
+       #     keycloak_default_roles = instance.app.settings['keycloak-config']['default-roles']
 
 
-        client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URI,
-                                                                               parameters['release'],
-                                                                               username,
-                                                                               keycloak_roles,
-                                                                               keycloak_default_roles)
+        #client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URI,
+        #                                                                       parameters['release'],
+        #                                                                       username,
+        #                                                                       keycloak_roles,
+        #                                                                       keycloak_default_roles)
         
-        if not res_json['success']:
-            keycloak_success = False
-        instance.info['keycloak'].update({"keycloak_setup_base_client": res_json})
-        instance.save()
+        #if not res_json['success']:
+        #    keycloak_success = False
+        #instance.info['keycloak'].update({"keycloak_setup_base_client": res_json})
+        #instance.save()
 
-        if not keycloak_success:
-            print("Failed to setup Keycloak client for resource.")
-            print(instance.info['keycloak'])
-            status.status_type = "Failed"
+        #if not keycloak_success:
+        #    print("Failed to setup Keycloak client for resource.")
+        #    print(instance.info['keycloak'])
+        #    status.status_type = "Failed"
         # else:
         #     instance.state = "Installing"
 
-        gatekeeper = {
-            "gatekeeper": {
-                "realm": settings.KC_REALM,
-                "host": settings.KC_URL,
-                "client_secret": client_secret,
-                "client_id": client_id,
-                "auth_endpoint": settings.OIDC_OP_REALM_AUTH,
-            }
-        }
-        if settings.OIDC_VERIFY_SSL == False:
-            gatekeeper['gatekeeper']['skip_tls'] = True
-        parameters.update(gatekeeper)
+        #gatekeeper = {
+        #    "gatekeeper": {
+        #        "realm": settings.KC_REALM,
+        #        "host": settings.KC_URL,
+        #        "client_secret": client_secret,
+        #        "client_id": client_id,
+        #        "auth_endpoint": settings.OIDC_OP_REALM_AUTH,
+        #    }
+        #}
+        #if settings.OIDC_VERIFY_SSL == False:
+        #    gatekeeper['gatekeeper']['skip_tls'] = True
+        #parameters.update(gatekeeper)
 
 
         # For backwards-compatibility with old ingress spec:
-        print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
         if 'ingress' not in parameters:
             parameters['ingress'] = dict()
+        try:
+            print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
 
-        parameters['ingress']['v1beta1'] = settings.INGRESS_V1BETA1
-        # ingress = {
-        #     "ingress": {
-        #         "v1beta1": settings.INGRESS_V1BETA1
-        #     }
-        # }
+
+            parameters['ingress']['v1beta1'] = settings.INGRESS_V1BETA1
+            # ingress = {
+            #     "ingress": {
+            #         "v1beta1": settings.INGRESS_V1BETA1
+            #     }
+            # }
+        except:
+            pass
 
 
         instance.parameters = parameters
@@ -266,37 +271,37 @@ def deploy_resource(instance_pk, action='create'):
 
 
     # Deploy resource.
-    if keycloak_success:
-        instance.info['keycloak'].update({"success": True})
-        print("Deploying resource")
+    #if keycloak_success:
+    #instance.info['keycloak'].update({"success": True})
+    print("Deploying resource")
 
-        results = controller.deploy(instance.parameters)
-        stdout, stderr = process_helm_result(results)
-        if results.returncode == 0:
-            print("Helm install succeeded")
-            status.status_type = "Installed"
-            helm_info = {
-                "success": True,
-                "info": {
-                    "stdout": stdout,
-                    "stderr": stderr
-                }
+    results = controller.deploy(instance.parameters)
+    stdout, stderr = process_helm_result(results)
+    if results.returncode == 0:
+        print("Helm install succeeded")
+        status.status_type = "Installed"
+        helm_info = {
+            "success": True,
+            "info": {
+                "stdout": stdout,
+                "stderr": stderr
             }
-        else:
-            print("Helm install failed")
-            status.status_type = "Failed"
-            helm_info = {
-                "success": False,
-                "info": {
-                    "stdout": stdout,
-                    "stderr": stderr
-                }
+        }
+    else:
+        print("Helm install failed")
+        status.status_type = "Failed"
+        helm_info = {
+            "success": False,
+            "info": {
+                "stdout": stdout,
+                "stderr": stderr
             }
+        }
 
-        instance.info["helm"] = helm_info
-        instance.save()
-        status.save()
-        post_create_hooks(instance)
+    instance.info["helm"] = helm_info
+    instance.save()
+    status.save()
+    post_create_hooks(instance)
 
 
 @shared_task
@@ -311,27 +316,27 @@ def delete_resource(pk):
         # TODO: Check that the user has the permission required to delete it.
 
         # Clean up in Keycloak.
-        kc = keylib.keycloak_init()
+        #kc = keylib.keycloak_init()
         # TODO: Fix for multicluster setup
         # TODO: We are assuming this URI here, but we should allow for other forms.
         # The instance should store information about this.
         URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
         
-        try:
-            keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-        except:
-            print("Failed to remove valid redirect URL from project client.")
-            print("Project client might already be deleted.")
-            pass
-        try:
-            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-            if not res_json['success']:
-                print("Failed to get client scope.")
-            else:
-                keylib.keycloak_delete_client_scope(kc, scope_id)
-        except:
-            print("Failed to clean up in Keycloak.")
+        #try:
+        #    keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
+        #except:
+        #    print("Failed to remove valid redirect URL from project client.")
+        #    print("Project client might already be deleted.")
+        #    pass
+        #try:
+        #    keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
+        #    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        #    if not res_json['success']:
+        #        print("Failed to get client scope.")
+        #    else:
+        #        keylib.keycloak_delete_client_scope(kc, scope_id)
+        #except:
+        #    print("Failed to clean up in Keycloak.")
         
         
         
@@ -370,7 +375,7 @@ def check_status():
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
         volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
+    kubeconfig = os.path.join(volume_root, '/root/.kube/config')
 
     # TODO: Fix for multicluster setup.
     args = ['kubectl', '--kubeconfig', kubeconfig, '-n', settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
@@ -434,13 +439,23 @@ def check_status():
             #     print("No update for release: {}".format(release))
         else:
             delete_exists = AppStatus.objects.filter(appinstance=instance, status_type="Terminated").exists()
-            if delete_exists:
-                status = AppStatus(appinstance=instance)
-                status.status_type = "Deleted"
-                status.save()                
-                instance.state = "Deleted"
-                instance.deleted_on = datetime.now()
-                instance.save()
+            #from django.conf import settings
+            #if settings.DEBUG:
+            if False:
+                if delete_exists:
+                    status = AppStatus(appinstance=instance)
+                    status.status_type = "Deleted"
+                    status.save()
+                    instance.state = "Deleted"
+                    instance.deleted_on = datetime.now()
+                    instance.save()
+            else:
+                if delete_exists:
+                    statuses = AppStatus.objects.filter(appinstance=instance)
+                    statuses.delete()
+                    #instance.state = "Deleted"
+                    #instance.deleted_on = datetime.now()
+                    instance.delete()
         # if instance.state != "Deleted":
         #     try:
         #         release = instance.parameters['release']
@@ -460,7 +475,7 @@ def get_resource_usage():
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
         volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
+    kubeconfig = os.path.join(volume_root, 'root/.kube/config')
 
     timestamp = time.time()
 
@@ -474,43 +489,48 @@ def get_resource_usage():
     args_pod = ['kubectl', '--kubeconfig', kubeconfig, 'get', 'po', '-o', 'json']
     results_pod = subprocess.run(args_pod, capture_output=True)
     results_pod_json = json.loads(results_pod.stdout.decode('utf-8'))
-    for pod in results_pod_json['items']:
-        if 'metadata' in pod and 'labels' in pod['metadata'] and 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
-    #         pod_release = pod['metadata']['labels']['release']
-    #         for label in pod['metadata']['labels']:
-    #             resources[label] = pod['metadata']['labels'][label]
-            pod_name = pod['metadata']['name']
-            resources[pod_name] = dict()
-            resources[pod_name]['labels'] = pod['metadata']['labels']
-            resources[pod_name]['cpu'] = 0.0
-            resources[pod_name]['memory'] = 0.0
-            resources[pod_name]['gpu'] = 0
+    try:
+        for pod in results_pod_json['items']:
+            if 'metadata' in pod and 'labels' in pod['metadata'] and 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
+        #         pod_release = pod['metadata']['labels']['release']
+        #         for label in pod['metadata']['labels']:
+        #             resources[label] = pod['metadata']['labels'][label]
+                pod_name = pod['metadata']['name']
+                resources[pod_name] = dict()
+                resources[pod_name]['labels'] = pod['metadata']['labels']
+                resources[pod_name]['cpu'] = 0.0
+                resources[pod_name]['memory'] = 0.0
+                resources[pod_name]['gpu'] = 0
+    except:
+        pass
 
-    for pod in pods:
-        
-        podname = pod['metadata']['name']
-        if podname in resources:
-            containers = pod['containers']
-            cpu = 0
-            mem = 0
-            for container in containers:
-                cpun = container['usage']['cpu']
-                memki = container['usage']['memory']
-                try:
-                    cpu += int(cpun.replace('n', ''))/1e6
-                except:
-                    print("Failed to parse CPU usage:")
-                    print(cpun)
-                if 'Ki' in memki:
-                    mem += int(memki.replace('Ki', ''))/1000
-                elif 'Mi' in memki:
-                    mem += int(memki.replace('Mi', ''))
-                elif 'Gi' in memki:
-                    mem += int(memki.replace('Mi', ''))*1000
+    try:
+        for pod in pods:
 
-            resources[podname]['cpu'] = cpu
-            resources[podname]['memory'] = mem
-            
+            podname = pod['metadata']['name']
+            if podname in resources:
+                containers = pod['containers']
+                cpu = 0
+                mem = 0
+                for container in containers:
+                    cpun = container['usage']['cpu']
+                    memki = container['usage']['memory']
+                    try:
+                        cpu += int(cpun.replace('n', ''))/1e6
+                    except:
+                        print("Failed to parse CPU usage:")
+                        print(cpun)
+                    if 'Ki' in memki:
+                        mem += int(memki.replace('Ki', ''))/1000
+                    elif 'Mi' in memki:
+                        mem += int(memki.replace('Mi', ''))
+                    elif 'Gi' in memki:
+                        mem += int(memki.replace('Mi', ''))*1000
+
+                resources[podname]['cpu'] = cpu
+                resources[podname]['memory'] = mem
+    except:
+        pass
     # print(json.dumps(resources, indent=2))
 
     for key in resources.keys():
@@ -619,34 +639,35 @@ def clear_table_field():
 def delete_old_clients():
     deleted_apps = AppInstance.objects.filter(state="Deleted")
     for appinstance in deleted_apps:
-        kc = keylib.keycloak_init()
+        #kc = keylib.keycloak_init()
         URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
         
-        try:
-            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-            if not res_json['success']:
-                print("Failed to get client scope.")
-            else:
-                keylib.keycloak_delete_client_scope(kc, scope_id)
-        except:
-            print("Failed to clean up in Keycloak.")
+        #try:
+        #    keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
+        #    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        #    if not res_json['success']:
+        #        print("Failed to get client scope.")
+        #    else:
+        #        keylib.keycloak_delete_client_scope(kc, scope_id)
+        #except:
+        #    print("Failed to clean up in Keycloak.")
 
 @app.task
 def delete_old_clients_proj():
     deleted_projects = Project.objects.filter(status="archived")
-    kc = keylib.keycloak_init()
-    for proj in deleted_projects:
-        try:
-            keylib.keycloak_delete_client(kc, proj.slug)
-        except:
-            print("Project client already deleted")
-            pass
-        try:
-            print("SCOPE: {}".format(proj.slug+'-scope'))
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
-            keylib.keycloak_delete_client_scope(kc, scope_id)
-            print("DELETED SCOPE: {}".format(proj.slug+'-scope'))
-        except:
-            print("Project client scope already deleted.")
-            pass
+
+    #kc = keylib.keycloak_init()
+    #for proj in deleted_projects:
+        #try:
+        #    keylib.keycloak_delete_client(kc, proj.slug)
+        #except:
+        #    print("Project client already deleted")
+        #    pass
+        #try:
+        ##    print("SCOPE: {}".format(proj.slug+'-scope'))
+         #   scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
+         #   keylib.keycloak_delete_client_scope(kc, scope_id)
+         #   print("DELETED SCOPE: {}".format(proj.slug+'-scope'))
+        #except:
+        #    print("Project client scope already deleted.")
+         #   pass
