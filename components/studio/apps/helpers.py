@@ -29,10 +29,11 @@ def create_instance_params(instance, action="create"):
 
     user = instance.owner
 
-    skip_tls = 0
-    if not settings.OIDC_VERIFY_SSL:
-        skip_tls = 1
-        print("WARNING: Skipping TLS verify.")
+    # todo fix secure override
+    skip_tls = 1
+    #if not settings.OIDC_VERIFY_SSL:
+    #   skip_tls = 1
+    #   print("WARNING: Skipping TLS verify.")
 
     # Add some generic parameters.
     parameters = {
