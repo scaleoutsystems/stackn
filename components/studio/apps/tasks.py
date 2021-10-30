@@ -481,8 +481,14 @@ def get_resource_usage():
 
     args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
     results = subprocess.run(args, capture_output=True)
-    res_json = json.loads(results.stdout.decode('utf-8'))
-    pods = res_json['items']
+
+    pods = []
+    try:
+        res_json = json.loads(results.stdout.decode('utf-8'))
+        pods = res_json['items']
+    except:
+        pass
+
 
     resources = dict()
 
