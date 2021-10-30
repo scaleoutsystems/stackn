@@ -1,7 +1,8 @@
 version: '3'
 
 services:
-  stack-studio-db:
+  db:
+    container_name: db
     image: postgres
     environment:
       - GET_HOSTS_FROM=dns
@@ -10,6 +11,8 @@ services:
       - POSTGRES_DB=postgres
     networks:
       - internal_network
+    volumes:
+      - db-data:/var/lib/postgresql/data
 
   studio:
     build: .
@@ -20,18 +23,18 @@ services:
     volumes:
       - .:/app:cached
     depends_on:
-      - stack-studio-db
-    links:
-      - "stack-studio-db:stack-studio-db.default.svc.cluster.local"
+      - db
+    #links:
+    #  - "stack-studio-db:stack-studio-db.default.svc.cluster.local"
     networks:
       - internal_network
 
-  chart-controller:
-    image: scaleoutsystems/chart-controller:master
-    ports:
-      - 80:80
-    networks:
-      - internal_network
+#  chart-controller:
+#    image: scaleoutsystems/chart-controller:master
+#    ports:
+#      - 80:80
+#    networks:
+#      - internal_network
 
   ingress:
     build:
@@ -51,45 +54,48 @@ services:
     networks:
       - internal_network
 
-  redis:
-    image: redis
-    hostname: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - internal_network
+#  redis:
+#    image: redis
+#    hostname: redis
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - internal_network
   
-  rabbit:
-    image: rabbitmq
-    hostname: rabbit
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=LJqEG9RE4FdZbVWoJzZIOQEI
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - internal_network
+#  rabbit:
+#    image: rabbitmq
+#    hostname: rabbit
+#    environment:
+#      - RABBITMQ_DEFAULT_USER=admin
+#      - RABBITMQ_DEFAULT_PASS=LJqEG9RE4FdZbVWoJzZIOQEI
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    networks:
+#      - internal_network
 
-  celery-worker:
-    build: .
-    image: scaleoutsystems/studio:master
-    command: sh ./scripts/run_worker.sh
-    volumes:
-      - .:/app:cached
-    links:
-      - stack-studio-db
-      - studio
-      - rabbit
-      - redis
-    depends_on:
-      - stack-studio-db
-      - studio
-      - rabbit
-      - redis
-    networks:
-      - internal_network
+#  celery-worker:
+#    build: .
+#    image: scaleoutsystems/studio:master
+#    command: sh ./scripts/run_worker.sh
+#    volumes:
+#      - .:/app:cached
+#    links:
+#      - stack-studio-db
+#      - studio
+#      - rabbit
+#      - redis
+#    depends_on:
+#      - stack-studio-db
+#      - studio
+#      - rabbit
+#      - redis
+#    networks:
+#      - internal_network
 
 networks:
   internal_network:
     driver: bridge
+
+volumes:
+  db-data:

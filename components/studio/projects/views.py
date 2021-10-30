@@ -3,7 +3,7 @@ from .models import Project, Environment, ProjectLog
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from .exceptions import ProjectCreationException
-from .helpers import delete_project_resources
+#from .helpers import delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 from django.core.files import File
@@ -21,10 +21,10 @@ from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
 from .forms import FlavorForm
 from apps.models import AppInstance, AppCategories
 from apps.models import Apps
-import modules.keycloak_lib as kc
+#import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
-from modules.project_auth import get_permissions
-from .helpers import create_project_resources
+#from modules.project_auth import get_permissions
+#from .helpers import create_project_resources
 from .tasks import create_resources_from_template
 from models.models import Model
 # from deployments.models import DeploymentInstance
@@ -37,8 +37,8 @@ def index(request):
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+        #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if request.user.is_authenticated:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
@@ -85,8 +85,8 @@ def settings(request, user, project_slug):
         projects = []
         print(err)
 
-    user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
-    print(user_permissions)
+    #user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
+    #print(user_permissions)
     template = 'settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
@@ -280,7 +280,8 @@ def grant_access_to_project(request, user, project_slug):
             project.authorized.add(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
-            kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
+            print("NYI - adding user to permission")
+            #kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
@@ -307,7 +308,8 @@ def revoke_access_to_project(request, user, project_slug):
             project.authorized.remove(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
-            kc.keycloak_remove_role_from_user(project.slug, username_tmp, 'member')
+            print("NYI - revoke user to permission")
+            #kc.keycloak_remove_role_from_user(project.slug, username_tmp, 'member')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
@@ -355,15 +357,13 @@ def create(request):
 
         try:
             # Create project resources (Keycloak only)
-            create_project_resources(project, request.user.username, repository)
+            #create_project_resources(project, request.user.username, repository)
 
             # Create resources from the chosen template
             project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
-            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
-            # Reset user token
-            request.session['oidc_id_token_expiration'] = time.time()-100
-            request.session.save()
+            #create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
+
         except ProjectCreationException as e:
             print("ERROR: could not create project resources")
             success = False
@@ -389,7 +389,8 @@ def create(request):
 
 @login_required
 def details(request, user, project_slug):
-    
+
+    is_authorized = False
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
@@ -398,8 +399,10 @@ def details(request, user, project_slug):
     if request.user.is_superuser:
         is_authorized = True
     else:
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+        #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        #todo check user is authorized
+        if request.user.is_authenticated:
+            is_authorized = True
             request.session['project'] = project_slug
     
         
@@ -449,10 +452,10 @@ def delete_project(project):
     from .tasks import delete_project_apps
     delete_project_apps(project.slug)
 
-    print("DELETING KEYCLOAK PROJECT RESOURCES")
-    retval = delete_project_resources(project)
-    if not retval:
-        print("Failed to delete Keycloak resources.")
+    #print("DELETING KEYCLOAK PROJECT RESOURCES")
+    #retval = delete_project_resources(project)
+    #if not retval:
+   #    print("Failed to delete Keycloak resources.")
 
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)

@@ -1,3 +1,4 @@
+"""
 from django.conf import settings
 import requests as r
 import logging
@@ -665,3 +666,6 @@ def keycloak_setup_base_client(base_url, client_id, username, roles=['default'],
                     "caller": "keycloak_setup_base_client"
                 }}
     return client_id, client_secret, res_json
+
+
+"""

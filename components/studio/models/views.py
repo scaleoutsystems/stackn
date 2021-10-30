@@ -18,7 +18,7 @@ from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
 from .forms import UploadModelCardHeadlineForm, EnvironmentForm
-import modules.keycloak_lib as kc
+#import modules.keycloak_lib as kc
 from portal.models import PublicModelObject, PublishedModel
 
 new_data = defaultdict(list)
@@ -32,8 +32,8 @@ def index(request,id=0):
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+
+        if request.user.is_authenticated:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'

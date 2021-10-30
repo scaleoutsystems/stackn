@@ -20,7 +20,7 @@ from .models import Flavor, Environment, Project, S3, MLFlow, ReleaseName
 
 
 
-
+"""
 @shared_task
 def create_keycloak_client_task(project_slug, username, repository):
     # Create Keycloak client for project with default project role.
@@ -48,7 +48,7 @@ def create_settings_file(project_slug):
     proj_settings['active_project'] = project_slug
 
     return yaml.dump(proj_settings)
-
+"""
 
 
 @shared_task

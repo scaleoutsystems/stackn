@@ -18,7 +18,7 @@ from .helpers import get_resource, get_all
 # from deployments.models import DeploymentInstance
 from models.models import Model
 from apps.models import AppInstance, ResourceData
-from modules.project_auth import get_permissions
+#from modules.project_auth import get_permissions
 
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
@@ -68,14 +68,14 @@ def get_cpu_mem(resources, project_slug, resource_type):
 
 @login_required
 def liveout(request, user, project):
-    is_authorized = True
-    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
+    #is_authorized = True
+    #user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
     
-    if not user_permissions['view']:
-        request.session['oidc_id_token_expiration'] = -1
-        request.session.save()
+    #if not user_permissions['view']:
+    #    request.session['oidc_id_token_expiration'] = -1
+    #    request.session.save()
         # return HttpResponse('Not authorized', status=401)
-        is_authorized = False
+    #    is_authorized = False
     template = 'monitor2.html'
     project = Project.objects.filter(slug=project).first()
 

@@ -26,13 +26,14 @@
         
     });
     </script>
-    {% load plotly_dash%}
-    {% plotly_header %}
+
 
     {% block extra_head %} {% endblock %}
 </head>
 
 <body data-theme="light" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+
+
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
@@ -181,7 +182,7 @@
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">Settings & Privacy</a>
                                 <a class="dropdown-item" href="#">Help</a> -->
-                                <form action="{% url 'oidc_logout' %}" method="post">
+                                <form action="{% url 'logout' %}" method="post">
                                     {% csrf_token %}
 
                                     <input type="submit" class="dropdown-item" value="Sign out">
@@ -189,14 +190,17 @@
                             </div>
                         </li>
                         {% else %}
-                        <a href="{% url 'oidc_authentication_init' %}">Sign in</a>
+                        <a href="{% url 'login' %}">Sign in</a>
                         {% endif %}
                     </ul>
                 </div>
             </nav>
             <main class="content">
                 <div class="container-fluid p-0">
-                    {% block content %} {% endblock %}
+
+                    {% block content %}
+
+                    {% endblock %}
                 </div>
             </main>
             <footer class="footer">
@@ -243,5 +247,5 @@
 
     {% block extra_scripts %} {% endblock %}
 </body>
-{% plotly_footer %}
+
 </html>

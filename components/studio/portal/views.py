@@ -11,7 +11,6 @@ from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 
-import modules.keycloak_lib as kc
 
 from apps.models import Apps, AppInstance
 from projects.models import Project
@@ -24,8 +23,8 @@ def index(request,id=0):
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+
+        if request.user.is_authenticated:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'

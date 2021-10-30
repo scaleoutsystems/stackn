@@ -1,0 +1,9 @@
+{% extends 'hero.html' %}
+{% load static %}
+{% block extra_head %}
+    <meta http-equiv="refresh" content="5;url=/" />
+{% endblock %}
+{% block content %}
+You are logged out. You will be automatically redirected to the portal page.
+    <a href="{% url 'login' %}">Login again?</a>
+{% endblock %}

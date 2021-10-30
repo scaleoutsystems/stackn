@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from .APIpermissions import ProjectPermission, AdminPermission
 from deployments.helpers import build_definition
-from projects.helpers import create_project_resources
+#from projects.helpers import create_project_resources
 from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -295,7 +295,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         
         try:
             # Create project resources (Keycloak only)
-            create_project_resources(project, request.user.username, repository)
+            #create_project_resources(project, request.user.username, repository)
 
             # Create resources from the chosen template
             template_slug = request.data['template']

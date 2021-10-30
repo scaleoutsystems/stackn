@@ -1,3 +1,5 @@
+
+"""
 import modules.keycloak_lib as keylib
 
 def get_permissions(request, project, rules):
@@ -9,3 +11,5 @@ def get_permissions(request, project, rules):
         user_permissions[rule] = bool(set(rules[rule]) & user_roles)
     
     return user_permissions
+
+"""

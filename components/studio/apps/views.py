@@ -90,7 +90,12 @@ def filtered(request, user, project, category):
     menu = dict()
 
     template = 'new.html'
-    cat_obj = AppCategories.objects.get(slug=category)
+    import django.core.exceptions as ex
+    try:
+        cat_obj = AppCategories.objects.get(slug=category)
+    except ex.ObjectDoesNotExist:
+        print("No apps are loaded.")
+        cat_obj = []
     menu[category] = 'active'
     media_url = settings.MEDIA_URL
     project = Project.objects.get(slug=project)

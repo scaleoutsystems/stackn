@@ -6,7 +6,7 @@ from django.db.models import Q
 from monitor.helpers import get_resource
 from monitor.views import get_cpu_mem
 from django.contrib.auth.decorators import login_required
-from projects.helpers import delete_project_resources
+#from projects.helpers import delete_project_resources
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import requests
