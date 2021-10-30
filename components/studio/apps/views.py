@@ -10,7 +10,7 @@ from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
+#import modules.keycloak_lib as keylib
 from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
@@ -254,12 +254,13 @@ def create(request, user, project, app_slug, data=[], wait=False):
         elif parameters_out['permissions']['project']:
             print("PROJECT PERMISSIONS")
             client_id = project.slug
-            kc = keylib.keycloak_init()
-            client_secret, res_json = keylib.keycloak_get_client_secret_by_id(kc, client_id)
+            #kc = keylib.keycloak_init()
+            #client_secret, res_json = keylib.keycloak_get_client_secret_by_id(kc, client_id)
             if not 'project' in parameters_out:
                 parameters_out['project'] = dict()
             parameters_out['project']['client_id'] = client_id
-            parameters_out['project']['client_secret'] = client_secret
+            parameters_out['project']['client_secret'] = client_id
+            #parameters_out['project']['client_secret'] = client_secret
             parameters_out['project']['slug'] = project.slug
             parameters_out['project']['name'] = project.name
             # parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
@@ -324,7 +325,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)
 
-            # Setting up Keycloak and deploying resources.
+
             res = deploy_resource.delay(instance.pk, "create")
             if wait:
                 while not res.ready():
