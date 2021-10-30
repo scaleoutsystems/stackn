@@ -4,9 +4,9 @@ from rest_framework import exceptions
 from django.conf import settings
 import jwt
 import requests as r
-import modules.keycloak_lib as keylib
+#import modules.keycloak_lib as keylib
 
-
+"""
 class KeycloakAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         token_str = request.META['HTTP_AUTHORIZATION']
@@ -30,3 +30,5 @@ class KeycloakAuthentication(authentication.BaseAuthentication):
         request.session['oidc_access_token'] = access_token
         request.session.save()
         return (user, None)
+    
+"""
