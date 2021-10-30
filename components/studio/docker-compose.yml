@@ -22,6 +22,7 @@ services:
       - GET_HOSTS_FROM=dns
     volumes:
       - .:/app:cached
+      - ./cluster.conf:/root/.kube/config
     depends_on:
       - db
     #links:
@@ -54,44 +55,86 @@ services:
     networks:
       - internal_network
 
-#  redis:
-#    image: redis
-#    hostname: redis
-#    ports:
-#      - "6379:6379"
-#    networks:
-#      - internal_network
+  redis:
+    image: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - internal_network
   
-#  rabbit:
-#    image: rabbitmq
-#    hostname: rabbit
-#    environment:
-#      - RABBITMQ_DEFAULT_USER=admin
-#      - RABBITMQ_DEFAULT_PASS=LJqEG9RE4FdZbVWoJzZIOQEI
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    networks:
-#      - internal_network
+  rabbit:
+    image: rabbitmq
+    hostname: rabbit
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=LJqEG9RE4FdZbVWoJzZIOQEI
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - internal_network
 
-#  celery-worker:
-#    build: .
-#    image: scaleoutsystems/studio:master
-#    command: sh ./scripts/run_worker.sh
-#    volumes:
-#      - .:/app:cached
-#    links:
-#      - stack-studio-db
-#      - studio
-#      - rabbit
-#      - redis
-#    depends_on:
-#      - stack-studio-db
-#      - studio
-#      - rabbit
-#      - redis
-#    networks:
-#      - internal_network
+  celery-worker:
+    build: .
+    image: scaleoutsystems/studio:master
+    command: sh ./scripts/run_worker.sh
+    volumes:
+      - .:/app:cached
+      - ./cluster.conf:/root/.kube/config
+    links:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      - internal_network
+
+  celery-beat:
+    build: .
+    image: scaleoutsystems/studio:master
+    command: sh ./scripts/run_beat.sh
+    volumes:
+      - .:/app:cached
+      - ./cluster.conf:/root/.kube/config
+    links:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      - internal_network
+
+  celery-flower:
+    build: .
+    image: scaleoutsystems/studio:master
+    command: sh ./scripts/run_flower.sh
+    volumes:
+      - .:/app:cached
+      - ./cluster.conf:/root/.kube/config
+    links:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - stack-studio-db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      - internal_network
+
 
 networks:
   internal_network:

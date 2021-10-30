@@ -7,18 +7,18 @@ for d in */ ; do
 done
 cd ..
 
-[ ! -z "${TELEPRESENCE_ROOT}" ] &&  echo "Copy settings from Telepresence root directory" && \
-    cp $TELEPRESENCE_ROOT/app/studio/settings.py studio/tele_settings_worker.py && \
-    export DJANGO_SETTINGS_MODULE=studio.tele_settings_worker
+#[ ! -z "${TELEPRESENCE_ROOT}" ] &&  echo "Copy settings from Telepresence root directory" && \
+#    cp $TELEPRESENCE_ROOT/app/studio/settings.py studio/tele_settings_worker.py && \
+#    export DJANGO_SETTINGS_MODULE=studio.tele_settings_worker
 # If we have set a local, custom settings.py, then use that.
-[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
+#[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
 
 sleep 1
 
 #  watchmedo auto-restart -R --patterns="*.py" -- 
-if [ -z "${DEBUG}" ] && [ -z "${TELEPRESENCE_ROOT}" ]; then
-    celery -A studio worker -l info --scheduler django
-else
+#if [ -z "${DEBUG}" ] && [ -z "${TELEPRESENCE_ROOT}" ]; then
+#    celery -A studio worker -l info --scheduler django
+#else
     watchmedo auto-restart -R --patterns="*.py" -- celery -A studio worker -l info --scheduler django
-fi
+#fi
