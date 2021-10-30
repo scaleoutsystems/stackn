@@ -8,5 +8,3 @@ Studio is the main UI component of the STACKn solution.
 ### License
 
 See LICENSE agreement.
-
-
