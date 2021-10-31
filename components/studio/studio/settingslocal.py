@@ -194,7 +194,7 @@ import socket
 #GIT_REPOS_URL = '/repos/'
 
 REGISTRY_SVC = 'stack-docker-registry'
-CHART_CONTROLLER_URL = 'http://stack-chart-controller'
+#CHART_CONTROLLER_URL = 'http://stack-chart-controller'
 STUDIO_URL = 'http://studio:8080'
 
 REDIS_PORT = 6379
