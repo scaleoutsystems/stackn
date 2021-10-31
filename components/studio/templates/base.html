@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Scaleout Studio</title>
+    <title>STACKn Studio</title>
 
     <link rel="icon" href="{% static 'dist/favicon_6.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
@@ -62,26 +62,10 @@
                             <span class="align-middle">Projects</span>
                         </a>
                     </li>
-                    {% if user.is_superuser %}
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{% url 'studio_admin:index' %}">
-                            <i class="align-middle" data-feather="settings"></i>
-                            <span class="align-middle">Admin</span>
-                        </a>
-                    </li>
-                    {% endif %}
+
 
                     {% block extra_sidebar_items %} {% endblock %}
 
-                    <!-- <li class="sidebar-header">
-                        Administration
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{% url 'studio_admin:index' %}">
-                            <i class="align-middle" data-feather="users"></i>
-                            <span class="align-middle">Studio Admin</span>
-                        </a>
-                    </li> -->
                 </ul>
             </div>
         </nav>
@@ -98,38 +82,6 @@
                         </button>
                     </div>
                 </form>
-                <!-- <ul class="navbar-nav">
-                    <li class="nav-item px-2 dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Help Center
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-start dropdown-mega" aria-labelledby="servicesDropdown">
-                            <div class="d-md-flex align-items-start justify-content-start">
-                                <div class="dropdown-mega-list">
-                                    <div class="dropdown-header">Installation</div>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=mac">Mac OS</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=linux">Linux</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/INSTALL?id=windows-10">Windows 10</a>
-                                </div>
-                                <div class="dropdown-mega-list">
-                                    <div class="dropdown-header">Tutorials</div>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=getting-started">Getting started</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=deploy-a-model">Deploy a model</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial?id=cli">STACKn CLI</a>
-                                    <a class="dropdown-item" href="#">STACKn API</a>
-                                </div>
-                                <div class="dropdown-mega-list">
-                                    <div class="dropdown-header">Release notes</div>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v040">v0.4.0</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v030">v0.3.0</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v020">v0.2.0</a>
-                                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/releasenotes?id=v010">v0.1.0</a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul> -->
                 {% if projects %}
                 <ul class="navbar-nav">
                     <li class="nav-item px-2 dropdown">

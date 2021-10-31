@@ -20,19 +20,19 @@ def index(request,id=0):
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     except Exception as err:
         print("User not logged in.")
-    base_template = 'base.html'
+    #base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
 
-        if request.user.is_authenticated:
-            try:
-                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
-            except TypeError as err:
-                project = []
-                print(err)
-            if not project:
-                base_template = 'base.html'
+        #if request.user.is_authenticated:
+        #    try:
+        #        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+        #        base_template = 'baseproject.html'
+        #    except TypeError as err:
+        #        project = []
+        #        print(err)
+        #    if not project:
+        #        base_template = 'base.html'
     # if project_selected:
     #     print("Project is selected")
     #     print(project)
@@ -91,5 +91,5 @@ def index(request,id=0):
         
     request.session.modified = True
 
-    template = 'index_portal.html'
+    template = 'portal/index.html'
     return render(request, template, locals())

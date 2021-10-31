@@ -34,22 +34,26 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    base_template = 'base.html'
-    if 'project' in request.session:
-        project_slug = request.session['project']
-        #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if request.user.is_authenticated:
-            try:
-                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
-            except Exception as err:
-                project = []
-                print(err)
-            if not project:
-                base_template = 'base.html'
-    template = 'index_projects.html'
+    #base_template = 'base.html'
+    #if 'project' in request.session:
+    #    project_slug = request.session['project']
+    #    #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+    #    if request.user.is_authenticated:
+    #        try:
+    #            project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+    #            base_template = 'baseproject.html'
+    #        except Exception as err:
+    #            project = []
+    #            print(err)
+    #        if not project:
+    #            base_template = 'base.html'
+    template = 'projects/index.html'
     try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+        if request.user.is_superuser:
+            projects = Project.objects.filter(status='active').distinct('pk')
+        else:
+            projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct(
+            'pk')
         media_url = sett.MEDIA_URL
         print(sett.STATIC_ROOT)
     except TypeError as err:
@@ -87,7 +91,7 @@ def settings(request, user, project_slug):
 
     #user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
     #print(user_permissions)
-    template = 'settings.html'
+    template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
@@ -406,7 +410,7 @@ def details(request, user, project_slug):
             request.session['project'] = project_slug
     
         
-    template = 'project.html'
+    template = 'projects/overview.html'
 
     url_domain = sett.DOMAIN
     media_url = sett.MEDIA_URL

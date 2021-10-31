@@ -6,12 +6,12 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.files import File
 from projects.models import Project, ProjectLog, Environment
-from reports.models import Report, ReportGenerator
+#from reports.models import Report, ReportGenerator
 from .models import Model, ModelLog, Metadata, ObjectType
-from reports.forms import GenerateReportForm
+#from reports.forms import GenerateReportForm
 from django.contrib.auth.decorators import login_required
 import logging
-from reports.helpers import populate_report_by_id, get_download_link
+#from reports.helpers import populate_report_by_id, get_download_link
 import markdown
 import ast
 from collections import defaultdict
@@ -24,84 +24,80 @@ from portal.models import PublicModelObject, PublishedModel
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
-def index(request,id=0):
+def index(request,user=None,project=None,id=0):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     except Exception as err:
         print("User not logged in.")
-    base_template = 'base.html'
-    if 'project' in request.session:
-        project_slug = request.session['project']
 
-        if request.user.is_authenticated:
-            try:
-                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
-            except Exception as err:
-                project = []
-                print(err)
-            if not project:
-                base_template = 'base.html'
-            print(base_template)
+    if project:
+        project = Project.objects.filter(slug=project).first()
+        published_models = Model.objects.filter(project=project).distinct('name')
 
-    # create session object to store info about model and their tag counts
-    if "model_tags" not in request.session:
-        request.session['model_tags'] = {}
-    # tag_count from the get request helps set num_tags which helps set the number of tags to show in the template
-    if "tag_count" in request.GET:
-        # add model id to model_tags object
-        if "model_id_add" in request.GET:
-            num_tags = int(request.GET['tag_count'])
-            id=int(request.GET['model_id_add'])
-            request.session['model_tags'][str(id)]=num_tags
-        # remove model id from model_tags object
-        if "model_id_remove" in request.GET:
-            num_tags = int(request.GET['tag_count'])
-            id=int(request.GET['model_id_remove'])
-            if str(id) in request.session['model_tags']:
-                request.session['model_tags'].pop(str(id))
-    
-    # reset model_tags if Model Tab on Sidebar pressed
-    if id==0:
-        if 'tf_add' not in request.GET and 'tf_remove' not in request.GET:
-            request.session['model_tags'] = {}
-    
-    media_url = settings.MEDIA_URL
-    published_models = PublishedModel.objects.all()
-    
-    # create session object to store ids for tag seacrh if it does not exist
-    if "tag_filters" not in request.session:
-        request.session['tag_filters'] = []
-    if 'tf_add' in request.GET:
-        tag = request.GET['tf_add']
-        if tag not in request.session['tag_filters']:
-            request.session['tag_filters'].append(tag)
-    elif 'tf_remove' in request.GET:
-        tag = request.GET['tf_remove']
-        if tag in request.session['tag_filters']:
-            request.session['tag_filters'].remove(tag)
-    elif "tag_count"  not in request.GET:
-        tag=""
-        request.session['tag_filters'] = []
-    print("tag_filters: ", request.session['tag_filters'])
-    
-    # changed list of published model only if tag filters are present
-    if request.session['tag_filters']:
-        tagged_published_models = []
-        for model in published_models:
-            model_objs = model.model_obj.order_by('-model__version')
-            latest_model_obj = model_objs[0]
-            mymodel = latest_model_obj.model
-            for t in mymodel.tags.all():
-                if t in request.session['tag_filters']:
-                    tagged_published_models.append(model)
-                    break
-        published_models = tagged_published_models
+        return render(request, 'models/index.html', locals())
+    else:
+        """
+        #TODO move tags to separate djapp
         
-    request.session.modified = True
-    return render(request, 'models_cards.html', locals())
+        # create session object to store info about model and their tag counts
+        if "model_tags" not in request.session:
+            request.session['model_tags'] = {}
+        # tag_count from the get request helps set num_tags which helps set the number of tags to show in the template
+        if "tag_count" in request.GET:
+            # add model id to model_tags object
+            if "model_id_add" in request.GET:
+                num_tags = int(request.GET['tag_count'])
+                id=int(request.GET['model_id_add'])
+                request.session['model_tags'][str(id)]=num_tags
+            # remove model id from model_tags object
+            if "model_id_remove" in request.GET:
+                num_tags = int(request.GET['tag_count'])
+                id=int(request.GET['model_id_remove'])
+                if str(id) in request.session['model_tags']:
+                    request.session['model_tags'].pop(str(id))
 
+        # reset model_tags if Model Tab on Sidebar pressed
+        if id==0:
+            if 'tf_add' not in request.GET and 'tf_remove' not in request.GET:
+                request.session['model_tags'] = {}
 
+        media_url = settings.MEDIA_URL
+        published_models = PublishedModel.objects.all()
+
+        # create session object to store ids for tag seacrh if it does not exist
+        if "tag_filters" not in request.session:
+            request.session['tag_filters'] = []
+        if 'tf_add' in request.GET:
+            tag = request.GET['tf_add']
+            if tag not in request.session['tag_filters']:
+                request.session['tag_filters'].append(tag)
+        elif 'tf_remove' in request.GET:
+            tag = request.GET['tf_remove']
+            if tag in request.session['tag_filters']:
+                request.session['tag_filters'].remove(tag)
+        elif "tag_count"  not in request.GET:
+            tag=""
+            request.session['tag_filters'] = []
+        print("tag_filters: ", request.session['tag_filters'])
+
+        # changed list of published model only if tag filters are present
+        if request.session['tag_filters']:
+            tagged_published_models = []
+            for model in published_models:
+                model_objs = model.model_obj.order_by('-model__version')
+                latest_model_obj = model_objs[0]
+                mymodel = latest_model_obj.model
+                for t in mymodel.tags.all():
+                    if t in request.session['tag_filters']:
+                        tagged_published_models.append(model)
+                        break
+            published_models = tagged_published_models
+
+        request.session.modified = True
+        """
+        return render(request, 'models/index.html', locals())
+
+"""
 @login_required
 def list(request, user, project):
     menu = dict()
@@ -117,7 +113,7 @@ def list(request, user, project):
 
 
     return render(request, template, locals())
-
+"""
 
 @login_required
 def unpublish_model(request, user, project, id):
@@ -312,11 +308,13 @@ def details(request, user, project, id):
     model_access_choices.remove(model.access)
     deployments = DeploymentInstance.objects.filter(model=model)
 
+    """
     report_generators = ReportGenerator.objects.filter(project=project)
 
     unfinished_reports = Report.objects.filter(status='P').order_by('created_at')
     for report in unfinished_reports:
         populate_report_by_id(report.id)
+
 
     reports = Report.objects.filter(model__id=id, status='C').order_by('-created_at')
 
@@ -359,7 +357,8 @@ def details(request, user, project, id):
             return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
-
+    """
+    
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     for log in log_objects:
@@ -484,8 +483,9 @@ def details_public(request, id):
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+        #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if request.user.is_authenticated:
+        #if is_authorized:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
