@@ -218,6 +218,3 @@ try:
     from .settings_local import *
 except ImportError as e:
     pass
-
-
-PROJECT_SETTINGS_PERM = 'None'

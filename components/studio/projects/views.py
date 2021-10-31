@@ -89,8 +89,6 @@ def settings(request, user, project_slug):
         projects = []
         print(err)
 
-    #user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
-    #print(user_permissions)
     template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
