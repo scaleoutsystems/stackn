@@ -47,24 +47,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    #'oauth2_provider',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    #'ingress',
     'api',
     'monitor',
     'projects',
     'models',
-    #'reports',
-    #'files',
-    #'datasets',
-    #'workflows',
     'deployments',
-    #'bootstrap_modal_forms',
-    #'studio_admin',
     'apps',
-    #'django_plotly_dash',
     'portal',
     'tagulous',
     'django_celery_beat',
@@ -89,7 +80,6 @@ MIDDLEWARE = [
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # other finders..
     'compressor.finders.CompressorFinder',
 )
 
@@ -229,12 +219,5 @@ try:
 except ImportError as e:
     pass
 
-#import os
 
-#try:
-#    apps = [os.environ.get("APPS").split(" ")]
-#    for app in apps:
-#        INSTALLED_APPS += [app]
-#except Exception as e:
-#    pass
 PROJECT_SETTINGS_PERM = 'None'
