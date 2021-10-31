@@ -33,13 +33,10 @@ models_router.register(r'modellogs', ModelLogList, basename='modellog')
 models_router.register(r'metadata', MetadataList, basename='metadata')
 models_router.register(r'apps', AppList, basename='apps')
 
-
-
-
 urlpatterns = [
     path('', include(router_drf.urls)),
     path('', include(router.urls)),
     path('', include(models_router.urls)),
-    path('api-token-auth', obtain_auth_token, name='api_token_auth'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('settings', get_studio_settings)
 ]

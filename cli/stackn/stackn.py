@@ -83,6 +83,7 @@ def get_projects(conf={}, params=[], auth_headers=[]):
         r = requests.get(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
     if r:
         projects = json.loads(r.content)
+        print("listing {} projects\n".format(len(projects)))
         return projects
     else:
         print("Fetching projects failed.")

@@ -80,7 +80,7 @@ def _load_config_file_url(conf, is_login=False):
     stackn_config_full = _load_config_file_full(conf)
     if stackn_config_full:
         try:
-            stackn_config = stackn_config_full[_get_studio_url_key(conf['STACKN_URL'])]
+            stackn_config = stackn_config_full[conf['STACKN_URL']]
         except:
             if conf['STACKN_URL'] and not is_login:
                 print("Failed to load config file from URL: {} not set up.".format(conf['STACKN_URL']))
@@ -100,7 +100,13 @@ def _get_remote(conf):
         pass
     keys = stackn_config_full.keys()
     return keys
-    
+
+def get_token(conf):
+    stackn_config_full = _load_config_file_full(conf)
+    #print("CONFIG HERE:")
+    #print(stackn_config_full)
+
+    return stackn_config_full[conf['STACKN_URL']], True
 
 def _get_current(conf):
     stackn_config_full = _load_config_file_full(conf)
@@ -211,8 +217,8 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     # If we have a currently set remote URL, fetch from config file.
     if conf['STACKN_URL']:
         try:
-            # print(conf)
-            conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
+            print(conf)
+            #conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
         except:
             print("Failed to call studio endpoint at: {}".format(conf['STACKN_URL']))
             return conf, False
@@ -230,25 +236,22 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
             return conf, False
     return conf, True
 
-def _keycloak_user_auth(conf):
+def _user_auth(conf):
     username = conf['STACKN_USER']
     password = conf['STACKN_PASS']
-    keycloak_url = conf['STACKN_KEYCLOAK_URL']
-    client_id = conf['STACKN_CLIENT_ID']
-    realm = conf['STACKN_REALM']
+    url = conf['STACKN_URL']
     secure = conf['STACKN_SECURE']
-    discovery_url = os.path.join(keycloak_url, 'auth/realms/{}'.format(realm))
-    res = requests.get(discovery_url, verify=secure)
-    if res:
-        realm_info = res.json()
-        public_key = realm_info['public_key']
-    else:
-        print('Failed to discover realm settings: '+realm)
-        return None
-    token_url = os.path.join(keycloak_url, 'auth/realms/{}/protocol/openid-connect/token'.format(realm))
-    req = {'client_id': client_id,
-           'grant_type': 'password',
-           'username': username,
+    #discovery_url = os.path.join(auth_url, 'api/api-token-auth/')
+    #res = requests.get(discovery_url, verify=secure)
+    #if res:
+    #    realm_info = res.json()
+    #    public_key = realm_info['public_key']
+    #else:
+    #    print('Failed to discover realm settings: '+realm)
+    #    return None
+    token_url = url + '/api/api-token-auth/'
+    print("calling {}".format(token_url))
+    req = {'username': username,
            'password': password}
     res = requests.post(token_url, data=req, verify=secure)
     if res:
@@ -256,39 +259,11 @@ def _keycloak_user_auth(conf):
     else:
         print('Failed to authenticate.')
         print(res.text)
-    if 'access_token' in res:
-        return res['access_token'], res['refresh_token'], public_key
+    if 'token' in res:
+        return res['token']
     else:
-        print('User: '+username+' denied access to client: '+client_id)
+        print('User: '+username+' denied access to client!')
         return False
-
-def get_token(conf={}, write_to_file=True):
-    
-    conf, status = get_config(conf, required=['STACKN_REFRESH_TOKEN'])
-    if not status:
-        print("Failed to get required config.")
-        return conf, False
-
-    token_url = urllib.parse.urljoin(conf["STACKN_KEYCLOAK_URL"], 'auth/realms/{}/protocol/openid-connect/token'.format(conf['STACKN_REALM']))
-    
-    req = {'grant_type': 'refresh_token',
-           'client_id': conf['STACKN_CLIENT_ID'],
-           'refresh_token': conf['STACKN_REFRESH_TOKEN']}
-    res = requests.post(token_url, data=req, verify=conf['STACKN_SECURE'])
-    resp = res.json()
-    
-    if 'access_token' in resp:
-        conf['STACKN_ACCESS_TOKEN'] = resp['access_token']
-        conf['STACKN_REFRESH_TOKEN'] = resp['refresh_token']
-        if write_to_file:
-            write_config(conf)
-    else:
-        print('Failed to authenticate with token, please login again.')
-        print(res.text)
-        return conf, False
-
-    return conf, True
-
 
 def write_config(conf):
 
@@ -304,7 +279,7 @@ def write_config(conf):
         current_config = dict()
     f.close()
 
-    studio_url_key = _get_studio_url_key(studio_url)
+    studio_url_key = studio_url
     current_config[studio_url_key] = conf
 
     try:
@@ -328,12 +303,10 @@ def get_keycloak_url(studio_url, secure=True):
     
     return keycloak_host
 
-def stackn_login(studio_url=[], client_id=[], realm=[], username=[], password=[], secure=True):
+def stackn_login(studio_url=[], username=[], password=[], secure=True):
     """ Login to Studio services. """
     inp_config = {
         'STACKN_URL': studio_url,
-        'STACKN_CLIENT_ID': client_id,
-        'STACKN_REALM': realm,
         'STACKN_USER': username,
         'STACKN_PASS': password,
         'STACKN_SECURE': secure
@@ -343,28 +316,18 @@ def stackn_login(studio_url=[], client_id=[], realm=[], username=[], password=[]
 
     if not conf['STACKN_URL']:
         conf['STACKN_URL'] = input('Studio URL: ')
-        conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
+        #conf['STACKN_AUTH_URL'] = conf['STACKN_URL'] + '/api/api-token-auth/'
 
     if not conf['STACKN_USER']:
         conf['STACKN_USER'] = input('Username: ')
 
     if not conf['STACKN_PASS']:
-        if conf['STACKN_REFRESH_TOKEN'] and conf['STACKN_REFRESH_TOKEN'] != '':
-            try:
-                conf, status = get_token(conf, write_to_file=False)
-            except:
-                pass
-            if not status:
-                print("Failed to login with set refresh token.")
-                print("Try with password instead.")
-                conf['STACKN_PASS'] = getpass()
-        else:
-            conf['STACKN_PASS'] = getpass()
+        from getpass import getpass
+        conf['STACKN_PASS'] = getpass('Password: ')
+
     if conf['STACKN_PASS']:
-        access_token, refresh_token, public_key = _keycloak_user_auth(conf)
+        access_token = _user_auth(conf)
         conf['STACKN_ACCESS_TOKEN'] = access_token
-        conf['STACKN_REFRESH_TOKEN'] = refresh_token
-        conf['PUBLIC_KEY'] = public_key
 
     write_config(conf)
     _set_current(conf)
