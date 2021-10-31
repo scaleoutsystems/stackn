@@ -13,6 +13,6 @@ import sys
 from django.core.wsgi import get_wsgi_application
 
 if not 'TELEPRESENCE_ROOT' in os.environ:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'studio.settingslocal')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'studio.settings')
 
 application = get_wsgi_application()

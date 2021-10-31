@@ -5,8 +5,8 @@
     "fields": {
       "name": "celery.backend_cleanup",
       "task": "celery.backend_cleanup",
-      "interval": null,
-      "crontab": 1,
+      "interval": 3,
+      "crontab": null,
       "solar": null,
       "clocked": null,
       "args": "[]",

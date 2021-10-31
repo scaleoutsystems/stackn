@@ -15,4 +15,13 @@
       "period": "seconds"
     }
   }
+  ,
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 3,
+    "fields": {
+      "every": 24,
+      "period": "hours"
+    }
+  }
   ]
