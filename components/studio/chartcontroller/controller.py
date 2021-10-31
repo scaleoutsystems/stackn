@@ -40,8 +40,8 @@ def deploy(options):
         print('Release option not specified.')
         return json.dumps({'status':'failed', 'reason':'Option release not set.'})
 
-
-    unique_filename = 'chartcontroller/values/{}.yaml'.format(str(uuid.uuid4()))
+    from datetime import datetime
+    unique_filename = 'chartcontroller/values/{}-{}-{}.yaml'.format(str(datetime.now().strftime("%Y%m%d-%H%M%S")),str(options['chart']).replace('/',''),str(options['app_name']))
     f = open(unique_filename,'w')
     f.write(yaml.dump(options))
     f.close()
