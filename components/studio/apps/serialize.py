@@ -5,7 +5,6 @@ from .models import Apps, AppInstance, AppCategories, AppPermission
 from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
 from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
 from django.template import engines
 import requests
 import flatten_json

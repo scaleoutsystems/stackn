@@ -6,7 +6,6 @@ from django.conf import settings
 from django.template import engines
 from models.models import Model
 from django.contrib.auth.models import User
-from modules import keycloak_lib as keylib
 import uuid
 
 from datetime import datetime, timedelta

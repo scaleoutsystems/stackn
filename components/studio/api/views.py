@@ -18,7 +18,6 @@ from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files import File
-import modules.keycloak_lib as kc
 from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
 from models.models import ObjectType
 from apps.models import AppInstance, Apps, AppCategories
@@ -83,12 +82,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             model_card= request.data['model_card']
             model_uid = request.data['uid']
             object_type_slug = request.data['object_type']
-            # if 'image' not in request.FILES:
-            #     img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
-            #     img_file = open(img, 'rb')
-            #     image = File(img_file)
-            # else:
-            #     image = request.FILES['image']
+
             object_type = ObjectType.objects.get(slug=object_type_slug)
         except Exception as err:
             print(err)

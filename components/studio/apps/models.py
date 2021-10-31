@@ -8,7 +8,6 @@ from models.models import Model
 from projects.models import Project, ReleaseName
 from projects.helpers import get_minio_keys
 from django.contrib.auth.models import User
-from modules import keycloak_lib as keylib
 import uuid
 import flatten_json
 from datetime import datetime, timedelta

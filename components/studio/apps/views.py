@@ -10,7 +10,6 @@ from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
-#import modules.keycloak_lib as keylib
 from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
@@ -32,10 +31,7 @@ def index(request, user, project):
     print("hello")
     category = 'store'
     template = 'index_apps.html'
-    # status_success = ['Running', 'Succeeded', 'Success']
-    # status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
 
-    # template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
@@ -50,6 +46,7 @@ def logs(request, user, project, ai_id):
     project = Project.objects.get(slug=project)
     app_settings = app.app.settings
     containers = []
+    logs = []
     if 'logs' in app_settings:
         containers = app_settings['logs']
         container = containers[0]
@@ -58,7 +55,7 @@ def logs(request, user, project, ai_id):
             container = request.GET.get('container')
             print("Got container in request: "+container)
         
-        logs = []
+
         try:
             url = settings.LOKI_SVC+'/loki/api/v1/query_range'
             app_params = app.parameters

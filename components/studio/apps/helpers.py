@@ -7,7 +7,6 @@ from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
 from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
@@ -43,10 +42,7 @@ def create_instance_params(instance, action="create"):
         "app_slug": str(instance.app.slug),
         "app_revision": str(instance.app.revision),
         "appname": RELEASE_NAME,
-        # "project": {
-        #     "name": instance.project.name,
-        #     "slug": instance.project.slug
-        # },
+
         "global": {
             "domain": HOST,
         },
@@ -67,12 +63,3 @@ def create_instance_params(instance, action="create"):
         instance.parameters['project'] = dict()
     instance.parameters['project'].update({'name': instance.project.name, 'slug': instance.project.slug})
 
-    
-
-    # # Add field for table.    
-    # if instance.app.table_field and instance.app.table_field != "":
-    #     django_engine = engines['django']
-    #     info_field = django_engine.from_string(instance.app.table_field).render(parameters)
-    #     instance.table_field = eval(info_field)
-    # else:
-    #     instance.table_field = {}
