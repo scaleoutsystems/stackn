@@ -20,7 +20,7 @@ AUTHENTICATION_BACKENDS = [
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DOMAIN = 'platform.local'
+DOMAIN = '13.51.45.47.nip.io'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -47,26 +47,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    'oauth2_provider',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'ingress',
     'api',
     'monitor',
     'projects',
     'models',
-    'reports',
-    'files',
-    'datasets',
-    'workflows',
     'deployments',
-    'bootstrap_modal_forms',
-    'studio_admin',
     'apps',
-    'django_plotly_dash',
     'portal',
     'tagulous',
+    'django_celery_beat',
 ]
 
 REST_FRAMEWORK = {
@@ -88,7 +80,6 @@ MIDDLEWARE = [
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # other finders..
     'compressor.finders.CompressorFinder',
 )
 
@@ -138,7 +129,12 @@ ASGI_APPLICATION = 'studio.asgi.application'
 # Dummy backend here to allow for creating migrations locally.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.dummy',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 
@@ -191,21 +187,21 @@ LOGIN_REDIRECT_URL = '/'
 import socket
 
 # TODO remove after refactor
-API_HOSTNAME = 'localhost'
-API_PORT = 8080
+#API_HOSTNAME = 'localhost'
+#API_PORT = 8080
 
-GIT_REPOS_ROOT = os.path.join(REPO_DIR, 'repos')
-GIT_REPOS_URL = '/repos/'
+#GIT_REPOS_ROOT = os.path.join(REPO_DIR, 'repos')
+#GIT_REPOS_URL = '/repos/'
 
 REGISTRY_SVC = 'stack-docker-registry'
-CHART_CONTROLLER_URL = 'http://stack-chart-controller'
-STUDIO_URL = 'http://stack-studio:8080'
+#CHART_CONTROLLER_URL = 'http://stack-chart-controller'
+STUDIO_URL = 'http://studio:8080'
 
 REDIS_PORT = 6379
 REDIS_DB = 0
-REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'platform-redis')
+REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'redis')
 
-CELERY_BROKER_URL = 'amqp://admin:LJqEG9RE4FdZbVWoJzZIOQEI@platform-rabbit:5672//'
+CELERY_BROKER_URL = 'amqp://admin:LJqEG9RE4FdZbVWoJzZIOQEI@rabbit:5672//'
 CELERY_RESULT_BACKEND = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -213,20 +209,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
 
+#TODO DEPRICATED!
 EXTERNAL_KUBECONF = True
 NAMESPACE = 'default'
-STORAGECLASS = 'aws-efs'
+STORAGECLASS = 'microk8s-hostpath'
 
 try:
     from .settings_local import *
 except ImportError as e:
-    pass
-
-import os
-
-try:
-    apps = [os.environ.get("APPS").split(" ")]
-    for app in apps:
-        INSTALLED_APPS += [app]
-except Exception as e:
     pass
