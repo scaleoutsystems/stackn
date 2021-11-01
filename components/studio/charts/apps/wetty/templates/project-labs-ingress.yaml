@@ -4,6 +4,9 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -23,6 +26,9 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}

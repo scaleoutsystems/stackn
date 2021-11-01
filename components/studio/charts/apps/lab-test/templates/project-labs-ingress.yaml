@@ -8,6 +8,8 @@ metadata:
     io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
     #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
     #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
 spec:
@@ -33,6 +35,8 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}

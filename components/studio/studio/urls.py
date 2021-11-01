@@ -8,7 +8,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', views.auth),
+    path('auth', views.auth),
     path('account/', include('django.contrib.auth.urls')),
     #path('oidc/', include('mozilla_django_oidc.urls')),
     #path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),

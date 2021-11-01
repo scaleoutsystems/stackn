@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "20000m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
   name: {{ .Release.Name }}-minio-ingress
   namespace: {{ .Values.namespace }}
 spec:
@@ -25,6 +27,8 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "20000m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}/auth/start?rd=$escaped_request_uri"
   name: {{ .Release.Name }}-minio-ingress
   namespace: {{ .Values.namespace }}
 spec:
