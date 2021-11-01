@@ -1,6 +1,7 @@
 # Installing STACKn
 
 ## Local Deployment
+<br />
 
 ### Mac
 
@@ -42,13 +43,11 @@ This starts microk8s with 4 CPUs, 8Gb of RAM, and 30GB of disk space.
 microk8s enable dns storage rbac ingress
 ```
 
-- Clone the Scaleout charts repo and check out the develop branch:
+- Clone the Scaleout charts repo:
 
 ```
 git clone https://github.com/scaleoutsystems/charts.git
-cd charts
-git checkout develop
-cd ..
+cd charts/scaleout/stackn
 ```
 
 - Create a folder where you can keep configuration files for your deployment:
@@ -58,10 +57,10 @@ mkdir stackn-local
 cd stackn-local
 ```
 
-Then copy `local.yaml` from `charts/scaleout/stackn/examples/`:
+Then copy `values.yaml`, which should be lcoated under `charts/scaleout/stackn/`, in your new folder:
 
 ```
-cp ../charts/scaleout/stackn/examples/local.yaml .
+cp ../values.yaml ./my-values.yaml
 ```
 
 - You will need to make some edits to this file, but first get your kubeconfig for access to the cluster:
@@ -76,11 +75,13 @@ microk8s kubectl config view --raw > config
 multipass list
 ```
 
-- Edit `config`: Change the line
+- Edit the `config` field by changing the line:
 
 ```
 server: https://127.0.0.1:16443
+```
 to
+```
 server: https://your-ip:16443
 ```
 
@@ -97,19 +98,34 @@ helm --kubeconfig config list
 cp config ~/.kube/config
 ```
 
-Now you don't have to specify kubeconfig with `kubectl` and `helm`. If you're managing multiple clusters, you can use the `kubectx` tool to be able to conveniently switch between different contexts.
+This way you don't have to specify kubeconfig with `kubectl` and `helm`. If you're managing multiple clusters, you can use the `kubectx` tool to be able to conveniently switch between different contexts.
 
-- Now edit `local.yaml`:
-  - Replace `cluster_config` with your config file.
-  - Search for 127.0.0.1 and replace with your cluster's IP.
+
+- Now it's time to start editing your `values.yaml` file. Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
+
+  - `StorageClass` (for microk8s is “microk8s-hostpath”)
+
+  - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
+
+  - If you plan to use a self-signed certificate, then set  `oidc.verify_ssl = false`; this will enable insecure options to be used.
+
+  - Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
+
+  - Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
+
+```
+microk8s config
+```
+
+
 - The last step before we can deploy STACKn is to create a self-signed wildcard certificate:
 
 ```
-cp ../charts/scaleout/stackn/examples/issuer.yaml .
-cp ../charts/scaleout/stackn/examples/certificate.yaml .
+cp ../examples/issuer.yaml .
+cp ..examples/certificate.yaml .
 ```
 
-In `certificate.yaml`, replace 127.0.0.1 with your IP. Install `cert-manager`:
+In `certificate.yaml`, replace 127.0.0.1 with your IP. For example, if your local IP is 192.168.1.10 and you are using nip.io as a wildcard DNS, then replace 127.0.0.1 with `192.168.1.10.nip.io`. Once done, install `cert-manager`as follows:
 
 ```
 kubectl --kubeconfig config create namespace cert-manager
@@ -132,7 +148,7 @@ kubectl --kubeconfig config apply -f certificate.yaml
 And finally, deploy STACKn:
 
 ```
-helm --kubeconfig config install stackn ../charts/scaleout/stackn -f local.yaml
+helm --kubeconfig config install stackn ../stackn -f my-values.yaml
 ```
 
 Note that you will need to take extra steps for your browser to accept the self-signed certificate. On Mac:
@@ -143,26 +159,36 @@ kubectl --kubeconfig config get secret prod-ingress -o jsonpath='{.data.ca\.crt}
 
 Then `open ca.crt`, and add it to `System` in your key-chain. Right-click the entry, select `Get Info`, expand `Trust` and set `When using this certificate` to `Always Trust`.
 
-Once all the pods have started (check with `kubectl --kubeconfig config get po`), you can browse to `Studio` at `studio.your-ip.nip.io`. It could take up to 10 minutes to start all the pods.
+Once all the pods have started (check with `kubectl --kubeconfig config get po`), you can browse to `Studio` at `studio.your-ip.nip.io`. It could take several minutes to start all the pods.
+<br />
+<br />
 
 ### Linux
 
-- Installing Helm:
+- Install Helm:
 
 ```
 sudo snap install helm --classic
 ```
 
-- Installing kubectl:
+- Install kubectl:
 
 ```
 sudo snap install kubectl --classic
 ```
 
-- Installing microk8s:
+- Install microk8s:
 
 ```
 sudo snap install microk8s --classic
+```
+
+- Add user to microk8s group and give permissions to the k8s config folder
+
+```
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+newgrp microk8s
 ```
 
 - Start microk8s:
@@ -177,10 +203,11 @@ microk8s start
 sudo microk8s enable dns storage rbac ingress
 ```
 
-- Clone the Scaleout charts repo and check out the develop branch:
+- Clone the Scaleout charts repo:
 
 ```
-git clone https://github.com/scaleoutsystems/charts.git -b develop
+git clone https://github.com/scaleoutsystems/charts.git
+cd charts/scaleout/stackn
 ```
 
 - Create a folder where you can keep configuration files for your deployment:
@@ -190,10 +217,10 @@ mkdir stackn-local
 cd stackn-local
 ```
 
-- Then copy local.yaml from charts/scaleout/stackn/examples/:
+- Then copy `value.yaml`, which should be located at `charts/scaleout/stackn`, in your new folder:
 
 ```
-cp ../charts/scaleout/stackn/examples/local.yaml .
+cp ../value.yaml ./my-values.yaml
 ```
 
 - Get your config for access to the cluster:
@@ -208,14 +235,28 @@ microk8s kubectl config view --raw > config
 cp config ~/.kube/config
 ```
 
-Now you don't have to specify kubeconfig with `kubectl` and `helm`. If you're managing multiple clusters, you can use the `kubectx` tool to be able to conveniently switch between different contexts. Now edit `local.yaml`:
+This way you don't have to specify kubeconfig with `kubectl` and `helm`. If you're managing multiple clusters, you can use the `kubectx` tool to be able to conveniently switch between different contexts. Now edit `local.yaml`:
 
-- Replace `cluster_config` with your config file.
+- Now it's time to start editing your `values.yaml` file. Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
+
+  - `StorageClass` (for microk8s is “microk8s-hostpath”)
+
+  - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
+
+  - If you plan to use a self-signed certificate, then set  `oidc.verify_ssl = false`; this will enable insecure options to be used.
+
+  - Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
+
+  - Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
+
+```
+microk8s config
+```
 
 - And finally, deploy STACKn:
 
 ```
-helm install stackn ../charts/scaleout/stackn -f local.yaml
+helm install stackn ../stackn -f my-values.yaml
 ```
 
 - Get to see if everything is working fine.
@@ -224,9 +265,13 @@ helm install stackn ../charts/scaleout/stackn -f local.yaml
 kubectl get pods
 ```
 
+- Once all the pods have started, you can browse to `Studio` at `studio.your-ip.nip.io`. It could take several minutes to start all the pods.
+<br />
+<br />
+
 ### Windows 10
 
-1. Install **helm** for Windows:
+- Install helm for Windows:
 
 ```bash
 choco install kubernetes-helm
@@ -234,7 +279,7 @@ choco install kubernetes-helm
 
 You can find instructions how to install Chocolatey [here](https://chocolatey.org/install).
 
-2. Install **kubectl** for Windows:
+- Install kubectl for Windows:
 
 ```bash
 choco install kubernetes-cli
@@ -244,24 +289,23 @@ After that, navigate to the main directory and run:
 
 ```bash
 mkdir .kube
-
 cd .kube
-
 New-Item config -type file
 ```
 
-3. Install [Microk8s](https://ubuntu.com/tutorials/install-microk8s-on-windows#2-installation).
+- Install [Microk8s](https://ubuntu.com/tutorials/install-microk8s-on-windows#2-installation).
 
-Note: Make sure you select **multipass** to be installed together with Microk8s.
+**Note**: Make sure you to select multipass to be installed together with Microk8s.
 
-4. Enable Virtualization in your BIOS:
+- Enable Virtualization in your BIOS:
 
-- Restart your system
-- Press **DEL** before the OS has loaded
-- Go to **Advanced CPU Settings**
-- Set **SVM** to **Enabled**
+  - Restart your system
+  - Press **DEL** before the OS has loaded
+  - Go to **Advanced CPU Settings**
+  - Set **SVM** to **Enabled**
 
-5. Launch a VM
+
+- Once restarted, launch a VM as follows:
 
 ```bash
 microk8s install --cpu 4 --mem 8 --disk 30
@@ -273,15 +317,10 @@ and install the add-ons:
 microk8s enable dns storage rbac ingress
 ```
 
-6. Create a kubernetes config:
+- Create a kubernetes config:
 
 ```bash
-mkdir stackn-local
-
-cd stackn-local
-
 microk8s kubectl config view --raw > config
-
 multipass list
 ```
 
@@ -297,37 +336,54 @@ to
 server: https://your-ip:16443
 ```
 
-7. Clone the **charts** repository
+- Clone the charts repository:
 
 ```bash
-cd ..
-
 git clone https://github.com/scaleoutsystems/charts.git
+cd charts/scaleout/stackn
 ```
 
-and paste the configuration file to your **stackn-local** directory:
+- Create a folder where you can keep configuration files for your deployment:
 
 ```bash
-cp charts/scaleout/stackn/examples/local.yaml stackn-local/values.yaml
-```
-
-Then, edit the **stackn-local/values.yaml** configuration file:
-
-- Replace `cluster_config` with your **stackn-local/config** file.
-- Replace **127.0.0.1** with the IP of your cluster everywhere.
-
-8. Deploy stackn:
-
-```bash
+mkdir stackn-local
 cd stackn-local
-
-helm --kubeconfig config install stackn ../charts/scaleout/stackn -f values.yaml
 ```
 
-9. Verify the deployment
+- Then copy `value.yaml`, which should be located at `charts/scaleout/stackn`, in your new folder:
+
+```bash
+cp ../values.yaml ./my-values.yaml
+```
+
+- Now it's time to start editing your `values.yaml` file. Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
+
+  - `StorageClass` (for microk8s is “microk8s-hostpath”)
+
+  - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
+
+  - If you plan to use a self-signed certificate, then set  `oidc.verify_ssl = false`; this will enable insecure options to be used.
+
+  - Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
+
+  - Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
+
+```
+microk8s config
+```
+
+- And finally, deploy STACKn:
+
+```bash
+helm --kubeconfig config install stackn ../stackn -f my-values.yaml
+```
+
+- Verify the deployment
 
 ```bash
 helm --kubeconfig config list
 
 kubectl --kubeconfig config get pods
 ```
+
+- Once all the pods have started, you can browse to `Studio` at `studio.your-ip.nip.io`. It could take several minutes to start all the pods.
