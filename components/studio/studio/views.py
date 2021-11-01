@@ -25,7 +25,6 @@ def register(request):
     context = {'form':form}
     return render(request,'registration/register.html',context)
 
-
 # Since this is a production feature, it will only work if DEBUG is set to False
 def handle_page_not_found(request, exception):
     return HttpResponseRedirect('/')
