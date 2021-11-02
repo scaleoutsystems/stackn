@@ -2,11 +2,11 @@ name: Chart Controller CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
     - 'components/chart-controller/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
     - 'components/chart-controller/**'
 
