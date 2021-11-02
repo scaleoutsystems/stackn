@@ -1,20 +1,35 @@
 # Release Notes
 
-## v0.5.0 (upcoming release)
+## v0.5.0
 
 ### New functionality
-- Studio Administration module to monitor and manage resources as an alternative to Django Admin
-- Brand new STACKn UI
-- Automated scaling of model deployments
-- New public portal for models
-- New model details page
-- Possibility to download a model from its S3 storage
-- Quick navigation between projects
+- Apps and project templates added  as separate folders (can be installed via CLI)
+- CLI has been refactored
+- Added support for MLflow
+- Default environments (images) added to "default" project template
+- Functionalities added to CLI, including "insecure" mode enabling local deployment without certificates
+- Support for setting app tags added
+- New static files for django admin site
+- Various updated to the UI for easier navigation and structure
+- Model cards added after model deployment, also support in CLI
+-  Can now deploy STACKn in either debug mode with the develop server, or in production mode with gunicorn and serving static content with nginx
+- Reloader added for making updates on change on ConfigMaps and Secrets
 
 ### Bug fixes
+- Fix in publishmodel object: onetoone project field to foreignkey
+- Keycloak resources now deleted properly when project is deleted
+- Random credentials are now generated when creating new projects from templates
+- Fix bug in celery worker deployment
+- Longer length of project names is now allowed
+- Deleting projects via CLI now works
+- Various bug fixes in UI
+- Various minor bug fixes
 
 ### Other
-
+- [master](https://github.com/scaleoutsystems/stackn/tree/master) branch is archived, new default branch is [main](https://github.com/scaleoutsystems/stackn/tree/main)
+- README.md has been restructured (instructions for local deployment) 
+<br />
+<br />
 ## v0.4.0
 
 ### New functionality
@@ -27,7 +42,8 @@
 ### Other
 
 - New improved functionality for adding users as members to your project
-
+<br />
+<br />
 ## v0.3.0
 
 ### New functionality
@@ -57,7 +73,8 @@ stackn get jobs
 
 - Freshened up and new optimized STACKn documentation
 - STACKn is now using ONLY Keycloak for authentication
-
+<br />
+<br />
 ## v0.2.0
 
 ### New functionality
@@ -96,8 +113,8 @@ stackn create/get/delete dataset ...
 - Only the Project owner can grant access to it
 - Cleaned up obsolete k8s jobs from the kubernetes cluster
 - Optimized Django migrations management
-
-
+<br />
+<br />
 ## v0.1.0
 
 - Experiments view now working.

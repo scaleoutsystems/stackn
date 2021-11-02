@@ -1,161 +1,157 @@
 ![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
 
+* [What is STACKn?](#what-is-stackn)
+* [Setup a local deployment](#setup-a-local-deployment)
+* [Where is STACKn used?](#where-is-stackn-used)
+* [Maintainers](#maintainers)
+
 # What is STACKn?
 
-STACKn is an open source collaborative ML platform. 
+STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
 
-We aim to provide organizations and institutions with a complete end-to-end toolbox solution evolved by community feedback and adoption.
+<p align="center">
+  <img src="images/STACKn_overview.svg" width="100%" title="STACKn overview">
+</p>
+<p align="center">
+  <img src="images/stackn_serve_overview.png" width="100%" title="STACKn serve overview">
+</p>
 
-# Why use STACKn?
-The aim of the STACKn solution is to provide an end-to-end solution for working on collaborative machine learning projects. With a vendor agnostic approach, no framework is preselected and it is entirely up to the users to select their preferred frameworks. 
 
-STACKn is cloud-native and can be deployed on any solution that implements the Kubernetes api. 
 
-# Core features
+With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
+- Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
+- Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
+- STACKn Models: enables trained models to be deployed and served using tools such as Tensorflow Serving, PyTorch Serve and MLFlow Serve, which in turn enables deployment of analytics apps and custom UIs using served model endpoints (Dash, Flask etc).     
 
-## Custom Resource management
-Ability to lifecycle control resources. STACKn provides model, dataset, files and project lifecycle management, including user management.
+STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
-## Model Management
-Ability to track models from cradle to grave with version control, inference auto scaling and control as well as audit trails and scheduled rollouts and/or decommissions. 
+STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
+<br />
+<br />
+# Setup a local deployment
+This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
+<br />
 
-## Platform support
-Deploy anywhere where there is a Kubernetes compliant API.
+## Setup single-node microk8s
 
-## Integration and customization
-- The STACKn front end is composed of modules on a plugin architecture. The versatility enables composeability and  extendability of multiple services together for consumption by the end user. 
-- On the backend side Helm charts can easily be extended to include additional services with the inclusion of additional resources to the Helm chart. 
- - A third way to extend resources includes complementing existing bundling with additional Helm charts with bundled resources to allow for custom resources to be deployed and managed either by the chart controller or by manual deployment. 
-
-## Components
-STACKn is a composition of multiple required components. The overview can give you a high level introduction to the project and its components.
-For additional details please see the technical documentation.
-
-# Setup
-
-## Getting started
-This guide lets you quickly get started with STACKn.
-
-1. Check prerequisites
-2. Create an SSL certificate
-3. Download charts
-4. Install STACKn
-5. Setup a user
-6. Create a project
-
-### 1. Check prerequisites
-
-- Ensure you have a Kubernetes compliant cluster.
-- Your user must have a KUBECONFIG in env configured such that you can access kubectl.
-- Helm 3 client installed.
-- You need a domain name with a wildcard SSL certificate. If your domain is your-domain.com, you will need a certificate for *.your-domain.com and *.studio.your-domain.com.
-
-#### Kubernetes prerequisites
-Your kubernetes setup is expected to have (unless you configure other options):
-- Working Ingress controller (ingress-nginx)
-- Working Dynamic Storage Provider.
-To configure STACKn you must know your storage class name and storage provisioner.
-
-#### Kubernetes configuration
-- Setup a desired namespace (or default)
-- Setup a service account (or rolebind to admin)
-Ensure your service account user has a rolebinding to administrator permissions for deployment.
+1. Install microk8s
 
 ```bash
-cat <<EOF | kubectl apply -f - 
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: admin
-  namespace: default
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: admin
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: default
-EOF
+sudo snap install microk8s --classic
+```
+2. Add user to microk8s group and give permissions to the k8s config folder
+
+```
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+newgrp microk8s
+```
+3. Enable extensions
+```
+microk8s.enable dns rbac ingress storage
+```
+4. If kubectl is installed on host add cluster config to kubectl config
+```
+microk8s config >> ~/.kube/config
+```
+5. Finally, install the latest version of Helm since microk8s is usually not packaged with the latest Helm version.
+**Follow the instructions** [here](https://helm.sh/docs/intro/install/#from-apt-debianubuntu)
+
+## Install STACKn
+
+1. Clone  Helm chart repo for STACKn
+```
+git clone https://github.com/scaleoutsystems/charts.git
+```
+2. A template file for values.yaml can be found in “charts/scaleout/stackn”
+Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
+
+- StorageClass for microk8s is “microk8s-hostpath”
+
+- Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
+
+- Set  `oidc.verify_ssl = false`, this will enable insecure options (without certificates)
+
+- Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
+
+- Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
+
+```
+microk8s config
 ```
 
-As we are using fusemounting for some of the s3 overlay mounts to allow for easy s3 access through filesystem you are required to configure so pods allow privileged mode.
-If you don't want this feature you can remove this by configuration.
-
-Also if you intend to deploy lab sessions that will utilize hardware capabilities such as GPU, make sure the service account used or configured for the services have the right permissions. 
-
-For example, if you are deploying to microk8s you are required to allow for privilege escalation for docker with `--allow-privileged=true` in `kube-apiserver`.
-
-### 2. Create an SSL certificate
-
-You need a domain name with a wildcard SSL certificate. If your domain is your-domain.com, you will need a certificate for *.your-domain.com and *.studio.your-domain.com. Assuming that your certificate is fullchain.pem and your private key privkey.pem, you can create a secret `prod-ingress` containing the certificate with the command:
+3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
 ```
- kubectl create secret tls prod-ingress --cert fullchain.pem --key privkey.pem
+helm install stackn charts/scaleout/stackn -f values.yaml
 ```
-An alternative is to deploy STACKn without a certificate, but you will then receive warnings from your browser, and the command-line tool will not work properly.
-
-### 3. Download charts
-Navigate to the official chart repository and either download or clone the repository. 
-
-> https://github.com/scaleoutsystems/charts
-
-The ability to add helm chart as a source will be configured soon.
-
-The chart for STACKn is in `charts/scaleout/stackn`.
-
-### 4. Install STACKn
-<!-- Copy the example file best matching your intended deployment. There exist examples for some of the most common scenarios like local deployments on various light weight workstation solutions as well as remote hosted deployment templates.  -->
-
-Copy `charts/scaleout/stackn/values.yaml` and make appropriate edits. For more information on how to configure the deployment, see  https://github.com/scaleoutsystems/charts/tree/master/scaleout/stackn. Some of the values are mandatory to update for a working deployment, specifically:
-
-`your-domain.com` should be replaced with your actual domain name everywhere.
-
-`cluster_config` should be updated with the config file for your cluster. You need to have admin access to the namespace in which STACKn is to be deployed.
-
-You might have to update `storageClassName`, `storageClass`, and `namespace`, depending on your cluster setup.
-
-Assuming that your configuration file is `testdeploy/values.yaml`, you can now deploy STACKn with
+**Note:** Instead of directly using the `values.yaml` file, one could make a copy out of it and use that. For instance:
 ```bash
-$ helm install stackn charts/scaleout/stackn -f testdeploy/values.yaml
-```
-You can lint or check the deployment with the flags —dry-run —debug.
-
-Make sure to assign the chart to the right namespace with —namespace yournamespace (when deploying to the default namespace this can be omitted.)
-
-### 5. Create a project
-
-Set up a project and start using STACKn through the [tutorials](/tutorial).
-
-### Additional - Upgrading STACKn
-
-Similar to how you install a chart you may also upgrade a chart.
-
-An example of how to upgrade STACKn with a values file as per above:
-```bash
-$ helm upgrade stackn scaleout/stackn --values=testdeploy/values.yaml --debug --dry-run
-```
-To perform the upgrade
-```bash
-$ helm upgrade stackn scaleout/stackn --values=testdeploy/values.yaml
+cp values.yaml my-values.yaml
+vim my-values.yaml # perform all the necessary changes
+helm install stackn charts/scaleout/stackn -f my-values.yaml
 ```
 
-# Tutorial projects
+4. Go to studio in your browser: (for example `studio.stackn.192.168.1.10.nip.io`)
+```
+https://studio.<your-domain.com>
+```
+5. Register a new user. Press "sign in"  
 
-## Digits MNIST Project
-https://github.com/scaleoutsystems/digits-example-project
+6. Go to django admin page:
+```
+https://studio.<your-domain.com>/admin
+```
+- Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
 
-## AML Example project
-https://github.com/scaleoutsystems/aml-example-project
+- Go to "Users" tab and click on the user you created earlier.
 
+- Give the user all permission (superuser, staff), then “save”.
 
-Contributions are welcome. Please see [CONTRIBUTING.md](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md ).
+ ## Install default apps and project templates
 
+1.  Clone this repository
+```
+git clone https://github.com/scaleoutsystems/stackn.git
+```
+2. Install STACKn CLI
+```
+cd stackn/cli
+sudo python3 setup.py install
+```
+3. Login with the user (which you created in studio)
+```
+stackn login -u <user-email> -p <password> --insecure --url studio.<your-domain.com>
+```
+
+4. Install the project templates.
+
+```
+cd ../../projecttemplates/default
+stackn create projecttemplate --insecure
+cd ../fedn-mnist/
+stackn create projecttemplate --insecure
+```
+5 . Install apps
+```
+cd ../../apps
+stackn create apps --insecure
+```
+## Start using STACKn
+Open studio in your browser and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
+<br />
+<br />
+# Where is STACKn used?
+STACKn is used in various places, examples include [SciLifeLab Data Center](https://www.scilifelab.se/data) and within the EU-funded project [EOSC-Nordics](https://www.eosc-nordic.eu/).
+<br />
+<br />
 # Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.
-- morganekmefjord
-- dstoyanova
-- stefanhellander
+- Morgan Ekmefjord
+- Fredrik Wrede
+- Matteo Carone
 
+## Software provided "as is"
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## License
-> See [LICENSE](https://github.com/scaleoutsystems/stackn/blob/master/LICENSE)
+> See [LICENSE](LICENSE) for details.
