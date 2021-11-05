@@ -447,17 +447,25 @@ def details(request, user, project_slug):
     
     return render(request, template, locals())
 
+@login_required
+def delete(request, user, project_slug):
+    next_page = request.GET.get('next', '/projects/')
 
-def delete_project(project):
+    if not request.user.is_superuser:
+        owner = User.objects.filter(username=user).first()
+        project = Project.objects.filter(owner=owner, slug=project_slug).first()
+    else:
+        project = Project.objects.filter(slug=project_slug).first()
+
 
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
     from .tasks import delete_project_apps
     delete_project_apps(project.slug)
 
-    #print("DELETING KEYCLOAK PROJECT RESOURCES")
-    #retval = delete_project_resources(project)
-    #if not retval:
-   #    print("Failed to delete Keycloak resources.")
+    # print("DELETING KEYCLOAK PROJECT RESOURCES")
+    # retval = delete_project_resources(project)
+    # if not retval:
+    #    print("Failed to delete Keycloak resources.")
 
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
@@ -466,15 +474,6 @@ def delete_project(project):
         model.save()
     project.status = 'archived'
     project.save()
-
-@login_required
-def delete(request, user, project_slug):
-    next_page = request.GET.get('next', '/projects/')
-
-    owner = User.objects.filter(username=user).first()
-    project = Project.objects.filter(owner=owner, slug=project_slug).first()
-
-    delete_project(project)
     # print("SCHEDULING DELETION OF ALL INSTALLED APPS")
     # from .tasks import delete_project_apps
     # delete_project_apps(project_slug)
