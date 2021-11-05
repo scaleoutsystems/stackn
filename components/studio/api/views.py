@@ -10,6 +10,7 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from rest_framework import generics
 from .APIpermissions import ProjectPermission, AdminPermission
 from deployments.helpers import build_definition
@@ -33,6 +34,7 @@ from apps.tasks import delete_resource
 
 class ObjectTypeList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
+    #permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = ObjectTypeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id','name', 'slug']

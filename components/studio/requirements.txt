@@ -11,6 +11,7 @@ django-celery-beat
 django-cryptography
 django-redis
 psycopg2-binary
+django-oauth-toolkit
 minio
 certifi
 chardet
