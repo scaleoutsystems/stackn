@@ -11,7 +11,7 @@ urlpatterns = [
     path('auth', views.auth),
     path('account/', include('django.contrib.auth.urls')),
     #path('oidc/', include('mozilla_django_oidc.urls')),
-    #path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('', include('portal.urls', namespace='portal')),
     path('', include('models.urls', namespace='models')),
     path('', include('deployments.urls', namespace="deployments")),
