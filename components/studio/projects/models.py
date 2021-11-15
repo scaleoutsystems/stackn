@@ -11,14 +11,19 @@ import random
 import uuid
 from django_cryptography.fields import encrypt
 
+
 class ReleaseName(models.Model):
     name = models.CharField(max_length=512)
     status = models.CharField(max_length=10)
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True)
-    app = models.ForeignKey('apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True)
+    project = models.ForeignKey(
+        'projects.Project', on_delete=models.CASCADE, null=True)
+    app = models.ForeignKey(
+        'apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return '{}-{}-{}'.format(self.name, self.project, self.app)
+
 
 class Flavor(models.Model):
     name = models.CharField(max_length=512)
@@ -33,8 +38,8 @@ class Flavor(models.Model):
     gpu_lim = models.TextField(blank=True, null=True, default="0")
     ephmem_lim = models.TextField(blank=True, null=True, default="200Mi")
 
-
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(
+        'projects.Project', on_delete=models.CASCADE, null=True)
     # app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE)
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -47,14 +52,17 @@ class Flavor(models.Model):
 class Environment(models.Model):
     name = models.CharField(max_length=100)
     slug = models.CharField(max_length=100, null=True)
-    
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True)
+
+    project = models.ForeignKey(
+        'projects.Project', on_delete=models.CASCADE, null=True)
 
     repository = models.CharField(max_length=100, blank=True, null=True)
     image = models.CharField(max_length=100)
 
-    registry = models.ForeignKey('apps.AppInstance', related_name="environments", null=True, blank=True, on_delete=models.CASCADE)
-    appenv = models.ForeignKey('apps.AppInstance', related_name="envobj", null=True, blank=True, on_delete=models.CASCADE)
+    registry = models.ForeignKey(
+        'apps.AppInstance', related_name="environments", null=True, blank=True, on_delete=models.CASCADE)
+    appenv = models.ForeignKey('apps.AppInstance', related_name="envobj",
+                               null=True, blank=True, on_delete=models.CASCADE)
     app = models.ForeignKey('apps.Apps', on_delete=models.CASCADE, null=True)
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -62,6 +70,68 @@ class Environment(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class S3(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE, related_name='s3_project')
+    host = models.CharField(max_length=512)
+    access_key = models.CharField(max_length=512)
+    secret_key = models.CharField(max_length=512)
+    region = models.CharField(max_length=512, blank=True, default="")
+    app = models.OneToOneField(
+        'apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True, related_name="s3obj")
+    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.project.slug)
+
+
+class BasicAuth(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE, related_name='ba_project', null=True)
+    username = models.CharField(max_length=100, blank=True, default="")
+    password = models.CharField(max_length=100, blank=True, default="")
+
+
+class MLFlow(models.Model):
+    name = models.CharField(max_length=512)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey(
+        'Project', on_delete=models.CASCADE, related_name='mlflow_project')
+    mlflow_url = models.CharField(max_length=512)
+    s3 = models.ForeignKey(
+        S3, on_delete=models.DO_NOTHING, blank=True, null=True)
+    basic_auth = models.ForeignKey(
+        BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True)
+    app = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE,
+                               null=True, blank=True, related_name="mlflowobj")
+    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.project.slug)
+
+
+class ProjectTemplate(models.Model):
+    name = models.CharField(max_length=512)
+    slug = models.CharField(max_length=512, default="")
+    revision = models.IntegerField(default=1)
+    description = models.TextField(null=True, blank=True)
+    template = models.TextField(null=True, blank=True)
+    image = models.ImageField(
+        upload_to='projecttemplates/images/', null=True, blank=True, default=None)
+
+    class Meta:
+        unique_together = ('slug', 'revision',)
+
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.revision)
 
 
 class ProjectManager(models.Manager):
@@ -92,75 +162,30 @@ class ProjectManager(models.Manager):
 
         return project
 
-class S3(models.Model):
-    name = models.CharField(max_length=512)
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='s3_project')
-    host = models.CharField(max_length=512)
-    access_key = models.CharField(max_length=512)
-    secret_key = models.CharField(max_length=512)
-    region = models.CharField(max_length=512, blank=True, default="")
-    app = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True, related_name="s3obj")
-    updated_on = models.DateTimeField(auto_now=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return '{} ({})'.format(self.name, self.project.slug)
-
-class BasicAuth(models.Model):
-    name = models.CharField(max_length=512)
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='ba_project', null=True)
-    username = models.CharField(max_length=100, blank=True, default="")
-    password = models.CharField(max_length=100, blank=True, default="")
-
-class MLFlow(models.Model):
-    name = models.CharField(max_length=512)
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='mlflow_project')
-    mlflow_url = models.CharField(max_length=512)
-    s3 = models.ForeignKey(S3, on_delete=models.DO_NOTHING, blank=True, null=True)
-    basic_auth = models.ForeignKey(BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True)
-    app = models.OneToOneField('apps.AppInstance', on_delete=models.CASCADE, null=True, blank=True, related_name="mlflowobj")
-    updated_on = models.DateTimeField(auto_now=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return '{} ({})'.format(self.name, self.project.slug)
-
-class ProjectTemplate(models.Model):
-    name = models.CharField(max_length=512)
-    slug = models.CharField(max_length=512, default="")
-    revision = models.IntegerField(default=1)
-    description = models.TextField(null=True, blank=True)
-    template = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to='projecttemplates/images/', null=True, blank=True, default=None)
-    
-    class Meta:
-        unique_together = ('slug', 'revision',)
-    
-    def __str__(self):
-        return '{} ({})'.format(self.name, self.revision)
 
 class Project(models.Model):
     objects = ProjectManager()
 
-    name = models.CharField(max_length=512)
+    name = models.CharField(max_length=512, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
     slug = models.CharField(max_length=512, unique=True)
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='owner')
+    owner = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='owner')
     authorized = models.ManyToManyField(User, blank=True)
 
-    s3storage = models.OneToOneField(S3, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_s3')
-    mlflow = models.OneToOneField(MLFlow, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_mlflow')
+    s3storage = models.OneToOneField(
+        S3, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_s3')
+    mlflow = models.OneToOneField(
+        MLFlow, on_delete=models.DO_NOTHING, null=True, blank=True, related_name='project_mlflow')
 
-    status = models.CharField(max_length=20, null=True, blank=True, default="active")
+    status = models.CharField(max_length=20, null=True,
+                              blank=True, default="active")
 
-
-    project_image = models.ImageField(upload_to='projects/images/', null=True, blank=True, default=None)
+    project_image = models.ImageField(
+        upload_to='projects/images/', null=True, blank=True, default=None)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-
 
     # These fields should be removed.
     image = models.CharField(max_length=2048, blank=True, null=True)
@@ -171,6 +196,15 @@ class Project(models.Model):
     repository = models.CharField(max_length=512, null=True, blank=True)
     repository_imported = models.BooleanField(default=False)
     # ----------------------
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # performs regular validation then clean()
+        super(Project, self).save(*args, **kwargs)
+
+    def clean(self):
+        # Custom validation https://docs.djangoproject.com/en/3.2/ref/models/instances/#validating-objects
+        if self.name:
+            self.name = self.name.strip()
 
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
@@ -189,9 +223,9 @@ class ProjectLog(models.Model):
         ('RE', 'reports'),
         ('UN', 'undefined'),
     ]
-    module = models.CharField(max_length=2, choices=MODULE_CHOICES, default='UN')
+    module = models.CharField(
+        max_length=2, choices=MODULE_CHOICES, default='UN')
 
     headline = models.CharField(max_length=256)
     description = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
-
