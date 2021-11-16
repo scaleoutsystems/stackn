@@ -3,7 +3,6 @@ import json
 import uuid
 import requests
 import subprocess
-import urllib.parse
 
 import stackn.auth
 import stackn.s3
@@ -18,9 +17,11 @@ def _check_status(r, error_msg="Failed"):
         print(r.text)
         return False
     else:
-        return True 
+        return True
+
 
 def get_endpoints(studio_url):
+    # These endpoints are related to the API available in Studio under: stackn/components/studio/api/
     endpoints = dict()
     if (not 'http://' in studio_url) and (not 'https://' in studio_url):
         studio_url = 'https://'+studio_url
@@ -39,27 +40,37 @@ def get_endpoints(studio_url):
     endpoints['projects'] = base+'/projects/'
     endpoints['project_templates'] = base+'/projecttemplates/'
     endpoints['admin'] = dict()
-    # endpoints['admin']['apps'] = base+'/projects/{}/apps/'
     endpoints['admin']['apps'] = base+'/apps/'
     return endpoints
 
-def get_auth_headers(conf):
+def get_auth_header(conf):
     conf, status = stackn.auth.get_token(conf)
     if not status:
         return False, False
-    auth_headers = {"Authorization": "Token {}".format(conf['STACKN_ACCESS_TOKEN'])}
-    return auth_headers, conf
+    auth_header = {"Authorization": "Token {}".format(conf['STACKN_ACCESS_TOKEN'])}
+    return auth_header, conf
 
-def get_remote():
-    conf, status = stackn.auth.get_config()
+def get_remote(inp_conf):
+    
+    conf, status = stackn.auth.get_config(inp_conf)
+
+    if not status:
+        return False
+
     keys = stackn.auth._get_remote(conf)
+    
+    if not keys:
+        return False
+
     return keys
 
-def get_current(secure=True):
+def get_current(secure):
+
     res = {'STACKN_URL': False, 'STACKN_PROJECT': False}
     conf, status = stackn.auth.get_config({'STACKN_SECURE': secure})
+
     if not status:
-        print("Failed to get current STACKn and project.")
+        print("Failed to get current STACKn configuration file.")
     else:
         if 'STACKN_URL' in conf:
             res['STACKN_URL'] = conf['STACKN_URL']
@@ -68,19 +79,24 @@ def get_current(secure=True):
     
     return res
 
-def get_projects(conf={}, params=[], auth_headers=[]):
+def get_projects(conf={}, params=[], auth_header=[]):
     conf, status = stackn.auth.get_config(conf)
+
     if not status:
         print('Cannot list projects.')
         return False
-    if not auth_headers:
-        auth_headers, conf = get_auth_headers(conf)
+
+    auth_header, conf = get_auth_header(conf)
+
+    if not auth_header:
+        return False
+
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['projects']
     if params:
-        r = requests.get(url, headers=auth_headers, params=params, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, params=params, verify=conf['STACKN_SECURE'])
     else:
-        r = requests.get(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, verify=conf['STACKN_SECURE'])
     if r:
         projects = json.loads(r.content)
         return projects
@@ -91,14 +107,25 @@ def get_projects(conf={}, params=[], auth_headers=[]):
         return None
 
 def call_admin_endpoint(name, conf={}, params=[]):
+    
     conf, status = stackn.auth.get_config(conf)
-    auth_headers, conf = get_auth_headers(conf)
+
+    if not status:
+        print("Failed to get current STACKn configuration file.")
+        return False
+
+    auth_header, conf = get_auth_header(conf)
+
+    if not auth_header:
+        return False
+    
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints[name]
+
     if params:
-        r = requests.get(url, headers=auth_headers, params=params, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, params=params, verify=conf['STACKN_SECURE'])
     else:
-        r = requests.get(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, verify=conf['STACKN_SECURE'])
     if r:
         objs = json.loads(r.content)
         return objs
@@ -110,12 +137,23 @@ def call_admin_endpoint(name, conf={}, params=[]):
 
 def call_project_endpoint(name, conf={}, params=[]):
     conf, status = stackn.auth.get_config(conf)
-    auth_headers, conf = get_auth_headers(conf)
+
+    if not status:
+        print("The configuration file for STACKn could not be correctly retrieved.")
+        return False
+
+    auth_header, conf = get_auth_header(conf)
+
+    if not auth_header:
+        return False
+
     endpoints = get_endpoints(conf['STACKN_URL'])
+    
     if conf['STACKN_PROJECT']:
         project = get_projects(conf, params={'name': conf['STACKN_PROJECT']})
     else:
         print("No project name specified.")
+        print("Try to run 'stackn get current' to check if a project is set.")
         return False
     if len(project)>1:
         print('Found several matching projects.')
@@ -126,9 +164,9 @@ def call_project_endpoint(name, conf={}, params=[]):
     project = project[0]
     url = endpoints[name].format(project['id'])
     if params:
-        r = requests.get(url, headers=auth_headers, params=params, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, params=params, verify=conf['STACKN_SECURE'])
     else:
-        r = requests.get(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+        r = requests.get(url, headers=auth_header, verify=conf['STACKN_SECURE'])
     if r:
         projects = json.loads(r.content)
         return projects
@@ -145,12 +183,11 @@ def setup_project_endpoint_call(conf, endpoint_type):
         print("Missing required input (studio URL, project name).")
         return False
 
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
 
-    project = get_projects(conf=conf['STACKN_URL'], params={'name': conf['STACKN_PROJECT']}, auth_headers=auth_headers)
+    project = get_projects(conf=conf['STACKN_URL'], params={'name': conf['STACKN_PROJECT']}, auth_header=auth_header)
     if len(project)>1:
         print('Found several matching projects.')
         return
@@ -161,18 +198,23 @@ def setup_project_endpoint_call(conf, endpoint_type):
     project = project[0]
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints[endpoint_type].format(project['id'])
-    return conf, auth_headers, url
+    return conf, auth_header, url
 
 def create_template(template='template.json', image="image.png", studio_url=[], secure_mode=True):
-    # Get STACKn config
+    
     conf = {
         'STACKN_URL': studio_url,
         'STACKN_SECURE': secure_mode
     }
+    
     conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+
+    if not status:
+        print("Failed to get current STACKn configuration file.")
+        return False
+
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
 
     with open(template, 'r') as templ_file:
@@ -190,7 +232,7 @@ def create_template(template='template.json', image="image.png", studio_url=[], 
 
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['project_templates']
-    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
+    r = requests.post(url, headers=auth_header, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
 
     if r:
         print("Created template.")
@@ -222,19 +264,17 @@ def create_app(settings="config.json",
                studio_url=[],
                secure_mode=True):
 
-    # Get STACKn config
     conf = {
         'STACKN_URL': studio_url,
         'STACKN_SECURE': secure_mode
     }
     conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
-    # if not status:
-    #     print("Missing required input (studio URL, project name).")
-    #     return False
+    if not status:
+         print("Failed to get current STACKn configuration file.")
+         return False
 
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
     
     
@@ -259,7 +299,6 @@ def create_app(settings="config.json",
         priority = config['priority']
     ftable.close()
     
-
     payload = {
         'name': name,
         'slug': slug,
@@ -271,17 +310,9 @@ def create_app(settings="config.json",
         'priority': priority
     }
 
-   
-
     endpoints = get_endpoints(conf['STACKN_URL'])
-
-    # if conf['STACKN_PROJECT']:
-    #     project = get_projects(conf, params={'name': conf['STACKN_PROJECT']})
-    # else:
-    #     print("No project name specified.")
-    #     return False
     url = endpoints['admin']['apps'] #.format(project[0]['id'])
-    r = requests.post(url, headers=auth_headers, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
+    r = requests.post(url, headers=auth_header, files=file_ob, data=payload, verify=conf['STACKN_SECURE']) 
 
     os.system('rm {}'.format(chart_uid))
 
@@ -294,15 +325,13 @@ def create_app(settings="config.json",
         print(r.reason)
 
 
-
-
 def create_project(name, 
                    description="",
                    repository="",
                    template="stackn-default",
                    studio_url=[],
                    secure_mode=True):
-    # Get STACKn config
+
     conf = {
         'STACKN_URL': studio_url,
         'STACKN_SECURE': secure_mode
@@ -311,24 +340,21 @@ def create_project(name,
     conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
 
     if not status:
-        print("Missing required input (studio URL, project name).")
+        print("Failed to get current STACKn configuration file.")
         return False
 
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
     
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['projects']
     data = {'name': name, 'description': description, 'repository': repository, 'template': template}
-    res = requests.post(url, headers=auth_headers, json=data, verify=conf['STACKN_SECURE'])
+    res = requests.post(url, headers=auth_header, json=data, verify=conf['STACKN_SECURE'])
     if res:
         print('Created project: '+name)
         conf['STACKN_PROJECT'] = name
         set_current(conf)
-        # print('Setting {} as the active project.'.format(name))
-        # self.set_project(name)
     else:
         print('Failed to create project.')
         print('Status code: {}'.format(res.status_code))
@@ -343,15 +369,14 @@ def create_resource(filename, studio_url, project, secure):
     conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
 
     if not status:
-        print("Missing required input (studio URL, project name).")
+        print("Failed to get current STACKn configuration file.")
         return False
 
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
 
-    project = get_projects(conf=conf['STACKN_URL'], params={'name': conf['STACKN_PROJECT']}, auth_headers=auth_headers)
+    project = get_projects(conf=conf['STACKN_URL'], params={'name': conf['STACKN_PROJECT']}, auth_header=auth_header)
     if len(project)>1:
         print('Found several matching projects.')
         return
@@ -368,7 +393,7 @@ def create_resource(filename, studio_url, project, secure):
     except:
         print("Failed to load JSON data from file {}.".format(filename))
     
-    res = requests.post(url, headers=auth_headers, json=app_data, verify=conf['STACKN_SECURE'])
+    res = requests.post(url, headers=auth_header, json=app_data, verify=conf['STACKN_SECURE'])
     if res:
         print('Created resource.')
     else:
@@ -390,7 +415,6 @@ def create_object(model_name,
 
     """ Publish an object to Studio. """
 
-    # Get STACKn config
     conf = {
         'STACKN_MODEL': model_name,
         'STACKN_URL': studio_url,
@@ -405,15 +429,14 @@ def create_object(model_name,
                                                           'STACKN_PROJECT'])
 
     if not status:
-        print("Missing required input (studio URL, project name).")
+        print("Failed to get current STACKn configuration file.")
         return False
 
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
 
-    project = get_projects(conf=conf, params={'name': conf['STACKN_PROJECT']}, auth_headers=auth_headers)
+    project = get_projects(conf=conf, params={'name': conf['STACKN_PROJECT']}, auth_header=auth_header)
     if len(project)>1:
         print('Found several matching projects.')
         return
@@ -449,7 +472,7 @@ def create_object(model_name,
     else:
         with open(model_card, 'r') as f:
             model_card_html_string = f.read()
-    # # Upload model.
+    
     status = stackn.s3.set_artifact(model_uid,
                                     model_file,
                                     'models',
@@ -461,7 +484,6 @@ def create_object(model_name,
         print("Failed to upload model to S3 storage")
         return False
     
-    # Register model in STACKn
     model_data = {"uid": model_uid,
                   "name": model_name,
                   "release_type": release_type,
@@ -472,7 +494,7 @@ def create_object(model_name,
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['models'].format(project['id'])
 
-    r = requests.post(url, json=model_data, headers=auth_headers, verify=secure_mode)
+    r = requests.post(url, json=model_data, headers=auth_header, verify=secure_mode)
     if not _check_status(r, error_msg="Failed to create model."):
         # Delete model object from storage.
         repo.delete_artifact(model_uid)
@@ -482,6 +504,7 @@ def create_object(model_name,
         # Delete temporary archive file.
         os.system('rm {}'.format(model_file))
     print('Released model: {}, release_type: {}'.format(model_name, release_type))
+
     return True
 
 def create_releasename(name, studio_url, project, secure):
@@ -490,11 +513,11 @@ def create_releasename(name, studio_url, project, secure):
         'STACKN_PROJECT': project,
         'STACKN_SECURE': secure
     }
-    conf, auth_headers, url = setup_project_endpoint_call(conf, 'releasenames')
+    conf, auth_header, url = setup_project_endpoint_call(conf, 'releasenames')
     params = {
         "name": name
     }
-    res = requests.post(url, json=params, headers=auth_headers, verify=conf['STACKN_SECURE'])
+    res = requests.post(url, json=params, headers=auth_header, verify=conf['STACKN_SECURE'])
     if res:
         print(res.text)
     else:
@@ -509,7 +532,7 @@ def delete_app(name, studio_url=[], project=[], secure=True):
         "STACKN_PROJECT": project,
         "STACKN_SECURE": secure
     }
-    conf, auth_headers, url = setup_project_endpoint_call(conf, 'appinstances')
+    conf, auth_header, url = setup_project_endpoint_call(conf, 'appinstances')
     params = {
         "name": name
     }
@@ -523,7 +546,7 @@ def delete_app(name, studio_url=[], project=[], secure=True):
     for app in apps:
         ai_id = app['id']
         tmp_url = url+str(ai_id)+'/'
-        res = requests.delete(tmp_url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+        res = requests.delete(tmp_url, headers=auth_header, verify=conf['STACKN_SECURE'])
         if res:
             print("Deleted app: {}".format(name))
         else:
@@ -537,9 +560,13 @@ def delete_app_obj(slug, studio_url=[], secure=True):
         'STACKN_SECURE': secure
     }
     conf, status = stackn.auth.get_config(conf, required=['STACKN_URL'])
-    auth_headers, conf = get_auth_headers(conf)
-    if not auth_headers:
-        print("Failed to set authentication headers.")
+
+    if not status:
+        print("Failed to get current STACKn configuration file.")
+        return False
+
+    auth_header, conf = get_auth_header(conf)
+    if not auth_header:
         return False
 
     payload = {
@@ -548,25 +575,16 @@ def delete_app_obj(slug, studio_url=[], secure=True):
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['admin']['apps']
 
-    apps = requests.get(url, headers=auth_headers, params=payload, verify=conf['STACKN_SECURE'])
+    apps = requests.get(url, headers=auth_header, params=payload, verify=conf['STACKN_SECURE'])
     apps = apps.json()
     for app in apps:
         print("Deleting {}, revision {}.".format(app['name'], app['revision']))
         print(url+str(app['id'])+'/')
-        r = requests.delete(url+str(app['id'])+'/', headers=auth_headers, verify=conf['STACKN_SECURE'])
+        r = requests.delete(url+str(app['id'])+'/', headers=auth_header, verify=conf['STACKN_SECURE'])
         print(r.text)
 
     print(url)
- 
-    # r = requests.delete(url, headers=auth_headers, data=payload) 
 
-    # if r:
-    #     print("Created template.")
-    # else:
-    #     print("Failed to create template.")
-    #     print(r.status_code)
-    #     print(r.text)
-    #     print(r.reason)
 
 def delete_object(name, version=None, studio_url=[], project=[], secure=True):
     if version:
@@ -579,14 +597,14 @@ def delete_object(name, version=None, studio_url=[], project=[], secure=True):
         "STACKN_PROJECT": project,
         "STACKN_SECURE": secure
     }
-    conf, auth_headers, url = setup_project_endpoint_call(conf, 'models')
+    conf, auth_header, url = setup_project_endpoint_call(conf, 'models')
     objects = call_project_endpoint('models', conf=conf, params=params)
-    # models  = self.get_models(self.project['id'], params)
+
     if not objects:
         print("No objects found with the given name and/or version.")
     for obj in objects:
         tmp_url = '{}{}/'.format(url, obj['id'])
-        res = requests.delete(tmp_url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+        res = requests.delete(tmp_url, headers=auth_header, verify=conf['STACKN_SECURE'])
         if res:
             print("Deleted object: {}".format(name))
         else:
@@ -600,8 +618,8 @@ def delete_project(name, studio_url=[], secure=True):
         "STACKN_SECURE": secure,
         "STACKN_PROJECT": name
     }
-    conf, auth_headers, url = setup_project_endpoint_call(conf, 'project_del')
-    res = requests.delete(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+    conf, auth_header, url = setup_project_endpoint_call(conf, 'project_del')
+    res = requests.delete(url, headers=auth_header, verify=conf['STACKN_SECURE'])
     if res:
         print("Deleted project: {}".format(name))
     else:
@@ -615,7 +633,7 @@ def delete_meta_resource(resource_type, name, project=[], studio_url=[], secure=
         "STACKN_URL": studio_url,
         "STACKN_SECURE": secure
     }
-    conf, auth_headers, url = setup_project_endpoint_call(conf, resource_type)
+    conf, auth_header, url = setup_project_endpoint_call(conf, resource_type)
     params = {
         "name": name
     }
@@ -629,7 +647,7 @@ def delete_meta_resource(resource_type, name, project=[], studio_url=[], secure=
     
     env = envs[0]
     url = '{}{}/'.format(url, env['id'])
-    res = requests.delete(url, headers=auth_headers, verify=conf['STACKN_SECURE'])
+    res = requests.delete(url, headers=auth_header, verify=conf['STACKN_SECURE'])
     if res:
         print("Deleted {}: {}".format(resource_type, name))
     else:
