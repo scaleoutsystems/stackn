@@ -12,8 +12,6 @@ logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)d] %(message)s', 
     message='%(prog)s, %(version)s'
 )
 
-@click.group()
+@click.group(help='CLI tool to manage STACKn common tasks. Please note that stackn cli commands are case sensitive.')
 def main():
     pass
-
-
