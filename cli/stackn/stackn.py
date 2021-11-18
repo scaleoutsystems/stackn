@@ -132,19 +132,21 @@ def get_endpoints(studio_url):
     if (not 'http://' in studio_url) and (not 'https://' in studio_url):
         studio_url = 'https://'+studio_url
     base = studio_url.strip('/')+'/api'
-    endpoints['models'] = base+'/projects/{}/models/'
-    endpoints['resources'] = base+'/projects/{}/resources/'
+    endpoints['admin'] = dict()
+    endpoints['admin']['apps'] = base+'/apps/'
     endpoints['appinstances'] = base+'/projects/{}/appinstances/'
-    endpoints['members'] = base+'/projects/{}/members/'
-    endpoints['flavors'] = base+'/projects/{}/flavors/'
     endpoints['environments'] = base+'/projects/{}/environments/'
-    endpoints['s3'] = base+'/projects/{}/s3/'
+    endpoints['flavors'] = base+'/projects/{}/flavors/'
+    endpoints['members'] = base+'/projects/{}/members/'
+    endpoints['models'] = base+'/projects/{}/models/'
     endpoints['mlflow'] = base+'/projects/{}/mlflow/'
+    endpoints['objecttypes'] = base+'/projects/{}/objecttype'
     endpoints['project_del'] = base+'/projects/{}'
     endpoints['projects'] = base+'/projects/'
     endpoints['project_templates'] = base+'/projecttemplates/'
-    endpoints['admin'] = dict()
-    endpoints['admin']['apps'] = base+'/apps/'
+    endpoints['resources'] = base+'/projects/{}/resources/'
+    endpoints['s3'] = base+'/projects/{}/s3/'
+
     return endpoints
 
 def get_auth_header(conf):

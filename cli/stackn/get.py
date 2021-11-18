@@ -30,7 +30,7 @@ def _find_dict_by_value(dicts, key, value):
     return res
 
 
-@main.group('get', cls=AliasedGroup, help="CLI commands for common create tasks")
+@main.group('get', cls=AliasedGroup)
 def get():
   pass
 
@@ -197,12 +197,13 @@ def obj(object_type, project, studio_url, secure):
 
     object_types = call_project_endpoint('objecttypes', conf=conf)
 
-    if not object_types:
+    if object_types == False:
         return False
 
     obj_type = _find_dict_by_value(object_types, 'slug', object_type)
 
     if not obj_type:
+        print("No model objects found for this project.")
         return
     
     params = {'object_type': obj_type['id']}
@@ -212,7 +213,7 @@ def obj(object_type, project, studio_url, secure):
     if objects == False:
         return False
     elif len(objects) == 0:
-        print("No model objects are associated to the current project")
+        print("No model objects are associated to the current project.")
         return
 
     obj_dict = dict()
