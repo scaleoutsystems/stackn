@@ -319,8 +319,9 @@ def get_token(conf={}, write_to_file=True):
         if write_to_file:
             write_config(conf)
     else:
-        print('Failed to authenticate with token, please login again.')
+        print('Failed to authenticate with token.')
         print(res.text)
+        print("Please login again by running 'stackn login -u <your-username> -p <your-user-password>'")
         return conf, False
 
     return conf, True
