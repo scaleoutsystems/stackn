@@ -38,6 +38,22 @@ env_vars = {
     'STACKN_SECURE': True
 }
 
+
+# STACKN_SECURE is by default always set to True. However we allow to deploy STACKn locally for development and testing purposes.
+# That's when a user needs to login with the flag --insecure, and thus STACKN_SECURE will be False
+# The util function make sure to remind the user to use --insecure if set in the ~/.scaleout/stackn.json configuration file
+def _check_flag_insecure(inp_conf):
+    stackn_conf_file = _load_config_file_full({})
+
+    # If the general default STACKN_SECURE is still True, but in the configuration file shows that 
+    # it is set to False instead (because the user has logged in with --insecure) Then we remind the user to use --insecure
+    if stackn_conf_file['current']['STACKN_SECURE'] == False and inp_conf['STACKN_SECURE']:
+        print("Do you perhaps have a local STACKn deployment? If so, don't forget to use --insecure to make stackn API calls working.")
+        return True
+    else:
+        return False
+
+
 def _get_stackn_config_path():
     if 'STACKN_CONFIG_PATH' in os.environ:
         config_path = os.environ['STACKN_CONFIG_PATH']
@@ -65,6 +81,19 @@ def _get_config_file(rw='r'):
         return []
     
     return fin
+
+
+# Checking if a user is logged. Promtping it if otherwise
+def _is_user_logged():
+    stackn_conf_file = _load_config_file_full({})
+
+    if not stackn_conf_file:
+        print("You are not logged in.")
+        print("Please use the command: 'stackn login -u <your-user> -p <your-user-password>' --url <your-studio-url>")
+        return False
+    else:
+        return True
+
 
 def _load_config_file_full(conf):
     stackn_config = []
@@ -178,6 +207,14 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     # Exception is STACKN_ACCESS_TOKEN, and STACKN_REFRESH_TOKEN, where config file
     # takes priority over environment variable (as they need to be updated)
 
+    # Checking if the user is logged in. Skipping if when the user needs to login instead
+    if not is_login and not _is_user_logged():
+        return False, False
+
+    # Checking if user has forgot to use --insecure flag
+    if _check_flag_insecure(inp_config):
+        return False, False
+
     conf = dict()
     # Fetch from environment variables
     for var, val in env_vars.items():
@@ -188,7 +225,7 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         else:
             conf[var] = val
 
-    # Fetch "current" remote, project, secure_mode
+    # Fetch "current" context: remote_url, project and secure_mode
     config_file_full = _load_config_file_full(conf)
     try:
         current = config_file_full['current']
@@ -200,9 +237,9 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     if not conf['STACKN_PROJECT']:
         if 'STACKN_PROJECT' in current:
             conf['STACKN_PROJECT'] = current['STACKN_PROJECT']
-    # if 'STACKN_SECURE' not in conf:
-    # print("AAA")
-    # print(conf)
+
+
+    # Checking flag STACKN_SECURE and initialize it if needed
     if 'STACKN_SECURE' in current and (conf['STACKN_SECURE']=="" or conf['STACKN_SECURE']==None):
         if print_warnings and current['STACKN_SECURE'] == False:
             print("Insecure mode is set in config, will not verify certificates.")
@@ -211,10 +248,9 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
     # If we have a currently set remote URL, fetch from config file.
     if conf['STACKN_URL']:
         try:
-            # print(conf)
             conf['STACKN_KEYCLOAK_URL'] = get_keycloak_url(conf['STACKN_URL'], secure=conf['STACKN_SECURE'])
         except:
-            print("Failed to call studio endpoint at: {}".format(conf['STACKN_URL']))
+            print("Failed to call studio API endpoint at: {}".format(conf['STACKN_URL']))
             return conf, False
         config_file = _load_config_file_url(conf, is_login)
         if config_file:
@@ -266,7 +302,7 @@ def get_token(conf={}, write_to_file=True):
     
     conf, status = get_config(conf, required=['STACKN_REFRESH_TOKEN'])
     if not status:
-        print("Failed to get required config.")
+        print("Failed to get required STACKn configuration.")
         return conf, False
 
     token_url = urllib.parse.urljoin(conf["STACKN_KEYCLOAK_URL"], 'auth/realms/{}/protocol/openid-connect/token'.format(conf['STACKN_REALM']))
@@ -283,8 +319,9 @@ def get_token(conf={}, write_to_file=True):
         if write_to_file:
             write_config(conf)
     else:
-        print('Failed to authenticate with token, please login again.')
+        print('Failed to authenticate with token.')
         print(res.text)
+        print("Please login again by running 'stackn login -u <your-username> -p <your-user-password>'")
         return conf, False
 
     return conf, True
