@@ -152,12 +152,16 @@ def _set_current(conf):
     if 'STACKN_SECURE' in conf:
         current['STACKN_SECURE'] = conf['STACKN_SECURE']
 
-    # Write settings to config file.
-
     # First read settings:
-    conf, status = get_config(conf)
+
+    # If _set_current is invoked by stackn_login, then pass is_login
+    if 'is_login' in conf and conf['is_login']:
+        conf, status = get_config(conf, is_login=True)
+    else:
+        conf, status = get_config(conf)
+
     if not status:
-        print("Failed to load config")
+        print("Failed to get current STACKn configuration file.")
         return []
 
     stackn_config = _load_config_file_full(conf)
@@ -173,8 +177,7 @@ def _set_current(conf):
         stackn_config['current']['STACKN_PROJECT'] = current['STACKN_PROJECT']
     if current['STACKN_SECURE'] != 'NOTSET':
         stackn_config['current']['STACKN_SECURE'] = current['STACKN_SECURE']
-    # print("SET CURRENT")
-    # print(stackn_config)
+
     if 'STACKN_URL' in os.environ and stackn_config['current']['STACKN_URL'] != '':
         print("STACKN_URL set as environment variable and this takes priority.")
         print("Set by 'export STACKN_URL={}'".format(stackn_config['current']['STACKN_URL']))
@@ -212,8 +215,11 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         return False, False
 
     # Checking if user has forgot to use --insecure flag
-    if _check_flag_insecure(inp_config):
-        return False, False
+    if is_login:
+        pass
+    else:
+        if _check_flag_insecure(inp_config):
+            return False, False
 
     conf = dict()
     # Fetch from environment variables
@@ -404,6 +410,9 @@ def stackn_login(studio_url=[], client_id=[], realm=[], username=[], password=[]
         conf['PUBLIC_KEY'] = public_key
 
     write_config(conf)
-    _set_current(conf)
-    return conf
 
+    # adding flag in conf for informing  that set_current is begin invoked by stackn_login
+    conf.update(is_login = "True")
+    _set_current(conf)
+
+    return conf
