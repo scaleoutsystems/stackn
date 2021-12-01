@@ -30,6 +30,7 @@
 - README.md has been restructured (instructions for local deployment) 
 <br />
 <br />
+
 ## v0.4.0
 
 ### New functionality
@@ -44,6 +45,7 @@
 - New improved functionality for adding users as members to your project
 <br />
 <br />
+
 ## v0.3.0
 
 ### New functionality
@@ -75,6 +77,7 @@ stackn get jobs
 - STACKn is now using ONLY Keycloak for authentication
 <br />
 <br />
+
 ## v0.2.0
 
 ### New functionality
@@ -115,6 +118,7 @@ stackn create/get/delete dataset ...
 - Optimized Django migrations management
 <br />
 <br />
+
 ## v0.1.0
 
 - Experiments view now working.
