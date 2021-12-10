@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.release }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Values.release }}
+      app: fedn-combiner
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: combiner
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        release: {{ .Values.release }}
+        app: fedn-combiner
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: combiner
+    spec:
+      {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+      {{ end }}
+      containers:
+        - args:
+            - sh
+            - -c
+            - fedn run combiner -in /config/settings.yaml
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "0"
+          image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+          imagePullPolicy: {{ .Values.combiner.pullPolicy }}
+          name: combiner
+          # resources:
+          #   limits:
+          #     cpu: {{ .Values.flavor.limits.cpu }}
+          #     memory: {{ .Values.flavor.limits.memory }}
+          #   requests:
+          #     cpu: {{ .Values.flavor.requests.cpu }}
+          #     memory: {{ .Values.flavor.requests.memory }}
+          ports:
+            - containerPort: 443
+          resources: {}
+          volumeMounts:
+            - mountPath: /config/settings.yaml
+              name: combiner-config
+              subPath: settings.yaml
+            {{- range $key, $value := .Values.apps.volume }}
+            - name: {{ $key }}
+              mountPath: /tmp/models
+            {{- end }}
+            - mountPath: /app/client/certs
+              name: certs-dir
+          workingDir: /app/client
+      restartPolicy: Always
+      volumes:
+        - name: combiner-config
+          configMap:
+            name: {{ .Release.Name }}-combiner-config
+            items:
+            - key: settings.yaml
+              path: settings.yaml
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          persistentVolumeClaim:
+            claimName: {{ $value.release }}
+        {{- end }}
+        - name: certs-dir
+          emptyDir: {}
+status: {}

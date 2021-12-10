@@ -1,0 +1,26 @@
+{
+  "name": "FEDn Client",
+  "slug": "fedn-client",
+  "category": "fedn",
+  "table_field": {},
+  "description": "",
+  "priority": "300",
+  "settings": {
+    "apps": {
+      "FEDn Reducer": "one"
+    },
+    "environment": {
+      "name": "from",
+      "title": "Client Image",
+      "quantity": "one",
+      "type": "match"
+    },
+    "flavor": "one",
+    "logs": ["client"],
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
+  }
+}

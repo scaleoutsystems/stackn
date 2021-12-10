@@ -1,0 +1,29 @@
+{
+  "name": "FEDn Reducer",
+  "slug": "reducer",
+  "category": "fedn",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}"
+  },
+  "description": "",
+  "priority": "500",
+  "settings": {
+    "S3": "one",
+    "apps":{
+      "MongoDB":"one",
+      "Docker Registry": "one"
+    },
+    "environment": {
+      "name": "from",
+      "title": "Image",
+      "quantity": "one",
+      "type": "match"
+    },
+    "logs": ["reducer"],
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
+  }
+}

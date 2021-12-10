@@ -1,0 +1,50 @@
+{{ if .Values.ingress.v1beta1 }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}-vscode-svc
+            servicePort: 80
+  tls:
+    - secretName: {{ .Values.ingress.secretName }}
+      hosts:
+        - {{ .Values.global.domain }}
+{{ else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    io.kompose.service: {{ .Release.Name }}-ingress
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            service:
+              name: {{ .Release.Name }}-vscode-svc
+              port:
+                number: 80
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: {{ .Values.ingress.secretName }}
+      hosts:
+        - {{ .Values.global.domain }}
+{{- end }}

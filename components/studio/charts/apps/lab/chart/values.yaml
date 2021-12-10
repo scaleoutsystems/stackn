@@ -1,0 +1,56 @@
+
+settings_file: project-settings
+user_settings_file: user-settings
+namespace: default
+appname: jupyter-lab
+project:
+  name: project
+  slug: project-slug
+labs:
+  image: pharmbio/pharmbio-notebook:tf-2.1.0-gpu
+  #image: jupyter/minimal-notebook:latest
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 0.2
+    limits:
+      memory: 512Mi
+      cpu: 0.2
+
+  gpu:
+    enabled: false
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: acceleration
+            operator: In
+            values:
+            - gpu
+
+global:
+  domain: localhost
+
+imagePullSecrets:
+  - name: regcred
+
+minio:
+  access_key: minio
+  secret_key: minio123
+  bucket: dataset 
+
+ingress:
+  v1beta1: false
+  secretName: prod-ingress
+
+mlflow:
+  url: ""
+  s3url: ""
+  access_key: ""
+  secret_key: ""
+  region: ""
+  username: ""
+  password: ""

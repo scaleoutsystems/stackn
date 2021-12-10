@@ -1,0 +1,47 @@
+{{ if .Values.ingress.v1beta1 }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-dash-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}-dash
+            servicePort: 80
+  tls:
+    - secretName: {{ .Values.ingress.secretName }}
+      hosts:
+        - {{ .Values.global.domain }}
+{{ else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-dash-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            service:
+              name: {{ .Release.Name }}-dash
+              port:
+                number: 443
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: prod-ingress
+      hosts:
+        - {{ .Release.Name }}.{{ .Values.global.domain }}
+
+{{- end }}

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: minio
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: minio
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: minio
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: minio
+    spec:
+      containers:
+      - args:
+        {{- range $key, $value := .Values.apps.volume }}
+        - server
+        - /home/stackn/{{ $key }}
+        {{- end }}
+        env:
+        - name: MINIO_ROOT_USER
+          value: {{ .Values.credentials.access_key }}
+        - name: MINIO_ROOT_PASSWORD
+          value: {{ .Values.credentials.secret_key }}
+        image: minio/minio:RELEASE.2021-04-22T15-44-28Z
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - http://{{ .Release.Name }}-minio:9000/minio/health/live
+          failureThreshold: 3
+          periodSeconds: 30
+          timeoutSeconds: 20
+        name: {{ .Release.Name }}-minio
+        ports:
+        - containerPort: 9000
+        resources: {}
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volume }}
+        - name: {{ $key }}
+          mountPath: /home/stackn/{{ $key }}
+        {{- end }}
+      hostname: {{ .Release.Name }}-minio
+      restartPolicy: Always
+      volumes:
+      {{- range $key, $value := .Values.apps.volume }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}
+status: {}

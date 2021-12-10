@@ -1,0 +1,28 @@
+{
+  "name": "Ubuntu Terminal",
+  "slug": "ubuntu-terminal",
+  "category": "compute",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}/wetty"
+  },
+  "description": "",
+  "priority": "300",
+  "settings": {
+    "apps": {
+        "Persistent Volume":"many"
+    },
+    "flavor": "one",
+    "environment": {
+      "name": "from",
+      "title": "Environment",
+      "quantity": "one",
+      "type": "match"
+    },
+    "export-cli": "True",
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
+  }
+}

@@ -1,0 +1,30 @@
+project:
+  slug: project-slug
+
+namespace: default
+
+workers:
+  replicas: 3
+  port: 10101
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+scheduler:
+  port: 8786
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+ingress:
+  secretName: prod-ingress
+
+url: dask-host-svc
+
+             

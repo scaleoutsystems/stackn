@@ -1,0 +1,68 @@
+replicas: 1
+appname: mlflow-serve
+namespace: default
+visibility: private
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 700m
+    memory: 2Gi
+
+global:
+  domain: global.domain
+
+registry:
+  secure: False
+  host: stack-docker-registry:5000
+
+imagePullSecret: regcred
+
+project:
+  slug: project-slug
+
+deployment:
+  image: scaleoutsystems/default-python:latest
+  version: version
+  name: deployment-name
+  endpoint: deployment-endpoint
+  path: deployment-path
+  
+
+context:
+  image: context-image
+
+hpa:
+  enabled: true
+  min_pods: 1
+  max_pods: 3
+  cpu_target: 60
+
+
+model:
+  name: name
+  version: version
+  release_type: release_type
+  description: short-description
+  url: url
+  access_key: key
+  secret_key: secret
+  bucket: bucket
+  obj: obj
+
+default_values:
+  is_tar: false
+  port: 8501
+
+model_card:
+  enabled: false
+  path: model-card
+
+ingress:
+  v1beta1: false
+
+# extraEnv: |
+#   - name: LICENSE_FILE
+#     value: SOMESTRING
