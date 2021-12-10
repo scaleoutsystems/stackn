@@ -4,6 +4,7 @@ django-appconf
 django-bootstrap-modal-forms
 django-celery-beat
 django-compressor
+django-cors-headers
 django-cors-middleware
 django-crispy-forms
 django-cryptography
