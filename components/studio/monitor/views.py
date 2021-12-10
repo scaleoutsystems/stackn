@@ -18,7 +18,6 @@ from .helpers import get_resource, get_all
 # from deployments.models import DeploymentInstance
 from models.models import Model
 from apps.models import AppInstance, ResourceData
-from modules.project_auth import get_permissions
 
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
