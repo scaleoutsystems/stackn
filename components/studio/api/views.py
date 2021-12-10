@@ -13,7 +13,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from .APIpermissions import ProjectPermission, AdminPermission
 from deployments.helpers import build_definition
-from projects.helpers import create_project_resources
 from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
