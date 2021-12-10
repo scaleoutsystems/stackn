@@ -1,0 +1,44 @@
+{% extends 'common/common_base.html' %}
+
+{% load static %}
+
+{% block title %}Log in - STACKn{% endblock %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+  <div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+      <div class="col-xl-10 col-lg-12 col-md-9 ">
+        <div class="card border-0 shadow-lg my-5">
+          <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+              <div class="col-lg-6 offset-lg-3">
+                <div class="p-5">
+                  <div class="text-center mb-1">
+                        <img src="{% static 'dist/stackn.png' %}" alt="STACKn Logo" width="200" >
+                  </div>
+                  <div class="text-center">
+                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                  </div>
+                  <form method="POST">
+                    {% csrf_token %}
+                    {{form | crispy}}
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                  </form>
+                  <hr>
+                  <div class="text-center">
+                    <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
+                  </div>
+                  <div class="text-center">
+                    <a class="small" href="{% url 'common:signup' %}">Don't have an account? Sign up here</a>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
