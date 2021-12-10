@@ -1,10 +1,7 @@
-{% extends 'baseproject.html' %}
+{% extends 'projects/base.html' %}
 {% load static %}
 
-
-
 {% block content %}
-
 <div class="card flex-fill">
     <div class="card-header">
         <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
@@ -13,9 +10,6 @@
         {% include 'app_table.html' %}
     
 </div>
-
-
-
 
 <div class="row">
     {% for app in apps %}
@@ -67,6 +61,4 @@
     };
     setTimeout(update_status, 3000);
 </script>
-
-
 {% endblock %}
