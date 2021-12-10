@@ -8,14 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, ReleaseName
-from models.models import Model
-from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
 from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
-import flatten_json
-import uuid
 import time
 from datetime import datetime, timedelta
 from .generate_form import generate_form
@@ -32,10 +27,7 @@ def index(request, user, project):
     print("hello")
     category = 'store'
     template = 'index_apps.html'
-    # status_success = ['Running', 'Succeeded', 'Success']
-    # status_warning = ['Pending', 'Installed', 'Waiting', 'Installing']
 
-    # template = 'new.html'
     cat_obj = AppCategories.objects.get(slug=category)
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
@@ -50,6 +42,7 @@ def logs(request, user, project, ai_id):
     project = Project.objects.get(slug=project)
     app_settings = app.app.settings
     containers = []
+    logs = []
     if 'logs' in app_settings:
         containers = app_settings['logs']
         container = containers[0]
@@ -58,7 +51,7 @@ def logs(request, user, project, ai_id):
             container = request.GET.get('container')
             print("Got container in request: "+container)
         
-        logs = []
+
         try:
             url = settings.LOKI_SVC+'/loki/api/v1/query_range'
             app_params = app.parameters
@@ -90,7 +83,12 @@ def filtered(request, user, project, category):
     menu = dict()
 
     template = 'new.html'
-    cat_obj = AppCategories.objects.get(slug=category)
+    import django.core.exceptions as ex
+    try:
+        cat_obj = AppCategories.objects.get(slug=category)
+    except ex.ObjectDoesNotExist:
+        print("No apps are loaded.")
+        cat_obj = []
     menu[category] = 'active'
     media_url = settings.MEDIA_URL
     project = Project.objects.get(slug=project)
@@ -195,6 +193,7 @@ def remove_tag(request, user, project, ai_id):
 
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
 
+
 def create(request, user, project, app_slug, data=[], wait=False):
     template = 'create.html'
     app_action = "Create"
@@ -209,25 +208,21 @@ def create(request, user, project, app_slug, data=[], wait=False):
         from_page = ''
         user = User.objects.get(username=user)
 
-
-    existing_app_name = ""
     project = Project.objects.get(slug=project)
     app = Apps.objects.filter(slug=app_slug).order_by('-revision')[0]
-        
-
-    aset = app.settings
+    app_sett = app.settings
+    
 
     # Set up form
+    print("CREATING APP...")
     print("GENERATING FORM")
-    form = generate_form(aset, project, app, user, [])
+    form = generate_form(app_sett, project, app, user, [])
     print("FORM DONE")
     if data or request.method == "POST":
         if not data:
             data = request.POST
-        print("INPUT")
-        print(data)
         app_name = data.get('app_name')
-        parameters_out, app_deps, model_deps = serialize_app(data, project, aset, user.username)
+        parameters_out, app_deps, model_deps = serialize_app(data, project, app_sett, user.username)
 
         if data.get('app_action') == "Create":
             permission = AppPermission(name=app_name)
@@ -249,35 +244,27 @@ def create(request, user, project, app_slug, data=[], wait=False):
         elif parameters_out['permissions']['project']:
             print("PROJECT PERMISSIONS")
             client_id = project.slug
-            kc = keylib.keycloak_init()
-            client_secret, res_json = keylib.keycloak_get_client_secret_by_id(kc, client_id)
+
             if not 'project' in parameters_out:
                 parameters_out['project'] = dict()
+
             parameters_out['project']['client_id'] = client_id
-            parameters_out['project']['client_secret'] = client_secret
+            parameters_out['project']['client_secret'] = client_id
             parameters_out['project']['slug'] = project.slug
             parameters_out['project']['name'] = project.name
-            # parameters_out['project'].update({"client_id": client_id, "client_secret": client_secret})
-            print(parameters_out)
             permission.projects.set([project])
         elif parameters_out['permissions']['private']:
             permission.users.set([user])
         permission.save()
 
-
+        app_instance = AppInstance(name=app_name, app=app, project=project, info={},
+                                    parameters=parameters_out,owner=user)
 
         if data.get('app_action') == "Create":
-            instance = AppInstance(name=app_name,
-                                app=app,
-                                project=project,
-                                info={},
-                                parameters=parameters_out,
-                                owner=user)
+
+            create_instance_params(app_instance, "create")
             
-            
-            
-            create_instance_params(instance, "create")
-            
+            # Attempt to create a ReleaseName model object
             rel_name_obj = []
             if 'app_release_name' in data and data.get('app_release_name') != '':
                 submitted_rn = data.get('app_release_name')
@@ -285,59 +272,58 @@ def create(request, user, project, app_slug, data=[], wait=False):
                     rel_name_obj = ReleaseName.objects.get(name=submitted_rn, project=project, status='active')
                     rel_name_obj.status = 'in-use'
                     rel_name_obj.save()
-                    instance.parameters['release'] = submitted_rn
+                    app_instance.parameters['release'] = submitted_rn
                 except Exception as e:
                     print("Error: Submitted release name is not owned by project.")
                     print(e)
                     return HttpResponseRedirect(
-                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
-                
-                
+                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))    
 
-            # Add field for table.    
-            if instance.app.table_field and instance.app.table_field != "":
+            # Add fields for apps table: to be displayed as app details in Django views    
+            if app_instance.app.table_field and app_instance.app.table_field != "":
                 django_engine = engines['django']
-                info_field = django_engine.from_string(instance.app.table_field).render(instance.parameters)
-                instance.table_field = eval(info_field)
+                info_field = django_engine.from_string(app_instance.app.table_field).render(app_instance.parameters)
+                app_instance.table_field = eval(info_field)
             else:
-                instance.table_field = {}
+                app_instance.table_field = {}
 
-
-            # instance.state = "Waiting"
-            status = AppStatus(appinstance=instance)
+            # Setting status fields before saving app instance
+            status = AppStatus(appinstance=app_instance)
             status.status_type = 'Created'
-            status.info = instance.parameters['release']
-            instance.save()
+            status.info = app_instance.parameters['release']
+            app_instance.save()
+            # Saving ReleaseName, permissions, status and setting up dependecies
             if rel_name_obj:
-                rel_name_obj.app = instance
+                rel_name_obj.app = app_instance
                 rel_name_obj.save()
             status.save()
-            
-            
-            permission.appinstance = instance
+            permission.appinstance = app_instance
             permission.save()
-            instance.app_dependencies.set(app_deps)
-            instance.model_dependencies.set(model_deps)
+            app_instance.app_dependencies.set(app_deps)
+            app_instance.model_dependencies.set(model_deps)
 
-            # Setting up Keycloak and deploying resources.
-            res = deploy_resource.delay(instance.pk, "create")
+            # Finally, attempting to create apps resources
+            res = deploy_resource.delay(app_instance.pk, "create")
+
+            # wait is passed as a function parameter
             if wait:
                 while not res.ready():
                     time.sleep(0.1)
 
+            # End of Create action
         elif data.get('app_action') == "Settings":
             print("UPDATING APP DEPLOYMENT")
-            print(instance)
-            instance.name = app_name
-            instance.parameters.update(parameters_out)
-            instance.save()
-            instance.app_dependencies.set(app_deps)
-            instance.model_dependencies.set(model_deps)
-
-            res = deploy_resource.delay(instance.pk, "update")
+            app_instance.name = app_name
+            app_instance.parameters.update(parameters_out)
+            app_instance.save()
+            app_instance.app_dependencies.set(app_deps)
+            app_instance.model_dependencies.set(model_deps)
+            # Attempting to deploy apps settings
+            res = deploy_resource.delay(app_instance.pk, "update")
         else:
             raise Exception("Incorrect action on app.")
-        
+
+        # Forming a final response
         if request:
             if 'from' in request.GET:
                 from_page = request.GET.get('from')
@@ -352,6 +338,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
                         reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
         else:
             return JsonResponse({"status": "ok"})
+    # If not POST...
     return render(request, template, locals())
 
 def publish(request, user, project, category, ai_id):
