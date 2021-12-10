@@ -1,7 +1,8 @@
 version: '3'
 
 services:
-  stack-studio-db:
+  db:
+    container_name: db
     image: postgres
     environment:
       - GET_HOSTS_FROM=dns
@@ -10,26 +11,23 @@ services:
       - POSTGRES_DB=postgres
     networks:
       - internal_network
+    volumes:
+      - db-data:/var/lib/postgresql/data
 
   studio:
+    container_name: studio
     build: .
-    image: scaleoutsystems/studio:master
+    image: scaleoutsystems/carmat-dev:revamp
     command: sh scripts/run_web.sh
     environment:
       - GET_HOSTS_FROM=dns
+      - KUBECONFIG=/root/.kube/config
+      - DEBUG=True
     volumes:
       - .:/app:cached
+      - ${PWD}/cluster.conf:/root/.kube/config
     depends_on:
-      - stack-studio-db
-    links:
-      - "stack-studio-db:stack-studio-db.default.svc.cluster.local"
-    networks:
-      - internal_network
-
-  chart-controller:
-    image: scaleoutsystems/chart-controller:master
-    ports:
-      - 80:80
+      - db
     networks:
       - internal_network
 
@@ -53,6 +51,7 @@ services:
 
   redis:
     image: redis
+    container_name: redis
     hostname: redis
     ports:
       - "6379:6379"
@@ -61,6 +60,7 @@ services:
   
   rabbit:
     image: rabbitmq
+    container_name: rabbitmq
     hostname: rabbit
     environment:
       - RABBITMQ_DEFAULT_USER=admin
@@ -73,17 +73,46 @@ services:
 
   celery-worker:
     build: .
-    image: scaleoutsystems/studio:master
+    container_name: celery-worker
+    image: scaleoutsystems/stack-dev:latest
     command: sh ./scripts/run_worker.sh
+    environment:
+      - KUBECONFIG=/root/.kube/config
+      - BASE_PATH=/app
     volumes:
       - .:/app:cached
+      - ${PWD}/cluster.conf:/root/.kube/config
     links:
-      - stack-studio-db
+      - db
       - studio
       - rabbit
       - redis
     depends_on:
-      - stack-studio-db
+      - db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      - internal_network
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    image: scaleoutsystems/stack-dev:latest
+    command: sh ./scripts/run_beat.sh
+    environment:
+      - KUBECONFIG=/root/.kube/config
+      - BASE_PATH=/app
+    volumes:
+      - .:/app:cached
+      - ${PWD}/cluster.conf:/root/.kube/config
+    links:
+      - db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - db
       - studio
       - rabbit
       - redis
@@ -93,3 +122,7 @@ services:
 networks:
   internal_network:
     driver: bridge
+
+volumes:
+  db-data:
+    
