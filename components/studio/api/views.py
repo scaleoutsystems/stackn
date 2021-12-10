@@ -18,7 +18,6 @@ from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files import File
-import modules.keycloak_lib as kc
 from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
 from models.models import ObjectType
 from apps.models import AppInstance, Apps, AppCategories
@@ -216,7 +215,6 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         for username in selected_users.split(','):
             user = User.objects.get(username=username)
             project.authorized.add(user)
-            kc.keycloak_add_role_to_user(project.slug, user.username, role)
         project.save()
         return HttpResponse('Successfully added members.', status=200)
 
@@ -232,8 +230,7 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             print('username'+user.username)
             project.authorized.remove(user)
             for role in settings.PROJECT_ROLES:
-                kc.keycloak_add_role_to_user(project.slug, user.username, role, action='delete')
-            return HttpResponse('Successfully removed members.', status=200)
+                return HttpResponse('Successfully removed members.', status=200)
         else:
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
@@ -257,16 +254,6 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         project = self.get_object()
         if (request.user == project.owner or request.user.is_superuser) and project.status.lower() != "deleted":
             print("Delete project")
-
-            print("Cleaning up Keycloak.")
-            keyc = kc.keycloak_init()
-            kc.keycloak_delete_client(keyc, project.slug)
-            
-            scope_id, res = kc.keycloak_get_client_scope_id(keyc, project.slug+'-scope')
-            print(scope_id)
-            kc.keycloak_delete_client_scope(keyc, scope_id)
-
-            print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
             print("SCHEDULING DELETION OF ALL INSTALLED APPS")
             delete_project_apps(project.slug)
 
@@ -294,9 +281,6 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         success = True
         
         try:
-            # Create project resources (Keycloak only)
-            create_project_resources(project, request.user.username, repository)
-
             # Create resources from the chosen template
             template_slug = request.data['template']
             template = ProjectTemplate.objects.get(slug=template_slug)
