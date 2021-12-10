@@ -207,7 +207,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(REPO_DIR, 'static/')
 # Media Files for Studio apps
@@ -223,9 +223,9 @@ LOGOUT_URL = 'logout'
 # Redis settings
 REDIS_PORT = 6379
 REDIS_DB = 0
-REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'platform-redis')
+REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'redis')
 # Celery settings
-CELERY_BROKER_URL = 'amqp://admin:LJqEG9RE4FdZbVWoJzZIOQEI@platform-rabbit:5672//'
+CELERY_BROKER_URL = 'amqp://admin:LJqEG9RE4FdZbVWoJzZIOQEI@rabbit:5672//'
 CELERY_RESULT_BACKEND = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
