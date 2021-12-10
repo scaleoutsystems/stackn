@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
-
 AUTHENTICATION_BACKENDS = [
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.google.GoogleOAuth2',
@@ -234,7 +233,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
 
-# K8S deployment settings
+# Other Helm/k8s deployment settings
 CHART_CONTROLLER_URL = 'http://stack-chart-controller'
 EXTERNAL_KUBECONF = True
 KUBECONFIG = "/root/.kube/config"
