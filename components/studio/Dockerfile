@@ -22,9 +22,10 @@ FROM pybuild1
 COPY . /app/
 WORKDIR /app
 
-# Add a new user "mark" with user id 8787
-RUN useradd -s /bin/bash -u 1818 stackn
-# Provide root privileges to this user
-RUN usermod -aG sudo stackn
+# To be used in production - Commented out for local dev
+# Add a new user "mark" with user id 1818
+#RUN useradd -s /bin/bash -u 1818 stackn
+# Provide sudo privileges to this user
+#RUN usermod -aG sudo stackn
 # Swith to a specific user
-USER stackn
+#USER stackn
