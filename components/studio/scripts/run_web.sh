@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # If we have set a local, custom settings.py, then use that.
 #[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
@@ -24,7 +23,7 @@ python3 manage.py loaddata apps/fixtures/apps_fixtures.json
 # python3 manage.py createsuperuser --email $DJANGO_SUPERUSER_EMAIL --username $DJANGO_SUPERUSER --no-input
 
 # ONLY for local testing with docker-compose!!!
-export DJANGO_SUPERUSER_PASSWORD = 'dGhpaXNhdmVyeW5vdHNhZmVvbmx'
+export DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
 python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
 
 echo "Starting the Studio server..."
