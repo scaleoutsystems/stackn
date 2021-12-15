@@ -318,7 +318,7 @@ def create(request):
         
         # Try to create database project object.
         try:
-            img = sett.STATIC_ROOT+'dist/img/patterns/image-{}.png'.format(random.randrange(8,13))
+            img = sett.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
             print(img)
             img_file = open(img, 'rb')
             project = Project.objects.create_project(name=name,
