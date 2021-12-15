@@ -56,6 +56,7 @@ THIRD_PARTY_APPS = [
     "crispy_forms",            
     'corsheaders',
     'django_celery_beat',
+    'django_extensions',    # for executing runscript among others
     'django_filters',
     'oauth2_provider',
     'rest_framework',
@@ -110,14 +111,13 @@ ROOT_URLCONF = 'studio.urls'
 
 # IMPORTANT: Must be encrypted as secrets in K8S
 # Github
-SOCIAL_AUTH_GITHUB_KEY = '<enter-github-application-key>'
-SOCIAL_AUTH_GITHUB_SECRET = ' <enter-github-application-key>'
+SOCIAL_AUTH_GITHUB_KEY = '<your-github-key>'
+SOCIAL_AUTH_GITHUB_SECRET = '<your-github-secret>'
 SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']   # Ask for the user's email
 
 # Google
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<enter-google-application-key>'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<enter-google-secret>'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['user:email']    # Ask for the user's email
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<your-google-oauth2-key>'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<your-google-oauth2-secret>'
 
 # Tagulous serialization settings
 SERIALIZATION_MODULES = {
@@ -234,6 +234,7 @@ CELERY_ENABLE_UTC = True
 
 # Other Helm/k8s deployment settings
 CHART_CONTROLLER_URL = 'http://stack-chart-controller'
+CHART_FOLDER="/app/charts/apps"
 EXTERNAL_KUBECONF = True
 KUBECONFIG = "/root/.kube/config"
 NAMESPACE = 'default'

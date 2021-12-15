@@ -8,6 +8,7 @@ django-cors-headers
 django-cors-middleware
 django-crispy-forms
 django-cryptography
+django-extensions
 django-filter
 django-oauth-toolkit
 django-redis
