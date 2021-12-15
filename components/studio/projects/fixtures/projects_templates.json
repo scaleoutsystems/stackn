@@ -31,7 +31,7 @@
           "Jupyter Notebook": {
             "repository": "scaleoutsystems",
             "image": "jupyter-stackn:v0.1.5",
-            "app": "lab"
+            "app": "jupyter-lab"
           },
           "Default Serving": {
             "repository": "scaleoutsystems",
@@ -46,7 +46,7 @@
           "Ubuntu": {
             "repository": "scaleoutsystems",
             "image": "wetty-ubuntu:v0.1.2",
-            "app": "ubuntu-terminal"
+            "app": "wetty-terminal"
           },
           "Dask": {
             "repository": "daskdev",
@@ -56,12 +56,12 @@
           "FEDn Reducer": {
             "repository": "scaleoutsystems",
             "image": "fedn-reducer:master",
-            "app": "reducer"
+            "app": "fedn-reducer"
           },
           "FEDn Combiner": {
             "repository": "scaleoutsystems",
             "image": "fedn-combiner:master",
-            "app": "combiner"
+            "app": "fedn-combiner"
           }
         }
       }
@@ -99,7 +99,7 @@
           "Jupyter Notebook": {
             "repository": "scaleoutsystems",
             "image": "jupyter-stackn:v0.1.5",
-            "app": "lab"
+            "app": "jupyter-lab"
           },
           "Default Serving": {
             "repository": "scaleoutsystems",
@@ -114,7 +114,7 @@
           "Ubuntu": {
             "repository": "scaleoutsystems",
             "image": "wetty-ubuntu:v0.1.2",
-            "app": "ubuntu-terminal"
+            "app": "wetty-terminal"
           },
           "Dask": {
             "repository": "daskdev",
@@ -124,33 +124,33 @@
           "FEDn Reducer": {
             "repository": "scaleoutsystems",
             "image": "fedn-reducer:master",
-            "app": "reducer"
+            "app": "fedn-reducer"
           },
           "FEDn Combiner": {
             "repository": "scaleoutsystems",
             "image": "fedn-combiner:master",
-            "app": "combiner"
+            "app": "fedn-combiner"
           }
         },
         "apps": {
           "minio-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "reg-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "project-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "project-minio": {
             "slug": "minio",
-            "app:volume": [
+            "app:volume-k8s": [
               "minio-vol"
             ],
             "credentials.access_key": "accesskey2",
@@ -158,8 +158,8 @@
             "permission": "project"
           },
           "project-registry": {
-            "slug": "docker_registry",
-            "app:volume": [
+            "slug": "docker-registry",
+            "app:volume-k8s": [
               "reg-vol"
             ],
             "credentials.username": "username123",
@@ -205,12 +205,12 @@
           "Jupyter STACKn": {
             "repository": "scaleoutsystems",
             "image": "jupyter-stackn:v0.1.5",
-            "app": "lab"
+            "app": "jupyter-lab"
           },
           "Ubuntu": {
             "repository": "scaleoutsystems",
             "image": "wetty-ubuntu:v0.1.2",
-            "app": "ubuntu-terminal"
+            "app": "wetty-terminal"
           },
           "Dask": {
             "repository": "daskdev",
@@ -220,12 +220,12 @@
           "FEDn Reducer": {
             "repository": "scaleoutsystems",
             "image": "fedn-reducer:master",
-            "app": "reducer"
+            "app": "fedn-reducer"
           },
           "FEDn Combiner": {
             "repository": "scaleoutsystems",
             "image": "fedn-combiner:master",
-            "app": "combiner"
+            "app": "fedn-combiner"
           },
           "MNIST Client": {
             "repository": "scaleoutsystems",
@@ -235,33 +235,33 @@
         },
         "apps": {
           "minio-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "20Gi",
             "permission": "private"
           },
           "reg-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "20Gi",
             "permission": "private"
           },
           "project-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "20Gi",
             "permission": "private"
           },
           "mongodb-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "5Gi",
             "permission": "private"
           },
           "combiner-vol": {
-            "slug": "volume",
+            "slug": "volume-k8s",
             "volume.size": "5Gi",
             "permission": "private"
           },
           "S3 store": {
             "slug": "minio",
-            "app:volume": [
+            "app:volume-k8s": [
               "minio-vol"
             ],
             "credentials.access_key": "accesskey2",
@@ -269,7 +269,7 @@
           },
           "FEDn MongoDB": {
             "slug": "mongodb",
-            "app:volume": [
+            "app:volume-k8s": [
               "mongodb-vol"
             ],
             "credentials.username": "admin",
@@ -282,15 +282,15 @@
             ]
           },
           "Docker Registry": {
-            "slug": "docker_registry",
-            "app:volume": [
+            "slug": "docker-registry",
+            "app:volume-k8s": [
               "reg-vol"
             ],
             "credentials.username": "username123",
             "credentials.password": "pass999111222"
           },
           "Reducer": {
-            "slug": "reducer",
+            "slug": "fedn-reducer",
             "S3": "S3 store",
             "environment": "FEDn Reducer",
             "app:mongodb": [
@@ -302,8 +302,8 @@
             "reducer.pullPolicy": "IfNotPresent"
           },
           "Combiner": {
-            "slug": "combiner",
-            "app:volume": [
+            "slug": "fedn-combiner",
+            "app:volume-k8s": [
               "combiner-vol"
             ],
             "app:reducer": [
