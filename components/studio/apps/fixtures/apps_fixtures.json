@@ -102,7 +102,7 @@
         }
       },
       "chart": "apps/dask-cluster/chart",
-      "logo": "apps/dask-cluster/",
+      "logo": "apps/dask-cluster/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -150,6 +150,7 @@
         }
       },
       "chart": "apps/docker-registry/chart",
+      "logo": "apps/docker-registry/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -376,8 +377,8 @@
         },
         "export-cli": "True"
       },
-      "chart": "apps/lab/chart",
-      "logo": "apps/lab/logo.png",
+      "chart": "apps/jupyter-lab/chart",
+      "logo": "apps/jupyter-lab/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -427,7 +428,6 @@
       },
       "chart": "apps/minio/chart",
       "logo": "apps/minio/logo.png",
-      "logo_file": "apps/minio/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -738,8 +738,8 @@
           }
         }
       },
-      "chart": "apps/terminal/chart",
-      "logo": "apps/terminal/logo.png",
+      "chart": "apps/wetty-terminal/chart",
+      "logo": "apps/wetty-terminal/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -797,8 +797,8 @@
           "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/predictions/"
         }
       },
-      "chart": "apps/torchserve/chart",
-      "logo": "apps/torchserve/logo.png",
+      "chart": "apps/torch-serve/chart",
+      "logo": "apps/torch-serve/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -846,8 +846,8 @@
           }
         }
       },
-      "chart": "apps/volume/chart",
-      "logo": "apps/volume/logo.png",
+      "chart": "apps/volume-k8s/chart",
+      "logo": "apps/volume-k8s/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
