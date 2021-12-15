@@ -1,3 +1,4 @@
+{% load static %}
 
 <!doctype html>
 <html lang="en">
@@ -6,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="/static/dist/favicon.ico">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
 
     <title>{% block title %}{{ settings.APP_NAME }}{% endblock %}</title>
 

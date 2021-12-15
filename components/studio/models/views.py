@@ -146,7 +146,7 @@ def publish_model(request, user, project, id):
     models = Model.objects.filter(name=model.name, project=model.project)
     
     
-    img = settings.STATIC_ROOT+'dist/img/patterns/image-{}.png'.format(random.randrange(8,13))
+    img = settings.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
     img_file = open(img, 'rb')
     image = File(img_file)
     

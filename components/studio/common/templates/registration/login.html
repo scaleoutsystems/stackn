@@ -17,7 +17,7 @@
               <div class="col-lg-6 offset-lg-3">
                 <div class="p-5">
                   <div class="text-center mb-1">
-                        <img src="{% static 'dist/stackn.png' %}" alt="STACKn Logo" width="200" >
+                        <img src="{% static 'images/stackn.png' %}" alt="STACKn Logo" width="200" >
                   </div>
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
@@ -27,6 +27,13 @@
                     {{form | crispy}}
                     <button type="submit" class="btn btn-primary btn-block">Login</button>
                   </form>
+                  <hr>
+                    <a href="{% url 'social:begin' 'github' %}" class="btn btn-dark btn-block">
+                      <i class="fab fa-github fa-fw"></i> Login with Github
+                    </a>
+                    <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-google btn-block">
+                      <i class="fab fa-google fa-fw"></i> Login with Google
+                    </a>
                   <hr>
                   <div class="text-center">
                     <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
