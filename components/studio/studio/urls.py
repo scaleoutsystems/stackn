@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from . import views
 
 
@@ -34,11 +35,8 @@ urlpatterns = [
     path('oauth/', include('social_django.urls', namespace='social')),
     path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
     path('<user>/<project>/apps/', include('apps.urls', namespace='apps')),
-] 
+] + staticfiles_urlpatterns() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# To be able to access media and static from Admin UI
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Since this is a production feature, it will only work if DEBUG is set to False
 handler404 = 'studio.views.handle_page_not_found'
