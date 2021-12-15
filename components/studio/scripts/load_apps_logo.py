@@ -15,6 +15,7 @@ def run():
 
     # In each folder there should be a logo image called 'logo.png'
     for folder in subfolders:
+        print('INFO: Uploading logo from folder: {}'.format(folder))
         os.chdir(folder)
         file_to_upload = File(open('logo.png','rb'))    # every chart folder should have a logo file as logo.png
         tail = os.path.split(os.getcwd())[1] # e.g. "/app/charts/apps/jupyter-lab" -> tail = "jupyter-lab"
@@ -22,4 +23,5 @@ def run():
         curr_app = Apps.objects.get(slug=tail)
         curr_app.logo_file.save(new_filename, file_to_upload)
         file_to_upload.close()
+        print('INFO: {} uploaded successfully in the DB'.format(new_filename))
         os.chdir(curr_dir)

@@ -18,6 +18,7 @@ python3 manage.py loaddata apps/fixtures/intervals_fixtures.json
 python3 manage.py loaddata apps/fixtures/periodic_tasks_fixtures.json
 python3 manage.py loaddata apps/fixtures/appcats_fixtures.json
 python3 manage.py loaddata apps/fixtures/apps_fixtures.json
+python3 manage.py runscript load_apps_logo -v2
 
 # HELM deployment: DJANGO_SUPERUSER_PASSWORD should be an env var within the stackn-studio pod
 # python3 manage.py createsuperuser --email $DJANGO_SUPERUSER_EMAIL --username $DJANGO_SUPERUSER --no-input
