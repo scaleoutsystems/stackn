@@ -1,7 +1,8 @@
-# About Studio
-components/studio/chartcontroller/values/
+# About Studio (Django)
+components/studio/chartcontroller/values/*
 components/studio/cluster.conf
 components/studio/media
+*/migrations/*
 
 # Byte-compiled / optimized / DLL files
 .idea/
