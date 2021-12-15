@@ -112,7 +112,7 @@
     "pk": 3,
     "fields": {
       "name": "Docker Registry",
-      "slug": "docker_registry",
+      "slug": "docker-registry",
       "category": "store",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/registry/"
@@ -249,7 +249,7 @@
     "pk": 6,
     "fields": {
       "name": "FEDn Reducer",
-      "slug": "reducer",
+      "slug": "fedn-reducer",
       "category": "fedn",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
@@ -297,7 +297,7 @@
     "pk": 7,
     "fields": {
       "name": "FEDn Combiner",
-      "slug": "combiner",
+      "slug": "fedn-combiner",
       "category": "fedn",
       "table_field": {},
       "description": "",
@@ -342,7 +342,7 @@
     "pk": 8,
     "fields": {
       "name": "Jupyter Lab",
-      "slug": "lab",
+      "slug": "jupyter-lab",
       "category": "compute",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
@@ -704,7 +704,7 @@
     "pk": 16,
     "fields": {
       "name": "Ubuntu Terminal",
-      "slug": "ubuntu-terminal",
+      "slug": "wetty-terminal",
       "category": "compute",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/wetty"
@@ -808,7 +808,7 @@
     "pk": 18,
     "fields": {
       "name": "Persistent Volume",
-      "slug": "volume",
+      "slug": "volume-k8s",
       "category": "store",
       "table_field": {},
       "description": "",
