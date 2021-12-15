@@ -1,6 +1,7 @@
 # About Studio
 components/studio/chartcontroller/values/
 components/studio/cluster.conf
+components/studio/media
 
 # Byte-compiled / optimized / DLL files
 .idea/
