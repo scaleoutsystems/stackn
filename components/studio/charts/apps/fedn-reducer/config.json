@@ -1,6 +1,6 @@
 {
   "name": "FEDn Reducer",
-  "slug": "reducer",
+  "slug": "fedn-reducer",
   "category": "fedn",
   "table_field": {
     "url": "https://{{ release }}.{{ global.domain }}"

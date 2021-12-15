@@ -1,6 +1,6 @@
 {
   "name": "Ubuntu Terminal",
-  "slug": "ubuntu-terminal",
+  "slug": "wetty-terminal",
   "category": "compute",
   "table_field": {
     "url": "https://{{ release }}.{{ global.domain }}/wetty"

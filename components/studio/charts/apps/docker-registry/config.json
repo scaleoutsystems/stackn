@@ -1,6 +1,6 @@
 {
   "name": "Docker Registry",
-  "slug": "docker_registry",
+  "slug": "docker-registry",
   "category": "store",
   "table_field": {
     "url": "https://{{ release }}.{{ global.domain }}/registry/"
