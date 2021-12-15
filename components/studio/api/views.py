@@ -82,7 +82,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             model_uid = request.data['uid']
             object_type_slug = request.data['object_type']
             # if 'image' not in request.FILES:
-            #     img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+            #     img = settings.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
             #     img_file = open(img, 'rb')
             #     image = File(img_file)
             # else:
