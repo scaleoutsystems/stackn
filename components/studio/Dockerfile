@@ -2,9 +2,10 @@ FROM python:3.8.10 as pybuild1
 LABEL maintainer="matteo@scaleoutsystems.com"
 
 # Non-root user with sudo access
-ARG USERNAME=default
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
+ARG USERNAME=stackn
+RUN useradd -s /bin/bash $USERNAME
+# Provide root privileges to this user
+RUN usermod -aG sudo $USERNAME
 
 # Install stackn pip deps
 RUN mkdir /app
