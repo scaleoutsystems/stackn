@@ -1,10 +1,20 @@
 FROM python:3.8.10 as pybuild1
 LABEL maintainer="matteo@scaleoutsystems.com"
 
+# Non-root user with sudo access
+ARG USERNAME=default
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Install stackn pip deps
 RUN mkdir /app
 COPY requirements.txt /app/
 RUN pip install -r /app/requirements.txt
 
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install apt deps
 RUN apt update
 RUN apt install -y curl vim
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
@@ -19,13 +29,11 @@ RUN apt install -y kubectl
 
 FROM pybuild1
 
+# Set working directory
 COPY . /app/
 WORKDIR /app
 
-# To be used in production - Commented out for local dev
-# Add a new user "mark" with user id 1818
-#RUN useradd -s /bin/bash -u 1818 stackn
-# Provide sudo privileges to this user
-#RUN usermod -aG sudo stackn
-# Swith to a specific user
-#USER stackn
+USER $USERNAME
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog
