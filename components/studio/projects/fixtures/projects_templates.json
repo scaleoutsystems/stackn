@@ -113,7 +113,7 @@
           },
           "Ubuntu": {
             "repository": "scaleoutsystems",
-            "image": "wetty-ubuntu:v0.1.2",
+            "image": "wetty:latest",
             "app": "wetty-terminal"
           },
           "Dask": {
