@@ -15,7 +15,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-mlflow-svc
+            serviceName: {{ .Release.Name }}-mlflow-server-svc
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -39,9 +39,9 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-mlflow-svc
+              name: {{ .Release.Name }}-mlflow-server-svc
               port:
-                number: 80
+                number: 5000
           pathType: ImplementationSpecific
   tls:
     - secretName: {{ .Values.ingress.secretName }}

@@ -37,7 +37,7 @@ spec:
     {{ end }}
       containers:
       - name: labs
-        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        image: {{ .Values.labs.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8888
@@ -99,8 +99,6 @@ spec:
         - name: {{ $key }}
           mountPath: /home/jovyan/work/{{ $key }}
         {{- end }}
-        securityContext:
-          allowPrivilegeEscalation: true
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       volumes:

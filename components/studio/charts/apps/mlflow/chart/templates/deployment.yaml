@@ -33,20 +33,6 @@ spec:
         volumeMounts:
         - name: auth-vol
           mountPath: /auth
-      - name: create-bucket
-        image: minio/mc
-        env:
-        - name: S3_ACCESS_KEY_ID
-          value: {{ .Values.s3.access_key }}
-        - name: S3_SECRET_ACCESS_KEY
-          value: {{ .Values.s3.secret_key }}
-        - name: AWS_REGION
-          value: us-east-1
-        - name: S3_ENDPOINT
-          value: https://{{ .Values.s3.host }}
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/bash"]
-        args: ["-c", "mc alias set projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc mb projminio/mlflow || echo 'Bucket mlflow already exists'"]
       containers:
       - name: api-reverse-proxy
         image: nginx:alpine
@@ -60,30 +46,24 @@ spec:
         imagePullPolicy: IfNotPresent
         name: mlflow
         env:
-        - name: BACKEND_STORE_URI
-          value: sqlite:///mlruns/mydb.sqlite
         - name: MLFLOW_BUCKET
           value: mlflow
-        - name: MLFLOW_S3_ENDPOINT_URL
-          value: https://{{ .Values.s3.host }}
-        - name: AWS_ACCESS_KEY_ID
-          value: {{ .Values.s3.access_key }}
-        - name: AWS_SECRET_ACCESS_KEY
-          value: {{ .Values.s3.secret_key }}
         ports:
         - containerPort: 5000
+        command: ["/bin/sh"]
+        args: ["-c", "mlflow server --host 0.0.0.0:5000"]
         resources: {}
         volumeMounts:
         {{- range $key, $value := .Values.apps.volume }}
         - name: {{ $key }}
-          mountPath: /mlruns
+          mountPath: /mlflowruns
         {{- end }}
       hostname: {{ .Release.Name }}
       restartPolicy: Always
       volumes:
       - name: auth-vol
         emptyDir: {}
-      - name: nginx-rp-conf
+      - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-rp-config
       {{- range $key, $value := .Values.apps.volume }}

@@ -6,9 +6,9 @@ appname: jupyter-lab
 project:
   name: project
   slug: project-slug
+  
 labs:
-  image: pharmbio/pharmbio-notebook:tf-2.1.0-gpu
-  #image: jupyter/minimal-notebook:latest
+  image: scaleoutsystems/jupyter-stackn:v0.1.5
 
   resources:
     requests:

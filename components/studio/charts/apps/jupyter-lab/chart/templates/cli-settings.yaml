@@ -16,6 +16,7 @@ data:
         },
         "current": {
             "STACKN_URL": "{{ .Values.cli_setup.url }}",
-            "STACKN_PROJECT": "{{ .Values.cli_setup.project }}"
+            "STACKN_PROJECT": "{{ .Values.cli_setup.project }}",
+            "STACKN_SECURE": "{{ .Values.cli_setup.secure }}"
         }
     }
