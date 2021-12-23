@@ -11,7 +11,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-mongo-exp-svc
+            serviceName: {{ .Release.Name }}-mongo-exp
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -31,7 +31,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-mongo-exp-svc
+              name: {{ .Release.Name }}-mongo-exp
               port:
                 number: 80
           pathType: ImplementationSpecific

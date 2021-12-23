@@ -5,12 +5,8 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-  - name: "9000"
-    port: 9000
-    targetPort: 9000
-    {{- with .Values.service }}
-    nodePort: {{ .minio }}
-    {{- end }}
+  - protocol: TCP
+    port: 9001
+    targetPort: 9001
   selector:
     release: {{ .Release.Name }}
-

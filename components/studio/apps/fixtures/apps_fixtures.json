@@ -115,7 +115,7 @@
       "slug": "docker-registry",
       "category": "store",
       "table_field": {
-        "url": "https://{{ release }}.{{ global.domain }}/registry/"
+        "url": "https://{{ release }}.{{ global.domain }}"
       },
       "description": "",
       "settings": {
@@ -163,7 +163,7 @@
       "slug": "fastapi-serve",
       "category": "serve",
       "table_field": {
-        "url": "https://{{ release }}.{{ global.domain }}/predict/"
+        "url": "https://{{ release }}.{{ global.domain }}"
       },
       "description": "",
       "priority": "200",
@@ -626,7 +626,7 @@
       "slug": "rstudio",
       "category": "compute",
       "table_field": {
-        "url": "https://{{ release }}.{{ global.domain }}/"
+        "url": "https://{{ release }}.{{ global.domain }}"
       },
       "description": "",
       "priority": "400",

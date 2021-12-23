@@ -36,20 +36,18 @@ spec:
           value: {{ .Values.credentials.access_key }}
         - name: MINIO_ROOT_PASSWORD
           value: {{ .Values.credentials.secret_key }}
-        image: minio/minio:RELEASE.2021-04-22T15-44-28Z
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          exec:
-            command:
-            - curl
-            - -f
-            - http://{{ .Release.Name }}-minio:9000/minio/health/live
-          failureThreshold: 3
-          periodSeconds: 30
-          timeoutSeconds: 20
-        name: {{ .Release.Name }}-minio
         ports:
-        - containerPort: 9000
+          - containerPort: 9000
+            name: api-server
+          - containerPort: 9001
+            name: ui-console
+        image: minio/minio:RELEASE.2021-12-20T22-07-16Z
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/bin/sh"
+          - "-ce"
+          - "/usr/bin/docker-entrypoint.sh minio server {{ .Values.bucketRoot }} --address :{{ .Values.minioAPIPort }} --console-address :{{ .Values.minioConsolePort }}"
+        name: {{ .Release.Name }}-minio
         resources: {}
         volumeMounts:
         {{- range $key, $value := .Values.apps.volume }}

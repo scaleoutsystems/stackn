@@ -16,7 +16,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Values.appname }}-svc
+            serviceName: {{ .Release.Name }}-{{ .Values.appname }}-svc
             servicePort: 80
   tls:
     - secretName: prod-ingress
@@ -41,7 +41,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Values.appname }}-svc
+              name: {{ .Release.Name }}-{{ .Values.appname }}-svc
               port:
                 number: 80
           pathType: ImplementationSpecific

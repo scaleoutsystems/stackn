@@ -2,13 +2,13 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name | replace "_" "-" }}
+  name: {{ .Release.Name }}-registry
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
 spec:
   rules:
-    - host: {{ .Release.Name | replace "_" "-" }}.{{ .Values.global.domain }}
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
       http:
         paths:
         - path: /
@@ -23,19 +23,19 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name | replace "_" "-" }}
+  name: {{ .Release.Name }}-registry
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
 spec:
   rules:
-    - host: {{ .Release.Name | replace "_" "-" }}.{{ .Values.global.domain }}
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
       http:
         paths:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}
+              name: {{ .Release.Name }}-registry
               port:
                 number: 80
           pathType: ImplementationSpecific

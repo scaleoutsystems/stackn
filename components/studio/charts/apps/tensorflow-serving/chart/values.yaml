@@ -11,9 +11,6 @@ resources:
     cpu: 700m
     memory: 2Gi
 
-global:
-  domain: global.domain
-
 registry:
   secure: False
   host: stack-docker-registry:5000

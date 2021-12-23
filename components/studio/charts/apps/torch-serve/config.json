@@ -8,7 +8,7 @@
     "description": "",
     "priority": "500",
     "settings": {
-        "logs": ["serve", "gatekeeper"],
+        "logs": ["serve"],
         "permissions": {
             "public": {"value":"false", "option": "true"},
             "project": {"value":"true", "option": "true"},

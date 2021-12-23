@@ -1,10 +1,25 @@
 namespace: default
-
 volumes: {}
 
+## Port number for MinIO S3 API Access
+minioAPIPort: "9000"
+
+## Port number for MinIO Browser COnsole Access
+minioConsolePort: "9001"
+
+
+## Path where PV would be mounted on the MinIO Pod
+mountPath: ""
+## Override the root directory which the minio server should serve from.
+## If left empty, it defaults to the value of {{ .Values.mountPath }}
+## If defined, it must be a sub-directory of the path specified in {{ .Values.mountPath }}
+##
+bucketRoot: "/data"
+
 credentials:
-  access_key: accesskey
-  secret_key: secretkey123
+  access_key: minio-access-key
+  secret_key: minio-secret-key
 
 ingress:
   v1beta1: false
+  secretName: prod-ingress

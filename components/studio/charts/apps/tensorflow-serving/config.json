@@ -10,7 +10,7 @@
     "settings": {
         "model":"one",
         "flavor": "one",
-        "logs": ["serve", "gatekeeper"],
+        "logs": ["serve"],
         "permissions": {
             "public": {"value":"false", "option": "true"},
             "project": {"value":"true", "option": "true"},

@@ -11,7 +11,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}
+            serviceName: {{ .Release.Name }}-wetty
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -21,7 +21,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-ingress
+  name: {{ .Release.Name }}-wetty
   namespace: {{ .Values.namespace }}
 spec:
   rules:
@@ -31,13 +31,12 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}
+              name: {{ .Release.Name }}-wetty
               port:
                 number: 80
           pathType: ImplementationSpecific
   tls:
-    - secretName: {{ .Values.ingress.secretName }}
-      hosts:
+    - hosts:
         - {{ .Values.global.domain }}
-
+      secretName: {{ .Values.ingress.secretName }}
 {{- end }}

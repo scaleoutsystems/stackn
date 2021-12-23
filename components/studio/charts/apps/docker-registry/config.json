@@ -3,7 +3,7 @@
   "slug": "docker-registry",
   "category": "store",
   "table_field": {
-    "url": "https://{{ release }}.{{ global.domain }}/registry/"
+    "url": "https://{{ release }}.{{ global.domain }}"
   },
   "description": "",
   "settings": {

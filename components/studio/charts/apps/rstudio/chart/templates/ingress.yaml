@@ -5,7 +5,7 @@ metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
   labels:
-    io.kompose.service: {{ .Release.Name }}-ingress
+    io.kompose.service: {{ .Release.Name }}-rstudio
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
 spec:
@@ -39,7 +39,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}
+              name: {{ .Release.Name }}-rstudio
               port:
                 number: 80
           pathType: ImplementationSpecific

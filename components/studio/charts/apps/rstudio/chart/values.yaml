@@ -31,9 +31,6 @@ labs:
             values:
             - gpu
 
-global:
-  domain: platform.local
-
 imagePullSecrets:
   - name: regcred
 

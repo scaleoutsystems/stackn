@@ -15,7 +15,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-vscode-svc
+            serviceName: {{ .Release.Name }}-vscode
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -39,9 +39,9 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-vscode-svc
+              name: {{ .Release.Name }}-vscode
               port:
-                number: 80
+                number: 8088
           pathType: ImplementationSpecific
   tls:
     - secretName: {{ .Values.ingress.secretName }}

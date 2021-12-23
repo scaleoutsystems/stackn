@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-vscode-svc
+  name: {{ .Release.Name }}-vscode
   namespace: {{ .Values.namespace }}
   labels:
-    run: {{ .Release.Name }}-vscode-svc
+    run: {{ .Release.Name }}-vscode
 spec:
   ports:
-  - port: 80
-    targetPort: 9090
-    protocol: TCP
+  - protocol: TCP
+    port: 8088
+    targetPort: 8080
   selector:
     release: {{ $.Release.Name }}

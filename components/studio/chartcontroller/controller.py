@@ -51,4 +51,5 @@ def deploy(options):
     args = ['helm', 'upgrade', '--install', '--kubeconfig', str(KUBEPATH), '-n', options['namespace'], options['release'], chart, '-f', unique_filename]
     print("PROCESSING INPUT TO CONTROLLER")
     result = subprocess.run(args, capture_output=True)
+    print("RESULT: {}".format(result))
     return result

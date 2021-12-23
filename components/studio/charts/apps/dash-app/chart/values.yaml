@@ -27,9 +27,6 @@ app:
             values:
             - gpu
 
-global:
-  domain: local.stackn.dev
-
 imagePullSecrets:
   - name: regcred
 
@@ -43,7 +40,7 @@ ingress:
   secretName: prod-ingress
 
 s3sync:
-  image: registry.scilifelab.stackn.dev/s3-sync:latest #scaleoutsystems/s3-sync:latest
+  image: scaleoutsystems/s3-sync:latest
 
 ingress:
   secretName: prod-ingress

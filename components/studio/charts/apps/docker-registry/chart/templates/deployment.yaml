@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    name: {{ .Release.Name }}
-  name: {{ .Release.Name | replace "_" "-" }}
+    name: {{ .Release.Name }}-registry
+  name: {{ .Release.Name }}
   namespace: {{ .Values.namespace }}
   annotations:
     reloader.stakater.com/auto: "true"
@@ -81,7 +81,7 @@ spec:
         emptyDir: {}
       - name: rp-conf
         configMap:
-          name: {{ .Release.Name }}-rp-config
+          name: {{ .Release.Name }}-registry
       {{- range $key, $value := .Values.apps.volume }}
       - name: {{ $key }}
         persistentVolumeClaim:

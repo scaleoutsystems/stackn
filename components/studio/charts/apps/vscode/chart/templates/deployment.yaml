@@ -38,7 +38,7 @@ spec:
         image: scaleoutsystems/vscode:user
         imagePullPolicy: IfNotPresent
         ports:
-          - containerPort: 1234
+          - containerPort: 8080
         volumeMounts:
         - name: cli-config-vol
           mountPath: /home/stackn/.scaleout

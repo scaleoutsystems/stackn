@@ -1,14 +1,11 @@
 namespace: default
 appname: mongo-express
 project:
-  name: test
+  name: project
   slug: slug
 
 s3sync:
-  image: registry.scilifelab.stackn.dev/s3-sync:latest #scaleoutsystems/s3-sync:latest
-
-global:
-  domain: local.stackn.dev
+  image: scaleoutsystems/s3-sync:latest
 
 imagePullSecrets:
   - name: regcred

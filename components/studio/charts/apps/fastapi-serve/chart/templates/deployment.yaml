@@ -19,9 +19,9 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: /metrics
-        prometheus.io/port: "8501"
+        #prometheus.io/scrape: "true"
+        #prometheus.io/path: /metrics
+        #prometheus.io/port: "8501"
       labels:
         release: {{ .Release.Name }}
         app: fastapi-serve
@@ -48,7 +48,6 @@ spec:
         - name: {{ .Release.Name }}-pull-secret
       {{ end }}
       initContainers:
-      
       - name: copy-model
         image: minio/mc
         imagePullPolicy: Always
