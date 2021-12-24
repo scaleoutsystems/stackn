@@ -11,14 +11,16 @@ python3 manage.py migrate
 # However for testing and developement purpose, activate them when not using a post-install job
 
 echo "Loading Studio Fixtures..."
-# # Related to Projects (including project meta-resources such as flavours, environments, etc...)
+# Related to Projects (including project meta-resources such as flavours, environments, etc...)
 python3 manage.py loaddata projects/fixtures/projects_templates.json
-# # Related to Apps (including celery tasks and intervals)
+# Related to Apps (including celery tasks and intervals)
 python3 manage.py loaddata apps/fixtures/intervals_fixtures.json
 python3 manage.py loaddata apps/fixtures/periodic_tasks_fixtures.json
 python3 manage.py loaddata apps/fixtures/appcats_fixtures.json
 python3 manage.py loaddata apps/fixtures/apps_fixtures.json
 python3 manage.py runscript load_apps_logo -v2
+# Related to Models
+python3 manage.py loaddata models/fixtures/objecttype_fixtures.json
 
 # HELM deployment: DJANGO_SUPERUSER_PASSWORD should be an env var within the stackn-studio pod
 # python3 manage.py createsuperuser --email $DJANGO_SUPERUSER_EMAIL --username $DJANGO_SUPERUSER --no-input
