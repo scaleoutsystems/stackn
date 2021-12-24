@@ -41,7 +41,7 @@ spec:
             service:
               name: {{ .Release.Name }}-vscode
               port:
-                number: 8088
+                number: 80
           pathType: ImplementationSpecific
   tls:
     - secretName: {{ .Values.ingress.secretName }}
