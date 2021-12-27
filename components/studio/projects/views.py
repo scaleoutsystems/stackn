@@ -1,5 +1,6 @@
 from django.shortcuts import render, reverse
 from .models import Project, Environment, ProjectLog
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from .exceptions import ProjectCreationException
@@ -19,7 +20,7 @@ from apps.models import AppInstance, AppCategories
 from apps.models import Apps
 from datetime import datetime, timedelta
 from .tasks import create_resources_from_template
-from models.models import Model
+from models.models import Model, ObjectType
 from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
@@ -352,7 +353,7 @@ def create(request):
             l2.save()
 
         next_page = request.POST.get('next', '/{}/{}'.format(request.user, project.slug))
-        
+
         return HttpResponseRedirect(next_page, {'message': 'Created project'})
 
     
@@ -411,6 +412,7 @@ def details(request, user, project_slug):
             resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"
+        object_types = ObjectType.objects.all()
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())
