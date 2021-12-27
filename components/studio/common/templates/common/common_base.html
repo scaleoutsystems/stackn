@@ -40,12 +40,13 @@
   <!-- Custom scripts for all pages-->
   <script src="{% static 'js/common.js' %}"></script>
 
+  <!-- Custom scripts for all flash-messages alerts -->
   <script>
     setTimeout(function(){
-      if ($('#msg').length > 0) {
-        $('#msg').remove();
+      if ($('#flash-msg').length > 0) {
+        $('#flash-msg').remove();
       }
-    }, 2000)
+    }, 3500)
   </script>
 </body>
 

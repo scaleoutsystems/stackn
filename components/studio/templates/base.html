@@ -13,26 +13,13 @@
     <title>STACKn</title>
 
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
     <link rel="stylesheet" href="{% static 'dist/css/custom.css' %}">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="{% static 'dist/js/select2.js' %}"></script>
-    <script>
-    $(document).ready(function() {
-        $('.search-select-tag').select2({
-            placeholder: "Select Tag ..."
-        }).prop('required', true).trigger('change');
-        
-    });
-    </script>
-
 
     {% block extra_head %} {% endblock %}
 </head>
 
 <body data-theme="light" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
-
 
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
@@ -144,17 +131,16 @@
                                 </div>
                             </li>
                         {% else %}
-                        <a href="{% url 'login' %}">Sign in</a>
+                        <a class="btn btn-info" href="{% url 'login' %}">
+                            Sign in  <i class="align-middle me-1" data-feather="log-out"></i>
+                        </a>
                         {% endif %}
                     </ul>
                 </div>
             </nav>
             <main class="content">
                 <div class="container-fluid p-0">
-
-                    {% block content %}
-
-                    {% endblock %}
+                    {% block content %}{% endblock %}
                 </div>
             </main>
             <footer class="footer">
@@ -197,8 +183,58 @@
         </div>
     </div>
 
-    <script src="{% static 'dist/js/app.js' %}"></script>
+    <!-- JS library and custom script -->
+    
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
+    <!-- Dist custom JS -->
+    <script src="{% static 'dist/js/app.js' %}"></script>
+    <script src="{% static 'js/select2.js' %}"></script>
+
+    <!-- Custom scripts for all delete confirmation alerts -->
+    <script>
+        $('.confirm-delete').on('click', function (e){
+            e.preventDefault();
+            var self = $(this)
+            swal({
+                title: "Do You Really Want to Delete This?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+              })
+            .then((willDelete) => {
+                if (willDelete) {
+                    swal({
+                    title: "Done!",
+                    icon: "success",
+                    });
+                    setTimeout(() => { console.log("Showing result for 1 sec..."); location.href = self.attr('href')}, 1000);
+                }
+            });
+        })    
+    </script>
+
+    <!-- Custom timeout scripts for all sorts of alerts -->
+    <script>
+        setTimeout(function(){
+        if ($('#flash-msg').length > 0) {
+            $('#flash-msg').remove();
+        }
+        }, 3500)
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('.search-select-tag').select2({
+                placeholder: "Select Tag ..."
+            }).prop('required', true).trigger('change');
+            
+        });
+    </script>
+    
     {% block extra_scripts %} {% endblock %}
 </body>
 
