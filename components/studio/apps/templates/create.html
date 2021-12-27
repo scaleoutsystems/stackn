@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'projects/base.html' %}
 {% load static %}
 {% load custom_tags %}
 
@@ -180,6 +180,9 @@
                     {% else %}
                     <button class="btn btn-primary" type="submit">Update</button>
                     {% endif %}
+                    <button class="btn btn-secondary float-end" type="submit" onclick="window.location='{{ request.headers.referer }}' ; return false;">
+                        Go Back
+                    </button>
                 </form>
             </div>
         </div>      
