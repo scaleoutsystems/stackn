@@ -93,9 +93,15 @@
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">Logs</a>
-                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">Settings</a>
-                                                <a class="dropdown-item bg-danger text-white" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">Delete</a>
+                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
+                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
+                                                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                                </a>
+                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
+                                                    <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                                </a>
                                             </div>
                                         </div>
                                     </td>
@@ -107,7 +113,9 @@
                 </div>
             </div>
             {% else %}
-            <!-- <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p> -->
+                <script>
+                    swal ( "Oops" ,  "Something went wrong!" ,  "error" )
+                </script>
             {% endif %}
         </div>
     </div>
@@ -115,19 +123,19 @@
     <div class="col-6 d-flex">
         <div class="card flex-fill">
             <div class="card-header">
-                <div class="card-actions float-end">
+                <!--<div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
                         <button class="btn btn-outline-secondary">New</button>
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-right">
-                            {% for objtype in objs.objecttype %}
-                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug app.slug  %}>{{ objtype.name }}</a>
+                            {% for object_type in object_types %}
+                            {% comment %} <a class="dropdown-item" href="{% url 'models:create' request.user project.slug app.slug  %}">{{ object_type.name }}</a> {% endcomment %}
                             {% endfor %}
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
@@ -175,7 +183,7 @@
                                             <div class="dropdown-menu dropdown-menu-end">
                                                 <a class="dropdown-item" href="{% url 'models:details_private' request.user project.slug model.pk %}">Logs</a>
                                                 <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.pk %}">Settings</a>
-                                                <a class="dropdown-item bg-danger text-white" href="{% url 'models:delete' request.user project.slug model.pk %}">Delete</a>
+                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">Delete</a>
                                             </div>
                                         </div>
                                     </td>
@@ -194,10 +202,7 @@
 </div>
 
 
-
-
 <script>
-
     function newChart(chart, labels, y_data, ylabel, dataset_label) {
         new Chart(chart, {
             type: 'line',
@@ -276,10 +281,9 @@
         });
   
     };
-  
-    resourceCharts('#totalCPUChart', '#totalMEMChart');
-  
+    resourceCharts('#totalCPUChart', '#totalMEMChart');  
 </script>
+
 <script>
     function update_status() {
         var apps = {{ pk_list | safe }}
@@ -300,4 +304,5 @@
     };
     setTimeout(update_status, 5000);
 </script>
+
 {% endblock %}

@@ -2,8 +2,6 @@
 {% load static %}
 {% block extra_sidebar_items %}
 
-
-
 <li class="sidebar-header">
     Project
 </li>
@@ -16,7 +14,7 @@
 <li class="sidebar-item {{ menu.objects }}">
     <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
         <i class="align-middle" data-feather="layers"></i>
-        <span class="align-middle">Objects</span>
+        <span class="align-middle">Models</span>
     </a>
 </li>
 <li class="sidebar-item {{ menu.compute }}">
@@ -39,11 +37,6 @@
        <i class="align-middle"  data-feather="code"></i><span class="align-middle">Develop</span>
     </a>
 </li>
-<!-- <li class="sidebar-item {{ menu.misc }}">
-    <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
-        <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
-    </a>
-</li> -->
 <li class="sidebar-item {{ menu.fedn }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'fedn' %}" class="sidebar-link">
        <span class="align-middle" style="padding-right:10px;"><img class="align-middle" alt="FEDn Logo" src="{% static 'images/fedn.png' %}" width="20"  /> </span><span class="align-middle">FEDn</span>
