@@ -25,7 +25,7 @@ python3 manage.py loaddata models/fixtures/objecttype_fixtures.json
 # HELM deployment: DJANGO_SUPERUSER_PASSWORD should be an env var within the stackn-studio pod
 # python3 manage.py createsuperuser --email $DJANGO_SUPERUSER_EMAIL --username $DJANGO_SUPERUSER --no-input
 
-# ONLY for local testing with docker-compose!!!
+# ONLY for local testing with docker-compose
 export DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
 python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
 
