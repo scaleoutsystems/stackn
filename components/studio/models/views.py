@@ -18,7 +18,6 @@ from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
 from .forms import UploadModelCardHeadlineForm, EnvironmentForm
-#import modules.keycloak_lib as kc
 from portal.models import PublicModelObject, PublishedModel
 
 new_data = defaultdict(list)

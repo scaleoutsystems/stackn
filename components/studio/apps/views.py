@@ -332,10 +332,10 @@ def create(request, user, project, app_slug, data=[], wait=False):
                         reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
                 elif from_page == "filtered":
                     return HttpResponseRedirect(
-                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
             else:
                 return HttpResponseRedirect(
-                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': instance.app.category.slug}))
+                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
         else:
             return JsonResponse({"status": "ok"})
     # If not POST...
