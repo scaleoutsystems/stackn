@@ -8,16 +8,17 @@ from django.core.files import File
 import os
 
 def run(*args):
-    subfolders=[]
+    subfolders = []
+    folder_to_skip = ""
     if len(args)>0 and args[0]:
         # Fetching the charts path from command line argv and create a list of all the apps folder
         subfolders = [f.path for f in os.scandir(args[0]) if f.is_dir()]
+        folder_to_skip = args[0]+'/fixtures'
     else:
         # Fetching the charts path from settings.py and create a list of all the apps folder
         subfolders = [f.path for f in os.scandir(settings.CHART_FOLDER) if f.is_dir()]
     subfolders.sort()
     curr_dir = os.getcwd()
-    folder_to_skip = args[0]+'/fixtures'
     
     # In each folder there should be a logo image called 'logo.png'
     for folder in subfolders:

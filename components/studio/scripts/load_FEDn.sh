@@ -1,19 +1,18 @@
 #!/bin/bash
+# This script will load FEDn within STACKn by:
 
-# This script will load FEDn within STACKn
-
-# Donwload FEDn folder and remove .svn from it
+# Donwloading FEDn folder and remove .svn from it
 svn checkout https://github.com/carmat88/stackn-apps/trunk/FEDn
 rm -rf FEDn/.svn/
 
-# Loadind all fixtures related to FEDn
+# Loading all fixtures related to FEDn
 python3 manage.py loaddata FEDn/fixtures/project_template.json
 python3 manage.py loaddata FEDn/fixtures/apps_fixtures.json
 
-# Invoke script for upload FEDn apps logo - Passing relative path
-python3 manage.py runscript load_apps_logo "./FEDn"
+# Invoking script to upload FEDn apps logo (given a relative path)
+python3 manage.py runscript load_apps_logo --script-args "./FEDn"
 
-# Copy FEDn apps charts in default charts folder
+# Copying FEDn apps charts in default charts folder
 cp -r FEDn/fedn-* ./charts/apps
 
 # Removing comments from base template to show FEDn navbar item
