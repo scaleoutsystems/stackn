@@ -214,7 +214,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Related to user registration and authetication workflow
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/overview'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 
