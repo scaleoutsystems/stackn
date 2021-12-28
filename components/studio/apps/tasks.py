@@ -175,38 +175,18 @@ def delete_resource(pk):
         parameters = appinstance.parameters
         # TODO: Check that the user has the permission required to delete it.
 
-        # Clean up in Keycloak.
-        #kc = keylib.keycloak_init()
         # TODO: Fix for multicluster setup
         # TODO: We are assuming this URI here, but we should allow for other forms.
         # The instance should store information about this.
         URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
         
-        #try:
-        #    keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-        #except:
-        #    print("Failed to remove valid redirect URL from project client.")
-        #    print("Project client might already be deleted.")
-        #    pass
-        #try:
-        #    keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
-        #    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-        #    if not res_json['success']:
-        #        print("Failed to get client scope.")
-        #    else:
-        #        keylib.keycloak_delete_client_scope(kc, scope_id)
-        #except:
-        #    print("Failed to clean up in Keycloak.")
-        
-        
-        
         # Delete installed resources on the cluster.
         release = appinstance.parameters['release']
         namespace = appinstance.parameters['namespace']
 
-
-
+        # Invoke chart controller
         results = controller.delete(parameters)
+        
         if results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8'):
             status = AppStatus(appinstance=appinstance)
             status.status_type = "Terminated"

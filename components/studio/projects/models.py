@@ -168,7 +168,7 @@ class ProjectTemplate(models.Model):
     name = models.CharField(max_length=512)
     revision = models.IntegerField(default=1)
     slug = models.CharField(max_length=512, default="")
-    template = models.JSONField(blank=True, null=True)
+    template = models.TextField(null=True, blank=True)
  
     class Meta:
         unique_together = ('slug', 'revision',)
