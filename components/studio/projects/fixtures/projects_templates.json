@@ -52,16 +52,6 @@
             "repository": "daskdev",
             "image": "dask",
             "app": "dask-cluster"
-          },
-          "FEDn Reducer": {
-            "repository": "scaleoutsystems",
-            "image": "fedn-reducer:master",
-            "app": "fedn-reducer"
-          },
-          "FEDn Combiner": {
-            "repository": "scaleoutsystems",
-            "image": "fedn-combiner:master",
-            "app": "fedn-combiner"
           }
         }
       }
@@ -120,16 +110,6 @@
             "repository": "daskdev",
             "image": "dask",
             "app": "dask-cluster"
-          },
-          "FEDn Reducer": {
-            "repository": "scaleoutsystems",
-            "image": "fedn-reducer:master",
-            "app": "fedn-reducer"
-          },
-          "FEDn Combiner": {
-            "repository": "scaleoutsystems",
-            "image": "fedn-combiner:master",
-            "app": "fedn-combiner"
           }
         },
         "apps": {
