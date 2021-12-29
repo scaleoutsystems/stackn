@@ -217,7 +217,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
     print("CREATING APP...")
     print("GENERATING FORM")
     form = generate_form(app_sett, project, app, user, [])
-    print("FORM DONE")
+    print("FORM GENERATED: {}".format(form))
     if data or request.method == "POST":
         if not data:
             data = request.POST
@@ -279,7 +279,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
                     return HttpResponseRedirect(
                         reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))    
 
-            # Add fields for apps table: to be displayed as app details in Django views    
+            # Add fields for apps table: to be displayed as app details in views    
             if app_instance.app.table_field and app_instance.app.table_field != "":
                 django_engine = engines['django']
                 info_field = django_engine.from_string(app_instance.app.table_field).render(app_instance.parameters)
@@ -292,7 +292,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
             status.status_type = 'Created'
             status.info = app_instance.parameters['release']
             app_instance.save()
-            # Saving ReleaseName, permissions, status and setting up dependecies
+            # Saving ReleaseName, permissions, status and setting up dependencies
             if rel_name_obj:
                 rel_name_obj.app = app_instance
                 rel_name_obj.save()
@@ -338,7 +338,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
                         reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
         else:
             return JsonResponse({"status": "ok"})
-    # If not POST...
+    # If not POST, thus GET...
     return render(request, template, locals())
 
 def publish(request, user, project, category, ai_id):

@@ -128,6 +128,7 @@ def deploy_resource(instance_pk, action='create'):
             pass
 
         app_instance.parameters = parameters
+        print("App Instance paramenters: {}".format(app_instance))
         app_instance.save()
 
     results = controller.deploy(app_instance.parameters)

@@ -17,12 +17,11 @@ from logging import raiseExceptions
 def create_resources_from_template(user, project_slug, template):
     print("Create Resources From Project Template...")
     decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
-    print("Template is: {}".format(template))
     parsed_template = template.replace('\'','\"')
-    print("New Parsed template is: {}".format(parsed_template))
     template = decoder.decode(parsed_template)
     alphabet = string.ascii_letters + string.digits
     project = Project.objects.get(slug=project_slug)
+    print("Parsing template...")
     for key, item in template.items():
         print("Key {}".format(key))
         if 'flavors' == key:

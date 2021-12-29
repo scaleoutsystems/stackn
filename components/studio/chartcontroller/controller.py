@@ -49,7 +49,6 @@ def deploy(options):
 
     # building args for the equivalent of helm install command
     args = ['helm', 'upgrade', '--install', '--kubeconfig', str(KUBEPATH), '-n', options['namespace'], options['release'], chart, '-f', unique_filename]
-    print("PROCESSING INPUT TO CONTROLLER")
+    print("CONTROLLER: RUNNING HELM COMMAND... ")
     result = subprocess.run(args, capture_output=True)
-    print("RESULT: {}".format(result))
     return result
