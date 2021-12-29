@@ -44,12 +44,12 @@ spec:
           value: "{{ $value }}"
         {{- end }}
         volumeMounts:
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /app
         {{- end }}
       volumes:
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

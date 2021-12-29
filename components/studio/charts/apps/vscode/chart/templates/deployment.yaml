@@ -45,7 +45,7 @@ spec:
         - name: cli-config
           mountPath: /stackn.json
           subPath: stackn.json
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /home/stackn/{{ $key }}
         {{- end }}
@@ -64,7 +64,7 @@ spec:
       - name: cli-config
         configMap:
           name: {{ .Release.Name }}-cli-config
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

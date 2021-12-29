@@ -54,7 +54,7 @@ spec:
         args: ["-c", "mlflow server --host 0.0.0.0:5000"]
         resources: {}
         volumeMounts:
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /mlflowruns
         {{- end }}
@@ -66,7 +66,7 @@ spec:
       - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-rp-config
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

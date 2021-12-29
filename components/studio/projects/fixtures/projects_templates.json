@@ -114,23 +114,23 @@
         },
         "apps": {
           "minio-vol": {
-            "slug": "volume-k8s",
+            "slug": "volumeK8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "reg-vol": {
-            "slug": "volume-k8s",
+            "slug": "volumeK8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "project-vol": {
-            "slug": "volume-k8s",
+            "slug": "volumeK8s",
             "volume.size": "5Gi",
             "permission": "project"
           },
           "project-minio": {
             "slug": "minio",
-            "app:volume-k8s": [
+            "app:volumeK8s": [
               "minio-vol"
             ],
             "credentials.access_key": "accesskey2",
@@ -139,7 +139,7 @@
           },
           "project-registry": {
             "slug": "docker-registry",
-            "app:volume-k8s": [
+            "app:volumeK8s": [
               "reg-vol"
             ],
             "credentials.username": "username123",

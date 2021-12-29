@@ -34,7 +34,7 @@ spec:
       - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-rp-config
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}
@@ -84,7 +84,7 @@ spec:
         volumeMounts:
         # - name: torch-conf
         #   mountPath: /home/model-server/
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /home/model-server/model-store/
         {{- end }}

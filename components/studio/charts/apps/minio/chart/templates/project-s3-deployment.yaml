@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - args:
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - server
         - /home/stackn/{{ $key }}
         {{- end }}
@@ -50,14 +50,14 @@ spec:
         name: {{ .Release.Name }}-minio
         resources: {}
         volumeMounts:
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /home/stackn/{{ $key }}
         {{- end }}
       hostname: {{ .Release.Name }}-minio
       restartPolicy: Always
       volumes:
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

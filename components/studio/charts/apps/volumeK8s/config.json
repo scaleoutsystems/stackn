@@ -1,6 +1,6 @@
 {
     "name": "Persistent Volume",
-    "slug": "volume-k8s",
+    "slug": "volumeK8s",
     "category": "store",
     "table_field": {},
     "description": "",

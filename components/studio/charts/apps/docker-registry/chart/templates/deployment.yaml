@@ -69,7 +69,7 @@ spec:
         volumeMounts:
         - name: auth-vol
           mountPath: /auth
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /var/lib/registry
         {{- end }}
@@ -82,7 +82,7 @@ spec:
       - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-registry
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

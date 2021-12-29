@@ -2,6 +2,11 @@ accessModes: ReadWriteMany
 storageClass: default
 namespace: default
 
+appname: volumeK8s
+project:
+  name: project
+  slug: project-slug
+
 volume:
   size: 2Gi
   storageClass: false

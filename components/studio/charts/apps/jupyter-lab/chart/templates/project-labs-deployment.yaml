@@ -95,7 +95,7 @@ spec:
           mountPath: /etc/jupyter/jupyter_notebook_config.py
           subPath: jupyter_notebook_config.py
 
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /home/jovyan/work/{{ $key }}
         {{- end }}
@@ -110,7 +110,7 @@ spec:
       - name: jupyterconf
         configMap:
           name: {{ .Release.Name }}-jupyter-configmap
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}

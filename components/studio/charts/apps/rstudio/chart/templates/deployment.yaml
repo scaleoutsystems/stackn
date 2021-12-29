@@ -76,7 +76,7 @@ spec:
         #   readOnly: true
         # - name: cli-working-dir
         #   mountPath: /home/.scaleout/
-        {{- range $key, $value := .Values.apps.volume }}
+        {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
           mountPath: /home/rstudio/{{ $key }}
         {{- end }}
@@ -99,7 +99,7 @@ spec:
       - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-rp-config
-      {{- range $key, $value := .Values.apps.volume }}
+      {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}
