@@ -1,18 +1,16 @@
 import uuid
 import json
 import random
-from ast import literal_eval
+
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.db.models import Q
 from django.utils.text import slugify
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import action
+from rest_framework.viewsets import GenericViewSet 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from .APIpermissions import ProjectPermission, AdminPermission
-from deployments.helpers import build_definition
 from projects.tasks import create_resources_from_template, delete_project_apps
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -20,7 +18,7 @@ from django.core.files import File
 from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
 from models.models import ObjectType
 from apps.models import AppInstance, Apps, AppCategories
-from portal.models import PublishedModel, PublicModelObject
+from portal.models import PublishedModel
 
 from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
 from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
@@ -29,6 +27,28 @@ from .serializers import AppSerializer, ProjectTemplateSerializer
 
 from projects.tasks import create_resources_from_template
 from apps.tasks import delete_resource
+
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+
+# A customized version of the obtain_auth_token view
+# It will either create or fetch the user token
+# https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+class CustomAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })
+
 
 class ObjectTypeList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
