@@ -81,7 +81,7 @@ class Model(models.Model):
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     version = models.CharField(max_length=255)
-    release_type = models.CharField(max_length=255)
+    release_type = models.CharField(max_length=255, default="minor")
     description = models.CharField(max_length=255, null=True, blank=True)
     model_card = models.TextField(null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
@@ -90,7 +90,7 @@ class Model(models.Model):
     url = models.URLField(max_length=512, null=True, blank=True)
     s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
     bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
-    path = models.CharField(max_length=200, null=True, blank=True, default="")
+    path = models.CharField(max_length=200, null=True, blank=True, default="models")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     tags = TagField()
     project = models.ForeignKey(
