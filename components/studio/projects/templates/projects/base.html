@@ -3,7 +3,7 @@
 {% block extra_sidebar_items %}
 
 <li class="sidebar-header">
-    Project
+    Project: {{ project.slug }}
 </li>
 <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
