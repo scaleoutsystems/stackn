@@ -21,15 +21,13 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('', include('common.urls', namespace='common')),
-    #path('', include('deployments.urls', namespace="deployments")),
     path('', include('models.urls', namespace='models')),
     path('', include('portal.urls', namespace='portal')),
     path('', include('projects.urls', namespace='projects')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls', namespace='api')),
-    #path('oidc/', include('mozilla_django_oidc.urls')),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    #path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('oauth/', include('social_django.urls', namespace='social')),
     path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
     path('<user>/<project>/apps/', include('apps.urls', namespace='apps')),

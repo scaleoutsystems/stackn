@@ -1,0 +1,35 @@
+{% extends 'projects/base.html' %}
+
+{% load crispy_forms_tags %} 
+
+{% block content %}
+<h1 class="h3 mb-3">Create Model Object</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-xl-6">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{% url 'models:create' request.user project.slug %}" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form | crispy }}
+                            <label class="form-label">Volumes</label>
+                            <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
+                                {% for volume in volumes %}
+                                <option value="{{ volume.pk }}">{{ volume.name }}</option> 
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                        <button class="btn btn-primary" type="submit" value="Submit">Create</button>
+                        <button class="btn btn-secondary float-end" type="submit" 
+                            onclick="window.location='{{ request.headers.referer }}' ; return false;" value="Cancel">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

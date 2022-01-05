@@ -123,19 +123,16 @@
     <div class="col-6 d-flex">
         <div class="card flex-fill">
             <div class="card-header">
-                <!--<div class="card-actions float-end">
+                <div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
                         <button class="btn btn-outline-secondary">New</button>
                         </a>
-
                         <div class="dropdown-menu dropdown-menu-right">
-                            {% for object_type in object_types %}
-                            {% comment %} <a class="dropdown-item" href="{% url 'models:create' request.user project.slug app.slug  %}">{{ object_type.name }}</a> {% endcomment %}
-                            {% endfor %}
+                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Default Model Object</a>
                         </div>
                     </div>
-                </div> -->
+                </div>
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}

@@ -49,10 +49,7 @@
                             <span class="align-middle">Projects</span>
                         </a>
                     </li>
-
-
                     {% block extra_sidebar_items %} {% endblock %}
-
                 </ul>
             </div>
         </nav>
@@ -98,8 +95,6 @@
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav navbar-align">
                         {% if request.user.is_authenticated %}
-
-                            {% block extra_topnav_items %} {% endblock %}
                             <li class="nav-item dropdown">
                                 <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#"
                                     data-bs-toggle="dropdown">
@@ -130,6 +125,7 @@
                                     </a>
                                 </div>
                             </li>
+                            {% block extra_topnav_items %} {% endblock %}
                         {% else %}
                         <a class="btn btn-info" href="{% url 'login' %}">
                             Sign in  <i class="align-middle me-1" data-feather="log-out"></i>

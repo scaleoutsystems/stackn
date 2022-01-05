@@ -1,5 +1,7 @@
 import uuid
-from django.shortcuts import render
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.conf import settings
@@ -17,12 +19,58 @@ import ast
 from collections import defaultdict
 from random import randint
 from .helpers import get_download_url
-from .forms import UploadModelCardHeadlineForm, EnvironmentForm
+from .forms import UploadModelCardHeadlineForm, EnvironmentForm, ModelForm
 from portal.models import PublicModelObject, PublishedModel
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import View
+from django.urls import reverse_lazy
+from models.models import ObjectType
+
+from apps.models import Apps, AppInstance
+
+# We use reverse_lazy() because we are in "constructor attribute" code
+# that is run before urls.py is completely loaded
+class ModelCreate(LoginRequiredMixin, View):
+    template = "models/model_create.html"
+    success_url = reverse_lazy('models:list')
+
+    # Initializing values for hidden form inputs
+    model_uid = str(uuid.uuid1().hex)
+    object_type_pk = ObjectType.objects.filter(name="Default")
+
+    def get(self, request, user, project):
+        # locals() context fields
+        form = ModelForm()
+        volumeK8s_pk = Apps.objects.get(slug='volumeK8s')
+        volumes = AppInstance.objects.filter(app=volumeK8s_pk)
+        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+
+        return render(request, self.template, locals())
+
+    def post(self, request, user, project):
+        #Fetching current project
+        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+        
+        # Updating form fields
+        form = ModelForm(request.POST)
+        #form.uid = self.model_uid
+        #form.object_type = self.object_type_pk
+        #form.project = project.pk
+        
+        # If form is not valid, will show error and entered data
+        if not form.is_valid():
+            return render(request, self.template, locals())
+
+        # Otherwise it saves object in the db and redirect
+        model = form.save()
+        return redirect(self.success_url)
+
+
+# Published models visible under the "Catalogs" menu
 def index(request,user=None,project=None,id=0):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
@@ -96,23 +144,19 @@ def index(request,user=None,project=None,id=0):
         """
         return render(request, 'models/index.html', locals())
 
-"""
+
 @login_required
 def list(request, user, project):
+    template = 'models_list.html'
+    
+    # Will be added to locals() which create a dict context with local variables
     menu = dict()
     menu['objects'] = 'active'
-    template = 'models_list.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
-
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
-    current_project = project.name
-    objects = []
-    
     models = Model.objects.filter(project=project).order_by('name', '-version').distinct('name')
 
-
     return render(request, template, locals())
-"""
 
 @login_required
 def unpublish_model(request, user, project, id):

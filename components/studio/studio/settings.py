@@ -98,10 +98,10 @@ MIDDLEWARE = [
     'social_django.middleware.SocialAuthExceptionMiddleware',   # Add
 ]
 
+# https://www.django-rest-framework.org/api-guide/authentication/#setting-the-authentication-scheme
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        #'rest_framework.permissions.IsAuthenticated',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
 }
@@ -214,7 +214,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Related to user registration and authetication workflow
-LOGIN_REDIRECT_URL = '/overview'
+LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 

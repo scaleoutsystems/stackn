@@ -13,7 +13,7 @@ python3 manage.py migrate
 echo "Loading Studio Fixtures..."
 # Related to Projects (including project meta-resources such as flavours, environments, etc...)
 python3 manage.py loaddata projects/fixtures/projects_templates.json
-# Related to Apps (including celery tasks and intervals)
+#Related to Apps (including celery tasks and intervals)
 python3 manage.py loaddata apps/fixtures/intervals_fixtures.json
 python3 manage.py loaddata apps/fixtures/periodic_tasks_fixtures.json
 python3 manage.py loaddata apps/fixtures/appcats_fixtures.json
