@@ -270,7 +270,10 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
 def get_token(conf={}):
     # It send a POST request to /api/token-auth/
     # components/studio/api/views.py --> CustomAuthToken
-    studio_url = "http://" + conf['STACKN_URL']
+    if not "http" in conf['STACKN_URL']:
+        studio_url = "http://" + conf['STACKN_URL']
+    else:
+        studio_url = conf['STACKN_URL']
     token_url = studio_url.strip('/')+'/api/token-auth/' # previously keycloak token url
     
     print("INFO: Token URL is: {}".format(token_url))
@@ -318,6 +321,9 @@ def write_config(conf):
 
 def stackn_login(studio_url=[], client_id=[], username=[], password=[], secure=True):
     """ Login to Studio services. """
+    if not "http" in studio_url:
+        studio_url = "http://" + studio_url
+
     inp_config = {
         'STACKN_URL': studio_url,
         'STACKN_CLIENT_ID': client_id,

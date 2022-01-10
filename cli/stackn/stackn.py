@@ -150,7 +150,7 @@ def get_endpoints(studio_url):
     return endpoints
 
 def get_auth_header(conf):
-    conf, status = stackn.auth.get_token(conf)
+    conf, status = stackn.auth.get_config(conf)
     if not status:
         return False, False
     auth_header = {"Authorization": "Token {}".format(conf['STACKN_ACCESS_TOKEN'])}
