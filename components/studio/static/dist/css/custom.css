@@ -189,3 +189,5 @@ a.disabled {
 .model-card-a:hover{
     color: #5c4f78!important;
 }
+
+.opacity-25 { opacity: .25; }

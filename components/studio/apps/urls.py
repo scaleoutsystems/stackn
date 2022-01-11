@@ -8,6 +8,7 @@ urlpatterns = [
     path('status', views.get_status, name='get_status'),
     path('<category>', views.filtered, name='filtered'),
     path('create/<app_slug>', views.create, name='create'),
+    path('create/<app_slug>/create_releasename', views.create_releasename, name='create_releasename'),
     path('logs/<ai_id>', views.logs, name='logs'),
     path('settings/<ai_id>', views.appsettings, name='appsettings'),
     path('settings/<ai_id>/add_releasename', views.add_releasename, name='add_releasename'),

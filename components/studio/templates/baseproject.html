@@ -5,7 +5,7 @@
 
 
 <li class="sidebar-header">
-    Project
+    Project - {{project.name}}
 </li>
 <li class="sidebar-item {{ menu.dashboard }}">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
@@ -29,6 +29,7 @@
         <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
     </a>
 </li>
+{% if request.user.is_superuser %}
 <li class="sidebar-item {{ menu.store }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'store' %}" class="sidebar-link">
         <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
@@ -39,16 +40,17 @@
        <i class="align-middle"  data-feather="code"></i><span class="align-middle">Develop</span>
     </a>
 </li>
+{% endif %}
 <!-- <li class="sidebar-item {{ menu.misc }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'misc' %}" class="sidebar-link">
         <i class="align-middle" data-feather="shuffle"></i> <span class="align-middle">Misc</span>
     </a>
 </li> -->
-<li class="sidebar-item {{ menu.fedn }}">
+<!-- <li class="sidebar-item {{ menu.fedn }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'fedn' %}" class="sidebar-link">
        <span class="align-middle" style="padding-right:10px;"><img class="align-middle" alt="FEDn Logo" src="{% static 'dist/applogos/fedn_logo.png' %}" width="20"  /> </span><span class="align-middle">FEDn</span>
     </a>
-</li>
+</li> -->
 
 <li class="sidebar-item {{ menu.settings }}">
     <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">

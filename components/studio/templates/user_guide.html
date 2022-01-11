@@ -1,0 +1,134 @@
+{% extends base_template %}
+{% block content %}
+<div class="container-fluid p-0">
+                    
+
+    <div class="row">
+        <div class="card flex-fill">
+            <div class="card-header">
+            </div>
+            
+            <div class="d-flex justify-content-center">
+                <h1 class="h1" style="font-weight: 800;">Getting Started</h1>
+            </div>
+            
+            <div class="row" style="margin-top: 30px; font-size: medium;">
+                <article class="markdown-section" id="main">
+                    <h2 id="project-overview"><span>Projects</span></h2>
+                    <p>Projects are spaces where users are able to create apps and models. Created projects can be found under the
+                        tab <span style="font-weight: 500;color: #041c39c7;">Projects</span> in the sidebar. This tab contains all
+                        projects that you have created or have been granted access to.
+                    <h3 id="create-a-project"><span>Create a Project</span></h3>
+                    <p>To be able to create a project, users need to be logged in. Users can create a new Project by following the
+                        steps below:</p>
+                    <ol>
+                        <li>Click on the <span style="font-weight: 500;color: #041c39c7;">Projects</span> tab shown on the sidebar.
+                            (Only shown if user is logged in.)</li>
+                        <li>Click the <span style="font-weight: 500;color: #041c39c7;">New Project</span> button in the top right
+                            corner.</li>
+                        <li>Select the project template you want to use (currently there is only one template available).</li>
+                        <li>Enter project name (mandatory) and description (optional). Users can also change the project template
+                            here if they want. </li>
+                        <li>Click the <span style="font-weight: 500;color: #041c39c7;">Create Project</span> button to create the
+                            new project.</li>
+                    </ol>
+                    <!-- <p><img style="width: 90%;" src="/static/dist/img/gifs/projects-page.gif" alt="screen-gif"></p> -->
+                    <!-- <p><img src="/stackn/images/project-overview.gif" data-origin="images/project-overview.gif" alt="screen-gif"> -->
+                    </p>
+                    <p>This will take you to the project dashboard. Here users will be able to see an overview of the whole project.
+                        New tabs will be available on the sidebar as well. The categories for these tabs are explained below:</p>
+                    <ul>
+                        <li><strong><em>Objects</em>:</strong> Model objects created in the current project.</li>
+                        <li><strong><em>Compute</em>:</strong> Pre-configured data science environments for experimentation and
+                            training ML models. (Currently, this tab will only have a pre installed Jupyter lab instance available
+                            for the user. Using this instance, users can e.g can run experiments and also create model objects
+                            mentioned above. The tutorials below will elaborate on this.)</li>
+                        <li><strong><em>Serve</em>:</strong> The most common serving applications used for deploying ML models as
+                            well as apps such as shiny and dash. (Custom applications can be added to this list if requested).</li>
+                        <li><strong><em>Settings</em>:</strong> User can access and change the current project settings</li>
+                    </ul>
+                    <h2 id="settings"><span>Settings</span></h2>
+                    <p>The <span style="font-weight: 500;color: #041c39c7;">Settings</span> page contains all the information about
+                        your Project and its components. Some of the things you can do there are:</p>
+                    <ul>
+                        <li>Change the Project's description</li>
+                        <!-- <li>Find link to your MinIO instance and login keys</li>
+                        <li>Download a configuration file for your Project which is required when working with
+                            STACKn CLI</li> -->
+                        <li>Grant access to the project to registered users.</li>
+                        <li>Transfer ownership of the project to another user.</li>
+                        <li>Permanently delete the project.</li>
+                    </ul>
+                    <h2 id="create-new-resources"><span>Creating Apps and Resources</span>s</h2>
+                    <p> You can create resources by going into the Serve tab. Here you have the following options:</p>
+                    <ul>
+                        <!-- <li><strong><em>Compute</em>:</strong> a series of components to be used for experimentation and training models with pre-configured data science environments.</li> -->
+                        <li><strong>Shiny App</strong></li>
+                        <li><strong>Dash App</strong></li>
+                        <li><strong>Tensorflow Serve</strong></li>
+                        <li><strong>PyTorch Serve</strong></li>
+                        <li><strong>Python Model Serve (Using FastApi)</strong></li>
+                    </ul>
+                    <h3 id="shiny">Shiny</h3>
+                    <p>This is a service to deploy a shiny app that has been packaged as a docker container and is available on
+                        docker hub. To deploy a Shiny App click the Create button on the Shiny App card in the Serve Tab. Then Enter
+                        the following information in the form:</p>
+                    <ul>
+                        <li><strong>Name: </strong>User specified name for the app (e.g SciLifeLab Shiny Example)</li>
+                        <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be available at. It is not
+                            mandatory to choose. By default a random subdomain (e.g r46b61563) is generated if no option is chosen
+                            here. Then the app would be available at r46b61563.serve.scilifelab.se. If a user wants to create a more
+                            suitable subdomain, they can do this by scrolling down to the form that contains the option to Add
+                            Subdomain. Here the user can create a subdomain of their choice (given that it is not already taken).
+                            Then, this subdomain will appear in the Subdomain options and the final domain will be
+                            user-created-subdomain.serve.scilifelab.se. </li>
+                        <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of permissions for an app:
+                            <ul>
+                                <li><strong>Private:</strong> The app can only be accessed by the user that created the app. (Sign
+                                    In required)</li>
+                                <li><strong>Project:</strong> All members of the project will be able to access the app. (Sign In
+                                    required)</li>
+                                <li><strong>Private:</strong> Anyone that has access to the url can access the app.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker container) in which
+                            the main shiny application file is located (usually app.R).</li>
+                        <li><strong>App Port:</strong> The port that the shiny server runs on (usually 3838).</li>
+                        <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
+                    </ul>
+                    <h3 id="dash">Dash</h3>
+                    <p>Similar to the Shiny, Dash apps can be deployed as well. The docker container for the app has to be available on docker hub. To deploy a Dash App click the Create button on the Dash App card in the Serve Tab. Then Enter the following information in the form:</p>
+                    <ul>
+                        <li><strong>Name: </strong>User specified name for the app (e.g SciLifeLab Dash Example)</li>
+                        <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be available at. It is not
+                            mandatory to choose. By default a random subdomain (e.g r46b61563) is generated if no option is chosen
+                            here. Then the app would be available at r46b61563.serve.scilifelab.se. If a user wants to create a more
+                            suitable subdomain, they can do this by scrolling down to the form that contains the option to Add
+                            Subdomain. Here the user can create a subdomain of their choice (given that it is not already taken).
+                            Then, this subdomain will appear in the Subdomain options and the final domain will be
+                            user-created-subdomain.serve.scilifelab.se. </li>
+                        <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of permissions for an app:
+                            <ul>
+                                <li><strong>Private:</strong> The app can only be accessed by the user that created the app. (Sign
+                                    In required)</li>
+                                <li><strong>Project:</strong> All members of the project will be able to access the app. (Sign In
+                                    required)</li>
+                                <li><strong>Private:</strong> Anyone that has access to the url can access the app.</li>
+                            </ul>
+                        </li>
+                        <!-- <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the instance.</li> -->
+                        <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker container) in which
+                            the main dash application file is located (usually app.py).</li>
+                        <li><strong>App Port:</strong> The port that the shiny server runs on (usually 8050).</li>
+                        <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
+                    </ul>
+            
+                </article>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}

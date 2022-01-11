@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 import logging
-
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import time
 from django.db.models import Count, Sum, F
@@ -178,23 +178,26 @@ def cpuchart(request, user, project, resource_type):
     })
 
 
-
+@csrf_exempt
 def usage(request, user, project):
     
 
     curr_timestamp = time.time()
     points = ResourceData.objects.filter(time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
-    all_cpus = list()
-    for point in points:
-        all_cpus.append(point.cpu)
+    # print(list(points.all()))
+    # all_cpus = list()
+    # for point in points:
+    #     print(point)
+    #     all_cpus.append(point.cpu)
+    
     # print("NUMBER OF POINTS")
     # print(len(all_cpus))
     # print("MAX:")
     # print(max(all_cpus))
-    # print(all_cpus)
+    # print("ALLL CPUS: ",all_cpus)
     total = points.annotate(timeP=F('time')).values('timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
     # print(total)
-
+    
     labels = list(total.values_list('timeP'))
     labels = list(itertools.chain.from_iterable(labels))
     step = 1
@@ -205,7 +208,7 @@ def usage(request, user, project):
     x_data = list()
     for label in labels:
         x_data.append(datetime.fromtimestamp(label).strftime('%H:%M:%S'))
-
+        
     total_mem = list(total.values_list('total_mem'))
     total_mem = list(itertools.chain.from_iterable(total_mem))[::step]
     
@@ -217,7 +220,6 @@ def usage(request, user, project):
     # print(max(total_cpu))
     
     # print(len(total_cpu))
-
     return JsonResponse(data={
         'labels': x_data,
         'data_cpu': total_cpu,

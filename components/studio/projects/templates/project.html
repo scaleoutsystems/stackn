@@ -42,7 +42,16 @@
                 <h5 class="card-title">CPU</h5>
             </div>
             <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                <div class="chart">
+                    <div class="chartjs-size-monitor">
+                        <div class="chartjs-size-monitor-expand">
+                            <div class=""></div>
+                        </div>
+                        <div class="chartjs-size-monitor-shrink">
+                            <div class=""></div>
+                        </div>
+                        <span style="margin-left: 40%"> Loading chart...</span>
+                    </div>
                     <canvas id="totalCPUChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block;" class="chartjs-render-monitor"></canvas>
                 </div>
             </div>
@@ -54,13 +63,24 @@
                 <h5 class="card-title">Memory</h5>
             </div>
             <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
+                <div class="chart">
+                    <div class="chartjs-size-monitor">
+                        <div class="chartjs-size-monitor-expand">
+                            <div class=""></div>
+                        </div>
+                        <div class="chartjs-size-monitor-shrink">
+                            <div class=""></div>
+                        </div>
+                        <span style="margin-left: 40%"> Loading chart...</span>
+                    </div>
+                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor" aria-placeholder="Loading">Loading</canvas>
                 </div>
             </div>
         </div>
     </div>
-    
+    <!-- <div class="row">
+        <iframe src="https://grafana.serve-dev.scilifelab.se/d-solo/85a562078cdf77779eaa1add43ccec1e/kubernetes-compute-resources-namespace-pods?orgId=1&refresh=10s&var-datasource=default&var-cluster=&var-namespace=stackn-dev&from=1640872562939&to=1640876162939&theme=light&panelId=5" width="450" height="200" frameborder="0"></iframe>
+    </div> -->
 </div>
 
 <div class="row">
@@ -205,13 +225,13 @@
     </div>
 </div>
 
-
+<script type="text/javascript" src="{% static 'js/app.js' %}"></script>
 
 
 <script>
 
     function newChart(chart, labels, y_data, ylabel, dataset_label) {
-        new Chart(chart, {
+        return new Chart(chart, {
             type: 'line',
             data: {
                 labels: labels,
@@ -224,6 +244,9 @@
                 }]          
             },
             options: {
+                animation: {
+                    duration: 0 // general animation time
+                },
                 elements: {
                     point: {
                         radius: 0
@@ -278,12 +301,66 @@
     function resourceCharts(chart_id1, chart_id2) {
         var $labsCPUChart = $(chart_id1);
         var $labsMEMChart = $(chart_id2);
+        // var init_data = {{ initial_data | safe }}
+        // console.log(init_data)
+        // var cpuchart = newChart($(chart_id1), init_data.labels, init_data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
+        // var memchart = newChart($(chart_id2), init_data.labels, init_data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
+        // setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
         $.ajax({
             url: "{% url 'monitor:usage' user project.slug %}",
             success: function (data) {
-                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
-                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
+                var cpuchart = newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
+                var memchart = newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
+                setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
     
+            }
+        });
+  
+    };
+
+    function updateCharts(cpuchart, memchart) {
+        $.ajax({
+            url: "{% url 'monitor:usage' request.user project.slug %}",
+            type: "POST",
+            success: function (data) {
+                // console.log("Updating Chart",new Date())
+                cpuchart.data = {
+                labels: data.labels,
+                datasets: [{
+                    label: 'CPU usage (millicores)',
+                    fill: true,
+                    backgroundColor: 'transparent',
+                    borderColor: window.theme.primary,
+                    data: data.data_cpu
+                }]}
+                memchart.data = {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Memory usage (Mi)',
+                    fill: true,
+                    backgroundColor: 'transparent',
+                    borderColor: window.theme.primary,
+                    data: data.data_mem
+                }]}
+            
+                // cpuchart.data.datasets = data.data_cpu
+                cpuchart.update()
+                memchart.update()
+                // newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
+    
+            },
+            error: function (data) {
+                console.log("Error: Authentication")
+                // $.ajax({
+                //     url: data.responseJSON.refresh_url,
+                //     type: 'GET',
+                //     success: function (data) {
+                //         console.log("Updated Token")
+                //     }
+                // })
+            },
+            complete: function() {
+                setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
             }
         });
   

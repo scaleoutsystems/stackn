@@ -29,7 +29,6 @@ def get_status_defs():
 
 # Create your views here.
 def index(request, user, project):
-    print("hello")
     category = 'store'
     template = 'index_apps.html'
     # status_success = ['Running', 'Succeeded', 'Success']
@@ -185,7 +184,22 @@ def add_releasename(request, user, project, ai_id, rn=None):
         release.save()
     print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
     
+    
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id})+"?available="+available+"&rn="+request.POST.get('rn'))
+
+def create_releasename(request, user, project, app_slug):
+    count_rn = ReleaseName.objects.filter(name = request.POST.get('rn')).count()
+    available = "false"
+    if count_rn == 0:
+        available = "true"
+        release=ReleaseName()
+        release.name = request.POST.get('rn')
+        release.status = 'active'
+        release.project = Project.objects.get(slug=project)
+        release.save()
+    print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
+    
+    return HttpResponseRedirect(reverse('apps:create', kwargs={'user':user, 'project':project, 'app_slug':app_slug})+"?available="+available+"&rn="+request.POST.get('rn'))
 
 def add_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)

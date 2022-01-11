@@ -4,6 +4,7 @@ import json
 import time
 import requests
 from celery import shared_task
+from celery.utils.log import get_task_logger
 # from celery.decorators import periodic_task
 from django.template import engines
 from django.conf import settings
@@ -456,7 +457,6 @@ def check_status():
 
 @app.task
 def get_resource_usage():
-
     volume_root = "/"
     if "TELEPRESENCE_ROOT" in os.environ:
         volume_root = os.environ["TELEPRESENCE_ROOT"]
@@ -464,11 +464,11 @@ def get_resource_usage():
 
     timestamp = time.time()
 
-    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
+    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', 'https://rancher-server.dckube.scilifelab.se/k8s/clusters/c-skq8h/apis/metrics.k8s.io/v1beta1/pods']
     results = subprocess.run(args, capture_output=True)
     res_json = json.loads(results.stdout.decode('utf-8'))
     pods = res_json['items']
-
+    print(pods)
     resources = dict()
 
     args_pod = ['kubectl', '--kubeconfig', kubeconfig, 'get', 'po', '-o', 'json']

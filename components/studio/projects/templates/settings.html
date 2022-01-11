@@ -45,7 +45,7 @@
                 </a>
                 {% if user_permissions.add_member %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
-                    Access
+                    Grant/Revoke Access
                 </a>
                 {% endif %}
                 <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
@@ -60,14 +60,16 @@
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#mlflow" role="tab">
                     MLFlow
                 </a>
+                {% if request.user.is_superuser %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#flavors" role="tab">
                     Flavors
                 </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#environments" role="tab">
                     Environments
                 </a>
+                {% endif %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#transfer" role="tab">
-                    Transfer
+                    Transfer Project Ownership
                 </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#delete" role="tab"
                     style="color: red;">

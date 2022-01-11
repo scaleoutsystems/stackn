@@ -19,7 +19,12 @@
 
 <div class="row">
     {% for app in apps %}
+    {% if app.category.name != 'Compute' %}
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
+    {% else %}
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4" style="opacity: 0.40;">
+    {% endif %}
+    <!-- <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4"> -->
         <div class="card h-100">  
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
@@ -31,7 +36,9 @@
                             <p>{{ app.description }}</p>
                             <div style="position:absolute;bottom:0.5em;">
                                 <h4>
+                                    {% if app.category.name != 'Compute' or request.user.is_superuser %}   
                                     <a href="{% url 'apps:create' request.user project.slug app.slug  %}">Create</a>
+                                    {% endif %}
                                 </h4>
                             </div>
                         </div>

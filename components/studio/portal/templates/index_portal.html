@@ -3,7 +3,19 @@
 {% load static %}
 {% load custom_tags %}
 {% block content %}
-
+<script>
+    function myFunction(id) {
+  var x = document.getElementById("app-details-"+id);
+  console.log("app-details-"+id)
+  console.log(x.classList.contains('d-flex'))
+  if (x.classList.contains('d-flex')) {
+    $('#app-details-'+id).removeClass("d-flex").addClass("invisible");
+    x.style.display = "none";
+  } else {
+    $('#app-details-'+id).removeClass("invisible").addClass("d-flex");
+  }
+}
+</script>
 <div style="display: inline-flex;">
 <h1 class="h3 mb-3" style="margin-right: 5px;">Apps</h1>
 <h1 class="h3 mb-3 ghost-number">{% if published_apps|length > 0  %}{{ published_apps|length }}{% endif %}</h1>
@@ -22,17 +34,25 @@
         <div class="card h-100">  
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
-                    <div class="col-12  d-flex flex-row">
+                    <div class="col-12  d-flex flex-row" style="height: 10%;">
                         <div class="col-8 d-flex">
                             <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3>
+                            <!-- <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3> -->
                         </div>
                         <div class="col-4 d-flex justify-content-end">
-                            <img src="{{ media_url }}{{ app.app.logo_file }}" class="img-fluid float-end" style="height:50px;" alt="App Logo">
+                            <img src="{{ media_url }}{{ app.app.logo_file }}" class="img-fluid float-end" style="height:50px;padding-right: 5%;" alt="App Logo">
                         </div>
+                    </div>
+                    <div class="col-12  d-flex align-items-bottom flex-column">{{ app.app.name }}</div>
+                    <div id="app-details-{{app.id}}" class="col-12  invisible align-items-bottom flex-column" style="display: none;">
+                        <div><h6 style="font-weight: 500;display: inline-flex;">Owner:</h6> {{ app.owner }}</div>
+                        <div><h6 style="font-weight: 500;display: inline-flex;">Project:</h6> {{ app.project.name }}</div>
+                        <div><h6 style="font-weight: 500;display: inline-flex;">Created On:</h6> {{ app.created_on|date:"d M, Y" }}</div>
+                        <div><h6 style="font-weight: 500;display: inline-flex;">Description:</h6> - </div>
                     </div>
                     <div class="col-12  d-flex align-items-bottom flex-column">
                         <div class="h-100">
-                            <div> 
+                            <div>
                                 {% if request.session.app_tags|exists:app.id %}
                                 {% with app.tags|split:"," as tags %}
                                 {% for tag in tags %}
@@ -71,8 +91,11 @@
                         </div>
                     </div>
                     <div class="col-12  d-flex flex-row">
-                        <div style="align-self: flex-end;">
+                        <div class="col-6 d-flex" style="align-self: flex-end;">
                             <a class="model-card-a" href="{{ app.table_field.url }}"><button class="btn btn-sm btn-light model-card-a model-card-button" >Open</button></a>
+                        </div>
+                        <div class="col-6 d-flex justify-content-end" style="align-self: flex-end;">
+                            <button class="btn btn-sm btn-light model-card-a model-card-button" onclick="myFunction({{ app.id }})">Details</button>
                         </div>
                     </div>
                 </div>

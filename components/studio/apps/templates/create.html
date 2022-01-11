@@ -268,4 +268,36 @@
     </div>
 </div>
 {% endif %}
+{% if app_action == "Create" %}
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <!-- <div class="card-header">
+                <h5 class="card-title">Basic form</h5>
+                <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
+            </div> -->
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3 mb-0">Add Subdomain</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        <div class="mb-3">
+                            <form method="POST" autocomplete="off" action="{% url 'apps:create_releasename' request.user project.slug app.slug %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control {% if request.GET.available == 'true' %}is-valid{% elif request.GET.available == 'false' %}is-invalid{% endif %}" aria-label="Text input with segmented dropdown button" placeholder="Add Subdomain ..." name="rn" value="{{request.GET.rn}}">
+                                    <div class="input-group-append">
+                                    <button type="submit" class="btn btn-info">Add</button>
+                                    </div>
+                                    <div class="valid-feedback">Subdomain Added</div>
+                                    <div class="invalid-feedback">Subdomain already exists. Please choose another.</div>
+                              </div>
+                            </form>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>      
+    </div>
+</div>
+{% endif %}
 {% endblock %}

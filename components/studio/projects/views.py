@@ -27,9 +27,10 @@ from modules.project_auth import get_permissions
 from .helpers import create_project_resources
 from .tasks import create_resources_from_template
 from models.models import Model
+from monitor.views import usage
 # from deployments.models import DeploymentInstance
 from apps.views import get_status_defs
-
+import json
 logger = logging.getLogger(__name__)
 
 
@@ -90,7 +91,7 @@ def settings(request, user, project_slug):
         print(err)
 
     user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
-    print(user_permissions)
+    # print(user_permissions)
     template = 'settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
@@ -395,6 +396,8 @@ def create(request):
 def details(request, user, project_slug):
     menu = dict()
     menu['dashboard'] = 'active'
+    # initial_data = json.loads(usage(request, user, project_slug).content)
+    # print("INTIAL DATA: ",type(initial_data))
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
@@ -440,7 +443,8 @@ def details(request, user, project_slug):
             for instance in tmp:
                 pk_list += str(instance.pk)+','
             apps = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
-            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
+            if rslug['name'] != "Develop" and rslug['name'] != "Store":
+                resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]

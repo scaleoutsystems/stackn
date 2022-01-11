@@ -85,7 +85,7 @@ def index(request,id=0):
     elif "tag_count"  not in request.GET:
         tag=""
         request.session['tag_filters'] = []
-    print("tag_filters: ", request.session['tag_filters'])
+    # print("tag_filters: ", request.session['tag_filters'])
     
     # changed list of published model only if tag filters are present
     if request.session['tag_filters']:
@@ -147,7 +147,7 @@ def publish_model(request, user, project, id):
     
     
     model = Model.objects.get(pk=id)
-    print(model)
+    # print(model)
     # Default behavior is that all versions of a model are published.
     models = Model.objects.filter(name=model.name, project=model.project)
     
@@ -465,7 +465,7 @@ def details_private(request, user, project, id):
     model = Model.objects.get(pk=id) 
     all_tags = Model.tags.tag_model.objects.all()
     private = True
-    print("MY TAGS: ",model.tags,user)
+    # print("MY TAGS: ",model.tags,user)
     # published_model = PublishedModel(pk=id)
     # model_objs = published_model.model_obj.order_by('-model__version')
     # latest_model_obj = model_objs[0]
@@ -499,12 +499,12 @@ def details_public(request, id):
 
     media_url = settings.MEDIA_URL
     published_model = PublishedModel(pk=id)
-    print(published_model)
+    # print(published_model)
     model_objs = published_model.model_obj.order_by('-model__version')
     latest_model_obj = model_objs[0]
     model = latest_model_obj.model
-    print(model_objs)
-    print(latest_model_obj)
+    # print(model_objs)
+    # print(latest_model_obj)
 
     return render(request, 'models_details_public.html', locals())
 
