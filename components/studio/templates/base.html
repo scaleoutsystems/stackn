@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Scaleout Studio</title>
+    <title>SciLifeLab Serve</title>
 
     <link rel="icon" href="{% static 'dist/favicon_6.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
@@ -23,7 +23,7 @@
         $('.search-select-tag').select2({
             placeholder: "Select Tag ..."
         }).prop('required', true).trigger('change');
-        
+
     });
     </script>
     {% load plotly_dash%}
@@ -41,7 +41,7 @@
                 </a>
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
-                        
+
                     </li>
                     <li class="sidebar-item {{ menu.home }}">
                         <a class="sidebar-link" href="{% url 'home' %}">
