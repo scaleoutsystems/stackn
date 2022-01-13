@@ -295,6 +295,18 @@
         </div>
     </div>
 
+
+    <!-- Cookie alert -->
+    <div class="d-flex justify-content-center cookiealert" role="alert">
+      <span>We use cookies to improve your experience of the website. By continuing you accept that we use cookies. More information: <a href="/privacy/#cookies">About cookies</a>.</span>
+        <button type="button" class="btn btn-primary acceptcookies">
+            I understand
+        </button>
+    </div>
+
+    <!-- JS code for the cookie alert-->
+    <script src="{% static 'dist/js/cookiealert.js' %}"></script>
+
     <script src="{% static 'dist/js/app.js' %}"></script>
 
     {% block extra_scripts %} {% endblock %}

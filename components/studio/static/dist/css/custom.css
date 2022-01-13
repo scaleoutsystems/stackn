@@ -191,3 +191,24 @@ a.disabled {
 }
 
 .opacity-25 { opacity: .25; }
+
+.cookiealert {
+    padding: 0.5rem 1rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0 !important;
+    z-index: 999;
+    visibility: hidden;
+    transform: translateY(100%);
+    transition: all 500ms ease-out;
+    background: rgba(219, 220, 223, 0.9);
+}
+
+.cookiealert.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0%);
+    transition-delay: 1000ms;
+}
