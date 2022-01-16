@@ -436,7 +436,6 @@ def create_object(model_name,
                   secure_mode=True):
 
     """ Publish an object to Studio. """
-
     conf = {
         'STACKN_MODEL': model_name,
         'STACKN_URL': studio_url,
@@ -469,6 +468,7 @@ def create_object(model_name,
     project = project[0]
     if s3storage == None:
         s3storage = project['s3storage']
+        print("S3 storage set to: {}".format(s3storage))
     else:
         # TODO: Fetch S3 settings from Studio...
         print("Passing S3 storage as an option is not implemented yet.")
