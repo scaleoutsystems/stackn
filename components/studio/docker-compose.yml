@@ -10,7 +10,9 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - db.x.x.x.x.nip.io
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -29,7 +31,9 @@ services:
     depends_on:
       - db
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - studio.x.x.x.x.nip.io
 
   ingress:
     build:
@@ -47,7 +51,9 @@ services:
     depends_on:
       - studio
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - ingress.x.x.x.x.nip.io
 
   redis:
     image: redis
@@ -56,7 +62,9 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - redis.x.x.x.x.nip.io
   
   rabbit:
     image: rabbitmq
@@ -69,7 +77,9 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - rabbit.x.x.x.x.nip.io
 
   celery-worker:
     build: .
@@ -93,7 +103,9 @@ services:
       - rabbit
       - redis
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - celery.x.x.x.x.nip.io
 
   celery-beat:
     build: .
@@ -117,7 +129,9 @@ services:
       - rabbit
       - redis
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - celery-beat.x.x.x.x.nip.io
 
 networks:
   internal_network:
