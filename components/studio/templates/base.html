@@ -287,7 +287,7 @@
                     </div>
                     <div class="row">
                     <div class="col">
-                      <a href="/privacy">Privacy policy</a>
+                      <a href="{% url 'privacy' %}">Privacy policy</a>
                     </div>
                     </div>
                 </div>
@@ -298,7 +298,7 @@
 
     <!-- Cookie alert -->
     <div class="d-flex justify-content-center cookiealert" role="alert">
-      <span>We use cookies to improve your experience of the website. By continuing you accept that we use cookies. More information: <a href="/privacy/#cookies">About cookies</a>.</span>
+      <span style="display: flex;align-items: center;">We use cookies to improve your experience of the website. By continuing you accept that we use cookies. More information: <a href="{% url 'privacy' %}#cookies">About cookies</a>.</span>
         <button type="button" class="btn btn-primary acceptcookies">
             I understand
         </button>
