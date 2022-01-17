@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Scaleout Studio</title>
+    <title>SciLifeLab Serve</title>
 
     <link rel="icon" href="{% static 'dist/favicon_6.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
@@ -23,13 +23,24 @@
         $('.search-select-tag').select2({
             placeholder: "Select Tag ..."
         }).prop('required', true).trigger('change');
-        
+
     });
     </script>
     {% load plotly_dash%}
     {% plotly_header %}
 
     {% block extra_head %} {% endblock %}
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-168266875-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-168266875-2');
+    </script>
+
 </head>
 
 <body data-theme="light" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
@@ -41,7 +52,7 @@
                 </a>
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
-                        
+
                     </li>
                     <li class="sidebar-item {{ menu.home }}">
                         <a class="sidebar-link" href="{% url 'home' %}">
@@ -274,10 +285,27 @@
                             </p>
                         </div>
                     </div>
+                    <div class="row">
+                    <div class="col">
+                      <a href="{% url 'privacy' %}">Privacy policy</a>
+                    </div>
+                    </div>
                 </div>
             </footer>
         </div>
     </div>
+
+
+    <!-- Cookie alert -->
+    <div class="d-flex justify-content-center cookiealert" role="alert">
+      <span style="display: flex;align-items: center;">We use cookies to improve your experience of the website. By continuing you accept that we use cookies. More information: <a href="{% url 'privacy' %}#cookies">About cookies</a>.</span>
+        <button type="button" class="btn btn-primary acceptcookies">
+            I understand
+        </button>
+    </div>
+
+    <!-- JS code for the cookie alert-->
+    <script src="{% static 'dist/js/cookiealert.js' %}"></script>
 
     <script src="{% static 'dist/js/app.js' %}"></script>
 

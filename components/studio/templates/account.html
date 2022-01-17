@@ -7,7 +7,7 @@
           <div class="card" style="border-radius: 15px;">
             <div class="card-body p-5">
               <h2 class="text-uppercase text-center mb-5">Request an account</h2>
-            <p>You can fill in the form below to request an account or send us an email at data@scilifelab.se.</p>
+            <p>We are currently accepting pilot users for SciLifeLab Serve. You can fill in the form below to request an account or send us an email to datacentre@scilifelab.se.</p>
               <form action="{% url 'requestaccount' %}" method="post">
                 {% csrf_token %}
 
@@ -43,7 +43,7 @@
 
                 <div class="form-outline mb-4">
                     <textarea id="deployed" name="deployed" class="form-control form-control-lg"></textarea>
-                    <label class="form-label" for="deployed">If you want to deploy a mode/service, has it been deployed somewhere else?</label>
+                    <label class="form-label" for="deployed">If you want to deploy a model/service, has it been deployed somewhere else?</label>
                 </div>
 
                 <div class="form-outline mb-4">
@@ -67,7 +67,7 @@
                   <button type="submit" style="background-color: #beb9c9; border-color: #beb9c9; color: #051e3b!important;" type="button" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Send Request</button>
                 </div>
 
-                <p class="text-center text-muted mt-5 mb-0">Have already an account? <a href="{% url 'oidc_authentication_init' %}" class="fw-bold text-body"><u>Login here</u></a></p>
+                <p class="text-center text-muted mt-5 mb-0">Already have an account? <a href="{% url 'oidc_authentication_init' %}" class="fw-bold text-body"><u>Login here</u></a></p>
 
               </form>
 

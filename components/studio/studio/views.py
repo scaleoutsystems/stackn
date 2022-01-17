@@ -60,3 +60,6 @@ def guide(request):
                 base_template = 'base.html'
     template = 'user_guide.html'
     return render(request, template , locals())
+
+def privacy(request):
+    return render(request, 'privacy.html', locals())
