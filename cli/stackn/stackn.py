@@ -515,8 +515,8 @@ def create_object(model_name,
 
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['models'].format(project['id'])
-
     r = requests.post(url, json=model_data, headers=auth_header, verify=secure_mode)
+
     if not _check_status(r, error_msg="Failed to create model."):
         # Delete model object from storage.
         repo.delete_artifact(model_uid)
@@ -525,6 +525,7 @@ def create_object(model_name,
     if building_from_current:
         # Delete temporary archive file.
         os.system('rm {}'.format(model_file))
+    
     print('Released model: {}, release_type: {}'.format(model_name, release_type))
 
     return True
