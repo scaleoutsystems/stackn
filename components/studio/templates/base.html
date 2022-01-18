@@ -72,6 +72,12 @@
                             <span class="align-middle">Models</span>
                         </a>
                     </li>
+                    <li class="sidebar-item {{ menu.about }}">
+                        <a class="sidebar-link" href="{% url 'about' %}">
+                            <i class="align-middle" data-feather="layers"></i>
+                            <span class="align-middle">About</span>
+                        </a>
+                    </li>
                     <li class="sidebar-item {{ menu.guide }} {% if menu.guide %}{% else %}collapsed{% endif %}" data-bs-toggle="collapse" href="#submenu1">
                         <a class="sidebar-link">
                             <i class="align-middle" data-feather="file-text"></i>

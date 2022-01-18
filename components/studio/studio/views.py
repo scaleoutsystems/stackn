@@ -63,3 +63,6 @@ def guide(request):
 
 def privacy(request):
     return render(request, 'privacy.html', locals())
+
+def about(request):
+    return render(request, 'about.html', locals())
