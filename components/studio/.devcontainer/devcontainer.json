@@ -1,0 +1,29 @@
+{
+    "name": "Scaleout STACKn",
+    "dockerComposeFile": "../docker-compose.yml",
+    "workspaceFolder": "/studio",
+    "workspaceMount": "source=/stackn/components/studio,target=/studio,type=bind,consistency=default",
+    "runServices": [
+        "studio",
+        "db",
+        "redis",
+        "rabbitmq",
+        "ingress",
+        "celery-beat",
+        "celery-worker"
+    ],
+    "forwardPorts": [8080],
+
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+
+    "extensions": [
+        "ms-python.python",
+        "batisteo.vscode-django",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml"
+    ],
+    
+    "remoteUser": "default"
+  }
