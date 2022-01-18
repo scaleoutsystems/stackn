@@ -245,53 +245,26 @@
                     {% block content %} {% endblock %}
                 </div>
             </main>
+
             <footer class="footer">
-                <div class="container-fluid">
-                    <div class="row text-muted">
-                        <div class="col-6 text-start">
-                            <ul class="list-inline" style="display: flex;">
-                                <li class="list-inline-item">
-                                    <a class="text-muted" href="https://twitter.com/scaleoutsystem">
-                                        <button class="btn mb-1 btn-twitter">
-                                            <i class="align-middle fab my-1 fa-twitter"></i>
-                                        </button>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-muted" href="https://www.youtube.com/channel/UCZVv30LFXMQUOswNDKuQpNA">
-                                        <button class="btn mb-1 btn-youtube">
-                                            <i class="align-middle fab my-1 fa-youtube"></i>
-                                        </button>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-muted" href="https://github.com/scaleoutsystems">
-                                        <button class="btn mb-1 btn-github">
-                                            <i class="align-middle fab my-1 fa-github"></i>
-                                        </button>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a class="text-muted" href="https://www.scaleoutsystems.com/">
-                                        <img src="{% static 'dist/scaleout-logo.svg' %}" alt="STACKn Logo" width="160" >
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-6 text-end">
-                            <p class="mb-0">
-                                &copy; 2020 - <a href="https://scaleoutsystems.com/" class="text-muted"
-                                    target="_blank">Scaleout Systems</a>
-                            </p>
-                        </div>
+              <div class="container-fluid">
+                  <div class="row text-muted">
+                    <div class="col-md-9">
+                        <p>SciLifeLab Serve is developed and maintained by the SciLifeLab Data Centre, funded by the <a href="https://www.scilifelab.se/data-driven">SciLifeLab & Wallenberg National Program for Data-Driven Life Science</a>. SciLifeLab Serve is an instance of <a href="https://github.com/scaleoutsystems/stackn">STACKn</a>, an open-source platform developed by <a href="https://www.scaleoutsystems.com/">Scaleout Systems</a>.</p>
+                        <p>With any questions please email datacentre@scilifelab.se.</p>
+                        <p><a href="{% url 'privacy' %}">Privacy policy</a></p>
                     </div>
-                    <div class="row">
-                    <div class="col">
-                      <a href="{% url 'privacy' %}">Privacy policy</a>
+                    <div class="col-md-3">
+                          <div class="row mb-3"><div class="col text-center">
+                            <img src="{% static 'dist/scilifelab_logo.svg' %}" alt="SciLifeLab" height="40">
+                          </div></div>
+                          <div class="row"><div class="col text-center">
+                           <img src="{% static 'dist/kaw_logo.png' %}" alt="Knut and Alice Wallenberg Foundation" height="70">
+                          </div></div>
                     </div>
-                    </div>
-                </div>
-            </footer>
+                  </div>
+              </div>
+          </footer>
         </div>
     </div>
 
