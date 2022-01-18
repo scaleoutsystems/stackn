@@ -46,7 +46,7 @@ spec:
         command:
           - "/bin/sh"
           - "-ce"
-          - "/usr/bin/docker-entrypoint.sh minio server {{ .Values.bucketRoot }} --address :{{ .Values.minioAPIPort }} --console-address :{{ .Values.minioConsolePort }}"
+          - "/usr/bin/docker-entrypoint.sh minio server {{ .Values.bucketRoot }} --console-address :{{ .Values.minioConsolePort }}"
         name: {{ .Release.Name }}-minio
         resources: {}
         volumeMounts:
