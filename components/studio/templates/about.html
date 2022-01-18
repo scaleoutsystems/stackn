@@ -1,0 +1,86 @@
+{% extends base_template %}
+{% load static %}
+{% block content %}
+<div class="container-fluid p-0">
+
+
+    <div class="row">
+        <div class="card flex-fill">
+            <div class="card-header">
+                <div class="d-flex justify-content-center">
+                    <h1 class="h1" style="font-weight: 800;">About the service</h1>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="row" style="font-size: medium;">
+                  <article class="markdown-section" id="main" style="font-size: 14px;">
+                      <h2>Introduction</h2>
+                      <p>SciLifeLab Serve is a service under development for model and app deployment offered to life science researchers in Sweden. Currently, the service is accepting pilot users. SciLifeLab Serve allows to serve Tensorflow models, PyTorch models, Dash apps, General Python models, and R Shiny apps. The service is available to researchers in Sweden, both with and without an affiliation SciLifeLab, as well as to SciLifeLab platforms.</p>
+
+                      <p>SciLifeLab Serve is developed and maintained by <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. The service is an instance of <a href="https://www.stackn.ai/">STACKn</a>, an open source platform developed by <a href="https://www.scaleoutsystems.com/">ScaleOut Systems</a>, a spinoff from the Department of Information Technology at Uppsala University. It is a cloud native platform that is deployed on Kubernetes cluster managed by the SciLifeLab Data Centre.
+
+                        is developed and maintained by the <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. SciLifeLab Serve is free of charge for Swedish researchers and SciLifeLab platforms.</p>
+
+                      <p>SciLifeLab Serve is funded by the <a href="https://www.scilifelab.se/data-driven/">SciLifeLab & Wallenberg National Program for Data-Driven Life Science</a>.</p>
+
+                      <p><i>[logos go here]</i></p>
+
+                      <h2>People behind the service</h2>
+
+                      STACKn on which SciLifeLab Serve is built <a href="https://github.com/scaleoutsystems/stackn/graphs/contributors">has had contributions by a large number of people over the years</a>. Below the members of the core team working in particular on SciLifeLab Serve is listed. We always welcome community feedback and community input, do not hesitate to get in touch with us by e-mailing datacentre@scilifelab.se.
+
+                      <div class="container mb-3">
+                        <div class="row">
+                          <div class="col-md-2 pt-2">
+                            <div class="row-cor"><img src="{% static 'dist/team/hi.jpeg' %}" width="100" class="img-thumbnail"/></div>
+                            <div class="row-cor"><b>Hamza Imran</b></div>
+                            <div class="row-cor"><span class="text-muted">Data Engineer, SciLifeLab</span></div>
+                          </div>
+                          <div class="col-md-2 pt-2">
+                            <div class="row-cor"><img src="{% static 'dist/team/mc.jpeg' %}" width="100" class="img-thumbnail"/></div>
+                            <div class="row-cor"><b>Matteo Carone</b></div>
+                            <div class="row-cor"><span class="text-muted">Machine Learning Engineer, ScaleOut Systems</span></div>
+                          </div>
+                          <div class="col-md-2 pt-2">
+                            <div class="row-cor"><img src="{% static 'dist/team/ak.jpg' %}" width="100" class="img-thumbnail"/></div>
+                            <div class="row-cor"><b>Arnold Kochari</b></div>
+                            <div class="row-cor"><span class="text-muted">SciLifeLab</span></div>
+                          </div>
+                          <div class="col-md-2 pt-2">
+                            <div class="row-cor"><img src="{% static 'dist/team/jr.jpg' %}" width="100" class="img-thumbnail"/></div>
+                            <div class="row-cor"><b>Johan Rung</b></div>
+                            <div class="row-cor"><span class="text-muted">Head of the Data Centre, SciLifeLab</span></div>
+                          </div>
+                          <div class="col-md-2 pt-2">
+                            <div class="row-cor"><img src="{% static 'dist/team/os.jpeg' %}" width="100" class="img-thumbnail"/></div>
+                            <div class="row-cor"><b>Ola Spjuth</b></div>
+                            <div class="row-cor"><span class="text-muted">Professor at Uppsala University, AI coordinator at SciLifeLab</span></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <h2>Organizations behind the service</h2>
+                      <h4>SciLifeLab</h4>
+                      <p><a href="https://www.scilifelab.se/">https://www.scilifelab.se</a></p>
+
+                      <p>SciLifeLab, Science for Life Laboratory, is an institution for the advancement of molecular biosciences in Sweden. We are funded as a national research infrastructure by the Swedish government. Our organization leverages the unique strengths of individual researchers across Sweden into a focused resource for the life science community. We provide access for thousands of researchers to the cutting-edge instrumentation and deep scientific expertise necessary to be internationally competitive in bioscience research. This infrastructure is supported and developed by our research community, including internationally recognized experts in life science and technology. Our facilities and expertise create a unique environment for carrying out health and environmental research at the highest level.</p>
+
+                      <p>SciLifeLab started out in 2010 as a joint effort between four universities: Karolinska Institutet, KTH Royal Institute of Technology, Stockholm University and Uppsala University. Today, we support research activities at all major Swedish universities.</p>
+
+                      <h4>SciLifeLab Data Centre</h4>
+                      <p><a href="https://www.scilifelab.se/data/">https://www.scilifelab.se/data/</a></p>
+
+                      <p>Life science research is increasingly becoming not only technology-driven, but also data-driven. SciLifeLab coordinates and supports activities throughout the life cycle of data, from project planning, data production, data analysis, data sharing, to publishing and reuse of data, where researchers are dependent on advanced data analysis and e-infrastructures.</p>
+
+                      <p>Our focus is on data arising from the use of SciLifeLab infrastructure platforms, both to promote research on adding value to data, research deriving biological knowledge from data, and infrastructure making data findable and available. At SciLifeLab, we see data as one of the most valuable and long-lasting products of our operations and strive to make our data FAIR, handled according to open science standards and that its long- term value to the scientific community is maximized.</p>
+
+                  </article>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

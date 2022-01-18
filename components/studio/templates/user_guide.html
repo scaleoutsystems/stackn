@@ -12,253 +12,262 @@
             </div>
             <div class="card-body">
 
-                <div class="row" style="margin-top: 30px; font-size: medium;">
-                    <article class="markdown-section" id="main" style="font-size: 14px;">
-                        <h2 id="project-overview"><span>Projects</span></h2>
-                        <p>Projects are spaces where users are able to create apps and models. Created projects can be
-                            found under the
-                            tab <span style="font-weight: 500;color: #041c39c7;">Projects</span> in the sidebar. This
-                            tab contains all
-                            projects that you have created or have been granted access to.
-                        <h3 id="create-a-project"><span>Create a Project</span></h3>
-                        <p>To be able to create a project, users need to be logged in. Users can create a new Project by
-                            following the
-                            steps below:</p>
-                        <ol>
-                            <li>Click on the <span style="font-weight: 500;color: #041c39c7;">Projects</span> tab shown
-                                on the sidebar.
-                                (Only shown if user is logged in.)</li>
-                            <li>Click the <span style="font-weight: 500;color: #041c39c7;">New Project</span> button in
-                                the top right
-                                corner.</li>
-                            <li>Select the project template you want to use (currently there is only one template
-                                available).</li>
-                            <li>Enter project name (mandatory) and description (optional). Users can also change the
-                                project template
-                                here if they want. </li>
-                            <li>Click the <span style="font-weight: 500;color: #041c39c7;">Create Project</span> button
-                                to create the
-                                new project.</li>
-                        </ol>
-                        <!-- <p><img style="width: 90%;" src="/static/dist/img/gifs/projects-page.gif" alt="screen-gif"></p> -->
-                        <!-- <p><img src="/stackn/images/project-overview.gif" data-origin="images/project-overview.gif" alt="screen-gif"> -->
-                        </p>
-                        <p>This will take you to the project dashboard. Here users will be able to see an overview of
-                            the whole project.
-                            New tabs will be available on the sidebar as well. The categories for these tabs are
-                            explained below:</p>
-                        <ul>
-                            <li><strong><em>Objects</em>:</strong> Model objects created in the current project.</li>
-                            <li><strong><em>Compute</em>:</strong> Pre-configured data science environments for
-                                experimentation and
-                                training ML models. (Currently, this tab will only have a pre installed Jupyter lab
-                                instance available
-                                for the user. Using this instance, users can e.g can run experiments and also create
-                                model objects
-                                mentioned above. The tutorials below will elaborate on this.)</li>
-                            <li><strong><em>Serve</em>:</strong> The most common serving applications used for deploying
-                                ML models as
-                                well as apps such as shiny and dash. (Custom applications can be added to this list if
-                                requested).</li>
-                            <li><strong><em>Settings</em>:</strong> User can access and change the current project
-                                settings</li>
-                        </ul>
-                        <!-- <h2 id="settings"><span>Settings</span></h2>
-                        <p>The <span style="font-weight: 500;color: #041c39c7;">Settings</span> page contains all the
-                            information about
-                            your Project and its components. Some of the things you can do there are:</p>
-                        <ul>
-                            <li>Change the Project's description</li>
-                            <li>Grant access to the project to registered users.</li>
-                            <li>Transfer ownership of the project to another user.</li>
-                            <li>Permanently delete the project.</li>
-                        </ul> -->
-                        <h2 id="create-new-resources"><span>Creating Apps and Resources</span>s</h2>
-                        <p> You can create resources by going into the Serve tab. Here you have the following options:
-                        </p>
-                        <ul>
-                            <!-- <li><strong><em>Compute</em>:</strong> a series of components to be used for experimentation and training models with pre-configured data science environments.</li> -->
-                            <li><strong>Shiny App</strong></li>
-                            <li><strong>Dash App</strong></li>
-                            <li><strong>Tensorflow Serve</strong></li>
-                            <li><strong>PyTorch Serve</strong></li>
-                            <li><strong>Python Model Serve (Using FastApi)</strong></li>
-                        </ul>
-                        <h3 id="shiny">Shiny</h3>
-                        <p>This is a service to deploy a shiny app that has been packaged as a docker container and is
-                            available on
-                            docker hub. To deploy a Shiny App click the Create button on the Shiny App card in the Serve
-                            Tab. Then Enter
-                            the following information in the form:</p>
-                        <ul>
-                            <li><strong>Name: </strong>User specified name for the app (e.g SciLifeLab Shiny Example)
-                            </li>
-                            <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
-                                available at. It is not
-                                mandatory to choose. By default a random subdomain (e.g r46b61563) is generated if no
-                                option is chosen
-                                here. Then the app would be available at r46b61563.serve.scilifelab.se. If a user wants
-                                to create a more
-                                suitable subdomain, they can do this by scrolling down to the form that contains the
-                                option to Add
-                                Subdomain. Here the user can create a subdomain of their choice (given that it is not
-                                already taken).
-                                Then, this subdomain will appear in the Subdomain options and the final domain will be
-                                user-created-subdomain.serve.scilifelab.se. </li>
-                            <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of
-                                permissions for an app:
-                                <ul>
-                                    <li><strong>Private:</strong> The app can only be accessed by the user that created
-                                        the app. (Sign
-                                        In required)</li>
-                                    <li><strong>Project:</strong> All members of the project will be able to access the
-                                        app. (Sign In
-                                        required)</li>
-                                    <li><strong>Private:</strong> Anyone that has access to the url can access the app.
-                                    </li>
-                                </ul>
-                            </li>
-                            <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker
-                                container) in which
-                                the main shiny application file is located (usually app.R).</li>
-                            <li><strong>App Port:</strong> The port that the shiny server runs on (usually 3838).</li>
-                            <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
-                        </ul>
-                        <h3 id="dash">Dash</h3>
-                        <p>Similar to the Shiny, Dash apps can be deployed as well. The docker container for the app has
-                            to be available on docker hub. To deploy a Dash App click the Create button on the Dash App
-                            card in the Serve Tab. Then Enter the following information in the form:</p>
-                        <ul>
-                            <li><strong>Name: </strong>User specified name for the app (e.g SciLifeLab Dash Example)
-                            </li>
-                            <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
-                                available at. It is not
-                                mandatory to choose. By default a random subdomain (e.g r46b61563) is generated if no
-                                option is chosen
-                                here. Then the app would be available at r46b61563.serve.scilifelab.se. If a user wants
-                                to create a more
-                                suitable subdomain, they can do this by scrolling down to the form that contains the
-                                option to Add
-                                Subdomain. Here the user can create a subdomain of their choice (given that it is not
-                                already taken).
-                                Then, this subdomain will appear in the Subdomain options and the final domain will be
-                                user-created-subdomain.serve.scilifelab.se. </li>
-                            <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of
-                                permissions for an app:
-                                <ul>
-                                    <li><strong>Private:</strong> The app can only be accessed by the user that created
-                                        the app. (Sign
-                                        In required)</li>
-                                    <li><strong>Project:</strong> All members of the project will be able to access the
-                                        app. (Sign In
-                                        required)</li>
-                                    <li><strong>Private:</strong> Anyone that has access to the url can access the app.
-                                    </li>
-                                </ul>
-                            </li>
-                            <!-- <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the instance.</li> -->
-                            <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker
-                                container) in which
-                                the main dash application file is located (usually app.py).</li>
-                            <li><strong>App Port:</strong> The port that the shiny server runs on (usually 8050).</li>
-                            <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
-                        </ul>
+                <div class="row" style="font-size: medium;">
+                  <article class="markdown-section" id="main" style="font-size: 14px;">
+                                          <h4>Table of Contents</h4>
+                                          <ul>
+                                            <li><a href="#projects">Projects</a></li>
+                                              <ul>
+                                                <li><a href="#create-a-project">Creating a project</a></li>
+                                                <li><a href="#create-a-project">Project components</a></li>
+                                              </ul>
+                                            <li><a href="#apps-resources">Hosting apps and resources</a></li>
+                                                <ul>
+                                                  <li><a href="#Shiny">R Shiny</a></li>
+                                                  <li><a href="#Dash">Dash</a></li>
+                                                </ul>
+                                            <li><a href="#tutorials">Tutorials for serving machine learning models</a></li>
+                                                <ul>
+                                                  <li><a href="#tensorflow">TensorFlow</a></li>
+                                                  <li><a href="#pytorch">PyTorch</a></li>
+                                                  <li><a href="#python-deploy">Python Model Deployment</a></li>
+                                                </ul>
+                                          </ul>
+                                          <h2 id="projects"><span>Projects</span></h2>
+                                          <p>Projects are spaces where users are able to create apps and models. Every app and model has to be located within some project. Created projects can be
+                                              found under the
+                                              tab <span style="font-weight: 500;color: #041c39c7;">Projects</span> in the sidebar. This
+                                              tab contains all
+                                              projects that you have created or have been granted access to.</p>
+                                          <h4 id="create-a-project"><span>Creating a project</span></h4>
+                                          <p>To be able to create a project, users need to be logged in. Users can create a new Project by
+                                              following the
+                                              steps below:</p>
+                                          <ol>
+                                              <li>Click on the <span style="font-weight: 500;color: #041c39c7;">Projects</span> tab shown
+                                                  on the sidebar (only shown if user is logged in).</li>
+                                              <li>Click the <span style="font-weight: 500;color: #041c39c7;">New Project</span> button in
+                                                  the top right
+                                                  corner.</li>
+                                              <li>Select the project template you want to use (currently there is only one template
+                                                  available).</li>
+                                              <li>Enter project name (mandatory) and description (optional).</li>
+                                              <li>Click the <span style="font-weight: 500;color: #041c39c7;">Create Project</span> button
+                                                  to create the
+                                                  new project.</li>
+                                          </ol>
+                                          <!-- <p><img style="width: 90%;" src="/static/dist/img/gifs/projects-page.gif" alt="screen-gif"></p> -->
+                                          <!-- <p><img src="/stackn/images/project-overview.gif" data-origin="images/project-overview.gif" alt="screen-gif"> -->
+                                          <p>This will take you to the project Dashboard. Here users will be able to see an overview of
+                                              the whole project.
+                                              New tabs will be available on the sidebar as well. The categories for these tabs are
+                                              explained below.</p>
+                                          <h4 id="project-components"><span>Project components</span></h4>
+                                          <ul>
+                                              <li><strong><em>Objects</em>:</strong> Model objects created in the current project.</li>
+                                              <li><strong><em>Compute</em>:</strong> Pre-configured data science environments for
+                                                  experimentation and
+                                                  training ML models. (Currently, this tab will only have a pre installed Jupyter lab
+                                                  instance available
+                                                  for the user. Using this instance, users can e.g., can run experiments and also create
+                                                  model objects
+                                                  mentioned above. The tutorials below will elaborate on this.)</li>
+                                              <li><strong><em>Serve</em>:</strong> The most common serving applications used for deploying
+                                                  ML models as
+                                                  well as apps such as R Shiny and Dash (custom applications can be added to this list if
+                                                  requested).</li>
+                                              <li><strong><em>Settings</em>:</strong> User can access and change the current project
+                                                  settings. Here one can, for example, add other project members.</li>
+                                          </ul>
+                                          <!-- <h2 id="settings"><span>Settings</span></h2>
+                                          <p>The <span style="font-weight: 500;color: #041c39c7;">Settings</span> page contains all the
+                                              information about
+                                              your Project and its components. Some of the things you can do there are:</p>
+                                          <ul>
+                                              <li>Change the Project's description</li>
+                                              <li>Grant access to the project to registered users.</li>
+                                              <li>Transfer ownership of the project to another user.</li>
+                                              <li>Permanently delete the project.</li>
+                                          </ul> -->
+                                          <h2 id="apps-resources"><span>Hosting apps and resources</span></h2>
+                                          <p> You can create resources by going into the Serve tab. Here you have the following options:
+                                          </p>
+                                          <ul>
+                                              <!-- <li><strong><em>Compute</em>:</strong> a series of components to be used for experimentation and training models with pre-configured data science environments.</li> -->
+                                              <li><strong>R Shiny App</strong></li>
+                                              <li><strong>Dash App</strong></li>
+                                              <li><strong>Tensorflow Serve</strong></li>
+                                              <li><strong>PyTorch Serve</strong></li>
+                                              <li><strong>Python Model Serve (Using FastApi)</strong></li>
+                                          </ul>
+                                          <h3 id="shiny">R Shiny</h3>
+                                          <p>This is a service to deploy R Shiny apps. Currently, only apps that have been packaged as a docker container and are available on <a href="https://hub.docker.com/">DockerHub</a> are supported. If you are not sure how to do it, the SciLifeLab Serve team can assist you with this, please get in touch with us by e-mail.</p>
+                                          <p>To deploy a Shiny App click the Create button on the Shiny App card in the Serve
+                                              Tab. Then enter
+                                              the following information in the form:</p>
+                                          <ul>
+                                              <li><strong>Name: </strong>User specified name for the app (e.g., 'Shiny Example')
+                                              </li>
+                                              <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
+                                                  available at. By default a random subdomain is generated if no
+                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). You can add a custom domain name by scrolling down to the form that contains the
+                                                  option to Add
+                                                  Subdomain. Here the user can create a subdomain of their choice (given that it is not
+                                                  already taken).
+                                                  Then, this subdomain will appear in the Subdomain options and the final domain will be
+                                                  user-created-subdomain.serve.scilifelab.se.</li>
+                                              <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of
+                                                  permissions for an app:
+                                                  <ul>
+                                                      <li><strong>Private:</strong> The app can only be accessed by the user that created
+                                                          the app. (Sign
+                                                          In required)</li>
+                                                      <li><strong>Project:</strong> All members of the project will be able to access the
+                                                          app. (Sign In
+                                                          required)</li>
+                                                      <li><strong>Public:</strong> Anyone that has access to the URL can access the app.
+                                                      </li>
+                                                  </ul>
+                                              </li>
+                                              <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker
+                                                  container) in which
+                                                  the main Shiny application file is located (usually app.R).</li>
+                                              <li><strong>App Port:</strong> The port that the Shiny server runs on (usually 3838).</li>
+                                              <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
+                                          </ul>
+                                          <h3 id="dash">Dash</h3>
+                                          <p>This is a service to deploy Dash apps. Currently, only apps that have been packaged as a docker container and are available on <a href="https://hub.docker.com/">DockerHub</a> are supported. If you are not sure how to do it, the SciLifeLab Serve team can assist you with this, please get in touch with us by e-mail.
 
-                        <h2 id="tutorials">Scilifelab Serve ML Tutorials</h2>
-                        <p>This tutorial is intended as a quick example to get started with working on ML model
-                            deployment and serving using Scilifelab Serve.</p>
-                        <p> When a project is created, users also get a jupyter lab instance. This can be found in the
-                            Serve tab on the Sidebar (which is visible when you open a project). Click on open to go to
-                            the Jupyter Lab instance. On the home screen, click on Terminal. This will open a terminal
-                            tab inside the jupyter lab. Clone the tutorials repository <a
-                                href="https://github.com/ScilifelabDataCentre/serve-tutorials">serve-tutorials</a>. You
-                            will now see the <code>serve-tutorials</code> folder.</p>
-                        <h3 id="tensorflow">Tensorflow</h3>
-                        <p>Go to <code>serve-tutorials/Tensorflow/AML</code> folder. Open the <code>aml.ipynb</code>
-                            notebook file. This notebook contains the code to create a ML Model and save it as an object
-                            on Scilifelab Serve. Run all the cells in the notebook. This may take some time (around 20
-                            mins) as the model is trained.</p>
+                                          <p>To deploy a Dash App click the Create button on the Dash App
+                                              card in the Serve Tab. Then Enter the following information in the form:</p>
+                                          <ul>
+                                              <li><strong>Name: </strong>User specified name for the app (e.g., 'Dash Example')
+                                              </li>
+                                              <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
+                                                  available at. By default a random subdomain is generated if no
+                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). You can add a custom domain name by scrolling down to the form that contains the
+                                                  option to Add
+                                                  Subdomain. Here the user can create a subdomain of their choice (given that it is not
+                                                  already taken).
+                                                  Then, this subdomain will appear in the Subdomain options and the final domain will be
+                                                  user-created-subdomain.serve.scilifelab.se. </li>
+                                              <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of
+                                                  permissions for an app:
+                                                  <ul>
+                                                      <li><strong>Private:</strong> The app can only be accessed by the user that created
+                                                          the app. (Sign
+                                                          In required)</li>
+                                                      <li><strong>Project:</strong> All members of the project will be able to access the
+                                                          app. (Sign In
+                                                          required)</li>
+                                                      <li><strong>Public:</strong> Anyone that has access to the URL can access the app.
+                                                      </li>
+                                                  </ul>
+                                              </li>
+                                              <!-- <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the instance.</li> -->
+                                              <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker
+                                                  container) in which
+                                                  the main Dash application file is located (usually app.py).</li>
+                                              <li><strong>App Port:</strong> The port that the Shiny server runs on (usually 8050).</li>
+                                              <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
+                                          </ul>
 
-                        <p>After running this file, go to the Serve tab on the portal and create a Tensorflow Serve App
-                            with the follwing entries:</p>
-                        <ul>
-                            <li><strong>Name: </strong>AML Tensorflow</li>
-                            <li><strong>Subdomain: </strong> This is automatically generated. </li>
-                            <li><strong>Permissions: </strong> Set the permission to project.</li>
-                            <!-- <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the instance.</li> -->
-                            <li><strong>Model: </strong>Select the model, in this case the model is named aml.</li>
-                            <li><strong>Flavor: </strong> This indicates the resources given to the app. Currently on
-                                the Medium option is availble on the platform.</li>
-                        </ul>
+                                          <h2 id="tutorials">Tutorials for serving machine learning models</h2>
+                                          <p>These tutorials are intended as quick examples to get started with working on ML model
+                                              deployment and serving using Scilifelab Serve.</p>
+                                          <p>When a project is created, users also get a Jupyter lab instance. This can be found in the
+                                              Compute tab on the Sidebar (which is visible when you open a project). Click on Open to go to
+                                              the Jupyter Lab instance. On the home screen, click on Terminal. This will open a terminal
+                                              tab inside the Jupyter lab. Clone the tutorials repository <a
+                                                  href="https://serve-dev.scilifelab.se/https://github.com/ScilifelabDataCentre/serve-tutorials">serve-tutorials</a>. You
+                                              will now see the <code>serve-tutorials</code> folder.</p>
+                                          <h3 id="tensorflow">Tensorflow</h3>
+                                          <p>Go to <code>serve-tutorials/Tensorflow/AML</code> folder. Open the <code>aml.ipynb</code>
+                                              notebook file. This notebook contains the code to create a ML Model and save it as an object
+                                              on Scilifelab Serve. Run all the cells in the notebook. This may take some time (around 20
+                                              mins) as the model is trained.</p>
 
-                        <p>This should create the app and it will be visible in the Serve Tab. Copy the link for the
-                            service (you can do this by right clicking open and selecting copy link address). Then, go
-                            back to the jupyter lab instacne and open the <code>predict.ipynb</code> notebook. Replace
-                            the endpoint with the url that you copied. Run the cells in the notebook. If you see a
-                            prediction, this means that the service is running successfully.</p>
+                                          <p>After running this file, go to the Serve tab on the portal and create a Tensorflow Serve App
+                                              with the follwing entries:</p>
+                                          <ul>
+                                              <li><strong>Name: </strong>AML Tensorflow</li>
+                                              <li><strong>Subdomain: </strong> This is automatically generated. A custom subdomain can be created by filling out the form below ("Add Subdomain"), this domain will then show up as an option.</li>
+                                              <li><strong>Permissions: </strong> Set the permission to project.</li>
+                                              <!-- <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the instance.</li> -->
+                                              <li><strong>Model: </strong>Select the model, in this case the model is named aml.</li>
+                                              <li><strong>Flavor: </strong> This indicates the resources given to the app. Currently on
+                                                  the Medium option is availble on the platform.</li>
+                                          </ul>
 
-                        <h3 id="pytroch">PyTorch</h3>
-                        <p>To serve a pytroch model, we will use a pytorch model archive (VGG11) already prepared. You
-                            can read more about the model <a href="https://arxiv.org/abs/1409.1556">here</a>.</p>
+                                          <p>This should create the app and it will be visible in the Serve Tab. Copy the link for the
+                                              service (you can do this by right clicking Open and selecting copy link address). Then, go
+                                              back to the Jupyter lab instance and open the <code>predict.ipynb</code> notebook. Replace
+                                              the endpoint with the URL that you copied. Run the cells in the notebook. If you see a
+                                              prediction, this means that the service is running successfully.</p>
 
-                        <p>Go to the <code>project-vol</code> folder inside the jupyter lab. Right-click to create a new
-                            folder and give it a name (e.g pytorch-deployment). Go to the terminal (you can also launch
-                            a new terminal through <code>File > New > Terminal</code>). Change directory to the newly
-                            created folder, so in this case by <code>cd project-vol/pytorch-deployment/</code>. Once
-                            inside this folder run the command
-                            <code>curl -O -J https://nextcloud.dckube.scilifelab.se/s/TSNxFJCYrpJZAnz/download</code>.
-                            This will download the <code>vgg11_scripted.mar</code> archive to this folder. Now that we
-                            have the model archive, we need to launch the Pytorch Serve App. On the Scilifelab Serve
-                            portal, go to the Serve tab. Then create the Pytorch Serve App with the following values:
-                        </p>
-                        <ul>
-                            <li><strong>Name: </strong>VGG11 Serve</li>
-                            <li><strong>Subdomain: </strong> This is automatically generated, if not selected. You can
-                                create a subdomain to choose using the Add Subdomain form located at the bottom.</li>
-                            <li><strong>Permissions: </strong> Set the permission to public. (Currently, public
-                                permissions are required to access the serve url for pytorch apps).</li>
-                            <li><strong>Flavor: </strong> This indicates the resources given to the app. Currently on
-                                the Medium option is availble on the platform.</li>
-                            <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the
-                                instance. In this case it is important to select project-vol as that is where we
-                                dowloaded the vgg11_scripted.mar file.</li>
-                            <li><strong>Path to Model Store:</strong> This is the path to the folder where the model is
-                                located (relative to the mounted volume). As the model was downloaded in the
-                                pytorch-deployment folder inside the project-vol, the value for this will be
-                                pytorch-deployment.</li>
-                            <li><strong>Comma-separeted list of models (model1,model2,model3): </strong> This can be
-                                left empty. Here, model names from the model archive can be listed to deploy only those
-                                models.</li>
-                        </ul>
+                                          <h3 id="pytorch">PyTorch</h3>
+                                          <p>To serve a PyTorch model, we will use a pytorch model archive (VGG11) already prepared. You
+                                              can read more about the model <a href="https://serve-dev.scilifelab.se/https://arxiv.org/abs/1409.1556">here</a>.</p>
 
-                        <p>Create the app and wait for the status to turn to <code>Running</code>. Right click on open
-                            and copy the link address for the app. To check if it is working properly you can go to the
-                            jupyter lab instance and open the terminal. Go to the <code>serve-tutorials/PyTorch/</code>
-                            folder using <code>cd serve-tutorials/PyTorch/</code> and run the command
-                            <code>curl copied-url/vgg11_scripted -T kitten.jpg</code> (inplace of copied-url add the url
-                            you copied earlier). You should get a json response if the deployment is working properly.
-                        </p>
+                                          <p>Go to the <code>project-vol</code> folder inside the Jupyter lab. Right-click to create a new
+                                              folder and give it a name (e.g., pytorch-deployment). Go to the terminal (you can also launch
+                                              a new terminal through <code>File > New > Terminal</code>). Change directory to the newly
+                                              created folder, so in this case by <code>cd project-vol/pytorch-deployment/</code>. Once
+                                              inside this folder run the command
+                                              <code>curl -O -J https://nextcloud.dckube.scilifelab.se/s/TSNxFJCYrpJZAnz/download</code>.
+                                              This will download the <code>vgg11_scripted.mar</code> archive to this folder. Now that we
+                                              have the model archive, we need to launch the Pytorch Serve App. On the Scilifelab Serve
+                                              portal, go to the Serve tab. Then create the Pytorch Serve App with the following values:
+                                          </p>
+                                          <ul>
+                                              <li><strong>Name: </strong>VGG11 Serve</li>
+                                              <li><strong>Subdomain: </strong> This is automatically generated, if not selected. You can
+                                                  create a subdomain to choose using the Add Subdomain form located at the bottom.</li>
+                                              <li><strong>Permissions: </strong> Set the permission to public. (Currently, public
+                                                  permissions are required to access the serve URL for pytorch apps).</li>
+                                              <li><strong>Flavor: </strong> This indicates the resources given to the app. Currently on
+                                                  the Medium option is availble on the platform.</li>
+                                              <li><strong>Persistent Volume:</strong> The volume that needs to be attached to the
+                                                  instance. In this case it is important to select project-vol as that is where we
+                                                  dowloaded the vgg11_scripted.mar file.</li>
+                                              <li><strong>Path to Model Store:</strong> This is the path to the folder where the model is
+                                                  located (relative to the mounted volume). As the model was downloaded in the
+                                                  pytorch-deployment folder inside the project-vol, the value for this will be
+                                                  pytorch-deployment.</li>
+                                              <li><strong>Comma-separeted list of models (model1,model2,model3): </strong> This can be
+                                                  left empty. Here, model names from the model archive can be listed to deploy only those
+                                                  models.</li>
+                                          </ul>
 
-                        <h3 id="python-deploy">Python Model Deployment</h3>
-                        <p>Launch a new terminal from within your Jupyter instance and go to the Python-Model-Deployment folder:</p>
-                        <p> <code>cd serve-tutorials/Python-Model-Deployment folder</code></p>
-                        <p>Install the pip requirements:</p>
-                        <p><code>pip install -r requirements.txt</code></p>
-                        <p>Now you should be ready to open the <code>getting_started_with_swebert.ipynb</code>in the <em>notebooks</em> folder. Please follow the notebook's instructions.</p>
-                        <p>Once you have run all the cells in the above notebook, open up again the terminal and execute the following commands within the repository directory (inside the Python-Model-Deployment folder):</p>
-                        <p><code>stackn create object afbert -r minor</code></p>
-                        <p><code>stackn get objects</code></p>
-                        <p>(Check that the model is listed; you should be able to see the newly created model object in
-                            your Scilifelab Serve UI, under the "<em>Objects</em>" tab)</p>
+                                          <p>Create the app and wait for the status to turn to <code>Running</code>. Right click on Open
+                                              and copy the link address for the app. To check if it is working properly you can go to the
+                                              Jupyter lab instance and open the terminal. Go to the <code>serve-tutorials/PyTorch/</code>
+                                              folder using <code>cd serve-tutorials/PyTorch/</code> and run the command
+                                              <code>curl copied-url/vgg11_scripted -T kitten.jpg</code> (inplace of copied-url add the URL
+                                              you copied earlier). You should get a JSON response if the deployment is working properly.
+                                          </p>
 
-                        <p>Deploy the newly created model object with the "<em>Python Model Deployment</em>" component (under the "<em>Serve</em>" tab). <em>Name</em> can be anything, <em>Model</em> should match the name of the newly created model (e.g. "afbert:v0.1.0"); leave the rest as defaults.</p>
-                        <p> <strong>Note:</strong> It could take some time for this model to initialize, so keep checking the logs until it is available and wait until it is running successfully.</p>
-                        <p>Once the above serving app is up and running, copy the endpoint URL by right-clicking on the <em>Open</em> link.</p>
-                        <p>Go back to your Jupyter Lab and open the <code>predict.ipynb</code> notebook under the <em>notebooks</em> folder. Paste the copied URL in place of the url in order to use the correct endpoint for the prediction.</p>
-                        <p>It is time to test the prediction! Run all the cells and check the results.</p>
-                        <p>You can play around by changing the values of the <code>example</code> and <code>msk_ind</code> variables. The latter will mask (or "hide") one of the words in the example sentence; then the prediction will shown the possible candidates for such "missing" word.</p>
-                        
-                    </article>
+                                          <h3 id="python-deploy">Python Model Deployment</h3>
+                                          <p>Launch a new terminal from within your Jupyter instance and go to the Python-Model-Deployment folder:</p>
+                                          <p> <code>cd serve-tutorials/Python-Model-Deployment folder</code></p>
+                                          <p>Install the required packages:</p>
+                                          <p><code>pip install -r requirements.txt</code></p>
+                                          <p>Go to <code>serve-tutorials/Python-Model-Deployment</code> folder. Open the <code> getting_started_with_swebert.ipynb</code>
+                                              notebook file. Follow the notebook's instructions.</p>
+                                          <p>Once you have run all the cells in the above notebook, open up again the terminal and execute the following commands within the repository directory (inside the Python-Model-Deployment folder):</p>
+                                          <p><code>stackn create object afbert -r minor</code></p>
+                                          <p><code>stackn get objects</code></p>
+                                          <p>(Check that the model is listed; you should be able to see the newly created model object in
+                                              your Scilifelab Serve UI, under the "<em>Objects</em>" tab)</p>
+
+                                          <p>Deploy the newly created model object with the "<em>Python Model Deployment</em>" component (under the "<em>Serve</em>" tab). <em>Name</em> can be anything, <em>Model</em> should match the name of the newly created model (e.g., "afbert:v0.1.0"); leave the rest as defaults.</p>
+                                          <p> <strong>Note:</strong> It could take some time for this model to initialize, so keep checking the logs until it is available and wait until it is running successfully.</p>
+                                          <p>Once the above serving app is up and running, copy the endpoint URL by right-clicking on the <em>Open</em> link.</p>
+                                          <p>Go back to your Jupyter Lab and open the <code>predict.ipynb</code> notebook under the <em>notebooks</em> folder. Paste the copied URL in place of the URL in order to use the correct endpoint for the prediction.</p>
+                                          <p>It is time to test the prediction! Run all the cells and check the results.</p>
+                                          <p>You can play around by changing the values of the <code>example</code> and <code>msk_ind</code> variables. The latter will mask (or "hide") one of the words in the example sentence; then the prediction will shown the possible candidates for such "missing" word.</p>
+
+                                      </article>
                 </div>
             </div>
         </div>
