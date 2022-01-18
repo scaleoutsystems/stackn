@@ -11,7 +11,6 @@ data:
             "STACKN_URL": "{{ .Values.cli_setup.url }}",
             "STACKN_PROJECT": "{{ .Values.cli_setup.project }}",
             "STACKN_ACCESS_TOKEN": "{{ .Values.cli_setup.token }}",
-            "STACKN_REFRESH_TOKEN": "{{ .Values.cli_setup.refresh_token }}",
             "STACKN_USER": "{{ .Values.cli_setup.user }}"
         },
         "current": {
