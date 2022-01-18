@@ -46,7 +46,6 @@ def guide(request):
     menu['guide'] = 'active'
     base_template = 'base.html'
     if 'project' in request.session:
-        print("HEREEEEE")
         project_slug = request.session['project']
         is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
         if is_authorized:
@@ -62,7 +61,35 @@ def guide(request):
     return render(request, template , locals())
 
 def privacy(request):
+    base_template = 'base.html'
+    if 'project' in request.session:
+        project_slug = request.session['project']
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            try:
+                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+                base_template = 'baseproject.html'
+            except Exception as err:
+                project = []
+                print(err)
+            if not project:
+                base_template = 'base.html'
     return render(request, 'privacy.html', locals())
 
 def about(request):
+    menu = dict()
+    menu['about'] = 'active'
+    base_template = 'base.html'
+    if 'project' in request.session:
+        project_slug = request.session['project']
+        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if is_authorized:
+            try:
+                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+                base_template = 'baseproject.html'
+            except Exception as err:
+                project = []
+                print(err)
+            if not project:
+                base_template = 'base.html'
     return render(request, 'about.html', locals())
