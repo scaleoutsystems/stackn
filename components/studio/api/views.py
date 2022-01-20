@@ -88,7 +88,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
         try:
             model_name = request.data['name']
             prev_model = Model.objects.filter(name=model_name, project=project).order_by('-version')
-            print(prev_model)
+            print("INFO - Previous Model Objects: {}".format(prev_model))
             if len(prev_model)>0:
                 print("ACCESS")
                 access = prev_model[0].access
@@ -97,6 +97,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             else:
                 access = "PR"
             release_type = request.data['release_type']
+            version = request.data['version']
             description = request.data['description']
             model_card= request.data['model_card']
             model_uid = request.data['uid']
@@ -113,11 +114,12 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
             return HttpResponse('Failed to create object: incorrect input data.', 400)
 
         try:
-            new_model = Model(name=model_name,
-                            release_type=release_type,
+            new_model = Model(uid=model_uid,
+                            name=model_name,
                             description=description,
+                            release_type=release_type,
+                            version=version,
                             model_card=model_card,
-                            uid=model_uid,
                             project=project,
                             s3=project.s3storage,
                             access=access)
