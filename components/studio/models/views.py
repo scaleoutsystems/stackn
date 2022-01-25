@@ -1,3 +1,4 @@
+from importlib.resources import path
 import uuid
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
@@ -36,11 +37,10 @@ from apps.models import Apps, AppInstance
 # that is run before urls.py is completely loaded
 class ModelCreate(LoginRequiredMixin, View):
     template = "models/model_create.html"
-    success_url = reverse_lazy('models:list')
 
     # Initializing values for hidden form inputs
     model_uid = str(uuid.uuid1().hex)
-    object_type_pk = ObjectType.objects.filter(name="Default")
+    object_type = ObjectType.objects.get(name="Default")
 
     def get(self, request, user, project):
         # locals() context fields
@@ -52,22 +52,53 @@ class ModelCreate(LoginRequiredMixin, View):
         return render(request, self.template, locals())
 
     def post(self, request, user, project):
-        #Fetching current project
-        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
-        
-        # Updating form fields
-        form = ModelForm(request.POST)
-        #form.uid = self.model_uid
-        #form.object_type = self.object_type_pk
-        #form.project = project.pk
-        
-        # If form is not valid, will show error and entered data
-        if not form.is_valid():
-            return render(request, self.template, locals())
+        # For redirection after successful POST (and avoiding refresh of same POST)
+        success_url = reverse_lazy('models:list', args=[ user, project])
 
+        #Fetching current project
+        model_project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+        
+        # Extracting form fields
+        form = ModelForm(request.POST)
+        
         # Otherwise it saves object in the db and redirect
-        model = form.save()
-        return redirect(self.success_url)
+        if form.is_valid():
+            model_name            = form.cleaned_data['name']
+            model_description     = form.cleaned_data['description']
+            model_release_type    = form.cleaned_data['release_type']
+            model_version         = form.cleaned_data['version']
+            model_path            = form.cleaned_data['path']
+            #persisten_vol         = form.volumes
+
+            new_model = Model(uid=self.model_uid,
+                            name=model_name,
+                            description=model_description,
+                            release_type=model_release_type,
+                            version=model_version,
+                            model_card="",
+                            project=model_project,
+                            s3=model_project.s3storage,
+                            access='PR')
+            new_model.save()      
+            new_model.object_type.set([self.object_type])
+
+            # TO DO: S3 related
+            # open path to folder "models" (should exist within selected PV)
+            # compress models in a tar
+            # upload it to S3 storage associated with the project
+
+            # TO DO: Related to publish and unpublish
+            # published_model = PublishedModel.objects.get(name=new_model.name, project=new_model.project)
+            # if published_model:
+            #     # Model is published, so we should create a new
+            #     # PublishModelObject.
+            #     from models.helpers import add_pmo_to_publish
+            #     add_pmo_to_publish(new_model, published_model)
+
+            return redirect(success_url)
+        else:
+            # If form is not valid, will show error and entered data
+            return render(request, self.template, locals())
 
 
 # Published models visible under the "Catalogs" menu
