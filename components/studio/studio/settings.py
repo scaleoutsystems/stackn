@@ -232,6 +232,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
+# For Model Objects creation (check models/models.py, pre_save_model() )
+VERSION_BACKEND = 'studio.version.Version'
 
 # Other Helm/k8s deployment settings
 CHART_CONTROLLER_URL = 'http://stack-chart-controller'
