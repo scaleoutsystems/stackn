@@ -1,37 +1,33 @@
-from importlib.resources import path
-import uuid
-from django.http.request import HttpRequest
-from django.http.response import HttpResponse
-from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.conf import settings
-from django.db.models import Q
-from django.core.files import File
-from projects.models import Project, ProjectLog, Environment
-#from reports.models import Report, ReportGenerator
-from .models import Model, ModelLog, Metadata, ObjectType
-#from reports.forms import GenerateReportForm
-from django.contrib.auth.decorators import login_required
-import logging
-#from reports.helpers import populate_report_by_id, get_download_link
-import markdown
-import ast
 from collections import defaultdict
-from random import randint
-from .helpers import get_download_url
+
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files import File
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.views.generic import View
+from django.urls import reverse, reverse_lazy
+
 from .forms import UploadModelCardHeadlineForm, EnvironmentForm, ModelForm
+from .helpers import set_artifact
+from .models import Model, ModelLog, Metadata, ObjectType
+
+from apps.models import Apps, AppInstance
 from portal.models import PublicModelObject, PublishedModel
+from projects.models import Project, ProjectLog, Environment
+
+import ast
+import logging
+import markdown
+import os
+import subprocess
+import uuid
+
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View
-from django.urls import reverse_lazy
-from models.models import ObjectType
-
-from apps.models import Apps, AppInstance
 
 # We use reverse_lazy() because we are in "constructor attribute" code
 # that is run before urls.py is completely loaded
@@ -61,14 +57,49 @@ class ModelCreate(LoginRequiredMixin, View):
         # Extracting form fields
         form = ModelForm(request.POST)
         
-        # Otherwise it saves object in the db and redirect
+        # if valid it saves model in S3 storage, create object in the db and redirect
         if form.is_valid():
+            # TO DO: S3 related
+            # open path to folder "models" (should exist within selected PV)
+            # compress models in a tar
+            # upload it to S3 storage associated with the project
+
             model_name            = form.cleaned_data['name']
             model_description     = form.cleaned_data['description']
             model_release_type    = form.cleaned_data['release_type']
             model_version         = form.cleaned_data['version']
             model_path            = form.cleaned_data['path']
-            #persisten_vol         = form.volumes
+            #model_persistent_vol = form.volumes
+
+            model_file            = ""
+            model_card            = ""
+            model_S3              = model_project.s3storage
+            is_file               = True
+            secure_mode           = False   # To be changed: find a clever way to understand whether we are using a self-signed cert or not
+            building_from_current = False
+
+            if model_file == "":
+                building_from_current = True
+                model_file = '{}.tar.gz'.format(self.model_uid)
+                f = open(model_file, 'w')
+                f.close()
+                # TO DO: model_file must become an exact name, not just '.', so testing with model_path
+                res = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, '.'], stdout=subprocess.PIPE)
+            
+            if model_card == "" or model_card == None:
+                model_card_html_string = ""
+            else:
+                with open(model_card, 'r') as f:
+                    model_card_html_string = f.read()
+            
+            # Method from helpers.py, where S3 related methods exists
+            artifact_name = model_name + '_' + self.model_uid + '.tar'
+            status = set_artifact(artifact_name, model_file, model_path, model_S3, is_file=is_file, secure_mode=secure_mode)
+
+            if not status:
+                print("Failed to upload model to S3 storage")
+                # We should show the error and redirect somewhere else
+                return False
 
             new_model = Model(uid=self.model_uid,
                             name=model_name,
@@ -77,27 +108,19 @@ class ModelCreate(LoginRequiredMixin, View):
                             version=model_version,
                             model_card="",
                             project=model_project,
-                            s3=model_project.s3storage,
+                            s3=model_S3,
                             access='PR')
             new_model.save()      
             new_model.object_type.set([self.object_type])
+            
+            # Cleaning up generated tar for uploading artifact to S3 storage
+            if building_from_current:
+                os.system('rm {}'.format(model_file))  
 
-            # TO DO: S3 related
-            # open path to folder "models" (should exist within selected PV)
-            # compress models in a tar
-            # upload it to S3 storage associated with the project
-
-            # TO DO: Related to publish and unpublish
-            # published_model = PublishedModel.objects.get(name=new_model.name, project=new_model.project)
-            # if published_model:
-            #     # Model is published, so we should create a new
-            #     # PublishModelObject.
-            #     from models.helpers import add_pmo_to_publish
-            #     add_pmo_to_publish(new_model, published_model)
-
+            # Lastly, we redirect to the success url
             return redirect(success_url)
         else:
-            # If form is not valid, will show error and entered data
+            # Otherwise when form is not valid, it will then show error and the entered inputs
             return render(request, self.template, locals())
 
 
