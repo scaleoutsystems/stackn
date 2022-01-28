@@ -3,8 +3,8 @@
     "model": "models.objecttype",
     "pk": 1,
     "fields": {
-      "name": "Default",
-      "slug": "model",
+      "name": "Default Model",
+      "slug": "default",
       "apps": []
     }
   },
@@ -12,8 +12,35 @@
     "model": "models.objecttype",
     "pk": 2,
     "fields": {
-      "name": "MLFlow Model",
-      "slug": "mlflowModel",
+      "name": "Tensorflow Model",
+      "slug": "tensorflow",
+      "apps": []
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 3,
+    "fields": {
+      "name": "PyTorch Model",
+      "slug": "pytorch",
+      "apps": []
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 4,
+    "fields": {
+      "name": "MLflow Model",
+      "slug": "mlflow",
+      "apps": []
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 5,
+    "fields": {
+      "name": "Python Model Deployment",
+      "slug": "python",
       "apps": []
     }
   }
