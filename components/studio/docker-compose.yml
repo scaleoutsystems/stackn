@@ -12,7 +12,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - db.x.x.x.x.nip.io
+          - db.10.0.145.40.nip.io
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -20,7 +20,7 @@ services:
     container_name: studio
     build: .
     image: scaleoutsystems/studio-dev:v060
-    command: sh scripts/run_web.sh
+    command: sh scripts/run_web.sh $INIT
     environment:
       - GET_HOSTS_FROM=dns
       - KUBECONFIG=/root/.kube/config
@@ -33,7 +33,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - studio.x.x.x.x.nip.io
+          - studio.10.0.145.40.nip.io
 
   ingress:
     build:
@@ -53,7 +53,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - ingress.x.x.x.x.nip.io
+          - studio.10.0.145.40.nip.io
 
   redis:
     image: redis
@@ -64,7 +64,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - redis.x.x.x.x.nip.io
+          - redis.10.0.145.40.nip.io
   
   rabbit:
     image: rabbitmq
@@ -79,7 +79,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - rabbit.x.x.x.x.nip.io
+          - rabbit.10.0.145.40.nip.io
 
   celery-worker:
     build: .
@@ -105,7 +105,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - celery.x.x.x.x.nip.io
+          - celery.10.0.145.40.nip.io
 
   celery-beat:
     build: .
@@ -131,7 +131,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - celery-beat.x.x.x.x.nip.io
+          - celery-beat.10.0.145.40.nip.io
 
 networks:
   internal_network:
