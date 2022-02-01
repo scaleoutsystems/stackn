@@ -294,6 +294,14 @@
                                     <input type="text" name="environment_name" id="environment_name" value="" class="form-control" />
                                 </div>
                                 <div class="mb-3">
+                                    <label for="environment_name">Registry</label>
+                                    <select type="text" class="form-control" id="environment_registry" name="environment_registry" maxlength="256" required>
+                                        {% for registry in registries %}
+                                            <option value="{{ registry.pk }}">{{ registry.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
                                     <label for="environment_name">Repository</label>
                                     <input type="text" name="environment_repository" id="environment_repository" value="" class="form-control" />
                                 </div>
