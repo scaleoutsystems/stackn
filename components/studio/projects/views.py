@@ -412,7 +412,6 @@ def details(request, user, project_slug):
             resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"
-        object_types = ObjectType.objects.all()
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
     
     return render(request, template, locals())
