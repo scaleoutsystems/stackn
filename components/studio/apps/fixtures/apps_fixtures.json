@@ -523,7 +523,7 @@
     "pk": 15,
     "fields": {
       "name": "Tensorflow Serving",
-      "slug": "tensorflow-serving",
+      "slug": "tensorflow-serve",
       "category": "serve",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/v1/models/models:predict"
@@ -611,7 +611,7 @@
     "pk": 17,
     "fields": {
       "name": "PyTorch Serve",
-      "slug": "torch-serve",
+      "slug": "pytorch-serve",
       "category": "serve",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}/predictions/"
