@@ -1,6 +1,9 @@
 from collections import defaultdict
+from importlib.resources import path
+from unicodedata import decimal
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files import File
@@ -29,29 +32,37 @@ import uuid
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
-# We use reverse_lazy() because we are in "constructor attribute" code
-# that is run before urls.py is completely loaded
 class ModelCreate(LoginRequiredMixin, View):
     template = "models/model_create.html"
-
-    # Initializing values for hidden form inputs
     model_uid = str(uuid.uuid1().hex)
-    object_type = ObjectType.objects.get(name="Default")
 
     def get(self, request, user, project):
-        # locals() context fields
+        # all below will become locals() context fields
+
         form = ModelForm()
-        volumeK8s_pk = Apps.objects.get(slug='volumeK8s')
-        volumes = AppInstance.objects.filter(app=volumeK8s_pk)
+        # For showing the persistent volumes currently available within the project
+        volumeK8s_set = Apps.objects.get(slug='volumeK8s')
+        volumes = AppInstance.objects.filter(app=volumeK8s_set)
+
+        # Passing the current project to the view/template
         project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+        
+        # Showing all the available model object types (e.g. Tensorflow, PyTorch, etc...)
+        object_types = ObjectType.objects.all()
+        
+        # For showing the app instances where a folder with trained models can be fetched
+        app_set = Apps.objects.get(slug='jupyter-lab') # for the time being is hard-coded to jupyter-lab where usually models are trained
+        apps = AppInstance.objects.filter(app=app_set)
 
         return render(request, self.template, locals())
 
     def post(self, request, user, project):
         # For redirection after successful POST (and avoiding refresh of same POST)
-        success_url = reverse_lazy('models:list', args=[ user, project])
+        # We use reverse_lazy() because we are in "constructor attribute" code
+        # that is run before urls.py is completely loaded
+        redirect_url = reverse_lazy('models:list', args=[ user, project])
 
-        #Fetching current project
+        #Fetching current project and setting default object type
         model_project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
         
         # Extracting form fields
@@ -59,33 +70,73 @@ class ModelCreate(LoginRequiredMixin, View):
         
         # if valid it saves model in S3 storage, create object in the db and redirect
         if form.is_valid():
-            # TO DO: S3 related
-            # open path to folder "models" (should exist within selected PV)
-            # compress models in a tar
-            # upload it to S3 storage associated with the project
-
             model_name            = form.cleaned_data['name']
             model_description     = form.cleaned_data['description']
             model_release_type    = form.cleaned_data['release_type']
             model_version         = form.cleaned_data['version']
-            model_path            = form.cleaned_data['path']
-            #model_persistent_vol = form.volumes
-
+            model_folder_name     = form.cleaned_data['path']
+            model_type            = request.POST.get('model-type')
+            model_persistent_vol  = request.POST.get('volume')
+            model_app             = request.POST.get('app')
             model_file            = ""
             model_card            = ""
             model_S3              = model_project.s3storage
             is_file               = True
-            secure_mode           = False   # To be changed: find a clever way to understand whether we are using a self-signed cert or not
+            secure_mode           = False   # TO DO: find a clever way to understand whether we are using a self-signed cert or not
             building_from_current = False
 
+            # Copying folder from passed app that contains trained model
+            # First find the app release name
+            app = AppInstance.objects.get(name=model_app)
+            app_release = app.table_field['url'].split('.')[0].replace('https://','')     # e.g 'rfc058c6f'
+            # Now find the related pod
+            cmd = 'kubectl get po -l release=' + app_release + ' -o jsonpath="{.items[0].metadata.name}"'
+            result=subprocess.check_output(cmd, shell=True)
+            if not result:
+                print("stderr:", result.stderr)
+                messages.error(request, 'Oops, something went wrong: the model object was not created!')
+                return redirect(redirect_url)
+            else:
+                app_pod = result.decode('utf-8') # because the above subprocess run returns a byte-like object
+
+            # Copy model folder from pod to a temp location within studio pod
+            temp_folder_path = settings.BASE_DIR + '/tmp'    # which should be /app/tmp
+            # Create and move into the new directory
+            try:
+                os.mkdir(temp_folder_path)
+                os.chdir(temp_folder_path)
+                os.getcwd()
+            except OSError as error:
+                print(error)
+            # e.g. kubectl cp rfc058c6f-5fdb99c68c-kw5qb:/home/jovyan/work/project-vol/models ./models
+            # Note: default namespace is assumed here
+            cmd = 'kubectl cp ' + app_pod + ':/home/jovyan/work/' + model_persistent_vol + '/' + model_folder_name + ' ' + './' + model_folder_name
+            
+            result=subprocess.check_output(cmd, shell=True)
+            if not result:
+                print("stderr:", result.stderr)
+                messages.error(request, 'Oops, something went wrong: Models folder could not be copied from app: {}'.format(app_release))
+                return redirect(redirect_url)
+            else:
+                print('LOG INFO SUBPROCESS: ', result.decode('utf-8'))
+
+            # Creating new file to be compressed as a tar
             if model_file == "":
                 building_from_current = True
+                
                 model_file = '{}.tar.gz'.format(self.model_uid)
                 f = open(model_file, 'w')
                 f.close()
-                # TO DO: model_file must become an exact name, not just '.', so testing with model_path
-                res = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, '.'], stdout=subprocess.PIPE)
-            
+                
+                result = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, model_folder_name], stdout=subprocess.PIPE, check=True)
+                
+                if not result:
+                    print("stderr:", result.stderr)
+                    messages.error(request, "Oops, something went wrong: The archive for the models folder was not created!")
+                    return redirect(redirect_url)
+                else:
+                    print('LOG INFO SUBPROCESS: ', result.stdout)
+                
             if model_card == "" or model_card == None:
                 model_card_html_string = ""
             else:
@@ -94,12 +145,11 @@ class ModelCreate(LoginRequiredMixin, View):
             
             # Method from helpers.py, where S3 related methods exists
             artifact_name = model_name + '_' + self.model_uid + '.tar'
-            status = set_artifact(artifact_name, model_file, model_path, model_S3, is_file=is_file, secure_mode=secure_mode)
+            status = set_artifact(artifact_name, model_file, model_folder_name, model_S3, is_file=is_file, secure_mode=secure_mode)
 
             if not status:
                 print("Failed to upload model to S3 storage")
-                # We should show the error and redirect somewhere else
-                return False
+                return False # We should show the error and redirect somewhere else
 
             new_model = Model(uid=self.model_uid,
                             name=model_name,
@@ -110,15 +160,23 @@ class ModelCreate(LoginRequiredMixin, View):
                             project=model_project,
                             s3=model_S3,
                             access='PR')
-            new_model.save()      
-            new_model.object_type.set([self.object_type])
+            new_model.save()
+
+            # Setting the model object type based on form input from user
+            object_type = ObjectType.objects.get(name=model_type)
+            new_model.object_type.set([object_type])
             
             # Cleaning up generated tar for uploading artifact to S3 storage
-            if building_from_current:
-                os.system('rm {}'.format(model_file))  
+            try:
+                if building_from_current:
+                    os.system('rm {}.tar.gz'.format(self.model_uid))
+                    os.system('rm -rf {}'.format(temp_folder_path))
+                    os.chdir(settings.BASE_DIR)
+            except OSError as error:
+                print(error)
 
-            # Lastly, we redirect to the success url
-            return redirect(success_url)
+            # Finally, we redirect
+            return redirect(redirect_url)
         else:
             # Otherwise when form is not valid, it will then show error and the entered inputs
             return render(request, self.template, locals())

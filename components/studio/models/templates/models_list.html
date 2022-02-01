@@ -8,6 +8,8 @@
 
 <h1 class="h3 mb-3">Models</h1>
 
+{% include 'common/flash_messages.html' %}
+
 <div class="row">
     <div class="card flex-fill">
         <div class="card-header">
@@ -60,6 +62,10 @@
                                                 <i class="align-middle me-1" data-feather="slash"></i> Unpublish
                                             </a>
                                             {% endif %}
+                                            
+                                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                                <i class="align-middle me-1" data-feather="check-circle"></i> Serve
+                                            </a>
                                             <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
                                                 <i class="align-middle me-1" data-feather="trash"></i> Delete
                                             </a>
