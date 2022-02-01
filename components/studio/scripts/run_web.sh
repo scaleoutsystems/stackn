@@ -3,9 +3,22 @@
 # If we have set a local, custom settings.py, then use that.
 #[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
-INIT=$1 # should be either true or false
-
 # To allow setting up fixtures and init DB data for only the first time
+if [ -z $INIT ]; then
+    INIT=true # if one forgets to pass the init flag, true is assumed so to install fixtures and create the admin 
+else
+    INIT=$1 # should be either true or false
+fi
+
+if
+
+# To enable FEDn in STACKn
+if [ -z $FEDN ]; then
+    FEDN=false  # if one forgets to pass such flag, false is assumed
+else
+    FEDN=$2 # should be either true or false
+fi
+
 if $INIT; then
     echo "Running studio migrations..."
     python3 manage.py makemigrations
@@ -32,6 +45,10 @@ if $INIT; then
     # ONLY for local testing with docker-compose
     export DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
     python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
+
+    if $FEDN; then
+        python3 manage.py runscript load_FEDn -v2
+    fi
 fi
 
 echo "Starting the Studio server..."

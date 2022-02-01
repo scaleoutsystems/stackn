@@ -2,7 +2,7 @@
 # This script will load FEDn within STACKn by:
 
 # Donwloading FEDn folder and remove .svn from it
-svn checkout https://github.com/carmat88/stackn-apps/trunk/FEDn
+svn checkout https://github.com/carmat88/stackn-apps/trunk/FEDn     # TO DO: Change github repo as a source
 rm -rf FEDn/.svn/
 
 # Loading all fixtures related to FEDn
