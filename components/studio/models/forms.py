@@ -5,14 +5,10 @@ from .models import Model, ModelLog, Metadata
 class ModelForm(forms.ModelForm):
     class Meta:
         model = Model
-        fields = ('name', 'description', 'release_type', 'version', 'path')
+        fields = ('name', 'description', 'release_type', 'version', 'access', 'path')
         labels = {
-            'path': ('Model folder name'),
+            'path': ('Current folder name of your trained model*'),
         }
-        # widgets = {
-        #     'project': forms.HiddenInput(),
-        #     'uid': forms.HiddenInput()
-        # }
 
 class ModelLogForm(forms.ModelForm):
     class Meta:

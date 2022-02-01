@@ -12,10 +12,25 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         {{ form | crispy }}
-                        <label class="form-label">Volumes</label>
-                        <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
+
+                        <label class="form-label mt-1">Model Type*</label>
+                        <select name="model-type" id="model-type" class="form-control" required>
+                            {% for object_type in object_types %}
+                            <option value="{{ object_type.name }}">{{ object_type.name }}</option> 
+                            {% endfor %}
+                        </select>
+
+                        <label class="form-label mt-1">App*</label><small> (where the trained models are located)</small>
+                        <select name="app" id="app" class="form-control" required>
+                            {% for app in apps %}
+                            <option value="{{ app.name }}">{{ app.name }}</option> 
+                            {% endfor %}
+                        </select>
+
+                        <label class="form-label mt-1">Persistent Volume*</label><small> (mounted to the above app)</small>
+                        <select name="volume" id="volume" class="form-control" required>
                             {% for volume in volumes %}
-                            <option value="{{ volume.pk }}">{{ volume.name }}</option> 
+                            <option value="{{ volume.name }}">{{ volume.name }}</option> 
                             {% endfor %}
                         </select>
 
