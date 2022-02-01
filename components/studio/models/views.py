@@ -91,13 +91,12 @@ class ModelCreate(LoginRequiredMixin, View):
             app_release = app.table_field['url'].split('.')[0].replace('https://','')     # e.g 'rfc058c6f'
             # Now find the related pod
             cmd = 'kubectl get po -l release=' + app_release + ' -o jsonpath="{.items[0].metadata.name}"'
-            result=subprocess.check_output(cmd, shell=True)
-            if not result:
-                print("stderr:", result.stderr)
+            try:
+                result=subprocess.check_output(cmd, shell=True)
+                app_pod = result.decode('utf-8') # because the above subprocess run returns a byte-like object
+            except subprocess.CalledProcessError:
                 messages.error(request, 'Oops, something went wrong: the model object was not created!')
                 return redirect(redirect_url)
-            else:
-                app_pod = result.decode('utf-8') # because the above subprocess run returns a byte-like object
 
             # Copy model folder from pod to a temp location within studio pod
             temp_folder_path = settings.BASE_DIR + '/tmp'    # which should be /app/tmp
@@ -111,14 +110,12 @@ class ModelCreate(LoginRequiredMixin, View):
             # e.g. kubectl cp rfc058c6f-5fdb99c68c-kw5qb:/home/jovyan/work/project-vol/models ./models
             # Note: default namespace is assumed here
             cmd = 'kubectl cp ' + app_pod + ':/home/jovyan/work/' + model_persistent_vol + '/' + model_folder_name + ' ' + './' + model_folder_name
-            
-            result=subprocess.check_output(cmd, shell=True)
-            if not result:
-                print("stderr:", result.stderr)
-                messages.error(request, 'Oops, something went wrong: Models folder could not be copied from app: {}'.format(app_release))
+            try:
+                result=subprocess.check_output(cmd, shell=True)
+                print('LOG INFO SUBPROCESS - FOLDER COPY WITH KUBECTL: ', result.decode('utf-8'))
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                messages.error(request, 'Oops, something went wrong: Models folder could not be copied')
                 return redirect(redirect_url)
-            else:
-                print('LOG INFO SUBPROCESS: ', result.decode('utf-8'))
 
             # Creating new file to be compressed as a tar
             if model_file == "":
@@ -128,15 +125,16 @@ class ModelCreate(LoginRequiredMixin, View):
                 f = open(model_file, 'w')
                 f.close()
                 
-                result = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, model_folder_name], stdout=subprocess.PIPE, check=True)
-                
-                if not result:
-                    print("stderr:", result.stderr)
-                    messages.error(request, "Oops, something went wrong: The archive for the models folder was not created!")
+                try:
+                    result = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, model_folder_name], stdout=subprocess.PIPE, check=True)
+                    print('LOG INFO SUBPROCESS - ARCHIVE CREATION: ', result)
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    messages.error(request, "Oops, something went wrong: The archive for the model folder was not created!")
+                    # Clean up
+                    os.system('rm {}.tar.gz'.format(self.model_uid))
+                    os.system('rm -rf {}'.format(temp_folder_path))
                     return redirect(redirect_url)
-                else:
-                    print('LOG INFO SUBPROCESS: ', result.stdout)
-                
+                    
             if model_card == "" or model_card == None:
                 model_card_html_string = ""
             else:
