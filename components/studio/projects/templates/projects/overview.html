@@ -129,7 +129,7 @@
                         <button class="btn btn-outline-secondary">New</button>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Default Model Object</a>
+                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Create Model Object</a>
                         </div>
                     </div>
                 </div>
@@ -178,6 +178,9 @@
                                                 </a>
                                                 <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                                    <i class="align-middle me-1" data-feather="check-circle"></i> Serve
                                                 </a>
                                                 <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="trash"></i> Delete
