@@ -5,7 +5,7 @@
     "fields": {
       "name": "Default Model",
       "slug": "default",
-      "apps": []
+      "app_slug": "default-serve"
     }
   },
   {
@@ -14,7 +14,7 @@
     "fields": {
       "name": "Tensorflow Model",
       "slug": "tensorflow",
-      "apps": []
+      "app_slug": "tensorflow-serve"
     }
   },
   {
@@ -23,7 +23,7 @@
     "fields": {
       "name": "PyTorch Model",
       "slug": "pytorch",
-      "apps": []
+      "app_slug": "pytorch-serve"
     }
   },
   {
@@ -32,7 +32,7 @@
     "fields": {
       "name": "MLflow Model",
       "slug": "mlflow",
-      "apps": []
+      "app_slug": "mlflow-serve"
     }
   },
   {
@@ -41,7 +41,7 @@
     "fields": {
       "name": "Python Model Deployment",
       "slug": "python",
-      "apps": []
+      "app_slug": "fastapi-serve"
     }
   }
 ]
