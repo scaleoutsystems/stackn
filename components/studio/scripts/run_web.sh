@@ -5,12 +5,10 @@
 
 # To allow setting up fixtures and init DB data for only the first time
 if [ -z $INIT ]; then
-    INIT=true # if one forgets to pass the init flag, true is assumed so to install fixtures and create the admin 
+    INIT=false # if one forgets to pass the init flag, false is assumed
 else
     INIT=$1 # should be either true or false
 fi
-
-if
 
 # To enable FEDn in STACKn
 if [ -z $FEDN ]; then
