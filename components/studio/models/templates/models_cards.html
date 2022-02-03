@@ -20,18 +20,18 @@
 
     {% for model in published_models %}
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-3">
-        <div class="card h-100">  
+        <div class="card h-100">
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
                     <div class="col-12  d-flex flex-row">
                         <div class="col-8 d-flex">
-                            <h3 style="font-size: 1.1rem;">{{ model.name|title }}</h3>
+                            <h3 style="font-size: 1.1rem;">{{ model.name }}</h3>
                         </div>
                         <div class="col-4 d-flex justify-content-end">
                             <img src="{{ media_url }}{{ model.img }}" class="img-fluid float-end" style="height:40px;" alt="App Logo">
                         </div>
                     </div>
-                    
+
                         <div class="col-12  d-flex align-items-bottom flex-column">
                         <div class="h-100">
                             <!-- <p>{{ model.description }}</p> -->
