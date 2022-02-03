@@ -10,7 +10,7 @@
     "settings": {
         "model": {
             "quantity": "one",
-            "object_type": "mlflow-model"
+            "object_type": "mlflow"
         },
         "flavor": "one",
         "environment": {

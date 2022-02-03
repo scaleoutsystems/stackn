@@ -8,7 +8,9 @@
     "description": "",
     "priority": "200",
     "settings": {
-        "model": "one",
+        "model": {
+            "object_type": "python"
+        },
         "flavor": "one",
         "environment": {
             "name": "from",

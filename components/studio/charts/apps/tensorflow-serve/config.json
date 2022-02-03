@@ -8,7 +8,9 @@
     "description": "",
     "priority": "600",
     "settings": {
-        "model":"one",
+        "model": {
+            "object_type": "tensorflow"
+        },
         "flavor": "one",
         "logs": ["serve"],
         "permissions": {

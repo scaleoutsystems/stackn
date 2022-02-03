@@ -38,7 +38,7 @@ def get_form_models(aset, project, appinstance=[]):
         if 'object_type' in aset['model']:
             object_type = aset['model']['object_type']
         else:
-            object_type = 'model'
+            object_type = 'default'
         models = Model.objects.filter(project=project, object_type__slug=object_type)
         
         for model in models:
