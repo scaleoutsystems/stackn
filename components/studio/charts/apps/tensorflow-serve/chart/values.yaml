@@ -48,6 +48,9 @@ model:
   bucket: bucket
   obj: obj
 
+s3:
+  skip_tls: true
+
 model_card:
   enabled: false
   path: model-card

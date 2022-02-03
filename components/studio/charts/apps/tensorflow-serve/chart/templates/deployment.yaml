@@ -47,7 +47,11 @@ spec:
         image: minio/mc
         imagePullPolicy: IfNotPresent
         command: ["/bin/bash"]
+        {{ if .Values.s3.skip_tls }}
+        args: ["-c", "mc config host add --insecure projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp --insecure projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        {{ else }}
         args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        {{ end }}
         volumeMounts:
         - name: model-vol
           mountPath: /models
