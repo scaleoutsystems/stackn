@@ -10,9 +10,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SciLifeLab Serve</title>
+    <title>SciLifeLab Serve (beta)</title>
 
-    <link rel="icon" href="{% static 'dist/favicon_6.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'dist/scilifelab_symbol.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'dist/css/light.css' %}">
     <link rel="stylesheet" href="{% static 'dist/css/custom.css' %}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -48,7 +48,7 @@
         <nav id="sidebar" class="sidebar">
             <div style="border-right: 1px solid #dddddd;" class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" href="{% url 'models:index' %}">
-                    <img src="{% static 'dist/scaleout-studio.svg' %}" alt="STACKn Logo" width="220" >
+                    <img src="{% static 'dist/scaleout-studio.svg' %}" alt="SciLifeLab Serve (beta)" width="220" >
                 </a>
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
@@ -74,7 +74,7 @@
                     </li>
                     <li class="sidebar-item {{ menu.about }}">
                         <a class="sidebar-link" href="{% url 'about' %}">
-                            <i class="align-middle" data-feather="layers"></i>
+                            <i class="align-middle" data-feather="info"></i>
                             <span class="align-middle">About</span>
                         </a>
                     </li>
@@ -255,19 +255,14 @@
             <footer class="footer">
               <div class="container-fluid">
                   <div class="row text-muted">
-                    <div class="col-md-9">
-                        <p>SciLifeLab Serve is developed and maintained by the SciLifeLab Data Centre, funded by the <a href="https://www.scilifelab.se/data-driven">SciLifeLab & Wallenberg National Program for Data-Driven Life Science</a>. SciLifeLab Serve is an instance of <a href="https://github.com/scaleoutsystems/stackn">STACKn</a>, an open-source platform developed by <a href="https://www.scaleoutsystems.com/">Scaleout Systems</a>.</p>
-                        <p>With any questions please email datacentre@scilifelab.se.</p>
-                        <p><a href="{% url 'privacy' %}">Privacy policy</a></p>
+                    <div class="col-md-10">
+                        <p>SciLifeLab Serve is developed and maintained by the <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. SciLifeLab Serve is based on <a href="https://github.com/scaleoutsystems/stackn">STACKn</a>, an open-source platform developed by <a href="https://www.scaleoutsystems.com/">Scaleout Systems</a>. With any questions please email datacentre@scilifelab.se.</p>
+                        <p>This work was supported by a grant from the Knut and Alice Wallenberg Foundation to SciLifeLab for research in Datadriven Life Science.</p>
+                        <p><a href="https://serve.scilifelab.se/privacy/">Privacy policy</a></p>
                     </div>
-                    <div class="col-md-3">
-                          <div class="row mb-3"><div class="col text-center">
-                            <img src="{% static 'dist/scilifelab_logo.svg' %}" alt="SciLifeLab" height="40">
-                          </div></div>
-                          <div class="row"><div class="col text-center">
-                           <img src="{% static 'dist/kaw_logo.png' %}" alt="Knut and Alice Wallenberg Foundation" height="70">
-                          </div></div>
-                    </div>
+                    <div class="col-4 col-md-2">
+                      <img class="img-fluid" src="{% static 'dist/scilifelab_logo.svg' %}" alt="SciLifeLab and Knut and Alice Wallenberg Foundation">
+                  </div>
                   </div>
               </div>
           </footer>
