@@ -31,12 +31,12 @@
     {% endif %}
       {% for app in published_apps %}
       <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
-        <div class="card h-100">  
+        <div class="card h-100">
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
                     <div class="col-12  d-flex flex-row" style="height: 10%;">
                         <div class="col-8 d-flex">
-                            <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3>
+                            <h3 style="font-size: 1.1rem;">{{ app.name }}</h3>
                             <!-- <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3> -->
                         </div>
                         <div class="col-4 d-flex justify-content-end">
@@ -102,7 +102,7 @@
             </div>
         </div>
     </div>
-      
+
       {% endfor %}
 </div>
 {% endblock %}
