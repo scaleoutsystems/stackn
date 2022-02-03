@@ -149,7 +149,7 @@ class ModelCreate(LoginRequiredMixin, View):
                 print("Failed to upload model to S3 storage")
                 return False # We should show the error and redirect somewhere else
 
-            new_model = Model(uid=self.model_uid,
+            new_model = Model(uid=artifact_name,
                             name=model_name,
                             description=model_description,
                             release_type=model_release_type,
