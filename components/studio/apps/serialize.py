@@ -49,7 +49,7 @@ def serialize_model(form_selection):
                 "version": obj[0].version,
                 "release_type": obj[0].release_type,
                 "description": obj[0].description,
-                "url": "https://{}".format(obj[0].s3.host),
+                "url": "http://{}".format(obj[0].s3.host),
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
                 "bucket": obj[0].bucket,
