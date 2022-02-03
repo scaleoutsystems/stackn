@@ -45,7 +45,7 @@ if $INIT; then
     python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
 
     if $FEDN; then
-        python3 manage.py runscript load_FEDn -v2
+        sh ./scripts/load_FEDn.sh
     fi
 fi
 
