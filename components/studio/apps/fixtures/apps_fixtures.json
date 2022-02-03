@@ -168,7 +168,9 @@
       "description": "",
       "priority": "200",
       "settings": {
-        "model": "one",
+        "model": {
+          "object_type": "python"
+        },
         "flavor": "one",
         "environment": {
           "name": "from",
@@ -354,7 +356,7 @@
       "settings": {
         "model": {
           "quantity": "one",
-          "object_type": "mlflow-model"
+          "object_type": "mlflow"
         },
         "flavor": "one",
         "environment": {
@@ -531,7 +533,9 @@
       "description": "",
       "priority": "600",
       "settings": {
-        "model": "one",
+        "model": {
+          "object_type": "tensorflow"
+        },
         "flavor": "one",
         "logs": [
           "serve"
@@ -555,8 +559,8 @@
         },
         "publishable": "true"
       },
-      "chart": "apps/tensorflow-serving/chart",
-      "logo": "apps/tensorflow-serving/logo.png",
+      "chart": "apps/tensorflow-serve/chart",
+      "logo": "apps/tensorflow-serve/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -659,8 +663,8 @@
           "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/predictions/"
         }
       },
-      "chart": "apps/torch-serve/chart",
-      "logo": "apps/torch-serve/logo.png",
+      "chart": "apps/pytorch-serve/chart",
+      "logo": "apps/pytorch-serve/logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
