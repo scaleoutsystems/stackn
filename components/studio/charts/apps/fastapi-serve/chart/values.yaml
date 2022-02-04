@@ -37,6 +37,8 @@ hpa:
   max_pods: 3
   cpu_target: 60
 
+s3:
+  skip_tls: true
 
 model:
   name: name

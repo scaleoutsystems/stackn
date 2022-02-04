@@ -6,7 +6,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    # nginx.ingress.kubernetes.io/rewrite-target: /$1
   name: {{ .Release.Name }}-fastapi-ingress
   namespace: {{ .Values.namespace }}
 spec:
@@ -30,7 +29,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    # nginx.ingress.kubernetes.io/rewrite-target: /$1
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
 spec:
@@ -43,7 +41,7 @@ spec:
             service:
               name: {{ .Release.Name }}-{{ .Values.appname }}-svc
               port:
-                number: 80
+                number: 8501
           pathType: ImplementationSpecific
   tls:
     - secretName: prod-ingress
