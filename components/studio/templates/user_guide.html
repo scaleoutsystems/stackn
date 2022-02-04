@@ -23,8 +23,8 @@
                                               </ul>
                                             <li><a href="#apps-resources">Hosting apps and resources</a></li>
                                                 <ul>
-                                                  <li><a href="#Shiny">R Shiny</a></li>
-                                                  <li><a href="#Dash">Dash</a></li>
+                                                  <li><a href="#shiny">R Shiny</a></li>
+                                                  <li><a href="#dash">Dash</a></li>
                                                 </ul>
                                             <li><a href="#tutorials">Tutorials for serving machine learning models</a></li>
                                                 <ul>
@@ -110,9 +110,7 @@
                                               </li>
                                               <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
                                                   available at. By default a random subdomain is generated if no
-                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). You can add a custom domain name by scrolling down to the form that contains the
-                                                  option to Add
-                                                  Subdomain. Here the user can create a subdomain of their choice (given that it is not
+                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). By clicking on <b>New</b> you can add a custom subdomain name of your own choice (given that it is not
                                                   already taken).
                                                   Then, this subdomain will appear in the Subdomain options and the final domain will be
                                                   user-created-subdomain.serve.scilifelab.se.</li>
@@ -135,6 +133,7 @@
                                               <li><strong>App Port:</strong> The port that the Shiny server runs on (usually 3838).</li>
                                               <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
                                           </ul>
+                                          <p>To update a Shiny App after a new image has been published on DockerHub, click the pencil icon next to the app and press on the <b>Update</b> button on the bottom of the form.</p>
                                           <h3 id="dash">Dash</h3>
                                           <p>This is a service to deploy Dash apps. Currently, only apps that have been packaged as a docker container and are available on <a href="https://hub.docker.com/">DockerHub</a> are supported. If you are not sure how to do it, the SciLifeLab Serve team can assist you with this, please get in touch with us by e-mail.
 
@@ -145,12 +144,10 @@
                                               </li>
                                               <li><strong>Subdomain:</strong> This is the subdomain that the deployed app will be
                                                   available at. By default a random subdomain is generated if no
-                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). You can add a custom domain name by scrolling down to the form that contains the
-                                                  option to Add
-                                                  Subdomain. Here the user can create a subdomain of their choice (given that it is not
+                                                  option is chosen here (e.g., r46b61563 meaning that the app would be available at r46b61563.serve.scilifelab.se). By clicking on <b>New</b> you can add a custom subdomain name of your own choice (given that it is not
                                                   already taken).
                                                   Then, this subdomain will appear in the Subdomain options and the final domain will be
-                                                  user-created-subdomain.serve.scilifelab.se. </li>
+                                                  user-created-subdomain.serve.scilifelab.se.</li>
                                               <li><strong>Permissions:</strong> Permissions for the project. There are 3 levels of
                                                   permissions for an app:
                                                   <ul>
@@ -168,9 +165,10 @@
                                               <li><strong>Path to folder:</strong>This is the path to the folder (inside the docker
                                                   container) in which
                                                   the main Dash application file is located (usually app.py).</li>
-                                              <li><strong>App Port:</strong> The port that the Shiny server runs on (usually 8050).</li>
+                                              <li><strong>App Port:</strong> The port that the Dash app runs on (usually 8050).</li>
                                               <li><strong>DockerHub Image:</strong> Name of the image on DockerHub.</li>
                                           </ul>
+                                          <p>To update a Dash App after a new image has been published on DockerHub, click the pencil icon next to the app and press on the <b>Update</b> button on the bottom of the form.</p>
 
                                           <h2 id="tutorials">Tutorials for serving machine learning models</h2>
                                           <p>These tutorials are intended as quick examples to get started with working on ML model
