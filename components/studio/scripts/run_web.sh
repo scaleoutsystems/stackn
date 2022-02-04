@@ -4,19 +4,6 @@
 #[ -f studio/local_settings.py ] && echo "Using local settings file" && export DJANGO_SETTINGS_MODULE=studio.local_settings
 
 # To allow setting up fixtures and init DB data for only the first time
-if [ -z $INIT ]; then
-    INIT=false # if one forgets to pass the init flag, false is assumed
-else
-    INIT=$1 # should be either true or false
-fi
-
-# To enable FEDn in STACKn
-if [ -z $FEDN ]; then
-    FEDN=false  # if one forgets to pass such flag, false is assumed
-else
-    FEDN=$2 # should be either true or false
-fi
-
 if $INIT; then
     echo "Running studio migrations..."
     python3 manage.py makemigrations
@@ -44,6 +31,7 @@ if $INIT; then
     export DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
     python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
 
+    # To enable FEDn in STACKn
     if $FEDN; then
         sh ./scripts/load_FEDn.sh
     fi
