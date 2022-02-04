@@ -127,9 +127,14 @@
                             </li>
                             {% block extra_topnav_items %} {% endblock %}
                         {% else %}
-                        <a class="btn btn-info" href="{% url 'login' %}">
-                            Sign in  <i class="align-middle me-1" data-feather="log-out"></i>
-                        </a>
+                        <div>
+                            <a class="btn btn-info" href="{% url 'common:signup' %}">
+                                Sign up  <i class="align-middle me-1" data-feather="user-check"></i>
+                            </a>
+                            <a class="btn btn-success" href="{% url 'login' %}">
+                                Sign in  <i class="align-middle me-1" data-feather="log-in"></i>
+                            </a>
+                        </div>
                         {% endif %}
                     </ul>
                 </div>
