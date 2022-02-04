@@ -151,10 +151,12 @@ class ModelCreate(LoginRequiredMixin, View):
 
             new_model = Model(uid=artifact_name,
                             name=model_name,
+                            bucket=model_folder_name,
                             description=model_description,
                             release_type=model_release_type,
                             version=model_version,
                             model_card="",
+                            path=model_folder_name,
                             project=model_project,
                             s3=model_S3,
                             access='PR')
