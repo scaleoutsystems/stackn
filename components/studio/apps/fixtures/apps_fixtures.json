@@ -163,7 +163,7 @@
       "slug": "fastapi-serve",
       "category": "serve",
       "table_field": {
-        "url": "https://{{ release }}.{{ global.domain }}"
+        "url": "https://{{ release }}.{{ global.domain }}/predict/"
       },
       "description": "",
       "priority": "200",
