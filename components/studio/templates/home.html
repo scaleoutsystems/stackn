@@ -1,8 +1,21 @@
 {% extends base_template %}
 {% block content %}
-<div class="d-flex justify-content-center">
+
+<div class="container-fluid p-0">
+
+
+  <div class="row">
+      <div class="card flex-fill">
+          <div class="card-header">
+              <div class="d-flex justify-content-center">
+                <h1 class="h1" style="font-weight: 800;">Sci</h1><h1 class="h1" style="color: #8eab3e; font-weight: 800;">Life</h1><h1 class="h1" style="font-weight: 800;">Lab</h1><h1 class="h1" style="margin-left: 5px;"> Serve</h1>
+              </div>
+          </div>
+          <div class="card-body">
+
+<!-- <div class="d-flex justify-content-center">
     <h1 class="h1" style="font-weight: 800;">Sci</h1><h1 class="h1" style="color: #8eab3e; font-weight: 800;">Life</h1><h1 class="h1" style="font-weight: 800;">Lab</h1><h1 class="h1" style="margin-left: 5px;"> Serve</h1>
-</div>
+</div> -->
 
 <div class="row" style="margin-top: 30px; font-size: medium;">
     <p>SciLifeLab Serve is a service under development for machine learning model serving and app publication. Upon launch the service is planned to be offered free of charge to Swedish researchers (both with and without SciLifeLab affiliation) and SciLifeLab platforms. <b>Currently, SciLifeLab Serve is in beta testing phase and is looking for test users.</b>
@@ -50,6 +63,11 @@
 
   <h3>Questions?</h3>
   <p style="font-size:medium;">The <a href="{% url 'about' %}">team behind SciLifeLab Serve</a> is happy to answer your questions and receive feedback, drop us a line to datacentre@scilifelab.se.</p>
+
+</div>
+</div>
+</div>
+</div>
 
 </div>
 {% endblock %}

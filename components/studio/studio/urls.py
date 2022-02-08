@@ -46,6 +46,7 @@ urlpatterns = [
 
 # Since this is a production feature, it will only work if DEBUG is set to False
 handler404 = 'studio.views.handle_page_not_found'
+handler500 = 'studio.views.handle_500'
 
 import os
 

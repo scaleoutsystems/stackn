@@ -12,26 +12,56 @@
                 <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
             </div> -->
             <div class="card-body">
-                <form action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post">
+                <form class="needs-validation" action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post" novalidate>
                     {% csrf_token %}
                     
                     <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">
                     <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
+                    <div class="mb-3 form-group validate-item">
+                        <label for="app_name" class="form-label">Name</label>
+                        <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Please add a valid name!
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-group validate-item">
+                        <label for="app_description" class="form-label">Description</label>
+                        <input type="text" id="app_description" name="app_description" value="{{ existing_app_description }}" class="form-control" required>
+                        <div class="invalid-feedback">
+                            Please add a description of the app!
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Subdomain</label>
-                        <select name="app_release_name" id="app_release_name" class="form-control">
+                        <div class="input-group">
+                            <select name="app_release_name" id="app_release_name" type="text" class="form-control" formnovalidate="formnovalidate">
+                                <option value="" {% if not request.GET.rn %}selected{% endif %}>---- Generated ----</option>
+                            {% for item in form.release_names %}
+                                <option value="{{ item.name }}" {% if request.GET.rn == item.name %}selected{% endif %}>{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                            <button class="btn btn-outline-secondary" onclick="toggleSubdomain()" type="button">New</button>
+                        </div>
+                        <!-- <select name="app_release_name" id="app_release_name" class="form-control">
                             <option value="" selected>---- Generated ----</option>
                             {% for item in form.release_names %}
                                 <option value="{{ item.name }}">{{ item.name }}</option>
                             {% endfor %}
-                        </select>
+                        </select> -->
                     </div>
-
+                    <div id="subdomain-add" class="mb-3" style="display: none;">
+                        <label class="form-label">New Subdomain</label>
+                        <div class="input-group">
+                                <input id="rn" type="text" class="form-control" placeholder="New Subdomain ..." name="rn">
+                                <div class="input-group-append">
+                                <button onclick="submitDomain()" type="button" class="btn btn-info">Add</button>
+                                </div>
+                                <div class="valid-feedback">Subdomain Added</div>
+                                <div class="invalid-feedback">Subdomain already exists. Please choose another.</div>
+                          </div>
+                    </div>
                     {% if form.dep_permissions %}
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
@@ -109,7 +139,8 @@
                     </div>
                     {% endif %}
 
-
+                    <datalist id="datalistOptions">
+                    </datalist>
 
                     {% if form.dep_apps %}
                     
@@ -131,8 +162,13 @@
                         <!-- <label class="form-label">{{ key }}</label> -->
                         <h6> {{ vals.meta_title }}</h6>
                         {% for subkey, subval in vals.items %}
-                        <div class="mb-3">
-                            {% if subval.type == "boolean" %}
+                        {% if subval.type != "boolean" and  subkey == "image" or subkey == "port"%} 
+                            <div class="mb-3 form-group validate-item">
+                        {% else %}
+                            <div class="mb-3">
+                        {% endif %}
+                            
+                            {% if subval.type == "boolean"%}
                             <label class="form-label">{{ subval.title }}</label>
                             <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
                                 {% if subval.default == "False" %}
@@ -147,7 +183,15 @@
                             
                             {% if subval.type == "string" %}
                             <label class="form-label">{{ subval.title }}</label>
-                            <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% if subkey == "image" %} 
+                                <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control" required>
+                                <div class="invalid-feedback">
+                                    Please add a valid image name!
+                                </div>
+                            {% else %}
+                                <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% endif %}
+                            
                             {% endif %}
 
                             {% if subval.type == "textfield" %}
@@ -157,7 +201,14 @@
 
                             {% if subval.type == "number" %}
                             <label class="form-label">{{ subval.title }}</label>
-                            <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% if subkey == "port"%} 
+                                <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control" required>
+                                <div class="invalid-feedback">
+                                    Please add a valid port!
+                                </div>
+                            {% else %}
+                                <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
+                            {% endif %}
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -245,7 +296,7 @@
                     </div>
                     </dd>
                 </dl>
-                <dl class="row">
+                <!-- <dl class="row">
                     <dt class="col-4 col-xxl-3 mb-0">Add Subdomain</dt>
                     <dd class="col-8 col-xxl-9 mb-0">
                         <div class="mb-3">
@@ -262,20 +313,15 @@
                             </form>
                         </div>
                     </dd>
-                </dl>
+                </dl> -->
             </div>
         </div>      
     </div>
 </div>
 {% endif %}
-{% if app_action == "Create" %}
-<div class="row">
+<!-- <div class="row">
     <div class="col-12 col-xl-6">
         <div class="card">
-            <!-- <div class="card-header">
-                <h5 class="card-title">Basic form</h5>
-                <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
-            </div> -->
             <div class="card-body">
                 <dl class="row">
                     <dt class="col-4 col-xxl-3 mb-0">Add Subdomain</dt>
@@ -294,10 +340,141 @@
                             </form>
                         </div>
                     </dd>
+                    
                 </dl>
             </div>
         </div>      
     </div>
-</div>
-{% endif %}
+</div> -->
+<!-- <style>
+    .frmSearch {border: 1px solid #a8d4b1;background-color: #c6f7d0;margin: 2px 0px;padding:40px;border-radius:4px;}
+    #country-list{float:left;list-style:none;margin-top:-3px;padding:0;width:190px;position: absolute;}
+    #country-list li{padding: 10px; background: #f0f0f0; border-bottom: #bbb9b9 1px solid;}
+    #country-list li:hover{background:#ece3d2;cursor: pointer;}
+    #search-box{padding: 10px;border: #a8d4b1 1px solid;border-radius:4px;}
+    </style> -->
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  var forms = document.querySelectorAll('.needs-validation')
+  var validateGroup = document.getElementsByClassName('validate-item');
+  console.log(validateGroup)
+  // Loop over them and prevent submission
+  Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+
+                        //Added validation class to all form-groups in need of validation
+                        for (var i = 0; i < validateGroup.length; i++) {
+                            validateGroup[i].classList.add('was-validated');
+                        }
+                    }, false);
+    })
+})()
+    function toggleSubdomain() {
+        var x = document.getElementById("subdomain-add");
+        // if ($('#rn').hasClass('is-valid')) {
+        //     $('#rn').removeClass('is-valid');
+        // }
+        // if ($('#rn').hasClass('is-invalid')) {
+        //     $('#rn').removeClass('is-invalid');
+        // }
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+
+    function submitDomain() {
+        var rn = document.getElementById('rn').value
+        console.log("Hereee: ",rn)
+        $.ajax({
+            type: "POST",
+            url: '{% url "apps:create_releasename" request.user project.slug app.slug %}',
+            data: {"rn": rn,"csrfmiddlewaretoken": '{{ csrf_token }}'},
+            // beforeSend: function(){
+            // 	console.log($(this).val())
+            // },
+            success: function(data){
+                console.log("HEREE: ",data)
+                if (data.available == "true"){
+                    if ($('#rn').hasClass('is-invalid')) {
+                        $('#rn').removeClass('is-invalid');
+                    }
+                    $('#rn').addClass('is-valid');
+                    setTimeout(function(){
+                        window.location.href = window.location.href.replace( /[\?#].*|$/, "?rn="+data.rn );
+                        // window.location.reload(true);
+                    }, 2000);
+                    
+                } else {
+                    if ($('#rn').hasClass('is-valid')) {
+                        $('#rn').removeClass('is-valid');
+                    }
+                    $('#rn').addClass('is-invalid');
+                }
+            }
+            });
+        }
+
+    $(document).ready(function(){
+    $('#image').attr('list', 'datalistOptions');
+	$("#image").keyup(function(){
+        var final_list = []
+        console.log($(this).val(),encodeURIComponent($(this).val()))
+        if (!$(this).val().includes("/")) {
+            $.ajax({
+            type: "GET",
+            url: "https://hub.docker.com/api/content/v1/products/search?",
+            data: {"source": "community","q": $(this).val(),"page_size":1000},
+            // beforeSend: function(){
+            // 	console.log($(this).val())
+            // },
+            success: function(data){
+                // console.log(data.summaries)
+                $("#datalistOptions").empty()
+                if (data.summaries != null) {
+                    data.summaries.forEach(element => {
+                    final_list.push(element.name)
+                    });
+                    $("#datalistOptions").append(final_list.map(country => '<option value="'+country+'">'));
+                }
+                // console.log(final_list)
+                // $("#suggesstion-box").show();
+                // $("#suggesstion-box").html($ul);
+                // $("#search-box").css("background","#FFF");
+            }
+            // ,
+            // error: function (data) {
+            //     $("#datalistOptions").empty()
+            // }
+            // ,
+            // complete: function() {
+            //     setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
+            // }
+            });
+        }
+		
+	});
+});
+// <ul id="country-list">
+// <?php
+// foreach($result as $country) {
+// ?>
+// <li onClick="selectCountry('<?php echo $country["country_name"]; ?>');"><?php echo $country["country_name"]; ?></li>
+// <?php } ?>
+// </ul>
+//To select country name
+// function selectCountry(val) {
+// $("#search-box").val(val);
+// $("#suggesstion-box").hide();
+// }
+</script>
 {% endblock %}

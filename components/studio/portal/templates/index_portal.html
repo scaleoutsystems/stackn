@@ -44,11 +44,12 @@
                         </div>
                     </div>
                     <div class="col-12  d-flex align-items-bottom flex-column">{{ app.app.name }}</div>
+                    <div class="col-12  d-flex align-items-bottom flex-column">{{ app.description }}</div>
                     <div id="app-details-{{app.id}}" class="col-12  invisible align-items-bottom flex-column" style="display: none;">
                         <div><h6 style="font-weight: 500;display: inline-flex;">Owner:</h6> {{ app.owner }}</div>
                         <div><h6 style="font-weight: 500;display: inline-flex;">Project:</h6> {{ app.project.name }}</div>
                         <div><h6 style="font-weight: 500;display: inline-flex;">Created On:</h6> {{ app.created_on|date:"d M, Y" }}</div>
-                        <div><h6 style="font-weight: 500;display: inline-flex;">Description:</h6> - </div>
+                        <!-- <div><h6 style="font-weight: 500;display: inline-flex;">Description:</h6> {{ app.description }} </div> -->
                     </div>
                     <div class="col-12  d-flex align-items-bottom flex-column">
                         <div class="h-100">

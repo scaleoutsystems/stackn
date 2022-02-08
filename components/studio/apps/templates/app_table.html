@@ -39,13 +39,13 @@
           {% endif %}
         </td>
         <td>
-          {% if appinstance.app.settings.publishable == "true" %}
+          <!-- {% if appinstance.app.settings.publishable == "true" %}
             {% if appinstance.access == "public" %}
             <a href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">Unpublish</a>
             {% else %}
             <a href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">Publish</a>
             {% endif %}
-          {% endif %}
+          {% endif %} -->
         </td>
     </tr>
     {% endfor %}

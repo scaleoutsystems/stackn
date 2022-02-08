@@ -6,6 +6,7 @@ from django.db.models import Q, Subquery
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from libcst import If
 from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, ReleaseName
 from models.models import Model
@@ -166,6 +167,7 @@ def appsettings(request, user, project, ai_id):
     project = Project.objects.get(slug=project)
     appinstance = AppInstance.objects.get(pk=ai_id)
     existing_app_name = appinstance.name
+    existing_app_description = appinstance.description
     app = appinstance.app
 
     aset = appinstance.app.settings
@@ -198,8 +200,8 @@ def create_releasename(request, user, project, app_slug):
         release.project = Project.objects.get(slug=project)
         release.save()
     print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
-    
-    return HttpResponseRedirect(reverse('apps:create', kwargs={'user':user, 'project':project, 'app_slug':app_slug})+"?available="+available+"&rn="+request.POST.get('rn'))
+    print("RETURN: ",available)
+    return JsonResponse({"available":available,"rn":request.POST.get('rn')})
 
 def add_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
@@ -239,6 +241,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
 
 
     existing_app_name = ""
+    existing_app_description = ""
     project = Project.objects.get(slug=project)
     app = Apps.objects.filter(slug=app_slug).order_by('-revision')[0]
         
@@ -255,6 +258,7 @@ def create(request, user, project, app_slug, data=[], wait=False):
         print("INPUT")
         print(data)
         app_name = data.get('app_name')
+        app_description = data.get('app_description')
         parameters_out, app_deps, model_deps = serialize_app(data, project, aset, user.username)
 
         if data.get('app_action') == "Create":
@@ -296,14 +300,17 @@ def create(request, user, project, app_slug, data=[], wait=False):
 
         if data.get('app_action') == "Create":
             instance = AppInstance(name=app_name,
+                                description=app_description,
                                 app=app,
                                 project=project,
                                 info={},
                                 parameters=parameters_out,
                                 owner=user)
             
-            
-            
+            if permission.public == True:
+                instance.access = 'public'
+            else:
+                instance.access = 'private'
             create_instance_params(instance, "create")
             
             rel_name_obj = []
@@ -357,7 +364,12 @@ def create(request, user, project, app_slug, data=[], wait=False):
             print("UPDATING APP DEPLOYMENT")
             print(instance)
             instance.name = app_name
+            instance.description = app_description
             instance.parameters.update(parameters_out)
+            if permission.public == True:
+                instance.access = 'public'
+            else:
+                instance.access = 'private'
             instance.save()
             instance.app_dependencies.set(app_deps)
             instance.model_dependencies.set(model_deps)

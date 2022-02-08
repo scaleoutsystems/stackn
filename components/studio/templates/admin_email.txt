@@ -1,0 +1,15 @@
+Hi Admin,
+
+There is a new request for account registeration on SciLifeLab Serve. The request contents are as follows:
+
+First Name: {{ fname }}
+Last Name: {{ lname }}
+Date Received: {{ date_received }}
+Email: {{ email }}
+Organization: {{ org }}
+Usage: {{ use }}
+Deployed somewhere: {{ deployed }}
+Requirements: {{ resources }}
+
+Best,
+SciLifeLab Serve Team

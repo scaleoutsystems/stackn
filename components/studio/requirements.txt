@@ -54,3 +54,4 @@ Pillow
 mozilla-django-oidc
 s3fs
 django-tagulous
+libcst

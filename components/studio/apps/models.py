@@ -71,9 +71,9 @@ class AppInstance(models.Model):
     parameters = models.JSONField(blank=True, null=True)
     state = models.CharField(max_length=50, null=True, blank=True)
     table_field = models.JSONField(blank=True, null=True)
-
+    description = models.TextField(blank=True, null=True, default="")
     access = models.CharField(max_length=20, default="private", null=True, blank=True)
-    tags = TagField()
+    tags = TagField(null=True, blank=True)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
     deleted_on = models.DateTimeField(null=True, blank=True)
