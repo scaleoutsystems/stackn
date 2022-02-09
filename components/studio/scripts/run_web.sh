@@ -30,11 +30,11 @@ if $INIT; then
     # ONLY for local testing with docker-compose
     export DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
     python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
+fi
 
-    # To enable FEDn in STACKn
-    if $FEDN; then
-        sh ./scripts/load_FEDn.sh
-    fi
+# To enable FEDn in STACKn
+if $FEDN; then
+    sh ./scripts/load_FEDn.sh
 fi
 
 echo "Starting the Studio server..."
