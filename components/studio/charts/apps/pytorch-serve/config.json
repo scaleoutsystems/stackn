@@ -9,6 +9,9 @@
     "priority": "500",
     "settings": {
         "logs": ["serve"],
+        "model": {
+            "object_type": "pytorch"
+        },
         "permissions": {
             "public": {"value":"false", "option": "true"},
             "project": {"value":"true", "option": "true"},
