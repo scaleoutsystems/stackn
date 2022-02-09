@@ -19,7 +19,7 @@
                     <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control">
+                        <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control" required>
                     </div>
                     
                     <div class="mb-3">
@@ -101,7 +101,7 @@
                     {% if form.dep_volumes %}
                     <div class="mb-3">
                         <label class="form-label">Volumes</label>
-                        <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
+                        <select name="volumes" id="volumes" class="form-control" required>
                             {% for volume in form.volumes %}
                             <option value="{{ volume.pk }}">{{ volume.name }}</option> 
                             {% endfor %}
@@ -110,13 +110,11 @@
                     {% endif %}
 
 
-
-                    {% if form.dep_apps %}
-                    
+                    {% if form.dep_apps %}                    
                         {% for app_name, appinstances in form.app_deps.items %}
                         <div class="mb-3">
                             <label class="form-label">{{ app_name }}</label>
-                            <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
+                            <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }} required>
                             {% for appinstance in appinstances.instances %}
                                 <option value="{{ appinstance.pk }}" {{ appinstance.selected }}>{{ appinstance.name }}</option> 
                             {% endfor %}
