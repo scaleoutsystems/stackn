@@ -195,7 +195,6 @@ def index(request,user=None,project=None,id=0):
 
         return render(request, 'models/index.html', locals())
     else:
-        """
         #TODO move tags to separate djapp
         
         # create session object to store info about model and their tag counts
@@ -253,7 +252,7 @@ def index(request,user=None,project=None,id=0):
             published_models = tagged_published_models
 
         request.session.modified = True
-        """
+ 
         return render(request, 'models/index.html', locals())
 
 
@@ -293,13 +292,10 @@ def publish_model(request, user, project, id):
     import random
     from .helpers import add_pmo_to_publish
     # TODO: Check that user has access to this particular model.
-    
-    
     model = Model.objects.get(pk=id)
     print(model)
     # Default behavior is that all versions of a model are published.
     models = Model.objects.filter(name=model.name, project=model.project)
-    
     
     img = settings.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
     img_file = open(img, 'rb')
@@ -601,16 +597,15 @@ def details_private(request, user, project, id):
     base_template = 'base.html'
 
     project_slug = project
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    if is_authorized:
-        try:
-            project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-            base_template = 'baseproject.html'
-        except Exception as err:
-            project = []
-            print(err)
-        if not project:
-            base_template = 'base.html'
+
+    try:
+        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+        base_template = 'baseproject.html'
+    except Exception as err:
+        project = []
+        print(err)
+    if not project:
+        base_template = 'base.html'
 
     media_url = settings.MEDIA_URL
     # TODO: Check that user has access to this model (though already checked that user has access to project)
