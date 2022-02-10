@@ -24,12 +24,16 @@
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
-                <a class="sidebar-brand" href="{% url 'models:index' %}">
-                    <img src="{% static 'images/stackn.png' %}" alt="STACKn Logo" width="200" >
-                </a>
+                <img src="{% static 'images/stackn.png' %}" alt="STACKn Logo" width="200" >
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">
                         Catalogs
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'portal:home' %}">
+                            <i class="align-middle" data-feather="home"></i>
+                            <span class="align-middle">Home</span>
+                        </a>
                     </li>
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="{% url 'portal:index' %}">
@@ -43,10 +47,18 @@
                             <span class="align-middle">Models</span>
                         </a>
                     </li>
+                    {% if request.user.is_authenticated %}
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="{% url 'projects:index' %}">
                             <i class="align-middle" data-feather="folder"></i>
                             <span class="align-middle">Projects</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="https://scaleoutsystems.github.io/stackn/#/" target="_blank">
+                            <i class="align-middle" data-feather="file-text"></i>
+                            <span class="align-middle">User Guide</span>
                         </a>
                     </li>
                     {% block extra_sidebar_items %} {% endblock %}

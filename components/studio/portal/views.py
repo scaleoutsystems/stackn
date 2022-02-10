@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.template import engines
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.views.generic import View
 
 
 from apps.models import Apps, AppInstance
@@ -93,3 +94,12 @@ def index(request,id=0):
 
     template = 'portal/index.html'
     return render(request, template, locals())
+
+
+class HomeView(View):
+    template = "portal/home.html"
+
+    def get(self, request):
+
+        
+        return render(request, self.template, locals())
