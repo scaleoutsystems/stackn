@@ -45,7 +45,15 @@
                                     {% if model.status == 'CR' %}bg-warning
                                     {% elif model.status == 'DP' %}bg-success
                                     {% elif model.status == 'AR' %}bg-danger
-                                    {% endif %}">{{ model.get_status_display }}</span></td>
+                                    {% endif %}">{{ model.get_status_display }}</span>
+                                    <span class="badge bg-info">
+                                    {% if model.access != "PU" %}
+                                    unpublished
+                                    {% else %}
+                                    published</span>
+                                    {% endif %}
+                                </td>
+      
                                 <td>{{ project.owner }}</td>
                                 <td class="table-action">
                                     <div class="dropdown show">
