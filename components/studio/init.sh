@@ -28,4 +28,4 @@ sed -i "s/<your-domain>/$my_ip.nip.io/g" ./docker-compose.yml
 sed -i "s/<your-domain>/$my_ip.nip.io/g" ./studio/settings.py
 echo "Your current STACKn domain will be: $my_ip.nip.io"
 
-echo "Done"
+echo "Done! Please start STACKn with: docker-compose up"
