@@ -29,8 +29,6 @@ CRISPY_TEMPLATE_PACK="bootstrap4"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# This can be simply "localhost", but it's better to test with a wildcard dns such as nip.io
-DOMAIN = 'x.x.x.x.nip.io'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'pyey3^@n)$id1tc3_g7xcb55n7ii1989jy#&%!yk^z(u1us4@*'
 
@@ -243,4 +241,6 @@ KUBECONFIG = "/root/.kube/config"
 NAMESPACE = 'default'
 REGISTRY_SVC = 'stack-docker-registry'
 STORAGECLASS = 'microk8s-hostpath'
-STUDIO_URL = 'http://studio.x.x.x.x.nip.io:8080'
+# This can be simply "localhost", but it's better to test with a wildcard dns such as nip.io
+DOMAIN = '<your-domain>'
+STUDIO_URL = 'http://studio.<your-domain>:8080'
