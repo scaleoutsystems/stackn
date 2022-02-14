@@ -41,7 +41,8 @@ urlpatterns = [
     path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
     path('<user>/<project>/apps/', include('apps.urls', namespace='apps')),
     path('studio/admin/', include('studio_admin.urls', namespace='studio_admin')),
-    path('django_plotly_dash/', include('django_plotly_dash.urls'))
+    path('django_plotly_dash/', include('django_plotly_dash.urls')),
+    # path('', include('social_django.urls', namespace='social'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Since this is a production feature, it will only work if DEBUG is set to False

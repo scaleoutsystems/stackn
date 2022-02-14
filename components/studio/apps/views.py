@@ -21,6 +21,7 @@ import time
 from datetime import datetime, timedelta
 from .generate_form import generate_form
 from .helpers import create_instance_params
+import re
 
 def get_status_defs():
     status_success = ['Running', 'Succeeded', 'Success']
@@ -190,16 +191,21 @@ def add_releasename(request, user, project, ai_id, rn=None):
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id})+"?available="+available+"&rn="+request.POST.get('rn'))
 
 def create_releasename(request, user, project, app_slug):
-    count_rn = ReleaseName.objects.filter(name = request.POST.get('rn')).count()
-    available = "false"
-    if count_rn == 0:
-        available = "true"
-        release=ReleaseName()
-        release.name = request.POST.get('rn')
-        release.status = 'active'
-        release.project = Project.objects.get(slug=project)
-        release.save()
-    print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
+    pattern = re.compile("^[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$")
+    available = "invalid"
+    system_subdomains = ["keycloak","grafana","prometheus","studio"]
+    # print("PATTERN MATCH: ",pattern.match(request.POST.get('rn')))
+    if pattern.match(request.POST.get('rn')):
+        available = "false"
+        count_rn = ReleaseName.objects.filter(name = request.POST.get('rn')).count()
+        if count_rn == 0 and request.POST.get('rn') not in system_subdomains:
+            available = "true"
+            release=ReleaseName()
+            release.name = request.POST.get('rn')
+            release.status = 'active'
+            release.project = Project.objects.get(slug=project)
+            release.save()
+        print("RELEASE_NAME: ",request.POST.get('rn'),count_rn)
     print("RETURN: ",available)
     return JsonResponse({"available":available,"rn":request.POST.get('rn')})
 

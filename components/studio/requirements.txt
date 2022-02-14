@@ -55,3 +55,5 @@ mozilla-django-oidc
 s3fs
 django-tagulous
 libcst
+social-auth-core[all]
+social-auth-app-django

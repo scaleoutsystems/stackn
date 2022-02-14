@@ -14,6 +14,8 @@ import os
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.elixir.ElixirOpenIdConnect'
+    
 ]
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -28,7 +30,7 @@ DOMAIN = 'platform.local'
 SECRET_KEY = 'pyey3^@n)$id1tc3_g7xcb55n7ii1989jy#&%!yk^z(u1us4@*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
@@ -67,7 +69,7 @@ INSTALLED_APPS = [
     'django_plotly_dash',
     'portal',
     'tagulous',
-    'studio',
+    'social_django',
 ]
 
 REST_FRAMEWORK = {
@@ -84,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
 STATICFILES_FINDERS = (

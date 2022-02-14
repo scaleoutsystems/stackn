@@ -19,6 +19,9 @@
                     <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
                     <div class="mb-3 form-group validate-item">
                         <label for="app_name" class="form-label">Name</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Display name for the application. This is the name visible on the app catalogue if the app is public">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control" required>
                         <div class="invalid-feedback">
                             Please add a valid name!
@@ -27,6 +30,9 @@
 
                     <div class="mb-3 form-group validate-item">
                         <label for="app_description" class="form-label">Description</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Summarize the application in a few words">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <input type="text" id="app_description" name="app_description" value="{{ existing_app_description }}" class="form-control" required>
                         <div class="invalid-feedback">
                             Please add a description of the app!
@@ -35,6 +41,9 @@
 
                     <div class="mb-3">
                         <label class="form-label">Subdomain</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="A subdomain is automatically generated for the app. If you want to create a custom subdomain, click on New">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <div class="input-group">
                             <select name="app_release_name" id="app_release_name" type="text" class="form-control" formnovalidate="formnovalidate">
                                 <option value="" {% if not request.GET.rn %}selected{% endif %}>---- Generated ----</option>
@@ -53,18 +62,24 @@
                     </div>
                     <div id="subdomain-add" class="mb-3" style="display: none;">
                         <label class="form-label">New Subdomain</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Valid subdomain names are those that have letters a-z and numbers 0-9 and a hyphen '-'. The hyphen should not be at the start or end of the subdomain">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <div class="input-group">
                                 <input id="rn" type="text" class="form-control" placeholder="New Subdomain ..." name="rn">
                                 <div class="input-group-append">
                                 <button onclick="submitDomain()" type="button" class="btn btn-info">Add</button>
                                 </div>
                                 <div class="valid-feedback">Subdomain Added</div>
-                                <div class="invalid-feedback">Subdomain already exists. Please choose another.</div>
+                                <div id="subdomain-invalid" class="invalid-feedback">Subdomain already exists. Please choose another.</div>
                           </div>
                     </div>
                     {% if form.dep_permissions %}
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Public apps will be displayed on the app catalogue and can be accessed by anyone that has the link to them. Project apps can only be accessed by project members. Private apps are only accessible by users that create the apps.">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <select name="permission" id="permission" class="form-control">
                             {% for name, value in form.form_permissions.items %}
                                 {% if value.option == "true" %}
@@ -82,6 +97,9 @@
                     {% if form.dep_model %}
                     <div class="mb-3">
                         <label class="form-label">Model</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="List of model objects created in the project.">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <select name="model" id="model" class="form-control">
                             {% for model in form.models %}
                             <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
@@ -104,6 +122,9 @@
                     {% if form.dep_flavor %}
                     <div class="mb-3">
                         <label class="form-label">Flavors</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Flavor determines the resources available for the app. Only Medium available right now.">
+                            <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                        </span>
                         <select name="flavor" id="flavor" class="form-control">
                             {% for flavor in form.flavors %}
                             <option value="{{ flavor.pk }}">{{ flavor.name }}</option> 
@@ -183,7 +204,10 @@
                             
                             {% if subval.type == "string" %}
                             <label class="form-label">{{ subval.title }}</label>
-                            {% if subkey == "image" %} 
+                            {% if subkey == "image" %}
+                                <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="DockerHub Image for the app. The search bar uses dockerhub api to filter results from dockerhub. If you need specific tags, you can add them at the end.">
+                                    <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                                </span>
                                 <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control" required>
                                 <div class="invalid-feedback">
                                     Please add a valid image name!
@@ -201,7 +225,10 @@
 
                             {% if subval.type == "number" %}
                             <label class="form-label">{{ subval.title }}</label>
-                            {% if subkey == "port"%} 
+                            {% if subkey == "port"%}
+                                <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="Port that the docker container exposes and the application runs on.">
+                                    <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
+                                </span>
                                 <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control" required>
                                 <div class="invalid-feedback">
                                     Please add a valid port!
@@ -346,13 +373,14 @@
         </div>      
     </div>
 </div> -->
-<!-- <style>
-    .frmSearch {border: 1px solid #a8d4b1;background-color: #c6f7d0;margin: 2px 0px;padding:40px;border-radius:4px;}
-    #country-list{float:left;list-style:none;margin-top:-3px;padding:0;width:190px;position: absolute;}
-    #country-list li{padding: 10px; background: #f0f0f0; border-bottom: #bbb9b9 1px solid;}
-    #country-list li:hover{background:#ece3d2;cursor: pointer;}
-    #search-box{padding: 10px;border: #a8d4b1 1px solid;border-radius:4px;}
-    </style> -->
+    <script>
+        $(document).ready(function(){
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+        });
+        </script>
 <script>
     // Example starter JavaScript for disabling form submissions if there are invalid fields
 (function () {
@@ -419,6 +447,11 @@
                         $('#rn').removeClass('is-valid');
                     }
                     $('#rn').addClass('is-invalid');
+                    if (data.available == "invalid") {
+                        $('#subdomain-invalid').text("Subdomain is invalid. Please choose another.");
+                    } else {
+                        $('#subdomain-invalid').text("Subdomain already exists. Please choose another.");
+                    }
                 }
             }
             });

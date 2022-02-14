@@ -4,9 +4,11 @@ LABEL maintainer="morgan@scaleoutsystems.com"
 #RUN apk add musl-dev postgresql-dev gcc python3-dev linux-headers
 RUN mkdir /app
 COPY requirements.txt /app/
+RUN apt update
+RUN apt-get install libxmlsec1-dev pkg-config -y
 RUN pip install -r /app/requirements.txt
 
-RUN apt update
+
 RUN apt install -y curl
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 RUN chmod 700 get_helm.sh
