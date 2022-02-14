@@ -442,7 +442,7 @@ def details(request, user, project_slug):
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
                 pk_list += str(instance.pk)+','
-            apps = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
+            apps = Apps.objects.filter((Q(access="public") | Q(projects__in=[project])),category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
             if rslug['name'] != "Develop" and rslug['name'] != "Store":
                 resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
         pk_list = pk_list[:-1]

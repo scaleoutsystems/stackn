@@ -385,6 +385,7 @@
                                 <label for="id_transfer_to" class="form-label">Transfer to</label>
                                 <select class="form-control" type="text" name="transfer_to" maxlength="256"
                                     id="id_transfer_to" required>
+                                    <option value="{{ request.user.pk }}">Select user to transfer ownership</option>
                                     {% for user in platform_users %}
                                     <option value="{{ user.pk }}">{{ user.username }}</option>
                                     {% endfor %}

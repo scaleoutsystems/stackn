@@ -95,16 +95,19 @@
                     {% endif %}
 
                     {% if form.dep_model %}
-                    <div class="mb-3">
-                        <label class="form-label">Model</label>
+                    <div class="mb-3 form-group validate-item">
+                        <label for="model" class="form-label">Model</label>
                         <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="List of model objects created in the project.">
                             <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
                         </span>
-                        <select name="model" id="model" class="form-control">
+                        <select name="model" id="model" class="form-control" required>
                             {% for model in form.models %}
                             <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
                             {% endfor %}
                         </select>
+                        <div class="invalid-feedback">
+                            Please add a valid model. If this field is empty, you need to create a model object first. You can read how to do this in the user guide.
+                        </div>
                     </div>
                     {% endif %}
 
