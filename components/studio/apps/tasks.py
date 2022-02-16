@@ -214,8 +214,6 @@ def delete_resource(pk):
 @transaction.atomic
 def check_status():
     volume_root = "/"
-    if "TELEPRESENCE_ROOT" in os.environ:
-        volume_root = os.environ["TELEPRESENCE_ROOT"]
     kubeconfig = os.path.join(volume_root, '/root/.kube/config')
 
     # TODO: Fix for multicluster setup.
@@ -256,7 +254,9 @@ def check_status():
         }
 
 
+    # Fetch all app instances whose state is not "Deleted"
     instances = AppInstance.objects.filter(~Q(state="Deleted"))
+
     for instance in instances:
         release = instance.parameters['release']
         if release in app_statuses:
@@ -280,42 +280,20 @@ def check_status():
             #     print("No update for release: {}".format(release))
         else:
             delete_exists = AppStatus.objects.filter(appinstance=instance, status_type="Terminated").exists()
-            #from django.conf import settings
-            #if settings.DEBUG:
-            if False:
-                if delete_exists:
-                    status = AppStatus(appinstance=instance)
-                    status.status_type = "Deleted"
-                    status.save()
-                    instance.state = "Deleted"
-                    instance.deleted_on = datetime.now()
-                    instance.save()
-            else:
-                if delete_exists:
-                    statuses = AppStatus.objects.filter(appinstance=instance)
-                    statuses.delete()
-                    #instance.state = "Deleted"
-                    #instance.deleted_on = datetime.now()
-                    instance.delete()
-        # if instance.state != "Deleted":
-        #     try:
-        #         release = instance.parameters['release']
-        #         instance.state = app_statuses[release]['phase']
-        #         instance.save()
-        #     except:
-        #         if instance.app.slug != 'volume':
-        #             instance.state = "Deleted"
-        #             instance.save()
-            # print("Release {} not in namespace.".format(release))
-    # instances.save()
-    # print(app_statuses)
+            if delete_exists:
+                status = AppStatus(appinstance=instance)
+                status.status_type = "Deleted"
+                status.save()                
+                instance.state = "Deleted"
+                instance.deleted_on = datetime.now()
+                instance.save()
+
+    
 
 @app.task
 def get_resource_usage():
 
     volume_root = "/"
-    if "TELEPRESENCE_ROOT" in os.environ:
-        volume_root = os.environ["TELEPRESENCE_ROOT"]
     kubeconfig = os.path.join(volume_root, 'root/.kube/config')
 
     timestamp = time.time()
