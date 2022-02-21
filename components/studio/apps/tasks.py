@@ -1,4 +1,5 @@
 
+from unittest import skip
 import chartcontroller.controller as controller
 import json
 import os
@@ -114,7 +115,7 @@ def deploy_resource(instance_pk, action='create'):
     if action == "create":
         
         parameters = app_instance.parameters
-        status.status_type = 'Failed'
+        status.status_type = 'Created'
         status.info = parameters['release']
         URI = get_URI(parameters)
 
@@ -137,6 +138,7 @@ def deploy_resource(instance_pk, action='create'):
     if results.returncode == 0:
         print("Helm install succeeded")
         status.status_type = "Installed"
+        app_instance.state = "Running"
         helm_info = {
             "success": True,
             "info": {
@@ -147,6 +149,7 @@ def deploy_resource(instance_pk, action='create'):
     else:
         print("Helm install failed")
         status.status_type = "Failed"
+        app_instance.state = "Failed"
         helm_info = {
             "success": False,
             "info": {
@@ -170,7 +173,6 @@ def deploy_resource(instance_pk, action='create'):
 def delete_resource(pk):
     appinstance = AppInstance.objects.select_for_update().get(pk=pk)
     
-
     if appinstance and appinstance.state != "Deleted":
         # The instance does exist.
         parameters = appinstance.parameters
@@ -198,7 +200,7 @@ def delete_resource(pk):
             status = AppStatus(appinstance=appinstance)
             status.status_type = "FailedToDelete"
             status.save()
-            # appinstance.state = "FailedToDelete"
+            appinstance.state = "FailedToDelete"
 
     # print("NEW STATE:")
     # print(appinstance.state)
@@ -253,7 +255,6 @@ def check_status():
             "deletion_status": deletion_timestamp
         }
 
-
     # Fetch all app instances whose state is not "Deleted"
     instances = AppInstance.objects.filter(~Q(state="Deleted"))
 
@@ -288,7 +289,41 @@ def check_status():
                 instance.deleted_on = datetime.now()
                 instance.save()
 
-    
+    # Fetch all app instances whose state is "Deleted" and check whether there are related pods which are still running
+    pod_status = 'None'
+    instances = AppInstance.objects.filter(state="Deleted")
+    for instance in instances:
+        if 'url' in instance.table_field:
+            # Find the app instance release name
+            app_release = instance.parameters['release']     # e.g 'rfc058c6f'
+            # Now check if there exists a pod with that release
+            cmd = 'kubectl get po -l release=' + app_release
+            try:
+                result=subprocess.run(cmd, shell=True, capture_output=True) # returns a byte-like object
+                result_stdout = result.stdout.decode('utf-8')
+                result_stderr = result.stderr.decode('utf-8')
+            except subprocess.CalledProcessError:
+                print('Oops, something went wrong running the command: {}'.format(cmd))
+            
+            if result_stdout != '' and 'No resources found in default namespace.' not in result_stderr:
+                # Extract the the status of the related release pod
+                cmd = 'kubectl get po -l release=' + app_release + ' -o jsonpath="{.items[0].status.phase}"'
+                try:
+                    result=subprocess.run(cmd, shell=True, capture_output=True)
+                    pod_status = result.stdout.decode('utf-8')
+                    print(pod_status)
+                except subprocess.CalledProcessError:
+                    print('Oops, something went wrong running the command: {}'.format(cmd))
+
+                if pod_status == 'Running' and instance.state == 'Deleted':
+                    print("INFO: Found Running pod associated to an app instance marked as Deleted")
+                    print("INFO: DELETE RESOURCE with release: {}".format(app_release))
+                    cmd = 'helm uninstall ' + app_release
+                    try:
+                        result=subprocess.run(cmd, shell=True, capture_output=True)
+                        print(result)
+                    except subprocess.CalledProcessError:
+                        print('Oops, something went wrong running the command: {}'.format(cmd))
 
 @app.task
 def get_resource_usage():
