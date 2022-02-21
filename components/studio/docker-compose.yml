@@ -24,7 +24,7 @@ services:
     environment:
       - GET_HOSTS_FROM=dns
       - KUBECONFIG=/root/.kube/config
-      - DJANGO_SUPERUSER_PASSWORD='dGhpaXNhdmVyeW5vdHNhZmVvbmx'
+      - DJANGO_SUPERUSER_PASSWORD=dGhpaXNhdmVyeW5vdHNhZmVvbmx
       - DEBUG=true
       - INIT=true
       - FEDN=false
