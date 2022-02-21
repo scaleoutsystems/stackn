@@ -88,7 +88,7 @@ class ModelCreate(LoginRequiredMixin, View):
             # Copying folder from passed app that contains trained model
             # First find the app release name
             app = AppInstance.objects.get(name=model_app)
-            app_release = app.table_field['url'].split('.')[0].replace('https://','')     # e.g 'rfc058c6f'
+            app_release = app.parameters['release']     # e.g 'rfc058c6f'
             # Now find the related pod
             cmd = 'kubectl get po -l release=' + app_release + ' -o jsonpath="{.items[0].metadata.name}"'
             try:
