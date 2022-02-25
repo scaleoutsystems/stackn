@@ -146,8 +146,8 @@ class ModelCreate(LoginRequiredMixin, View):
             status = set_artifact(artifact_name, model_file, model_folder_name, model_S3, is_file=is_file, secure_mode=secure_mode)
 
             if not status:
-                print("Failed to upload model to S3 storage")
-                return False # We should show the error and redirect somewhere else
+                messages.error(request, 'Oops, something went wrong: failed to upload model to S3 storage!')
+                return redirect(redirect_url)
 
             new_model = Model(uid=artifact_name,
                             name=model_name,

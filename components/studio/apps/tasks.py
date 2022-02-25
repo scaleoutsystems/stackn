@@ -37,16 +37,28 @@ def post_create_hooks(instance):
         # TODO: If the instance is being updated, update the existing S3 object.
         access_key = instance.parameters['credentials']['access_key']
         secret_key = instance.parameters['credentials']['secret_key']
-        host = '{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain'])
+        #host = '{}-{}'.format(instance.parameters['release'], instance.parameters['global']['domain'])
+        
+        # OBS!! TEMP WORKAROUND to be able to connect to minio
+        minio_svc = '{}-minio'.format(instance.parameters['release'])
+        cmd = 'kubectl get svc ' + minio_svc + ' -o jsonpath="{.spec.clusterIP"}'
+        minio_host_url = ''
+        try:
+            result=subprocess.run(cmd, shell=True, capture_output=True)
+            minio_host_url=result.stdout.decode('utf-8')
+            minio_host_url+=':9000'
+        except subprocess.CalledProcessError:
+            print('Oops, something went wrong running the command: {}'.format(cmd))
+
         try:
             s3obj = instance.s3obj
             s3obj.access_key = access_key
             s3obj.secret_key = secret_key
-            s3obj.host = host
+            s3obj.host = minio_host_url
         except:
             s3obj = S3(name=instance.name,
                         project=instance.project,
-                        host=host,
+                        host=minio_host_url,
                         access_key=access_key,
                         secret_key=secret_key,
                         app=instance,
