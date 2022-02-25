@@ -103,7 +103,13 @@ def create_client(S3_storage, secure_mode=True):
 def set_artifact(artifact_name, artifact_file, bucket, S3_storage, is_file=False, secure_mode=True):
     """ Instance must be a byte-like object. """
     client = create_client(S3_storage, secure_mode)
-    found = client.bucket_exists(bucket)
+
+    try:
+        found = client.bucket_exists(bucket)
+    except Exception as err:
+        print('EXCEPTION LOG: Client could not verify if bucket exists')
+        return False
+    
     if not found:
         try:
             client.make_bucket(bucket)
@@ -112,11 +118,16 @@ def set_artifact(artifact_name, artifact_file, bucket, S3_storage, is_file=False
             return False
 
     if is_file == True:
-        client.fput_object(bucket, artifact_name, artifact_file)
+        try:
+            client.fput_object(bucket, artifact_name, artifact_file)
+        except Exception as e:
+            print('Client method fput_object failed')
+            return False
     else:
         try:
             client.put_object(bucket, artifact_name, io.BytesIO(artifact_file), len(artifact_file))
         except Exception as e:
-            raise Exception("Could not load data into bytes {}".format(e))
+            print('Client method put_object failed')
+            return False
 
     return True
