@@ -14,7 +14,7 @@
             <div class="card-body">
                 <form class="needs-validation" action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post" novalidate>
                     {% csrf_token %}
-                    
+
                     <input type="hidden" id="app_action" name="app_action" value="{{ app_action }}">
                     <input type="hidden" id="app_id" name="app_id" value="{{ appinstance.pk }}">
                     <div class="mb-3 form-group validate-item">
@@ -40,18 +40,18 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Subdomain</label>
-                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="A subdomain is automatically generated for the app. If you want to create a custom subdomain, click on New">
+                        <label class="form-label">Subdomain (under serve.scilifelab.se)</label>
+                        <span data-bs-toggle="tooltip" title="" data-bs-placement="right" data-bs-original-title="By default, a subdomain is automatically generated for the app. If you want to create a custom subdomain, click on 'Add new'.">
                             <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
                         </span>
                         <div class="input-group">
                             <select name="app_release_name" id="app_release_name" type="text" class="form-control" formnovalidate="formnovalidate">
-                                <option value="" {% if not request.GET.rn %}selected{% endif %}>---- Generated ----</option>
+                                <option value="" {% if not request.GET.rn %}selected{% endif %}>---- Automatically generated ----</option>
                             {% for item in form.release_names %}
-                                <option value="{{ item.name }}" {% if request.GET.rn == item.name %}selected{% endif %}>{{ item.name }}</option>
+                                <option value="{{ item.name }}" {% if request.GET.rn == item.name %}selected{% endif %}>{{ item.name }}.serve.scilifelab.se</option>
                             {% endfor %}
                         </select>
-                            <button class="btn btn-outline-secondary" onclick="toggleSubdomain()" type="button">New</button>
+                            <button class="btn btn-outline-secondary" onclick="toggleSubdomain()" type="button">Add new</button>
                         </div>
                         <!-- <select name="app_release_name" id="app_release_name" class="form-control">
                             <option value="" selected>---- Generated ----</option>
@@ -66,12 +66,12 @@
                             <i style="height: 12px;width: 12px;margin-left: 3px;color: #989da0;margin-bottom: 1px;" class="align-right" data-feather="help-circle"></i>
                         </span>
                         <div class="input-group">
-                                <input id="rn" type="text" class="form-control" placeholder="New Subdomain ..." name="rn">
+                                <input id="rn" type="text" class="form-control" placeholder="type-your-subdomain" name="rn">
                                 <div class="input-group-append">
                                 <button onclick="submitDomain()" type="button" class="btn btn-info">Add</button>
                                 </div>
                                 <div class="valid-feedback">Subdomain Added</div>
-                                <div id="subdomain-invalid" class="invalid-feedback">Subdomain already exists. Please choose another.</div>
+                                <div id="subdomain-invalid" class="invalid-feedback">Subdomain already exists. Please choose another one.</div>
                           </div>
                     </div>
                     {% if form.dep_permissions %}
@@ -86,7 +86,7 @@
                                     {% if value.value %}
                                     <option value="{{ name }}" selected>{{ name }}</option>
                                     {% else %}
-                                    <option value="{{ name }}">{{ name }}</option> 
+                                    <option value="{{ name }}">{{ name }}</option>
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
@@ -102,7 +102,7 @@
                         </span>
                         <select name="model" id="model" class="form-control" required>
                             {% for model in form.models %}
-                            <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option> 
+                            <option value="{{ model.pk }}" {{ model.selected }}>{{ model.name }}:{{ model.version }}</option>
                             {% endfor %}
                         </select>
                         <div class="invalid-feedback">
@@ -116,12 +116,12 @@
                         <label class="form-label">S3</label>
                         <select name="S3" id="S3" class="form-control">
                             {% for s3 in form.s3stores %}
-                            <option value="{{ s3.pk }}" {{ s3.selected }}>{{ s3.name }}</option> 
+                            <option value="{{ s3.pk }}" {{ s3.selected }}>{{ s3.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     {% endif %}
-                    
+
                     {% if form.dep_flavor %}
                     <div class="mb-3">
                         <label class="form-label">Flavors</label>
@@ -130,7 +130,7 @@
                         </span>
                         <select name="flavor" id="flavor" class="form-control">
                             {% for flavor in form.flavors %}
-                            <option value="{{ flavor.pk }}">{{ flavor.name }}</option> 
+                            <option value="{{ flavor.pk }}">{{ flavor.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -142,7 +142,7 @@
                         <select name="environment" id="environment" class="form-control">
                             {% for environment in form.environments.objs %}
                             {% if environment.pk == form.environments.selected %}
-                            <option value="{{ environment.pk }}" selected>{{ environment.name }}</option> 
+                            <option value="{{ environment.pk }}" selected>{{ environment.name }}</option>
                             {% else %}
                             <option value="{{ environment.pk }}">{{ environment.name }}</option>
                             {% endif %}
@@ -157,7 +157,7 @@
                         <label class="form-label">Volumes</label>
                         <select name="volumes" id="volumes" class="form-control" {{ volume_type }}>
                             {% for volume in form.volumes %}
-                            <option value="{{ volume.pk }}">{{ volume.name }}</option> 
+                            <option value="{{ volume.pk }}">{{ volume.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -167,31 +167,31 @@
                     </datalist>
 
                     {% if form.dep_apps %}
-                    
+
                         {% for app_name, appinstances in form.app_deps.items %}
                         <div class="mb-3">
                             <label class="form-label">{{ app_name }}</label>
                             <select name="app:{{ app_name }}" id="{{ app_name }}" class="form-control" {{ appinstances.option_type }}>
                             {% for appinstance in appinstances.instances %}
-                                <option value="{{ appinstance.pk }}" {{ appinstance.selected }}>{{ appinstance.name }}</option> 
+                                <option value="{{ appinstance.pk }}" {{ appinstance.selected }}>{{ appinstance.name }}</option>
                             {% endfor %}
                             </select>
                         </div>
                         {% endfor %}
                     {% endif %}
-                    
-                    
+
+
                     {% for key, vals in form.primitives.items %}
-                    
+
                         <!-- <label class="form-label">{{ key }}</label> -->
                         <h6> {{ vals.meta_title }}</h6>
                         {% for subkey, subval in vals.items %}
-                        {% if subval.type != "boolean" and  subkey == "image" or subkey == "port"%} 
+                        {% if subval.type != "boolean" and  subkey == "image" or subkey == "port"%}
                             <div class="mb-3 form-group validate-item">
                         {% else %}
                             <div class="mb-3">
                         {% endif %}
-                            
+
                             {% if subval.type == "boolean"%}
                             <label class="form-label">{{ subval.title }}</label>
                             <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
@@ -204,7 +204,7 @@
                                 {% endif %}
                             </select>
                             {% endif %}
-                            
+
                             {% if subval.type == "string" %}
                             <label class="form-label">{{ subval.title }}</label>
                             {% if subkey == "image" %}
@@ -218,7 +218,7 @@
                             {% else %}
                                 <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}" class="form-control">
                             {% endif %}
-                            
+
                             {% endif %}
 
                             {% if subval.type == "textfield" %}
@@ -242,7 +242,7 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                    
+
                     {% endfor %}
 
                     {% if form.dep_appobj %}
@@ -250,7 +250,7 @@
                         <label class="form-label">{{ form.appobjs.title }}</label>
                         <select name="appobj" id="appobj" class="form-control" {{ appobjs.type }}>
                         {% for app in form.appobjs.objs %}
-                        <option value="{{ app.pk }}">{{ app.name }}</option> 
+                        <option value="{{ app.pk }}">{{ app.name }}</option>
                         {% endfor %}
                         </select>
                     </div>
@@ -263,7 +263,7 @@
                     {% endif %}
                 </form>
             </div>
-        </div>      
+        </div>
     </div>
 </div>
 {% if app_action == "Settings" %}
@@ -274,7 +274,7 @@
                 <h5 class="card-title">Basic form</h5>
                 <h6 class="card-subtitle text-muted">Default Bootstrap form layout.</h6>
             </div> -->
-            <div class="card-body">                    
+            <div class="card-body">
                 <form method="POST" autocomplete="off" action="{% url 'apps:add_tag' request.user project.slug appinstance.pk %}">
                     {% csrf_token %}
 
@@ -345,7 +345,7 @@
                     </dd>
                 </dl> -->
             </div>
-        </div>      
+        </div>
     </div>
 </div>
 {% endif %}
@@ -370,10 +370,10 @@
                             </form>
                         </div>
                     </dd>
-                    
+
                 </dl>
             </div>
-        </div>      
+        </div>
     </div>
 </div> -->
     <script>
@@ -444,7 +444,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                         window.location.href = window.location.href.replace( /[\?#].*|$/, "?rn="+data.rn );
                         // window.location.reload(true);
                     }, 2000);
-                    
+
                 } else {
                     if ($('#rn').hasClass('is-valid')) {
                         $('#rn').removeClass('is-valid');
@@ -497,7 +497,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             // }
             });
         }
-		
+
 	});
 });
 // <ul id="country-list">

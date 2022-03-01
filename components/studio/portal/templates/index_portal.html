@@ -17,7 +17,7 @@
 }
 </script>
 <div style="display: inline-flex;">
-<h1 class="h3 mb-3" style="margin-right: 5px;">Apps</h1>
+<h1 class="h3 mb-3" style="margin-right: 5px;">Public apps</h1>
 <h1 class="h3 mb-3 ghost-number">{% if published_apps|length > 0  %}{{ published_apps|length }}{% endif %}</h1>
 <div>
     {% for tf in request.session.app_tag_filters %}
@@ -34,7 +34,7 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
-                    <div class="col-12  d-flex flex-row" style="height: 10%;">
+                    <div class="col-12  d-flex flex-row">
                         <div class="col-8 d-flex">
                             <h3 style="font-size: 1.1rem;">{{ app.name }}</h3>
                             <!-- <h3 style="font-size: 1.1rem;">{{ app.name|title }}</h3> -->
@@ -47,7 +47,7 @@
                     <div class="col-12  d-flex align-items-bottom flex-column">{{ app.description }}</div>
                     <div id="app-details-{{app.id}}" class="col-12  invisible align-items-bottom flex-column" style="display: none;">
                         <div><h6 style="font-weight: 500;display: inline-flex;">Owner:</h6> {{ app.owner }}</div>
-                        <div><h6 style="font-weight: 500;display: inline-flex;">Project:</h6> {{ app.project.name }}</div>
+                        <!-- <div><h6 style="font-weight: 500;display: inline-flex;">Project:</h6> {{ app.project.name }}</div> -->
                         <div><h6 style="font-weight: 500;display: inline-flex;">Created On:</h6> {{ app.created_on|date:"d M, Y" }}</div>
                         <!-- <div><h6 style="font-weight: 500;display: inline-flex;">Description:</h6> {{ app.description }} </div> -->
                     </div>
