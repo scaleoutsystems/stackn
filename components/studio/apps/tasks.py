@@ -464,7 +464,7 @@ def get_resource_usage():
 
     timestamp = time.time()
 
-    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', 'https://rancher-server.dckube.scilifelab.se/k8s/clusters/c-skq8h/apis/metrics.k8s.io/v1beta1/pods']
+    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', 'https://rancher-server.dckube.scilifelab.se/k8s/clusters/c-mr7ql/apis/metrics.k8s.io/v1beta1/pods']
     results = subprocess.run(args, capture_output=True)
     res_json = json.loads(results.stdout.decode('utf-8'))
     pods = res_json['items']

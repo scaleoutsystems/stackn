@@ -19,6 +19,7 @@ from .helpers import get_resource, get_all
 from models.models import Model
 from apps.models import AppInstance, ResourceData
 from modules.project_auth import get_permissions
+import pytz
 
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
@@ -181,7 +182,7 @@ def cpuchart(request, user, project, resource_type):
 @csrf_exempt
 def usage(request, user, project):
     
-
+    tz = pytz.timezone('Europe/Stockholm')
     curr_timestamp = time.time()
     points = ResourceData.objects.filter(time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
     # print(list(points.all()))
@@ -207,7 +208,8 @@ def usage(request, user, project):
     labels = labels[::step]
     x_data = list()
     for label in labels:
-        x_data.append(datetime.fromtimestamp(label).strftime('%H:%M:%S'))
+        # print(datetime.fromtimestamp(label,tz).strftime('%H:%M:%S'),"---",label,"---",datetime.fromtimestamp(label,tz))
+        x_data.append(datetime.fromtimestamp(label,tz).strftime('%H:%M:%S'))
         
     total_mem = list(total.values_list('total_mem'))
     total_mem = list(itertools.chain.from_iterable(total_mem))[::step]

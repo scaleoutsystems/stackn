@@ -93,7 +93,11 @@
                     </div>
                     <div class="col-12  d-flex flex-row">
                         <div class="col-6 d-flex" style="align-self: flex-end;">
+                            {% if app.app.name == "Tensorflow Serving" or app.app.name == "PyTorch Serve" or app.app.name == "Python Model Deployment" %}
+                            <a class="model-card-a" onclick="copyClip('{{app.table_field.url}}')"><button class="btn btn-sm btn-light model-card-a model-card-button" >Copy API Endpoint</button></a>
+                            {% else %}
                             <a class="model-card-a" href="{{ app.table_field.url }}"><button class="btn btn-sm btn-light model-card-a model-card-button" >Open</button></a>
+                            {% endif %}
                         </div>
                         <div class="col-6 d-flex justify-content-end" style="align-self: flex-end;">
                             <button class="btn btn-sm btn-light model-card-a model-card-button" onclick="myFunction({{ app.id }})">Details</button>
@@ -106,4 +110,14 @@
 
       {% endfor %}
 </div>
+<script>
+    function copyClip(data) {
+        var inputc = document.body.appendChild(document.createElement("input"));
+        inputc.value = data;
+        inputc.focus();
+        inputc.select();
+        document.execCommand('copy');
+        inputc.parentNode.removeChild(inputc);
+}
+</script>
 {% endblock %}

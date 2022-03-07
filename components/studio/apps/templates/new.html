@@ -62,7 +62,7 @@
             url: "{% url 'apps:get_status' request.user project.slug %}",
             data: {'pk': apps},
             success: function (data) {
-                console.log(data)
+                // console.log(data)
                 apps.split(',').forEach(function (item, index) {
                     document.getElementById("status-"+item).innerHTML = data['status-'+item];
                 });
