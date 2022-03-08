@@ -302,11 +302,6 @@
     function resourceCharts(chart_id1, chart_id2) {
         var $labsCPUChart = $(chart_id1);
         var $labsMEMChart = $(chart_id2);
-        // var init_data = {{ initial_data | safe }}
-        // console.log(init_data)
-        // var cpuchart = newChart($(chart_id1), init_data.labels, init_data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
-        // var memchart = newChart($(chart_id2), init_data.labels, init_data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
-        // setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
         $.ajax({
             url: "{% url 'monitor:usage' user project.slug %}",
             success: function (data) {
@@ -352,13 +347,6 @@
             },
             error: function (data) {
                 console.log("Error: Authentication")
-                // $.ajax({
-                //     url: data.responseJSON.refresh_url,
-                //     type: 'GET',
-                //     success: function (data) {
-                //         console.log("Updated Token")
-                //     }
-                // })
             },
             complete: function() {
                 setTimeout(function(){updateCharts(cpuchart, memchart);}, 120000);
@@ -378,9 +366,12 @@
             url: "{% url 'apps:get_status' request.user project.slug %}",
             data: {'pk': apps},
             success: function (data) {
-                console.log(data)
                 apps.split(',').forEach(function (item, index) {
-                    document.getElementById("status-"+item).innerHTML = data['status-'+item];
+                    try {
+                        document.getElementById("status-"+item).innerHTML = data['status-'+item];   
+                    } catch (error) {
+                        // console.log(error)
+                    }
                 });
             },
             complete: function() {

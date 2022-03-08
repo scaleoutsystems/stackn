@@ -184,7 +184,10 @@ def usage(request, user, project):
     
     tz = pytz.timezone('Europe/Stockholm')
     curr_timestamp = time.time()
+    print("Query")
+    start = time.process_time()
     points = ResourceData.objects.filter(time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
+    print("Query end :",time.process_time() - start)
     # print(list(points.all()))
     # all_cpus = list()
     # for point in points:
@@ -196,7 +199,10 @@ def usage(request, user, project):
     # print("MAX:")
     # print(max(all_cpus))
     # print("ALLL CPUS: ",all_cpus)
+    print("Annotate")
+    start = time.process_time()
     total = points.annotate(timeP=F('time')).values('timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
+    print("Annotate End: ",time.process_time() - start)
     # print(total)
     
     labels = list(total.values_list('timeP'))
@@ -207,10 +213,12 @@ def usage(request, user, project):
         step = round(len(labels)/np)
     labels = labels[::step]
     x_data = list()
+    print("Labels")
+    start = time.process_time()
     for label in labels:
         # print(datetime.fromtimestamp(label,tz).strftime('%H:%M:%S'),"---",label,"---",datetime.fromtimestamp(label,tz))
         x_data.append(datetime.fromtimestamp(label,tz).strftime('%H:%M:%S'))
-        
+    print("Labels end: ",time.process_time() - start)  
     total_mem = list(total.values_list('total_mem'))
     total_mem = list(itertools.chain.from_iterable(total_mem))[::step]
     
