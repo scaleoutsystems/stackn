@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('status', views.get_status, name='get_status'),
     path('<category>', views.filtered, name='filtered'),
+    path('<category>/<ai_id>/update', views.update_app, name='update'),
     path('create/<app_slug>', views.create, name='create'),
     path('create/<app_slug>/create_releasename', views.create_releasename, name='create_releasename'),
     path('logs/<ai_id>', views.logs, name='logs'),

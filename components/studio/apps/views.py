@@ -115,7 +115,7 @@ def filtered(request, user, project, category):
     pk_list = pk_list[:-1]
     pk_list = "'"+pk_list+"'"
     apps_installed = False
-    print("PRINTINGGG: ",appinstances)
+    print("App Instances: ",appinstances)
     if appinstances:
         apps_installed = True
         
@@ -124,16 +124,16 @@ def filtered(request, user, project, category):
 @csrf_exempt
 def get_status(request, user, project):
     status_success, status_warning = get_status_defs()
-    print("GET_STATUS")
-    print(request.POST)
+    # print("GET_STATUS")
+    # print(request.POST)
     pk = request.POST.get('pk')
     # print(pk)
     pk = pk.split(',')
-    print(pk)
+    # print(pk)
     res = {}
     if len(pk)>0 and not (len(pk)==1 and pk[0]==''):
         appinstances = AppInstance.objects.filter(pk__in=pk)
-        print(appinstances)
+        # print(appinstances)
         res = dict()
         for instance in appinstances:
             try:
@@ -148,8 +148,8 @@ def get_status(request, user, project):
             else:
                 span_class = 'bg-danger'
             res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
-            print(status)
-        print(pk)
+            # print(status)
+        # print(pk)
     return JsonResponse(res)
     # if 'pk' in request.POST:
     #     pk = request.POST['pk']
@@ -230,6 +230,11 @@ def remove_tag(request, user, project, ai_id):
         appinstance.save()
 
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
+
+def update_app(request, user, project, category, ai_id):
+    instance = AppInstance.objects.get(pk=ai_id)
+    res = deploy_resource.delay(instance.pk, "update")
+    return HttpResponseRedirect(reverse('apps:filtered',kwargs={'user':user, 'project':project, 'category':category}))
 
 def create(request, user, project, app_slug, data=[], wait=False):
     template = 'create.html'
