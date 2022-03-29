@@ -1,0 +1,61 @@
+{% extends base_template %}
+{% block content %}
+<div class="container-fluid p-0">
+
+
+    <div class="row">
+        <div class="card flex-fill">
+            <div class="card-header">
+                <div class="d-flex justify-content-center">
+                    <h1 class="h1" style="font-weight: 800;">Turning an R Shiny app into a Docker image</h1>
+                </div>
+            </div>
+            <div class="card-body">
+
+              <div class="row" style="font-size: medium;">
+                <article class="markdown-section" id="main" style="font-size: 14px;">
+                                        <p>As of now, SciLifeLab Serve only allows to host Dash applications if they are packaged as Docker images. While this is a straightforward process, it can cause difficulties if you have never created a Docker image before. To make this easier, the SciLifeLab Serve team is happy to help you with this through a free individual consultation, get in touch with us by e-mailing <a href="mailto:datacentre@scilifelab.se">datacentre@scilifelab.se</a>. Alternatively, we provide step-by-step instructions on how to do it on this page. We do not go in detail explaining what each of the tools and settings we use here mean as we try to keep it as simple as possible. You can learn more about Docker images in the <a href="https://docs.docker.com/">official Docker documentation</a>.</p>
+                                        <p>You can find <a href="https://github.com/ScilifelabDataCentre/dash-covid-in-sweden">the example Dash app used in this tutorial on GitHub</a>.</p>
+                                        <h2>Preparation: install Docker and create an account on DockerHub</h2>
+                                        <p>In order to build an image you need to <a href="https://docs.docker.com/get-docker/">make sure you have Docker installed</a>. In addition, to publish this image you will need to create an account on <a href="https://hub.docker.com/">DockerHub</a>. You can log in to Docker Deskhop using these credentials and you will use the username when building the image.</p>
+                                        <h2>Step one: create a Dockerfile</h2>
+                                        <p>Docker images are built from sets of instructions given in a so-called <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a>. The name of the file should be exactly 'Dockerfile' and it should not have any file extension. We created an example Dockerfile to make it easier to start. Create a file using any text editor you have and insert the code below or simply <a href="https://raw.githubusercontent.com/ScilifelabDataCentre/dash-covid-in-sweden/main/Dockerfile">download this example from here</a>.</p>
+                                        <pre><code>
+                                          FROM python:3.9
+
+                                          COPY ./requirements.txt /requirements.txt
+
+                                          RUN apt-get update && apt-get upgrade -y
+
+                                          RUN pip3 install -r /requirements.txt
+                                          RUN pip3 install gunicorn openpyxl
+
+                                          COPY ./app.py /code/
+                                          RUN mkdir /code/assets
+                                          COPY ./assets/ /code/assets
+
+                                          WORKDIR /code/
+                                          ENV PYTHONPATH /code
+
+                                          ENV GUNICORN_CMD_ARGS "--bind=0.0.0.0:8000 --workers=2 --thread=4 --worker-class=gthread --forwarded-allow-ips='*' --access-logfile -"
+
+                                          CMD ["gunicorn", "app:server"]
+
+                                        </code></pre>
+                                        <p>Our example set-up assumes that the app code is located in the file <i>app.py</i>, the required packages are listed in the file <i>requirements.txt</i>, that there is an <i>assets</i> folder with some additional files (in our case <i>styles.css</i>). All of these files and folders should be located in the same folder as the Dockerfile.</p>
+                                        <p>The Dockerfile is a set of instructions which you can change to fit your app needs (e.g. rename files and copy or run additional files). The first line declares that the image is based on Python 3.9; change the Python version if needed. This is followed by copying the <i>requirements.txt</i> in the image, and the required packages are installed in the line <code>RUN pip3 install -r /requirements.txt</code>. Subsequently, the <i>app.py</i> is copied, <i>/code/assests</i> folder is created and the content of our <i>assets</i> folder is copied there.</p>
+                                        <h2>Step two: build an image</h2>
+                                        <p>Ensure that Docker Desktop is running. Open the Terminal (or Windows Terminal) on your computer and navigate to the folder where the app files and folders as well as the Dockerfile are located. To build an image you will need to run the following command: <code>docker build -t &lt;your-user-name&gt;/&lt;your-app-name&gt; .</code> (NB: do not forget the dot at the end of the command). Before you run it, replace the <i>&lt;your-user-name&gt;/&lt;your-app-name&gt;</i> with your DockerHub username and the name of the app. Building the image may take a while. Once the process is completed, you should be able to see the image among your images in the Docker Desktop app.</p>
+                                        <h2>Step three: upload the Docker image into DockerHub</h2>
+                                        <p>The easiest way to publish an image on DockerHub is to sign in to your account with Docker Desktop and then pick "Push to Hub" among the options for your app image. This will publish your image on <i>https://hub.docker.com/r/&lt;your-user-name&gt;/&lt;your-app-name&gt;</i>. For example, our example app is available on <a href="https://hub.docker.com/r/scilifelabdatacentre/dash-covid-in-sweden">https://hub.docker.com/r/scilifelabdatacentre/dash-covid-in-sweden</a>.</p>
+                                        <h2>Step four: publish your app on SciLifeLab Serve</h2>
+                                        <p>Now that you built an image and made it available through DockerHub, you can <a href="{% url 'guide' %}">follow our general instructions for publishing your Dash app on SciLifeLab Serve</a> to make it available for others to see and interact with.  When creating your app on SciLifeLab Serve, under Docker image you will need to give <i>&lt;your-user-name&gt;/&lt;your-app-name&gt;</i>; under path to folder insert <i>/</i> ; under app port insert <i>8000</i>.</p>
+                                    </article>
+              </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
