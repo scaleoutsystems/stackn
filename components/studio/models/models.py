@@ -48,7 +48,8 @@ class ModelManager(models.Manager):
 class ObjectType(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True, default="Model")
     slug = models.CharField(max_length=100, null=True, blank=True, default="model")
-    apps = models.ManyToManyField('apps.Apps', blank=True)
+    app_slug = models.CharField(max_length=100, null=True, blank=True)
+
     def __str__(self):
         return self.name
 
@@ -78,10 +79,17 @@ class Model(models.Model):
         (DEPLOYED, 'Deployed'),
         (ARCHIVED, 'Archived'),
     ]
+
+    MAJOR = 'M'
+    MINOR = 'm'
+    RELEASE_TYPE = [
+        (MAJOR, 'Major'),
+        (MINOR, 'Minor'),
+    ]
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    version = models.CharField(max_length=255)
-    release_type = models.CharField(max_length=255)
+    version = models.CharField(max_length=255, default='1.0')
+    release_type = models.CharField(max_length=255, choices=RELEASE_TYPE, default=MINOR)
     description = models.CharField(max_length=255, null=True, blank=True)
     model_card = models.TextField(null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
@@ -90,7 +98,7 @@ class Model(models.Model):
     url = models.URLField(max_length=512, null=True, blank=True)
     s3 = models.ForeignKey('projects.S3', null=True, blank=True, on_delete=models.CASCADE)
     bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
-    path = models.CharField(max_length=200, null=True, blank=True, default="")
+    path = models.CharField(max_length=200, null=True, blank=True, default="models")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     tags = TagField()
     project = models.ForeignKey(

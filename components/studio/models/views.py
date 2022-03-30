@@ -1,123 +1,273 @@
-import uuid
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.conf import settings
-from django.db.models import Q
-from django.core.files import File
-from projects.models import Project, ProjectLog, Environment
-from reports.models import Report, ReportGenerator
-from .models import Model, ModelLog, Metadata, ObjectType
-from reports.forms import GenerateReportForm
-from django.contrib.auth.decorators import login_required
-import logging
-from reports.helpers import populate_report_by_id, get_download_link
-import markdown
-import ast
 from collections import defaultdict
-from random import randint
-from .helpers import get_download_url
-from .forms import UploadModelCardHeadlineForm, EnvironmentForm
-import modules.keycloak_lib as kc
+from importlib.resources import path
+from unicodedata import decimal
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files import File
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.views.generic import View
+from django.urls import reverse, reverse_lazy
+
+from .forms import UploadModelCardHeadlineForm, EnvironmentForm, ModelForm
+from .helpers import set_artifact
+from .models import Model, ModelLog, Metadata, ObjectType
+
+from apps.models import Apps, AppInstance
 from portal.models import PublicModelObject, PublishedModel
+from projects.models import Project, ProjectLog, Environment
+
+import ast
+import logging
+import markdown
+import os
+import subprocess
+import uuid
+
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
-def index(request,id=0):
+class ModelCreate(LoginRequiredMixin, View):
+    template = "models/model_create.html"
+    model_uid = str(uuid.uuid1().hex)
+
+    def get(self, request, user, project):
+        # all below will become locals() context fields
+
+        form = ModelForm()
+        # For showing the persistent volumes currently available within the project
+        volumeK8s_set = Apps.objects.get(slug='volumeK8s')
+        volumes = AppInstance.objects.filter(app=volumeK8s_set)
+
+        # Passing the current project to the view/template
+        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+        
+        # Showing all the available model object types (e.g. Tensorflow, PyTorch, etc...)
+        object_types = ObjectType.objects.all()
+        
+        # For showing the app instances where a folder with trained models can be fetched
+        app_set = Apps.objects.get(slug='jupyter-lab') # for the time being is hard-coded to jupyter-lab where usually models are trained
+        apps = AppInstance.objects.filter(app=app_set)
+
+        return render(request, self.template, locals())
+
+    def post(self, request, user, project):
+        # For redirection after successful POST (and avoiding refresh of same POST)
+        # We use reverse_lazy() because we are in "constructor attribute" code
+        # that is run before urls.py is completely loaded
+        redirect_url = reverse_lazy('models:list', args=[ user, project])
+
+        #Fetching current project and setting default object type
+        model_project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
+        
+        # Extracting form fields
+        form = ModelForm(request.POST)
+        
+        # if valid it saves model in S3 storage, create object in the db and redirect
+        if form.is_valid():
+            model_name            = form.cleaned_data['name']
+            model_description     = form.cleaned_data['description']
+            model_release_type    = form.cleaned_data['release_type']
+            model_version         = form.cleaned_data['version']
+            model_folder_name     = form.cleaned_data['path']
+            model_type            = request.POST.get('model-type')
+            model_persistent_vol  = request.POST.get('volume')
+            model_app             = request.POST.get('app')
+            model_file            = ""
+            model_card            = ""
+            model_S3              = model_project.s3storage
+            is_file               = True
+            secure_mode           = False   # TO DO: find a clever way to understand whether we are using a self-signed cert or not
+            building_from_current = False
+
+            # Copying folder from passed app that contains trained model
+            # First find the app release name
+            app = AppInstance.objects.get(name=model_app)
+            app_release = app.parameters['release']     # e.g 'rfc058c6f'
+            # Now find the related pod
+            cmd = 'kubectl get po -l release=' + app_release + ' -o jsonpath="{.items[0].metadata.name}"'
+            try:
+                result=subprocess.check_output(cmd, shell=True)
+                app_pod = result.decode('utf-8') # because the above subprocess run returns a byte-like object
+            except subprocess.CalledProcessError:
+                messages.error(request, 'Oops, something went wrong: the model object was not created!')
+                return redirect(redirect_url)
+
+            # Copy model folder from pod to a temp location within studio pod
+            temp_folder_path = settings.BASE_DIR + '/tmp'    # which should be /app/tmp
+            # Create and move into the new directory
+            try:
+                os.mkdir(temp_folder_path)
+                os.chdir(temp_folder_path)
+                os.getcwd()
+            except OSError as error:
+                print(error)
+            # e.g. kubectl cp rfc058c6f-5fdb99c68c-kw5qb:/home/jovyan/work/project-vol/models ./models
+            # Note: default namespace is assumed here
+            cmd = 'kubectl cp ' + app_pod + ':/home/jovyan/work/' + model_persistent_vol + '/' + model_folder_name + ' ' + './' + model_folder_name
+            try:
+                result=subprocess.check_output(cmd, shell=True)
+                print('LOG INFO SUBPROCESS - FOLDER COPY WITH KUBECTL: ', result.decode('utf-8'))
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                messages.error(request, 'Oops, something went wrong: Models folder could not be copied')
+                return redirect(redirect_url)
+
+            # Creating new file to be compressed as a tar
+            if model_file == "":
+                building_from_current = True
+                
+                model_file = '{}.tar.gz'.format(self.model_uid)
+                f = open(model_file, 'w')
+                f.close()
+                
+                try:
+                    result = subprocess.run(['tar', '--exclude={}'.format(model_file), '-czvf', model_file, model_folder_name], stdout=subprocess.PIPE, check=True)
+                    print('LOG INFO SUBPROCESS - ARCHIVE CREATION: ', result)
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    messages.error(request, "Oops, something went wrong: The archive for the model folder was not created!")
+                    # Clean up
+                    os.system('rm {}.tar.gz'.format(self.model_uid))
+                    os.system('rm -rf {}'.format(temp_folder_path))
+                    return redirect(redirect_url)
+                    
+            if model_card == "" or model_card == None:
+                model_card_html_string = ""
+            else:
+                with open(model_card, 'r') as f:
+                    model_card_html_string = f.read()
+            
+            # Method from helpers.py, where S3 related methods exists
+            artifact_name = model_name + '_' + self.model_uid + '.tar'
+            status = set_artifact(artifact_name, model_file, model_folder_name, model_S3, is_file=is_file, secure_mode=secure_mode)
+
+            if not status:
+                messages.error(request, 'Oops, something went wrong: failed to upload model to S3 storage!')
+                return redirect(redirect_url)
+
+            new_model = Model(uid=artifact_name,
+                            name=model_name,
+                            bucket=model_folder_name,
+                            description=model_description,
+                            release_type=model_release_type,
+                            version=model_version,
+                            model_card="",
+                            path=model_folder_name,
+                            project=model_project,
+                            s3=model_S3,
+                            access='PR')
+            new_model.save()
+
+            # Setting the model object type based on form input from user
+            object_type = ObjectType.objects.get(name=model_type)
+            new_model.object_type.set([object_type])
+            
+            # Cleaning up generated tar for uploading artifact to S3 storage
+            try:
+                if building_from_current:
+                    os.system('rm {}.tar.gz'.format(self.model_uid))
+                    os.system('rm -rf {}'.format(temp_folder_path))
+                    os.chdir(settings.BASE_DIR)
+            except OSError as error:
+                print(error)
+
+            # Finally, we redirect
+            return redirect(redirect_url)
+        else:
+            # Otherwise when form is not valid, it will then show error and the entered inputs
+            return render(request, self.template, locals())
+
+
+# Published models visible under the "Catalogs" menu
+def index(request,user=None,project=None,id=0):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
     except Exception as err:
         print("User not logged in.")
-    base_template = 'base.html'
-    if 'project' in request.session:
-        project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
-            try:
-                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
-            except Exception as err:
-                project = []
-                print(err)
-            if not project:
-                base_template = 'base.html'
-            print(base_template)
 
-    # create session object to store info about model and their tag counts
-    if "model_tags" not in request.session:
-        request.session['model_tags'] = {}
-    # tag_count from the get request helps set num_tags which helps set the number of tags to show in the template
-    if "tag_count" in request.GET:
-        # add model id to model_tags object
-        if "model_id_add" in request.GET:
-            num_tags = int(request.GET['tag_count'])
-            id=int(request.GET['model_id_add'])
-            request.session['model_tags'][str(id)]=num_tags
-        # remove model id from model_tags object
-        if "model_id_remove" in request.GET:
-            num_tags = int(request.GET['tag_count'])
-            id=int(request.GET['model_id_remove'])
-            if str(id) in request.session['model_tags']:
-                request.session['model_tags'].pop(str(id))
-    
-    # reset model_tags if Model Tab on Sidebar pressed
-    if id==0:
-        if 'tf_add' not in request.GET and 'tf_remove' not in request.GET:
-            request.session['model_tags'] = {}
-    
-    media_url = settings.MEDIA_URL
-    published_models = PublishedModel.objects.all()
-    
-    # create session object to store ids for tag seacrh if it does not exist
-    if "tag_filters" not in request.session:
-        request.session['tag_filters'] = []
-    if 'tf_add' in request.GET:
-        tag = request.GET['tf_add']
-        if tag not in request.session['tag_filters']:
-            request.session['tag_filters'].append(tag)
-    elif 'tf_remove' in request.GET:
-        tag = request.GET['tf_remove']
-        if tag in request.session['tag_filters']:
-            request.session['tag_filters'].remove(tag)
-    elif "tag_count"  not in request.GET:
-        tag=""
-        request.session['tag_filters'] = []
-    print("tag_filters: ", request.session['tag_filters'])
-    
-    # changed list of published model only if tag filters are present
-    if request.session['tag_filters']:
-        tagged_published_models = []
-        for model in published_models:
-            model_objs = model.model_obj.order_by('-model__version')
-            latest_model_obj = model_objs[0]
-            mymodel = latest_model_obj.model
-            for t in mymodel.tags.all():
-                if t in request.session['tag_filters']:
-                    tagged_published_models.append(model)
-                    break
-        published_models = tagged_published_models
+    if project:
+        project = Project.objects.filter(slug=project).first()
+        published_models = Model.objects.filter(project=project).distinct('name')
+
+        return render(request, 'models/index.html', locals())
+    else:
+        #TODO move tags to separate djapp
         
-    request.session.modified = True
-    return render(request, 'models_cards.html', locals())
+        # create session object to store info about model and their tag counts
+        if "model_tags" not in request.session:
+            request.session['model_tags'] = {}
+        # tag_count from the get request helps set num_tags which helps set the number of tags to show in the template
+        if "tag_count" in request.GET:
+            # add model id to model_tags object
+            if "model_id_add" in request.GET:
+                num_tags = int(request.GET['tag_count'])
+                id=int(request.GET['model_id_add'])
+                request.session['model_tags'][str(id)]=num_tags
+            # remove model id from model_tags object
+            if "model_id_remove" in request.GET:
+                num_tags = int(request.GET['tag_count'])
+                id=int(request.GET['model_id_remove'])
+                if str(id) in request.session['model_tags']:
+                    request.session['model_tags'].pop(str(id))
+
+        # reset model_tags if Model Tab on Sidebar pressed
+        if id==0:
+            if 'tf_add' not in request.GET and 'tf_remove' not in request.GET:
+                request.session['model_tags'] = {}
+
+        media_url = settings.MEDIA_URL
+        published_models = PublishedModel.objects.all()
+
+        # create session object to store ids for tag seacrh if it does not exist
+        if "tag_filters" not in request.session:
+            request.session['tag_filters'] = []
+        if 'tf_add' in request.GET:
+            tag = request.GET['tf_add']
+            if tag not in request.session['tag_filters']:
+                request.session['tag_filters'].append(tag)
+        elif 'tf_remove' in request.GET:
+            tag = request.GET['tf_remove']
+            if tag in request.session['tag_filters']:
+                request.session['tag_filters'].remove(tag)
+        elif "tag_count"  not in request.GET:
+            tag=""
+            request.session['tag_filters'] = []
+        print("tag_filters: ", request.session['tag_filters'])
+
+        # changed list of published model only if tag filters are present
+        if request.session['tag_filters']:
+            tagged_published_models = []
+            for model in published_models:
+                model_objs = model.model_obj.order_by('-model__version')
+                latest_model_obj = model_objs[0]
+                mymodel = latest_model_obj.model
+                for t in mymodel.tags.all():
+                    if t in request.session['tag_filters']:
+                        tagged_published_models.append(model)
+                        break
+            published_models = tagged_published_models
+
+        request.session.modified = True
+ 
+        return render(request, 'models/index.html', locals())
 
 
 @login_required
 def list(request, user, project):
+    template = 'models_list.html'
+    
+    # Will be added to locals() which create a dict context with local variables
     menu = dict()
     menu['objects'] = 'active'
-    template = 'models_list.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
-
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
-    current_project = project.name
-    objects = []
-    
     models = Model.objects.filter(project=project).order_by('name', '-version').distinct('name')
 
-
     return render(request, template, locals())
-
 
 @login_required
 def unpublish_model(request, user, project, id):
@@ -142,15 +292,12 @@ def publish_model(request, user, project, id):
     import random
     from .helpers import add_pmo_to_publish
     # TODO: Check that user has access to this particular model.
-    
-    
     model = Model.objects.get(pk=id)
     print(model)
     # Default behavior is that all versions of a model are published.
     models = Model.objects.filter(name=model.name, project=model.project)
     
-    
-    img = settings.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+    img = settings.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
     img_file = open(img, 'rb')
     image = File(img_file)
     
@@ -312,11 +459,13 @@ def details(request, user, project, id):
     model_access_choices.remove(model.access)
     deployments = DeploymentInstance.objects.filter(model=model)
 
+    """
     report_generators = ReportGenerator.objects.filter(project=project)
 
     unfinished_reports = Report.objects.filter(status='P').order_by('created_at')
     for report in unfinished_reports:
         populate_report_by_id(report.id)
+
 
     reports = Report.objects.filter(model__id=id, status='C').order_by('-created_at')
 
@@ -359,7 +508,8 @@ def details(request, user, project, id):
             return HttpResponseRedirect('/{}/{}/models/'.format(user, project.slug))
     else:
         form = GenerateReportForm()
-
+    """
+    
     log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     for log in log_objects:
@@ -447,16 +597,15 @@ def details_private(request, user, project, id):
     base_template = 'base.html'
 
     project_slug = project
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    if is_authorized:
-        try:
-            project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-            base_template = 'baseproject.html'
-        except Exception as err:
-            project = []
-            print(err)
-        if not project:
-            base_template = 'base.html'
+
+    try:
+        project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
+        base_template = 'baseproject.html'
+    except Exception as err:
+        project = []
+        print(err)
+    if not project:
+        base_template = 'base.html'
 
     media_url = settings.MEDIA_URL
     # TODO: Check that user has access to this model (though already checked that user has access to project)
@@ -484,8 +633,9 @@ def details_public(request, id):
     base_template = 'base.html'
     if 'project' in request.session:
         project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+        #is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
+        if request.user.is_authenticated:
+        #if is_authorized:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
                 base_template = 'baseproject.html'
