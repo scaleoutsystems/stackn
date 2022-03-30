@@ -17,7 +17,6 @@ STACKn is a machine learning platform that lets data scientist collaborate on pr
 </p>
 
 
-
 With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
 - Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
 - Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
@@ -25,9 +24,9 @@ With an intuitive web UI, users can create private or shared projects in which v
 
 STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
-STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
 <br />
 <br />
+
 # Setup a local deployment
 This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
 <br />
