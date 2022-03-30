@@ -1,6 +1,0 @@
-namespace: default
-volumes: {}
-
-credentials:
-  username: admin
-  password: password

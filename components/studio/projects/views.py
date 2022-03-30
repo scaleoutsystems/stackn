@@ -1,55 +1,39 @@
 from django.shortcuts import render, reverse
 from .models import Project, Environment, ProjectLog
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from .exceptions import ProjectCreationException
-from .helpers import delete_project_resources
 from django.contrib.auth.models import User
 from django.conf import settings as sett
 from django.core.files import File
 import logging
 import markdown
-import time
 import random
 from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
 from models.models import Model
 import requests as r
 import base64
-from projects.helpers import get_minio_keys
 from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
-from .forms import FlavorForm
 from apps.models import AppInstance, AppCategories
 from apps.models import Apps
-import modules.keycloak_lib as kc
 from datetime import datetime, timedelta
-from modules.project_auth import get_permissions
-from .helpers import create_project_resources
 from .tasks import create_resources_from_template
-from models.models import Model
-# from deployments.models import DeploymentInstance
+from models.models import Model, ObjectType
 from apps.views import get_status_defs
 
 logger = logging.getLogger(__name__)
 
 
 def index(request):
-    base_template = 'base.html'
-    if 'project' in request.session:
-        project_slug = request.session['project']
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
-            try:
-                project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
-            except Exception as err:
-                project = []
-                print(err)
-            if not project:
-                base_template = 'base.html'
-    template = 'index_projects.html'
+    template = 'projects/index.html'
     try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+        if request.user.is_superuser:
+            projects = Project.objects.filter(status='active').distinct('pk')
+        else:
+            projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct(
+            'pk')
         media_url = sett.MEDIA_URL
         print(sett.STATIC_ROOT)
     except TypeError as err:
@@ -85,9 +69,7 @@ def settings(request, user, project_slug):
         projects = []
         print(err)
 
-    user_permissions = get_permissions(request, project_slug, sett.PROJECT_SETTINGS_PERM)
-    print(user_permissions)
-    template = 'settings.html'
+    template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = sett.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
@@ -97,6 +79,9 @@ def settings(request, user, project_slug):
     s3instances = S3.objects.filter(project=project)
     flavors = Flavor.objects.filter(project=project)
     mlflows = MLFlow.objects.filter(project=project)
+    
+    registry_app = Apps.objects.get(slug='docker-registry')
+    registries = AppInstance.objects.filter(app=registry_app.pk, project=project)
 
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
@@ -142,7 +127,6 @@ def change_description(request, user, project_slug):
             l = ProjectLog(project=project, module='PR', headline='Project description',
                            description='Changed description for project')
             l.save()
-        # TODO fix the create_environment_image creation
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
@@ -280,7 +264,6 @@ def grant_access_to_project(request, user, project_slug):
             project.authorized.add(user_tmp)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
-            kc.keycloak_add_role_to_user(project.slug, username_tmp, 'member')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
@@ -306,8 +289,7 @@ def revoke_access_to_project(request, user, project_slug):
             user_tmp = User.objects.get(pk=selected_user)
             project.authorized.remove(user_tmp)
             username_tmp = user_tmp.username
-            logger.info('Trying to add user {} to project.'.format(username_tmp))
-            kc.keycloak_remove_role_from_user(project.slug, username_tmp, 'member')
+            logger.info('Trying to remove user access {} to project.'.format(username_tmp))
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
@@ -340,7 +322,7 @@ def create(request):
         
         # Try to create database project object.
         try:
-            img = sett.STATIC_ROOT+'dist/img/patterns/image {}.png'.format(random.randrange(8,13))
+            img = sett.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
             print(img)
             img_file = open(img, 'rb')
             project = Project.objects.create_project(name=name,
@@ -354,16 +336,10 @@ def create(request):
             success = False
 
         try:
-            # Create project resources (Keycloak only)
-            create_project_resources(project, request.user.username, repository)
-
             # Create resources from the chosen template
             project_template = ProjectTemplate.objects.get(pk=request.POST.get('project-template'))
             create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
-            # Reset user token
-            request.session['oidc_id_token_expiration'] = time.time()-100
-            request.session.save()
         except ProjectCreationException as e:
             print("ERROR: could not create project resources")
             success = False
@@ -389,7 +365,8 @@ def create(request):
 
 @login_required
 def details(request, user, project_slug):
-    
+
+    is_authorized = False
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
@@ -398,12 +375,12 @@ def details(request, user, project_slug):
     if request.user.is_superuser:
         is_authorized = True
     else:
-        is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-        if is_authorized:
+        if request.user.is_authenticated:
+            is_authorized = True
             request.session['project'] = project_slug
     
         
-    template = 'project.html'
+    template = 'projects/overview.html'
 
     url_domain = sett.DOMAIN
     media_url = sett.MEDIA_URL
@@ -442,56 +419,28 @@ def details(request, user, project_slug):
     
     return render(request, template, locals())
 
+@login_required
+def delete(request, user, project_slug):
+    next_page = request.GET.get('next', '/projects/')
 
-def delete_project(project):
+    if not request.user.is_superuser:
+        owner = User.objects.filter(username=user).first()
+        project = Project.objects.filter(owner=owner, slug=project_slug).first()
+    else:
+        project = Project.objects.filter(slug=project_slug).first()
 
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
     from .tasks import delete_project_apps
     delete_project_apps(project.slug)
-
-    print("DELETING KEYCLOAK PROJECT RESOURCES")
-    retval = delete_project_resources(project)
-    if not retval:
-        print("Failed to delete Keycloak resources.")
 
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=project)
     for model in models:
         model.status = 'AR'
         model.save()
+
     project.status = 'archived'
     project.save()
-
-@login_required
-def delete(request, user, project_slug):
-    next_page = request.GET.get('next', '/projects/')
-
-    owner = User.objects.filter(username=user).first()
-    project = Project.objects.filter(owner=owner, slug=project_slug).first()
-
-    delete_project(project)
-    # print("SCHEDULING DELETION OF ALL INSTALLED APPS")
-    # from .tasks import delete_project_apps
-    # delete_project_apps(project_slug)
-
-    # print("DELETING KEYCLOAK PROJECT RESOURCES")
-    # retval = delete_project_resources(project)
-
-    # if not retval:
-    #     next_page = request.GET.get('next', '/{}/{}'.format(request.user, project.slug))
-    #     print("could not delete Keycloak resources!")
-    #     return HttpResponseRedirect(next_page, {'message': 'Error during project deletion'})
-
-    # print("KEYCLOAK RESOURCES DELETED SUCCESFULLY!")
-    
-
-    # print("ARCHIVING PROJECT MODELS")
-    # models = Model.objects.filter(project=project)
-    # for model in models:
-    #     model.status = 'AR'
-    #     model.save()
-    # project.status = 'archived'
-    # project.save()
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 

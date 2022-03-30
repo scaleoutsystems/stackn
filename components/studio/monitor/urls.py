@@ -6,7 +6,7 @@ from .dash_demo import app
 app_name = 'monitor'
 
 urlpatterns = [
-    path('', views.overview, name='overview'),
+    path('monitor/', views.overview, name='overview'),
     path('liveout', views.liveout, name='liveout'),
     path('usage', views.usage, name='usage'),
     path('<resource_type>/cpuchart', views.cpuchart, name='cpuchart'),

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ .Values.appname }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    run: {{ .Values.appname }}
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8501
+  selector:
+    release: {{ $.Release.Name }}

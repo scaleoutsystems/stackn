@@ -74,22 +74,8 @@ def start_job(definition):
     if settings.EXTERNAL_KUBECONF:
         config.load_kube_config('cluster.conf')
     else:
-        if 'TELEPRESENCE_ROOT' in os.environ:
-            from kubernetes.config.incluster_config import (SERVICE_CERT_FILENAME,
-                                                      SERVICE_TOKEN_FILENAME,
-                                                      InClusterConfigLoader)
-
-            token_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
-                                  ) / Path(SERVICE_TOKEN_FILENAME).relative_to('/')
-            cert_filename = Path(os.getenv('TELEPRESENCE_ROOT', '/')
-                                ) / Path(SERVICE_CERT_FILENAME).relative_to('/')
-
-            InClusterConfigLoader(
-                token_filename=token_filename, cert_filename=cert_filename
-            ).load_and_set()
-        else:
-            config.load_incluster_config()
-
+        config.load_incluster_config()
+        
     api = client.BatchV1Api()
 
     # create the resource

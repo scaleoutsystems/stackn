@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appname }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: fastapi-serve
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: fastapi-serve
+  template:
+    metadata:
+      annotations:
+        #prometheus.io/scrape: "true"
+        #prometheus.io/path: /metrics
+        #prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: fastapi-serve
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: fastapi-serve
+    spec:
+      volumes:
+      - name: rp-conf
+        configMap:
+          name: {{ .Release.Name }}-rp-config
+      {{ if .Values.model_card.enabled }}
+      - name: mc-conf
+        configMap:
+          name: {{ .Release.Name }}-mc-config
+      {{ end }}
+      - name: model-vol
+        emptyDir: {}
+      {{- with .Values.extraVolumes }}
+      {{- tpl . $ | nindent 6 }}
+      {{- end }}
+      {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+      {{ end }}
+      initContainers:
+      - name: copy-model
+        image: minio/mc
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        {{ if .Values.s3.skip_tls }}
+        args: ["-c", "mc config host add --insecure projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp --insecure projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        {{ else }}
+        args: ["-c", "mc config host add projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc cp projminio/$STACKN_MODEL_BUCKET/$STACKN_MODEL_FILE /models/model.tar.gz"]
+        {{ end }}
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+        env:
+        - name: S3_ACCESS_KEY_ID
+          value: {{ .Values.model.access_key }}
+        - name: S3_SECRET_ACCESS_KEY
+          value: {{ .Values.model.secret_key }}
+        - name: AWS_REGION
+          value: us-east-1
+        - name: S3_ENDPOINT
+          value: {{ .Values.model.url }}
+        - name: STACKN_MODEL_BUCKET
+          value: {{ .Values.model.bucket }}
+        - name: STACKN_MODEL_FILE
+          value: {{ .Values.model.obj }}
+        - name: STACKN_MODEL_PATH
+          value: {{ .Values.model.path }}
+      {{ if eq .Values.model.type "model" }}
+      - name: extract-model
+        image: busybox
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "cd /models && tar xvf model.tar.gz"]
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+      {{ end }}
+      containers:
+      - name: reverse-proxy
+        image: nginx:alpine
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: rp-conf
+          mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+      {{ if .Values.model_card.enabled }}
+      - name: model-card
+        image: nginx:alpine
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: model-vol
+          mountPath: /model
+        - name: mc-conf
+          mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      {{ end }}
+      - name: serve
+        resources:
+          limits:
+            cpu: {{ .Values.flavor.limits.cpu }}
+            memory: {{ .Values.flavor.limits.memory }}
+          requests:
+            cpu: {{ .Values.flavor.requests.cpu }}
+            memory: {{ .Values.flavor.requests.memory }}
+        volumeMounts:
+        - name: model-vol
+          mountPath: /models
+        {{- with .Values.extraVolumeMounts }}
+        {{- tpl . $ | nindent 8 }}
+        {{- end }}
+        env:
+        - name: GUNICORN_CMD_ARGS
+          value: "--limit-request-field_size 0"
+          {{- with .Values.extraEnv }}
+          {{- tpl . $ | nindent 10 }}
+          {{- end }}
+        - name: STACKN_MODEL_FILE
+          value: {{ .Values.model.obj }}
+        - name: STACKN_MODEL_PATH
+          value: {{ .Values.model.path }}
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.default_values.port }}

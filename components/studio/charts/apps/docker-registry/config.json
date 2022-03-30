@@ -1,0 +1,24 @@
+{
+  "name": "Docker Registry",
+  "slug": "docker-registry",
+  "category": "store",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}"
+  },
+  "description": "",
+  "settings": {
+    "apps":{
+        "Persistent Volume":"one"
+    },
+    "credentials": {
+        "username": {"type": "string", "default":"admin","title":"Username"},
+        "password": {"type": "string", "default":"password","title":"Password"}
+    },
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    }
+  }
+}
+

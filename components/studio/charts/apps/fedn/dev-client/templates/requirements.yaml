@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-reqs
-  namespace: {{ .Values.namespace }}
-data:
-  requirements.txt: |-
-{{ toYaml .Values.requirements | indent 4 }}

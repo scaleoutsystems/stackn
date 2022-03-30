@@ -15,20 +15,19 @@ def create_client(config, secure_mode=True):
         print("No secret key in S3 config.")
         return []
 
-    if not secure_mode:
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        from urllib3.poolmanager import PoolManager
-        manager = PoolManager(num_pools=100, cert_reqs='CERT_NONE', assert_hostname=False)
-        client = Minio(config['host'],
-                            access_key=access_key,
-                            secret_key=secret_key,
-                            http_client=manager)
+    # API connection does not want scheme in the minio URL
+    # Yet we need the URL to have the scheme included when some app charts use the minio client mc
+    if 'http://' in config['host']:
+        minio_url = config['host'].replace('http://', '')
+    elif 'https://' in config['host']:
+        minio_url = config['host'].replace('https://', '')
     else:
-        minio_url = "{}".format(config['host'])
-        client = Minio(minio_url,
-                            access_key=access_key,
-                            secret_key=secret_key)
+        minio_url = config['host']
+
+    if not secure_mode:
+        client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=secure_mode)
+    else:
+        client = Minio(minio_url, access_key=access_key, secret_key=secret_key)
 
     return client
 

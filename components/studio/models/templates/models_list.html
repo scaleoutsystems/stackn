@@ -1,6 +1,14 @@
-{% extends 'baseproject.html' %}
+{% extends 'projects/base.html' %}
 
 {% block content %}
+
+{% if request.user.is_authenticated %}
+<a href="{% url 'models:create' request.user project.slug %}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> New model</a>
+{% endif %}
+
+<h1 class="h3 mb-3">Models</h1>
+
+{% include 'common/flash_messages.html' %}
 
 <div class="row">
     <div class="card flex-fill">
@@ -37,14 +45,40 @@
                                     {% if model.status == 'CR' %}bg-warning
                                     {% elif model.status == 'DP' %}bg-success
                                     {% elif model.status == 'AR' %}bg-danger
-                                    {% endif %}">{{ model.get_status_display }}</span></td>
-                                <td>{{ project.owner }}</td>
-                                <td>
+                                    {% endif %}">{{ model.get_status_display }}</span>
+                                    <span class="badge bg-info">
                                     {% if model.access != "PU" %}
-                                    <a href="{% url 'models:publish_model' request.user project.slug model.id %}">Publish</a>
+                                    unpublished
                                     {% else %}
-                                    <a href="{% url 'models:unpublish_model' request.user project.slug model.id %}">Unpublish</a>
+                                    published</span>
                                     {% endif %}
+                                </td>
+      
+                                <td>{{ project.owner }}</td>
+                                <td class="table-action">
+                                    <div class="dropdown show">
+                                        <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            {% if model.access != "PU" %}
+                                            <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.id %}">
+                                                <i class="align-middle me-1" data-feather="share-2"></i> Publish
+                                            </a>
+                                            {% else %}
+                                            <a class="dropdown-item" href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
+                                                <i class="align-middle me-1" data-feather="slash"></i> Unpublish
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                                <i class="align-middle me-1" data-feather="check-circle"></i> Serve
+                                            </a>
+                                            <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
+                                                <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -54,7 +88,7 @@
             </div>
         </div>
         {% else %}
-        <p style="margin-left: 25px;">No Objects have been uploaded to this project yet.</p>
+        <p style="margin-left: 25px;">No Model objects have been created for this project yet.</p>
         {% endif %}
     </div>
 </div>

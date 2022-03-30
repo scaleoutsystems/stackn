@@ -1,0 +1,45 @@
+{% extends 'common/common_base.html' %}
+
+{% block title %}Sign Up - STACKn{% endblock %}
+
+{% load crispy_forms_tags %} 
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="card border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-2 d-none d-lg-block"></div>
+                        <div class="col-lg-8">
+                            <div class="p-5">
+                                <div class="text-center mb-1">
+                                    <img src="{% static 'images/stackn.png' %}" alt="STACKn Logo" width="200" >
+                                </div>
+                                <div class="text-center">
+                                    <h1 class="h2 text-dark mb-4">Create an Account</h1>
+                                </div>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    {{form | crispy}}
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-secondary" onclick="window.location='{% url 'common:welcome' %}' ; return false;" value="Cancel">
+                                        Cancel
+                                    </button>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a href="#">Forgot Password?</a>
+                                </div>
+                                <div class="text-center">
+                                    <a href="{% url 'login' %}">Already have an account? Login here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

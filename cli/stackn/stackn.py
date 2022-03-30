@@ -150,7 +150,7 @@ def get_endpoints(studio_url):
     return endpoints
 
 def get_auth_header(conf):
-    conf, status = stackn.auth.get_token(conf)
+    conf, status = stackn.auth.get_config(conf)
     if not status:
         return False, False
     auth_header = {"Authorization": "Token {}".format(conf['STACKN_ACCESS_TOKEN'])}
@@ -425,9 +425,10 @@ def create_meta_resource(filename, studio_url, project, secure):
 
 def create_object(model_name,
                   studio_url=[],
-                  model_file="",
+                  model_file='',
                   project_name=[],
                   release_type='minor',
+                  version='',
                   object_type='model',
                   model_description=None,
                   model_card=None,
@@ -436,7 +437,6 @@ def create_object(model_name,
                   secure_mode=True):
 
     """ Publish an object to Studio. """
-
     conf = {
         'STACKN_MODEL': model_name,
         'STACKN_URL': studio_url,
@@ -469,6 +469,7 @@ def create_object(model_name,
     project = project[0]
     if s3storage == None:
         s3storage = project['s3storage']
+        print("S3 storage set to: {}".format(s3storage))
     else:
         # TODO: Fetch S3 settings from Studio...
         print("Passing S3 storage as an option is not implemented yet.")
@@ -509,14 +510,15 @@ def create_object(model_name,
     model_data = {"uid": model_uid,
                   "name": model_name,
                   "release_type": release_type,
+                  "version": version,
                   "description": model_description,
                   "model_card": model_card_html_string,
                   "object_type": object_type}
 
     endpoints = get_endpoints(conf['STACKN_URL'])
     url = endpoints['models'].format(project['id'])
-
     r = requests.post(url, json=model_data, headers=auth_header, verify=secure_mode)
+
     if not _check_status(r, error_msg="Failed to create model."):
         # Delete model object from storage.
         repo.delete_artifact(model_uid)
@@ -525,6 +527,7 @@ def create_object(model_name,
     if building_from_current:
         # Delete temporary archive file.
         os.system('rm {}'.format(model_file))
+    
     print('Released model: {}, release_type: {}'.format(model_name, release_type))
 
     return True

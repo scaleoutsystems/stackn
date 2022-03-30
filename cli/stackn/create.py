@@ -76,17 +76,19 @@ def metaresource(filename, studio_url, project, secure):
 @click.option('-t', '--object-type', required=False, default="model")
 @click.option('-f', '--file-name', required=False, default="")
 @click.option('-r', '--release-type', required=False, default="minor")
+@click.option('-v', '--version', required=False, default="1.0")
 @click.option('-d', '--description', required=False, default="")
 @click.option('-m', '--model-card', required=False, default="")
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('-s', '--s3-storage', required=False, default=None)
 @click.option('--secure/--insecure', default=True)
-def obj(name, object_type, file_name, release_type, description, model_card, project, studio_url, s3_storage, secure):
+def obj(name, object_type, file_name, release_type, version, description, model_card, project, studio_url, s3_storage, secure):
     create_object(name,
                   model_file=file_name,
                   project_name=project,
                   release_type=release_type,
+                  version=version,
                   object_type=object_type,
                   model_description=description,
                   model_card=model_card,

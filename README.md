@@ -17,7 +17,6 @@ STACKn is a machine learning platform that lets data scientist collaborate on pr
 </p>
 
 
-
 With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
 - Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
 - Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
@@ -25,9 +24,9 @@ With an intuitive web UI, users can create private or shared projects in which v
 
 STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
-STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
 <br />
 <br />
+
 # Setup a local deployment
 This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
 <br />
@@ -57,11 +56,48 @@ microk8s config >> ~/.kube/config
 5. Finally, install the latest version of Helm since microk8s is usually not packaged with the latest Helm version.
 **Follow the instructions** [here](https://helm.sh/docs/intro/install/#from-apt-debianubuntu)
 
-## Install STACKn
+## Install STACKn for Local Development with Docker-Compose
 
-1. Clone  Helm chart repo for STACKn
+1. Clone this repository locally:
 ```
-git clone https://github.com/scaleoutsystems/charts.git
+$ git clone https://github.com/scaleoutsystems/stackn.git
+```
+
+2. Navigate to the directory “components/studio“:
+```
+$ cd stackn/components/studio
+```
+At this directory there are two files that need to be quickly modified before running the command `docker-compose up`:
+- `cluster.conf`
+  - update this file with your kubernetes cluster config by running: `$ microk8s config > ./cluster.conf`
+
+- `docker-compose.yaml`
+  - update this file by searching and replacing **all** occurrences of `<your-domain>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain>` field becomes `192.168.1.10.nip.io`
+
+- `studio/settings.py`
+  - update this file, like the previous file, replace the occurence of `<your-domain>` with your local IP domain
+
+**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called [`init.sh`](https://github.com/scaleoutsystems/charts/blob/release/v0.6.0/scaleout/stackn/values-utility-script.sh). 
+
+3. Finally, fire up STACKn with the following simple command:
+```
+$ docker-compose up
+```
+**Note:** in the `docker-compose.yaml` file, it is important to know and be aware that there exists two useful flags for the studio container which default values are:
+- `INIT=true`
+- `FEDN=false`
+
+This flags are used by the studio container when starting the web server with the script [`run_web.sh`](https://github.com/scaleoutsystems/stackn/blob/release/v0.6.0-1/components/studio/scripts/run_web.sh).
+
+The `INIT` flag tells the studio container whether the initial database migrations, fixtures and admin user should be created. This means that such flag should be set to `true` whenever a fresh instance/deployment of STACKn is needed. **Otherwise you must change this to `false` after the first initialization, or you will run into database migrations errors.**
+
+The `FEDN` flag tells the studio container whether [FEDn](https://github.com/scaleoutsystems/fedn) should be enabled and integrated by running the related database migrations and fixtures. Same thing here, such flag should be set to `true` whenever a fresh instance/deployment with FEDn enabled is needed. **Otherwise you must change back this to `false` after the first initialization, or you will run into database migrations errors.**
+
+## Install STACKn as an Helm Chart
+
+1. Clone the Helm chart repository for STACKn
+```
+$ git clone https://github.com/scaleoutsystems/charts.git
 ```
 2. A template file for values.yaml can be found in “charts/scaleout/stackn”
 Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
@@ -70,74 +106,32 @@ Please make sure to follow the instructions that you will find **at the beginnin
 
 - Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
 
-- Set  `oidc.verify_ssl = false`, this will enable insecure options (without certificates)
-
 - Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
 
 - Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
 
 ```
-microk8s config
+$ microk8s config
+```
+
+**Note:** We have created a quite basic shell utility script that takes care of the manual changes of the `values.yaml`. You can find it in the same Helm chart repository for STACKn and it is called [`values-utility-script.sh`](https://github.com/scaleoutsystems/charts/blob/release/v0.6.0/scaleout/stackn/values-utility-script.sh). Run it in order to modify the `values.yaml` file:
+```
+$ ./values-utility-script.sh
 ```
 
 3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
 ```
-helm install stackn charts/scaleout/stackn -f values.yaml
+$ helm install stackn charts/scaleout/stackn -f values.yaml
 ```
 **Note:** Instead of directly using the `values.yaml` file, one could make a copy out of it and use that. For instance:
 ```bash
-cp values.yaml my-values.yaml
-vim my-values.yaml # perform all the necessary changes
-helm install stackn charts/scaleout/stackn -f my-values.yaml
+$ cp values.yaml my-values.yaml
+$ vim my-values.yaml # perform all the necessary changes
+$ helm install stackn charts/scaleout/stackn -f my-values.yaml
 ```
 
-4. Go to studio in your browser: (for example `studio.stackn.192.168.1.10.nip.io`)
-```
-https://studio.<your-domain.com>
-```
-5. Register a new user. Press "sign in"  
-
-6. Go to django admin page:
-```
-https://studio.<your-domain.com>/admin
-```
-- Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
-
-- Go to "Users" tab and click on the user you created earlier.
-
-- Give the user all permission (superuser, staff), then “save”.
-
- ## Install default apps and project templates
-
-1.  Clone this repository
-```
-git clone https://github.com/scaleoutsystems/stackn.git
-```
-2. Install STACKn CLI
-```
-cd stackn/cli
-sudo python3 setup.py install
-```
-3. Login with the user (which you created in studio)
-```
-stackn login -u <user-email> -p <password> --insecure --url studio.<your-domain.com>
-```
-
-4. Install the project templates.
-
-```
-cd ../../projecttemplates/default
-stackn create projecttemplate --insecure
-cd ../fedn-mnist/
-stackn create projecttemplate --insecure
-```
-5 . Install apps
-```
-cd ../../apps
-stackn create apps --insecure
-```
 ## Start using STACKn
-Open studio in your browser and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
+Open studio in your browser (for example `studio.stackn.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project.. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
 <br />
 <br />
 # Where is STACKn used?

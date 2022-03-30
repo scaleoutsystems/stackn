@@ -5,7 +5,6 @@ from .models import Apps, AppInstance, AppCategories, AppPermission
 from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
 from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
 from django.template import engines
 import requests
 import flatten_json
@@ -20,7 +19,6 @@ key_words = ['appobj',
              'apps',
              'logs',
              'permissions',
-             'keycloak-config',
              'default_values',
              'export-cli',
              'csrfmiddlewaretoken',
@@ -51,7 +49,7 @@ def serialize_model(form_selection):
                 "version": obj[0].version,
                 "release_type": obj[0].release_type,
                 "description": obj[0].description,
-                "url": "https://{}".format(obj[0].s3.host),
+                "url": "http://{}".format(obj[0].s3.host),
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
                 "bucket": obj[0].bucket,
@@ -246,16 +244,11 @@ def serialize_project(project):
 def serialize_cli(username, project, aset):
     parameters = dict()
     if 'export-cli' in aset and aset['export-cli']=='True':
-        kc = keylib.keycloak_init()
-        token, refresh_token, token_url, public_key = keylib.keycloak_token_exchange_studio(kc, username)
         parameters['cli_setup'] = {
             "url": settings.DOMAIN,
             "project": project.name,
             "user": username,
-            "token": token,
-            "refresh_token": refresh_token
         }
-        
     return parameters
 
 def serialize_env_variables(username, project, aset):

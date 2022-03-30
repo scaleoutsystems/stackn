@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: mlflow
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: mlflow
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: mlflow
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: mlflow
+    spec:
+      initContainers:
+      - image: alpine:latest
+        name: init-auth
+        command: ["/bin/sh"]
+        args: ["-c", "apk add apache2-utils && htpasswd -Bbn {{ .Values.credentials.username }} {{ .Values.credentials.password }} > /auth/htpasswd"]
+        volumeMounts:
+        - name: auth-vol
+          mountPath: /auth
+      containers:
+      - name: api-reverse-proxy
+        image: nginx:alpine
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: rp-conf
+          mountPath: /etc/nginx
+        - name: auth-vol
+          mountPath: /auth
+      - image: scaleoutsystems/mlflow-server:latest
+        imagePullPolicy: IfNotPresent
+        name: mlflow
+        env:
+        - name: MLFLOW_BUCKET
+          value: mlflow
+        ports:
+        - containerPort: 5000
+        command: ["/bin/sh"]
+        args: ["-c", "mlflow server --host 0.0.0.0:5000"]
+        resources: {}
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volumeK8s }}
+        - name: {{ $key }}
+          mountPath: /mlflowruns
+        {{- end }}
+      hostname: {{ .Release.Name }}
+      restartPolicy: Always
+      volumes:
+      - name: auth-vol
+        emptyDir: {}
+      - name: rp-conf
+        configMap:
+          name: {{ .Release.Name }}-rp-config
+      {{- range $key, $value := .Values.apps.volumeK8s }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}
