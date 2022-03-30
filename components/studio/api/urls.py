@@ -4,6 +4,7 @@ import rest_framework.routers as drfrouters
 from .views import ModelList, ModelLogList, MetadataList, ProjectList, MembersList, ObjectTypeList
 from .views import AppInstanceList, FlavorsList, EnvironmentList, S3List, MLflowList, ResourceList
 from .views import ReleaseNameList, AppList, ProjectTemplateList
+from .views import CustomAuthToken
 from .public_views import get_studio_settings
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework_nested import routers
@@ -11,9 +12,7 @@ from rest_framework_nested import routers
 app_name = 'api'
 
 router_drf = drfrouters.DefaultRouter()
-
 router = routers.SimpleRouter()
-
 router.register(r'projects', ProjectList, basename='project')
 router.register(r'apps', AppList, basename='apps')
 router.register(r'projecttemplates', ProjectTemplateList, basename='projecttemplates')
@@ -33,13 +32,10 @@ models_router.register(r'modellogs', ModelLogList, basename='modellog')
 models_router.register(r'metadata', MetadataList, basename='metadata')
 models_router.register(r'apps', AppList, basename='apps')
 
-
-
-
 urlpatterns = [
     path('', include(router_drf.urls)),
     path('', include(router.urls)),
     path('', include(models_router.urls)),
-    path('api-token-auth', obtain_auth_token, name='api_token_auth'),
-    path('settings', get_studio_settings)
+    path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),
+    path('settings/', get_studio_settings)
 ]
