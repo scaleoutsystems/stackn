@@ -7,7 +7,6 @@ from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
 from projects.models import Project, Flavor, Environment, S3, ReleaseName
 from models.models import Model
 from projects.helpers import get_minio_keys
-import modules.keycloak_lib as keylib
 from .serialize import serialize_app
 from .tasks import deploy_resource, delete_resource
 import requests
@@ -23,7 +22,6 @@ key_words = ['appobj',
              'apps',
              'logs',
              'permissions',
-             'keycloak-config',
              'default_values',
              'export-cli',
              'csrfmiddlewaretoken',
@@ -40,7 +38,7 @@ def get_form_models(aset, project, appinstance=[]):
         if 'object_type' in aset['model']:
             object_type = aset['model']['object_type']
         else:
-            object_type = 'model'
+            object_type = 'default'
         models = Model.objects.filter(project=project, object_type__slug=object_type)
         
         for model in models:
