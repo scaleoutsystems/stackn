@@ -5,23 +5,6 @@
 
 <div class="row">
   {% for template in templates %}
-    <!-- <div class="col-4 col-xl-4 mb-4">
-        <div class="card h-100 ">
-          <img class="card-img-top" src="{{ media_url }}{{ template.image }}" alt="Template Image" style="height:150px;width:150px;">
-          <div class="card-header">
-            <h3>{{ template.name }}</h3>
-          </div>
-          <div class="card-body">
-            <p>{{ template.description }}</p>
-            <div style="position:absolute;bottom:0.5em;">
-              <h4>
-                  <a href="{% url 'projects:create' %}?template={{ template.name | urlencode }}">Create</a>
-              </h4>
-            </div>
-          </div>
-        </div>
-    </div> -->
-
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
         <div class="card h-100">  
             <div class="card-body">
@@ -34,13 +17,18 @@
                             <p>{{ template.description }}</p>
                             <div style="position:absolute;bottom:0.5em;">
                                 <h4>
-                                    <a href="{% url 'projects:create' %}?template={{ template.name | urlencode }}">Create</a>
+                                    <a class="btn btn-primary" href="{% url 'projects:create' %}?template={{ template.name | urlencode }}">Create</a>
                                 </h4>
                             </div>
                         </div>
                     </div>
                     <div class="col-4">
-                        <img src="{{ media_url }}{{ template.image }}" class="img-fluid float-end" style="height:100px;" alt="Template Logo">
+                        {% if template.image  %}
+                          <img src="{{ media_url }}{{ template.image }}" class="img-fluid float-end" style="height:100px;" alt="Template Logo">
+                        {% else %}
+                          {% load static %}
+                          <img src="{% static 'images/logo.png' %}" class="img-fluid float-end" style="height:100px;" alt="Template Logo">
+                        {% endif %}
                     </div>
                 </div>
             </div>

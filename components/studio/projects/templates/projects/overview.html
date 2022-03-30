@@ -1,4 +1,4 @@
-{% extends 'baseproject.html' %}
+{% extends 'projects/base.html' %}
 {% load static %}
 
 {% block content %}
@@ -6,36 +6,6 @@
 <h1 class="h3 mb-3">Overview</h1>
 
 <div class="row">
-    <!-- <div class="col-12 col-md-6 col-lg-4" style="padding-bottom: 24px;">
-        <div class="card" style="height: 100%;">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Description</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    {{ project.description }}
-                </p>
-            </div>
-        </div>
-    </div> -->
-    <!-- <div class="col-12 col-lg-6 col-xl-4 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Recent activity</h5>
-            </div>
-            <div class="card-body">
-                <ul class="timeline">
-                    {% for log in activity_logs %}
-                    <li class="timeline-item">
-                        <strong>{{ log.headline }}</strong>
-                        <span class="float-end text-muted text-sm">{{ log.created_at }}</span>
-                        <p>{{ log.description }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div> -->
     <div class="col-12 col-lg-6 col-xl-6 d-flex">
         <div class="card flex-fill w-100">
             <div class="card-header">
@@ -85,10 +55,6 @@
             </div>
             {% if objs.objs %}
             <div class="dataTables_wrapper dt-bootstrap4 no-footer">
-                <!-- <div class="row">
-                    <div class="col-sm-12 col-md-6"></div>
-                    <div class="col-sm-12 col-md-6"></div>
-                </div> -->
                 <div class="row">
                     <div class="col-sm-12">
                         <table id="datatables-dashboard-projects-{{ forloop.counter }}" class="table table-striped my-0 dataTable no-footer"
@@ -124,17 +90,20 @@
                                     <td class="table-action text-center">
                                         <div class="dropdown show">
                                             <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                                                <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">Logs</a>
-                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">Settings</a>
-                                                <a class="dropdown-item bg-danger text-white" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">Delete</a>
+                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
+                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
+                                                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                                </a>
+                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
+                                                    <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                                </a>
                                             </div>
                                         </div>
-                                        <!-- <a href="{% url 'apps:logs' request.user project.slug obj.pk %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder align-middle"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
-                                        <a href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
-                                        <a href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a> -->
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -144,7 +113,9 @@
                 </div>
             </div>
             {% else %}
-            <!-- <p style="margin-left: 25px;">No Lab Sessions have been created within this project yet.</p> -->
+                <script>
+                    swal ( "Oops" ,  "Something went wrong!" ,  "error" )
+                </script>
             {% endif %}
         </div>
     </div>
@@ -152,6 +123,16 @@
     <div class="col-6 d-flex">
         <div class="card flex-fill">
             <div class="card-header">
+                <div class="card-actions float-end">
+                    <div class="dropdown show">
+                        <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
+                        <button class="btn btn-outline-secondary">New</button>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Create Model Object</a>
+                        </div>
+                    </div>
+                </div>
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
@@ -166,17 +147,12 @@
                             role="grid">
                             <thead>
                                 <tr>
-                                    <th class="sorting_asc" tabindex="0"
-                                        rowspan="1" colspan="1">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Version</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Created</th>
-                                    <th class="sorting" tabindex="0"
-                                        rowspan="1" colspan="1">
-                                        Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0"
-                                         rowspan="1" colspan="1">Accessability</th>
+                                    <th class="sorting_asc" tabindex="0" rowspan="1" colspan="1">Name</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Version</th>
+                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Created</th>
+                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
+                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Accessability</th>
+                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -191,6 +167,27 @@
                                         {% elif model.status == 'AR' %}bg-danger
                                         {% endif %}">{{ model.get_status_display }}</span></td>
                                     <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
+                                    <td class="table-action text-center">
+                                        <div class="dropdown show">
+                                            <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a class="dropdown-item" href="{% url 'models:details_private' request.user project.slug model.pk %}">
+                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.pk %}">
+                                                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                                    <i class="align-middle me-1" data-feather="check-circle"></i> Serve
+                                                </a>
+                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
+                                                    <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -206,10 +203,7 @@
 </div>
 
 
-
-
 <script>
-
     function newChart(chart, labels, y_data, ylabel, dataset_label) {
         new Chart(chart, {
             type: 'line',
@@ -288,10 +282,9 @@
         });
   
     };
-  
-    resourceCharts('#totalCPUChart', '#totalMEMChart');
-  
+    resourceCharts('#totalCPUChart', '#totalMEMChart');  
 </script>
+
 <script>
     function update_status() {
         var apps = {{ pk_list | safe }}
@@ -312,4 +305,5 @@
     };
     setTimeout(update_status, 5000);
 </script>
+
 {% endblock %}

@@ -1,0 +1,156 @@
+[
+  {
+    "model": "projects.projecttemplate",
+    "pk": 1,
+    "fields": {
+      "name": "Blank Project",
+      "slug": "blank",
+      "description": "A project template, with no apps launched at creation.",
+      "template": {
+        "flavors": {
+          "Medium": {
+            "cpu": {
+              "requirement": "100m",
+              "limit": "1000m"
+            },
+            "mem": {
+              "requirement": "1Gi",
+              "limit": "8Gi"
+            },
+            "gpu": {
+              "requirement": "0",
+              "limit": "0"
+            },
+            "ephmem": {
+              "requirement": "50Mi",
+              "limit": "100Mi"
+            }
+          }
+        },
+        "environments": {
+          "Jupyter Notebook": {
+            "repository": "scaleoutsystems",
+            "image": "jupyter-stackn:v0.1.5",
+            "app": "jupyter-lab"
+          },
+          "Default Serving": {
+            "repository": "scaleoutsystems",
+            "image": "default-python:latest",
+            "app": "fastapi-serve"
+          },
+          "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+          },
+          "Ubuntu": {
+            "repository": "scaleoutsystems",
+            "image": "wetty-ubuntu:v0.1.2",
+            "app": "wetty-terminal"
+          },
+          "Dask": {
+            "repository": "daskdev",
+            "image": "dask",
+            "app": "dask-cluster"
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "projects.projecttemplate",
+    "pk": 2,
+    "fields": {
+      "name": "STACKn Default",
+      "slug": "default",
+      "description": "Default project template.",
+      "template": {
+        "flavors": {
+          "Medium": {
+            "cpu": {
+              "requirement": "100m",
+              "limit": "1000m"
+            },
+            "mem": {
+              "requirement": "1Gi",
+              "limit": "8Gi"
+            },
+            "gpu": {
+              "requirement": "0",
+              "limit": "0"
+            },
+            "ephmem": {
+              "requirement": "50Mi",
+              "limit": "100Mi"
+            }
+          }
+        },
+        "environments": {
+          "Jupyter Notebook": {
+            "repository": "scaleoutsystems",
+            "image": "jupyter-stackn:v0.1.5",
+            "app": "jupyter-lab"
+          },
+          "Default Serving": {
+            "repository": "scaleoutsystems",
+            "image": "default-python:latest",
+            "app": "fastapi-serve"
+          },
+          "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+          },
+          "Ubuntu": {
+            "repository": "scaleoutsystems",
+            "image": "wetty:latest",
+            "app": "wetty-terminal"
+          },
+          "Dask": {
+            "repository": "daskdev",
+            "image": "dask",
+            "app": "dask-cluster"
+          }
+        },
+        "apps": {
+          "minio-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project"
+          },
+          "reg-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project"
+          },
+          "project-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project"
+          },
+          "project-minio": {
+            "slug": "minio",
+            "app:volumeK8s": [
+              "minio-vol"
+            ],
+            "credentials.access_key": "accesskey2",
+            "credentials.secret_key": "secretkey193",
+            "permission": "project"
+          },
+          "project-registry": {
+            "slug": "docker-registry",
+            "app:volumeK8s": [
+              "reg-vol"
+            ],
+            "credentials.username": "username123",
+            "credentials.password": "pass999111222",
+            "permission": "project"
+          }
+        },
+        "settings": {
+          "project-S3": "project-minio"
+        }
+      }
+    }
+  }
+]
