@@ -49,12 +49,12 @@ jobs:
         DOCKER_URL: scaleoutsystems
       working-directory: ${{env.working-directory}}
       run: |
-        docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:master .
+        docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }} .
 
     - name: docker push
       env:      
         DOCKER_URL: scaleoutsystems
       working-directory: ${{env.working-directory}}
       run: |
-        docker push $DOCKER_URL/ingress:master
+        docker push $DOCKER_URL/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }}
         docker push $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}
