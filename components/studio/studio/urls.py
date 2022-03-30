@@ -18,12 +18,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from . import views
 
 urlpatterns = [
     path('', include('common.urls', namespace='common')),
     path('', include('models.urls', namespace='models')),
     path('', include('portal.urls', namespace='portal')),
     path('', include('projects.urls', namespace='projects')),
+    path('auth/', views.auth),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls', namespace='api')),
