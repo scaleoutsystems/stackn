@@ -76,7 +76,7 @@ At this directory there are two files that need to be quickly modified before ru
   - update this file by searching and replacing **all** occurrences of `<your-domain>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain>` field becomes `192.168.1.10.nip.io`
 
 - `studio/settings.py`
-  - update this file by searching for the variables `DOMAIN` and `STUDIO_URL` and, like the previous file, replace the occurence of `<your-domain>` with your local IP domain
+  - update this file, like the previous file, replace the occurence of `<your-domain>` with your local IP domain
 
 **Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called [`init.sh`](https://github.com/scaleoutsystems/charts/blob/release/v0.6.0/scaleout/stackn/values-utility-script.sh). 
 
