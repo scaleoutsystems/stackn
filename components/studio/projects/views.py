@@ -45,6 +45,8 @@ def index(request):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_environment(request, user, project_slug):
 
     template = 'create_environment.html'
@@ -56,6 +58,8 @@ def create_environment(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def environments(request, user, project_slug):
     template = 'environments.html'
     project = Project.objects.get(slug=project_slug)
@@ -64,6 +68,8 @@ def environments(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def settings(request, user, project_slug):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
@@ -104,6 +110,8 @@ def settings(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def update_image(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     if request.method == 'POST' and request.FILES['image']:
@@ -117,6 +125,8 @@ def update_image(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def change_description(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
 
@@ -134,6 +144,8 @@ def change_description(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_environment(request, user, project_slug):
     # TODO: Ensure that user is allowed to create environment in this project.
     if request.method == 'POST':
@@ -148,6 +160,8 @@ def create_environment(request, user, project_slug):
     return HttpResponseRedirect(reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete_environment(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -160,6 +174,8 @@ def delete_environment(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_flavor(request, user, project_slug):
     # TODO: Ensure that user is allowed to create flavor in this project.
     if request.method == 'POST':
@@ -184,6 +200,8 @@ def create_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete_flavor(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -196,6 +214,8 @@ def delete_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def set_s3storage(request, user, project_slug, s3storage=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # s3 object to storage in this project (need to check that the user has access to the
@@ -222,6 +242,8 @@ def set_s3storage(request, user, project_slug, s3storage=[]):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def set_mlflow(request, user, project_slug, mlflow=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # MLFlow object to MLFlow Server in this project (need to check that the user has access to the
@@ -245,6 +267,8 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def grant_access_to_project(request, user, project_slug):
 
     project = Project.objects.get(slug=project_slug)
@@ -271,6 +295,8 @@ def grant_access_to_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def revoke_access_to_project(request, user, project_slug):
 
     project = Project.objects.get(slug=project_slug)
@@ -427,6 +453,8 @@ def details(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete(request, user, project_slug):
     next_page = request.GET.get('next', '/projects/')
 
@@ -453,6 +481,8 @@ def delete(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def publish_project(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
@@ -494,6 +524,8 @@ def publish_project(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def project_readme(request, user, project_slug):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
