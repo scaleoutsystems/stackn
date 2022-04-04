@@ -143,6 +143,11 @@ class Project(models.Model):
     repository_imported = models.BooleanField(default=False)
     # ----------------------
 
+    class Meta:
+        permissions = [
+            ('can_view_project', 'Can view project')
+        ]
+
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
 

@@ -16,6 +16,8 @@ import base64
 from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplate, MLFlow
 from .tasks import create_resources_from_template
 from django.apps import apps
+from guardian.shortcuts import assign_perm
+from guardian.decorators import permission_required_or_403
 
 logger = logging.getLogger(__name__)
 Apps = apps.get_model(app_label=django_settings.APPS_MODEL)
@@ -329,6 +331,7 @@ def create(request):
                                                      owner=request.user,
                                                      description=description,
                                                      repository=repository)
+            assign_perm('can_view_project', request.user, project)
             project.project_image.save('default.png', File(img_file))
             img_file.close()
         except ProjectCreationException as e:
@@ -364,6 +367,8 @@ def create(request):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def details(request, user, project_slug):
 
     is_authorized = False
@@ -376,6 +381,7 @@ def details(request, user, project_slug):
         is_authorized = True
     else:
         if request.user.is_authenticated:
+
             is_authorized = True
             request.session['project'] = project_slug
     
