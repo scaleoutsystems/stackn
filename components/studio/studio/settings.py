@@ -246,3 +246,14 @@ DOMAIN = '<your-domain>'
 STUDIO_URL = 'http://studio.<your-domain>:8080'
 #To enable sticky sessions for k8s ingress  
 SESSION_COOKIE_DOMAIN=".<your-domain>"
+
+#Local dependecies Models
+PROJECTS_MODEL = 'projects.Project'
+APPINSTANCE_MODEL = 'apps.AppInstance'
+APPS_MODEL = 'apps.Apps'
+APPCATEGORIES_MODEL = 'apps.AppCategories'
+MODELS_MODEL = 'models.Model'
+
+#App statuses
+APPS_STATUS_SUCCESS = ['Running', 'Succeeded', 'Success']
+APPS_STATUS_WARNING = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
