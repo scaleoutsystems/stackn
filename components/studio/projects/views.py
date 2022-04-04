@@ -1,29 +1,28 @@
 from django.shortcuts import render, reverse
-from .models import Project, Environment, ProjectLog
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from .exceptions import ProjectCreationException
-from django.contrib.auth.models import User
-from django.conf import settings as sett
+from django.contrib.auth import get_user_model
+from django.conf import settings as django_settings
 from django.core.files import File
 import logging
 import markdown
 import random
 from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
 from django.db.models import Q
-from models.models import Model
 import requests as r
 import base64
-from .models import Project, S3, Flavor, ProjectTemplate, MLFlow
-from apps.models import AppInstance, AppCategories
-from apps.models import Apps
-from datetime import datetime, timedelta
+from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplate, MLFlow
 from .tasks import create_resources_from_template
-from models.models import Model, ObjectType
-from apps.views import get_status_defs
+from django.apps import apps
 
 logger = logging.getLogger(__name__)
+Apps = apps.get_model(app_label=django_settings.APPS_MODEL)
+AppInstance = apps.get_model(app_label=django_settings.APPINSTANCE_MODEL)
+AppCategories = apps.get_model(app_label=django_settings.APPCATEGORIES_MODEL)
+Model = apps.get_model(app_label=django_settings.MODELS_MODEL)
+User = get_user_model()
 
 
 def index(request):
@@ -34,8 +33,8 @@ def index(request):
         else:
             projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct(
             'pk')
-        media_url = sett.MEDIA_URL
-        print(sett.STATIC_ROOT)
+        media_url = django_settings.MEDIA_URL
+        print(django_settings.STATIC_ROOT)
     except TypeError as err:
         projects = []
         print(err)
@@ -45,6 +44,7 @@ def index(request):
 
 @login_required
 def create_environment(request, user, project_slug):
+
     template = 'create_environment.html'
     project = Project.objects.get(slug=project_slug)
     action = "Create"
@@ -71,7 +71,7 @@ def settings(request, user, project_slug):
 
     template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
-    url_domain = sett.DOMAIN
+    url_domain = django_settings.DOMAIN
     platform_users = User.objects.filter(~Q(pk=project.owner.pk))
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
@@ -298,7 +298,7 @@ def revoke_access_to_project(request, user, project_slug):
 def project_templates(request):
     template = 'project_templates.html'
     templates = ProjectTemplate.objects.all().order_by('slug', '-revision').distinct('slug')
-    media_url = sett.MEDIA_URL
+    media_url = django_settings.MEDIA_URL
     return render(request, template, locals())
 
 @login_required
@@ -322,7 +322,7 @@ def create(request):
         
         # Try to create database project object.
         try:
-            img = sett.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
+            img = django_settings.STATIC_ROOT+'images/patterns/image-{}.png'.format(random.randrange(8,13))
             print(img)
             img_file = open(img, 'rb')
             project = Project.objects.create_project(name=name,
@@ -382,8 +382,8 @@ def details(request, user, project_slug):
         
     template = 'projects/overview.html'
 
-    url_domain = sett.DOMAIN
-    media_url = sett.MEDIA_URL
+    url_domain = django_settings.DOMAIN
+    media_url = django_settings.MEDIA_URL
 
     project = None
     message = None
@@ -399,7 +399,8 @@ def details(request, user, project_slug):
     if project:
         pk_list = ''
         
-        status_success, status_warning = get_status_defs()
+        status_success = django_settings.APPS_STATUS_SUCCESS 
+        status_warning = django_settings.APPS_STATUS_WARNING
         activity_logs = ProjectLog.objects.filter(project=project).order_by('-created_at')[:5]
         resources = list()
         cats = AppCategories.objects.all().order_by('-priority')
@@ -411,8 +412,8 @@ def details(request, user, project_slug):
             tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
                 pk_list += str(instance.pk)+','
-            apps = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
-            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps})
+            apps_filtered = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
+            resources.append({"title": rslug['name'], "objs": tmp, "apps": apps_filtered})
         pk_list = pk_list[:-1]
         pk_list = "'"+pk_list+"'"
         models = Model.objects.filter(project=project).order_by('-uploaded_at')[:10]
