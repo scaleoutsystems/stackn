@@ -17,8 +17,8 @@ from .generate_form import generate_form
 from .helpers import create_instance_params
 
 def get_status_defs():
-    status_success = ['Running', 'Succeeded', 'Success']
-    status_warning = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
+    status_success = settings.APPS_STATUS_SUCCESS
+    status_warning = settings.APPS_STATUS_WARNING
     return status_success, status_warning
 
 
