@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timedelta
 from .generate_form import generate_form
 from .helpers import create_instance_params
+from guardian.decorators import permission_required_or_403
 
 def get_status_defs():
     status_success = settings.APPS_STATUS_SUCCESS
@@ -23,6 +24,9 @@ def get_status_defs():
 
 
 # Create your views here.
+#TODO: Is this view used?
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def index(request, user, project):
     print("hello")
     category = 'store'
@@ -36,6 +40,8 @@ def index(request, user, project):
         
     return render(request, template, locals())
 
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def logs(request, user, project, ai_id):
     template = "logs.html"
     app = AppInstance.objects.get(pk=ai_id)
@@ -76,6 +82,8 @@ def logs(request, user, project, ai_id):
 
     return render(request, template, locals())
 
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
     projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
@@ -152,6 +160,8 @@ def get_status(request, user, project):
     #     appinstances = AppInstance.objects.filter(pk__in=pk)
     #     print(appinstances)
 
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def appsettings(request, user, project, ai_id):
     all_tags = AppInstance.tags.tag_model.objects.all()
     template = 'create.html'
@@ -171,6 +181,8 @@ def appsettings(request, user, project, ai_id):
     form = generate_form(aset, project, app, request.user, appinstance)
     return render(request, template, locals())
 
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def add_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
     if request.method == 'POST':
@@ -181,7 +193,8 @@ def add_tag(request, user, project, ai_id):
 
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
 
-
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def remove_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
     if request.method == 'POST':
@@ -193,7 +206,8 @@ def remove_tag(request, user, project, ai_id):
 
     return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
 
-
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def create(request, user, project, app_slug, data=[], wait=False):
     template = 'create.html'
     app_action = "Create"
@@ -341,6 +355,8 @@ def create(request, user, project, app_slug, data=[], wait=False):
     # If not POST, thus GET...
     return render(request, template, locals())
 
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def publish(request, user, project, category, ai_id):
     print("Publish app {}".format(ai_id))
     print(project)
@@ -362,7 +378,8 @@ def publish(request, user, project, category, ai_id):
     return HttpResponseRedirect(
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
 
-
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
 
