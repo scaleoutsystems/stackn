@@ -16,7 +16,6 @@ import base64
 from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplate, MLFlow
 from .tasks import create_resources_from_template
 from django.apps import apps
-from guardian.shortcuts import assign_perm
 from guardian.decorators import permission_required_or_403
 
 logger = logging.getLogger(__name__)
@@ -357,7 +356,6 @@ def create(request):
                                                      owner=request.user,
                                                      description=description,
                                                      repository=repository)
-            assign_perm('can_view_project', request.user, project)
             project.project_image.save('default.png', File(img_file))
             img_file.close()
         except ProjectCreationException as e:
