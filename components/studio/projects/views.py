@@ -57,15 +57,6 @@ def create_environment(request, user, project_slug):
 
     return render(request, template, locals())
 
-@login_required
-@permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project_slug'))
-def environments(request, user, project_slug):
-    template = 'environments.html'
-    project = Project.objects.get(slug=project_slug)
-
-    return render(request, template, locals())
-
 
 @login_required
 @permission_required_or_403('can_view_project',
@@ -533,38 +524,3 @@ def publish_project(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
-
-@login_required
-@permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project_slug'))
-def project_readme(request, user, project_slug):
-    try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
-    except TypeError as err:
-        projects = []
-        print(err)
-
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    
-    project = None
-    username = request.user.username
-    try:
-        owner = User.objects.get(username=username)
-        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
-    except Exception as e:
-        print('Project not found.')
-
-    readme = None
-    if project:     
-        url = 'http://{}-file-controller/readme'.format(project.slug)
-        try:
-            response = r.get(url)
-            if response.status_code == 200 or response.status_code == 203:
-                payload = response.json()
-                if payload['status'] == 'OK':
-                    md = markdown.Markdown(extensions=['extra'])
-                    readme = md.convert(payload['readme'])
-        except Exception as e:
-            logger.error("Failed to get response from {} with error: {}".format(url, e))
-    
-    return render(request, "project_readme.html", locals())
