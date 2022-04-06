@@ -17,6 +17,7 @@ from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplat
 from .tasks import create_resources_from_template
 from django.apps import apps
 from guardian.decorators import permission_required_or_403
+from guardian.shortcuts import assign_perm, remove_perm
 
 logger = logging.getLogger(__name__)
 Apps = apps.get_model(app_label=django_settings.APPS_MODEL)
@@ -79,7 +80,11 @@ def settings(request, user, project_slug):
     template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = django_settings.DOMAIN
-    platform_users = User.objects.filter(~Q(pk=project.owner.pk))
+    platform_users = User.objects.filter(
+        ~Q(pk=project.owner.pk), 
+        ~Q(username='AnonymousUser'),
+        ~Q(username='admin')
+    )
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
 
@@ -284,9 +289,10 @@ def grant_access_to_project(request, user, project_slug):
         if len(selected_users) == 1:
             selected_users = list(selected_users)
 
-        for selected_user in selected_users:
-            user_tmp = User.objects.get(pk=selected_user)
+        for _user in selected_users:
+            user_tmp = User.objects.get(pk=_user)
             project.authorized.add(user_tmp)
+            assign_perm('can_view_project', user_tmp, project)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
 
@@ -315,8 +321,15 @@ def revoke_access_to_project(request, user, project_slug):
         for selected_user in selected_users:
             user_tmp = User.objects.get(pk=selected_user)
             project.authorized.remove(user_tmp)
+            remove_perm('can_view_project', user_tmp, project)
             username_tmp = user_tmp.username
             logger.info('Trying to remove user access {} to project.'.format(username_tmp))
+    
+    #TODO: Currently all project members with 'can_view_projects' can revoke access
+    # this handles when the user "remove" herself from the project
+    _user = User.objects.get(username=user)
+    if str(_user.pk) in selected_users:
+        return HttpResponseRedirect('/')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
