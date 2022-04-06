@@ -16,6 +16,7 @@ django-plotly-dash==1.6.6
 djangorestframework==3.13.1
 django-tagulous==1.3.3
 django-yamlfield==1.1.0
+django-guardian==2.4.0
 
 # Other Python and project related libraries
 amqp==5.0.9
