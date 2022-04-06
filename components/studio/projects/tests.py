@@ -129,6 +129,108 @@ class ProjectViewTestCase(TestCase):
         
         self.assertFalse(member.has_perm('can_view_project', project))
         self.assertFalse(project.authorized.exists())
+    
+    def test_forbidden_project_details(self):
+        """
+        Test non-project member not allowed to access project overview
+        """
+        self.client.login(username='member', password='bar')
+        member = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'projects:details', 
+                kwargs={
+                    'user':member, 
+                    'project_slug':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+    
+    def test_forbidden_project_settings(self):
+        """
+        Test non-project member not allowed to access project settings
+        """
+        self.client.login(username='member', password='bar')
+        member = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'projects:settings', 
+                kwargs={
+                    'user':member, 
+                    'project_slug':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+    
+    
+    def test_forbidden_project_delete(self):
+        """
+        Test non-project member not allowed to access project delete
+        """
+        self.client.login(username='member', password='bar')
+        member = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'projects:delete', 
+                kwargs={
+                    'user':member, 
+                    'project_slug':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+    
+    def test_forbidden_project_setS3storage(self):
+        """
+        Test non-project member not allowed to access project setS3storage
+        """
+        self.client.login(username='member', password='bar')
+        member = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'projects:set_s3storage', 
+                kwargs={
+                    'user':member, 
+                    'project_slug':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+    
+    def test_forbidden_project_setmlflow(self):
+        """
+        Test non-project member not allowed to access project setmlflow
+        """
+        self.client.login(username='member', password='bar')
+        member = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'projects:set_mlflow', 
+                kwargs={
+                    'user':member, 
+                    'project_slug':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+    
+    
+
+
+
+
         
     
 
