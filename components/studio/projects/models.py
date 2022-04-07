@@ -11,6 +11,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from rest_framework.authtoken.models import Token
+from guardian.shortcuts import assign_perm
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -105,6 +106,8 @@ class ProjectManager(models.Manager):   # it will become the default objects att
         project = self.create(name=name, owner=owner, slug=slug, project_key=key, project_secret=secret,
                               description=description, repository=repository,
                               repository_imported=False)
+    
+        assign_perm('can_view_project', owner, project)
         return project
     
     def generate_passkey(self, length=20):
@@ -142,6 +145,11 @@ class Project(models.Model):
     repository = models.CharField(max_length=512, null=True, blank=True)
     repository_imported = models.BooleanField(default=False)
     # ----------------------
+
+    class Meta:
+        permissions = [
+            ('can_view_project', 'Can view project')
+        ]
 
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)

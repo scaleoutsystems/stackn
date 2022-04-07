@@ -16,6 +16,8 @@ import base64
 from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplate, MLFlow
 from .tasks import create_resources_from_template
 from django.apps import apps
+from guardian.decorators import permission_required_or_403
+from guardian.shortcuts import assign_perm, remove_perm
 
 logger = logging.getLogger(__name__)
 Apps = apps.get_model(app_label=django_settings.APPS_MODEL)
@@ -43,6 +45,8 @@ def index(request):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_environment(request, user, project_slug):
 
     template = 'create_environment.html'
@@ -53,15 +57,10 @@ def create_environment(request, user, project_slug):
 
     return render(request, template, locals())
 
-@login_required
-def environments(request, user, project_slug):
-    template = 'environments.html'
-    project = Project.objects.get(slug=project_slug)
-
-    return render(request, template, locals())
-
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def settings(request, user, project_slug):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
@@ -72,7 +71,11 @@ def settings(request, user, project_slug):
     template = 'projects/settings.html'
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     url_domain = django_settings.DOMAIN
-    platform_users = User.objects.filter(~Q(pk=project.owner.pk))
+    platform_users = User.objects.filter(
+        ~Q(pk=project.owner.pk), 
+        ~Q(username='AnonymousUser'),
+        ~Q(username='admin')
+    )
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
 
@@ -102,6 +105,8 @@ def settings(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def update_image(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
     if request.method == 'POST' and request.FILES['image']:
@@ -115,6 +120,8 @@ def update_image(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def change_description(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), Q(slug=project_slug)).first()
 
@@ -132,6 +139,8 @@ def change_description(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': request.user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_environment(request, user, project_slug):
     # TODO: Ensure that user is allowed to create environment in this project.
     if request.method == 'POST':
@@ -146,6 +155,8 @@ def create_environment(request, user, project_slug):
     return HttpResponseRedirect(reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete_environment(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -158,6 +169,8 @@ def delete_environment(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def create_flavor(request, user, project_slug):
     # TODO: Ensure that user is allowed to create flavor in this project.
     if request.method == 'POST':
@@ -182,6 +195,8 @@ def create_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete_flavor(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -194,6 +209,8 @@ def delete_flavor(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def set_s3storage(request, user, project_slug, s3storage=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # s3 object to storage in this project (need to check that the user has access to the
@@ -220,6 +237,8 @@ def set_s3storage(request, user, project_slug, s3storage=[]):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def set_mlflow(request, user, project_slug, mlflow=[]):
     # TODO: Ensure that the user has the correct permissions to set this specific
     # MLFlow object to MLFlow Server in this project (need to check that the user has access to the
@@ -243,6 +262,8 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def grant_access_to_project(request, user, project_slug):
 
     project = Project.objects.get(slug=project_slug)
@@ -259,9 +280,10 @@ def grant_access_to_project(request, user, project_slug):
         if len(selected_users) == 1:
             selected_users = list(selected_users)
 
-        for selected_user in selected_users:
-            user_tmp = User.objects.get(pk=selected_user)
+        for _user in selected_users:
+            user_tmp = User.objects.get(pk=_user)
             project.authorized.add(user_tmp)
+            assign_perm('can_view_project', user_tmp, project)
             username_tmp = user_tmp.username
             logger.info('Trying to add user {} to project.'.format(username_tmp))
 
@@ -269,6 +291,8 @@ def grant_access_to_project(request, user, project_slug):
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def revoke_access_to_project(request, user, project_slug):
 
     project = Project.objects.get(slug=project_slug)
@@ -288,8 +312,15 @@ def revoke_access_to_project(request, user, project_slug):
         for selected_user in selected_users:
             user_tmp = User.objects.get(pk=selected_user)
             project.authorized.remove(user_tmp)
+            remove_perm('can_view_project', user_tmp, project)
             username_tmp = user_tmp.username
             logger.info('Trying to remove user access {} to project.'.format(username_tmp))
+    
+    #TODO: Currently all project members with 'can_view_projects' can revoke access
+    # this handles when the user "remove" herself from the project
+    _user = User.objects.get(username=user)
+    if str(_user.pk) in selected_users:
+        return HttpResponseRedirect('/')
 
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project.slug}))
@@ -364,6 +395,8 @@ def create(request):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def details(request, user, project_slug):
 
     is_authorized = False
@@ -376,6 +409,7 @@ def details(request, user, project_slug):
         is_authorized = True
     else:
         if request.user.is_authenticated:
+
             is_authorized = True
             request.session['project'] = project_slug
     
@@ -421,6 +455,8 @@ def details(request, user, project_slug):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def delete(request, user, project_slug):
     next_page = request.GET.get('next', '/projects/')
 
@@ -447,6 +483,8 @@ def delete(request, user, project_slug):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
 def publish_project(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
@@ -486,36 +524,3 @@ def publish_project(request, user, project_slug):
     return HttpResponseRedirect(
         reverse('projects:settings', kwargs={'user': user, 'project_slug': project_slug}))
 
-
-@login_required
-def project_readme(request, user, project_slug):
-    try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
-    except TypeError as err:
-        projects = []
-        print(err)
-
-    is_authorized = kc.keycloak_verify_user_role(request, project_slug, ['member'])
-    
-    project = None
-    username = request.user.username
-    try:
-        owner = User.objects.get(username=username)
-        project = Project.objects.filter(Q(owner=owner) | Q(authorized=owner), Q(slug=project_slug)).first()
-    except Exception as e:
-        print('Project not found.')
-
-    readme = None
-    if project:     
-        url = 'http://{}-file-controller/readme'.format(project.slug)
-        try:
-            response = r.get(url)
-            if response.status_code == 200 or response.status_code == 203:
-                payload = response.json()
-                if payload['status'] == 'OK':
-                    md = markdown.Markdown(extensions=['extra'])
-                    readme = md.convert(payload['readme'])
-        except Exception as e:
-            logger.error("Failed to get response from {} with error: {}".format(url, e))
-    
-    return render(request, "project_readme.html", locals())

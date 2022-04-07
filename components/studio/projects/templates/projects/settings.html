@@ -43,11 +43,9 @@
                     role="tab">
                     Image
                 </a>
-                {% if user_permissions.add_member %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
                     Access
                 </a>
-                {% endif %}
                 <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
                     Publish
                 </a> -->
@@ -162,9 +160,19 @@
                         </form>
                         {% endif %}
                         {% if project.authorized.all %}
-                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" method="post" style="margin-top: 24px;">
+                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" onsubmit="confirm(displayResult());" method="post" style="margin-top: 24px;">
                             {% csrf_token %}
-
+                            <script>
+                                function displayResult() {
+                                    var x = document.getElementById("id_selected_users");
+                                    var txt = "Revoke access to the following users: ";
+                                    var i;
+                                    for (i = 0; i < x.length; i++) {
+                                        txt = txt + "\n" + x.options[i].text;
+                                    }
+                                    return txt;
+                                }
+                            </script>
                             <div class="mb-3">
                                 <label class="form-label" for="id_selected_users">Authorized users</label>
                                 <select name="selected_users" id="id_selected_users" class="form-control" multiple

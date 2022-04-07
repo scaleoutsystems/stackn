@@ -9,7 +9,6 @@ urlpatterns = [
     path('projects/create', views.create, name='create'),
     path('projects/templates', views.project_templates, name='project_templates'),
     path('<user>/<project_slug>', views.details, name='details'),
-    path('<user>/<project_slug>/environments', views.environments, name='environments'),
     path('<user>/<project_slug>/environments/create', views.create_environment, name='create_environment'),
     path('<user>/<project_slug>/settings', views.settings, name='settings'),
     path('<user>/<project_slug>/delete', views.delete, name='delete'),
@@ -24,5 +23,4 @@ urlpatterns = [
     path('<user>/<project_slug>/project/publish', views.publish_project, name='publish_project'),
     path('<user>/<project_slug>/project/access/grant', views.grant_access_to_project, name='grant_access'),
     path('<user>/<project_slug>/project/access/revoke', views.revoke_access_to_project, name='revoke_access'),
-    path('<user>/<project_slug>/readme', views.project_readme, name='project_readme'),
 ]
