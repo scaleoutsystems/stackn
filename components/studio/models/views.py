@@ -6,10 +6,11 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from guardian.mixins import PermissionRequiredMixin
 from django.core.files import File
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from django.urls import reverse, reverse_lazy
 
@@ -20,6 +21,7 @@ from .models import Model, ModelLog, Metadata, ObjectType
 from apps.models import Apps, AppInstance
 from portal.models import PublicModelObject, PublishedModel
 from projects.models import Project, ProjectLog, Environment
+from guardian.decorators import permission_required_or_403
 
 import ast
 import logging
@@ -32,9 +34,15 @@ import uuid
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
 
-class ModelCreate(LoginRequiredMixin, View):
+class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
     template = "models/model_create.html"
     model_uid = str(uuid.uuid1().hex)
+    permission_required = 'can_view_project'
+    return_403 = True
+
+    def get_object(self):
+        self.obj = get_object_or_404(Project, slug=self.kwargs['project'])
+        return self.obj
 
     def get(self, request, user, project):
         # all below will become locals() context fields
@@ -257,6 +265,8 @@ def index(request,user=None,project=None,id=0):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def list(request, user, project):
     template = 'models_list.html'
     
@@ -270,6 +280,8 @@ def list(request, user, project):
     return render(request, template, locals())
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def unpublish_model(request, user, project, id):
     # TODO: Check that user has access to this particular model.
     model = Model.objects.get(pk=id)
@@ -286,6 +298,8 @@ def unpublish_model(request, user, project, id):
     return HttpResponseRedirect(reverse('models:list', kwargs={'user':user, 'project':project}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def publish_model(request, user, project, id):
     print("PUBLISHING MODEL")
     import s3fs
@@ -319,6 +333,8 @@ def publish_model(request, user, project, id):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def change_access(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -362,6 +378,8 @@ def remove_tag(request, published_id, id):
     return HttpResponseRedirect(reverse('models:details_public', kwargs={'id': published_id}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def add_tag_private(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -375,6 +393,8 @@ def add_tag_private(request, user, project, id):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def remove_tag_private(request, user, project, id):
     model = Model.objects.filter(pk=id).first()
     previous = model.get_access_display()
@@ -388,6 +408,8 @@ def remove_tag_private(request, user, project, id):
     return HttpResponseRedirect(reverse('models:details_private', kwargs={'user':user, 'project':project, 'id':id}))
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def upload_model_headline(request, user, project, id):
     if request.method == 'POST':
         form = UploadModelCardHeadlineForm(request.POST, request.FILES)
@@ -409,6 +431,8 @@ def upload_model_headline(request, user, project, id):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def add_docker_image(request, user, project, id):
     model = Model.objects.get(pk=id)
 
@@ -589,6 +613,8 @@ def import_model(request, id):
     print("IMPORTING MODEL")
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def details_private(request, user, project, id):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
@@ -600,7 +626,7 @@ def details_private(request, user, project, id):
 
     try:
         project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-        base_template = 'baseproject.html'
+        base_template = 'projects/base.html'
     except Exception as err:
         project = []
         print(err)
@@ -638,12 +664,14 @@ def details_public(request, id):
         #if is_authorized:
             try:
                 project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project_slug).first()
-                base_template = 'baseproject.html'
+                base_template = 'projects/base.html'
             except Exception as err:
                 project = []
                 print(err)
             if not project:
                 base_template = 'base.html'
+    else:
+        base_template = 'base.html'
 
     media_url = settings.MEDIA_URL
     published_model = PublishedModel(pk=id)
@@ -658,6 +686,8 @@ def details_public(request, id):
 
 
 @login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project'))
 def delete(request, user, project, id):
 
     project = Project.objects.get(slug=project)

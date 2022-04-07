@@ -16,6 +16,7 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
 ]
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -62,6 +63,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     'social_django',
     'tagulous',
+    'guardian',
 ]
 
 LOCAL_APPS =[
@@ -104,6 +106,11 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
 }
+
+#Django guardian 403 templates
+GUARDIAN_RENDER_403 = True
+GUARDIAN_TEMPLATE_403 = '403.html'
+
 
 # Main Url conf for loading all the routing path in Studio
 ROOT_URLCONF = 'studio.urls'

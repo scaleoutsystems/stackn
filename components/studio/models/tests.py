@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Apps, AppInstance
+from .models import Model
 from projects.models import Project
 from django.conf import settings
 from django.urls import reverse
@@ -9,7 +9,7 @@ from guardian.shortcuts import remove_perm, assign_perm
 
 
 
-class AppsViewForbidden(TestCase):
+class ModelViewForbidden(TestCase):
     def setUp(self):
         user = User.objects.create_user('foo', 'foo@test.com', 'bar')
 
@@ -20,219 +20,231 @@ class AppsViewForbidden(TestCase):
             repository=''
         )
 
+        new_model = Model(uid="test_uid",
+                            name="test",
+                            bucket="",
+                            description="model_description",
+                            model_card="",
+                            project=project,
+                            access='PR')
+        new_model.save()
+
         user = User.objects.create_user("member", 'foo@test.com', 'bar')
         self.client.login(username='member', password='bar')
     
     
-    def test_forbidden_apps_compute(self):
+    def test_forbidden_models_list(self):
         """
-        Test non-project member not allowed to access /<category>=compute
+        Test non-project member not allowed to access /models 
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
         response = self.client.get(
             reverse(
-                'apps:filtered', 
+                'models:list', 
                 kwargs={
                     'user':owner, 
-                    'project':project.slug,
-                    'category': 'compute'
+                    'project':project.slug
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+
+    def test_forbidden_models_create(self):
+        """
+        Test non-project member not allowed to access /models/create
+        """
+        owner = User.objects.get(username='foo')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.get(
+            reverse(
+                'models:create', 
+                kwargs={
+                    'user':owner, 
+                    'project':project.slug
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_serve(self):
+    def test_forbidden_models_details_private(self):
         """
-        Test non-project member not allowed to access /<category>=serve
+        Test non-project member not allowed to access /models/<int:id>
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:filtered', 
+                'models:details_private', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'category': 'serve'
+                    'id':model.id
+                }
+            )
+        )
+        self.assertTemplateUsed(response, '403.html')
+        self.assertEqual(response.status_code, 403)
+
+    def test_forbidden_models_delete(self):
+        """
+        Test non-project member not allowed to access /models/<int:id>/delete
+        """
+        owner = User.objects.get(username='foo')
+        project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
+        response = self.client.get(
+            reverse(
+                'models:delete', 
+                kwargs={
+                    'user':owner, 
+                    'project':project.slug,
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_store(self):
+    def test_forbidden_models_publish(self):
         """
-        Test non-project member not allowed to access /<category>=store
+        Test non-project member not allowed to access /models/<int:id>/publish
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:filtered', 
+                'models:publish_model', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'category': 'store'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_develop(self):
+    def test_forbidden_models_add_tag(self):
         """
-        Test non-project member not allowed to access /<category>=develop
+        Test non-project member not allowed to access /models/<int:id>/add_tag
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:filtered', 
+                'models:add_tag_private', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'category': 'develop'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_create(self):
+    def test_forbidden_models_remove_tag(self):
         """
-        Test non-project member not allowed to access /create/<app_slug>=test
+        Test non-project member not allowed to access /models/<int:id>/remove_tag
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:create', 
+                'models:remove_tag_private', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'app_slug': 'test'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_logs(self):
+    def test_forbidden_models_unpublidh(self):
         """
-        Test non-project member not allowed to access /logs/<ai_id>=1
+        Test non-project member not allowed to access /models/<int:id>/unpublish
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:logs', 
+                'models:unpublish_model', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'ai_id': '1'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_settings(self):
+    def test_forbidden_models_access(self):
         """
-        Test non-project member not allowed to access /seetings/<ai_id>=1
+        Test non-project member not allowed to access /models/<int:id>/access
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:appsettings', 
+                'models:change_access', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'ai_id': '1'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_settings_add_tag(self):
+    def test_forbidden_models_upload(self):
         """
-        Test non-project member not allowed to access /settings/<ai_id>=1/add_tag
+        Test non-project member not allowed to access /models/<int:id>/upload
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:add_tag', 
+                'models:upload_model_headline', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'ai_id': '1'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
-    def test_forbidden_apps_settings_remove_tag(self):
+    def test_forbidden_models_docker(self):
         """
-        Test non-project member not allowed to access /settings/<ai_id>=1/remove_tag
+        Test non-project member not allowed to access /models/<int:id>/docker
         """
         owner = User.objects.get(username='foo')
         project = Project.objects.get(name='test-perm')
+        model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'apps:remove_tag', 
+                'models:add_docker_image', 
                 kwargs={
                     'user':owner, 
                     'project':project.slug,
-                    'ai_id': '1'
+                    'id':model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
-    def test_forbidden_apps_delete(self):
-        """
-        Test non-project member not allowed to access /delete/<category>=compute/<ai_id>=1
-        """
-        owner = User.objects.get(username='foo')
-        project = Project.objects.get(name='test-perm')
-        response = self.client.get(
-            reverse(
-                'apps:delete', 
-                kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'ai_id': '1',
-                    'category': 'compute'
-                }
-            )
-        )
-        self.assertTemplateUsed(response, '403.html')
-        self.assertEqual(response.status_code, 403)
-    
-    def test_forbidden_apps_publish(self):
-        """
-        Test non-project member not allowed to access /publish/<category>=compute/<ai_id>=1
-        """
-        owner = User.objects.get(username='foo')
-        project = Project.objects.get(name='test-perm')
-        response = self.client.get(
-            reverse(
-                'apps:publish', 
-                kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'ai_id': '1',
-                    'category': 'compute'
-                }
-            )
-        )
-        self.assertTemplateUsed(response, '403.html')
-        self.assertEqual(response.status_code, 403)
-    
-    

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+    <div class="row">
+        <div class="card flex-fill">
+            <div class="card-header">
+                <div class="d-flex justify-content-center">
+                  <img src="{% static 'images/stackn.png' %}" alt="STACKn Logo" width="15%" >
+                </div>
+                <div class="row g-1 py-1 row-cols-1 row-cols-lg-1">
+                    <div class="feature col">
+                        <h1>FORBIDDEN 403</h1>
+                        <p>You don't have access to that site! Contact project admin to grant you access.</p>
+                    </div>
+            </div>
+
+          </div>
+      </div>
+  </div>
+{% endblock %}
