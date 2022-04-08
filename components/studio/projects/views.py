@@ -86,12 +86,22 @@ def settings(request, user, project_slug):
     registry_app = Apps.objects.get(slug='docker-registry')
     registries = AppInstance.objects.filter(app=registry_app.pk, project=project)
 
+    return render(request, template, locals())
+
+@login_required
+@permission_required_or_403('can_view_project',
+    (Project, 'slug', 'project_slug'))
+def transfer_owner(request, user, project_slug):
+    project = Project.objects.get(slug=project_slug)
     if request.method == 'POST':
         form = TransferProjectOwnershipForm(request.POST)
         if form.is_valid():
             new_owner_id = int(form.cleaned_data['transfer_to'])
             new_owner = User.objects.filter(pk=new_owner_id).first()
+            project.authorized.add(project.owner)
             project.owner = new_owner
+            if not new_owner.has_perm('can_view_project', project):
+                assign_perm('can_view_project', new_owner, project)
             project.save()
 
             l = ProjectLog(project=project, module='PR', headline='Project owner',
@@ -102,7 +112,6 @@ def settings(request, user, project_slug):
     else:
         form = TransferProjectOwnershipForm()
 
-    return render(request, template, locals())
 
 @login_required
 @permission_required_or_403('can_view_project',
