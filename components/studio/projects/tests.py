@@ -226,6 +226,26 @@ class ProjectViewTestCase(TestCase):
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
     
+    def test_transfer_project_owner(self):
+        owner = User.objects.get(username='foo')
+        new_owner = User.objects.get(username='member')
+        project = Project.objects.get(name='test-perm')
+        response = self.client.post(
+            reverse(
+                'projects:transfer_owner', 
+                kwargs={
+                    'user':owner, 
+                    'project_slug':project.slug
+                }
+            ),
+            {
+            'transfer_to': [new_owner.pk]
+            }
+        )
+        project = Project.objects.get(name='test-perm')
+        self.assertEqual(project.owner, new_owner)
+        self.assertTrue(new_owner.has_perm('can_view_project', project))
+        self.assertTrue(owner in project.authorized.all())
     
 
 
