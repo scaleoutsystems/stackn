@@ -50,7 +50,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
         form = ModelForm()
         # For showing the persistent volumes currently available within the project
         volumeK8s_set = Apps.objects.get(slug='volumeK8s')
-        volumes = AppInstance.objects.filter(app=volumeK8s_set)
+        volumes = AppInstance.objects.filter(Q(app=volumeK8s_set), Q(state='Running'))
 
         # Passing the current project to the view/template
         project = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active', slug=project).distinct().first()
@@ -60,7 +60,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
         
         # For showing the app instances where a folder with trained models can be fetched
         app_set = Apps.objects.get(slug='jupyter-lab') # for the time being is hard-coded to jupyter-lab where usually models are trained
-        apps = AppInstance.objects.filter(app=app_set)
+        apps = AppInstance.objects.filter(Q(app=app_set), Q(state='Running'))
 
         return render(request, self.template, locals())
 
