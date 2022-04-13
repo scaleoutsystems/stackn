@@ -35,6 +35,8 @@ spec:
       imagePullSecrets:
         - name: {{ .Release.Name }}-pull-secret
     {{ end }}
+      hostname: lab
+      subdomain: default-subdomain
       containers:
       - name: labs
         image: {{ .Values.labs.image }}
@@ -49,13 +51,13 @@ spec:
         - name: NOTEBOOK_TOKEN
           value: ""
         - name: MLFLOW_TRACKING_URI
-          value: {{ .Values.mlflow.url }}
+          value: "{{ .Values.mlflow.service }}:{{ .Values.mlflow.port }}"
         - name: MLFLOW_TRACKING_USERNAME
           value: {{ .Values.mlflow.username }}
         - name: MLFLOW_TRACKING_PASSWORD
           value: {{ .Values.mlflow.password }}
         - name: MLFLOW_S3_ENDPOINT_URL
-          value: {{ .Values.mlflow.s3url }}
+          value: "http://{{ .Values.mlflow.s3service }}:{{ .Values.mlflow.s3port }}"
         - name: AWS_ACCESS_KEY_ID
           value: {{ .Values.mlflow.access_key }}
         - name: AWS_SECRET_ACCESS_KEY

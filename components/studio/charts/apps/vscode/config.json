@@ -10,6 +10,10 @@
         "apps": {
             "Persistent Volume":"many"
         },
+        "default_values": {
+            "port": "80",
+            "targetport": "8080"
+          },
         "export-cli": "True",
         "permissions": {
             "public": {"value":"false", "option": "false"},

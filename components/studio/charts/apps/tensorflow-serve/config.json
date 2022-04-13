@@ -11,6 +11,10 @@
         "model": {
             "object_type": "tensorflow"
         },
+        "default_values": {
+            "port": "80",
+            "targetport": "8501"
+          },
         "flavor": "one",
         "logs": ["serve"],
         "permissions": {

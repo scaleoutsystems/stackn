@@ -11,6 +11,10 @@
         "apps": {
             "Persistent Volume":"one"
         },
+        "default_values": {
+            "port": "443",
+            "targetport": "8050"
+          },
         "deployment": {
             "debug": {"type":"boolean", "default":"False", "title":"Debug deployment"},
             "path": {"type": "string", "default": "", "title": "Path to folder"}

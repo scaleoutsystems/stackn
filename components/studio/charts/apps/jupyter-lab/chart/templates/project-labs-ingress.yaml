@@ -18,8 +18,8 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-lab
-            servicePort: 80
+            serviceName: {{ .Values.service.name }}
+            servicePort: {{ .Values.service.port }}
   tls:
     - secretName: {{ .Values.ingress.secretName }}
       hosts:
@@ -46,9 +46,9 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-lab
+              name: {{ .Values.service.name }}
               port:
-                number: 80
+                number: {{ .Values.service.port }}
           pathType: ImplementationSpecific
   tls:
     - secretName: {{ .Values.ingress.secretName }}

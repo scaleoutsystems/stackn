@@ -15,6 +15,10 @@
         "apps": {
           "Persistent Volume": "one"
         },
+        "default_values": {
+          "port": "443",
+          "targetport": "8050"
+        },
         "deployment": {
           "debug": {
             "type": "boolean",
@@ -122,6 +126,10 @@
         "apps": {
           "Persistent Volume": "one"
         },
+        "default_values": {
+          "port": "80",
+          "targetport": "80"
+        },
         "credentials": {
           "username": {
             "type": "string",
@@ -171,6 +179,10 @@
         "model": {
           "object_type": "python"
         },
+        "default_values": {
+          "port": "8501",
+          "targetport": "8501"
+        },
         "flavor": "one",
         "environment": {
           "name": "from",
@@ -219,6 +231,10 @@
           "Persistent Volume": "many"
         },
         "flavor": "one",
+        "default_values":{
+          "port": "80",
+          "targetport": "8888"
+        },
         "environment": {
           "name": "from",
           "title": "Image",
@@ -262,6 +278,10 @@
       "settings": {
         "apps": {
           "Persistent Volume": "one"
+        },
+        "default_values": {
+          "port": "9000",
+          "targetport": "9000"
         },
         "credentials": {
           "access_key": {
@@ -310,6 +330,10 @@
       "settings": {
         "apps": {
           "Persistent Volume": "one"
+        },
+        "default_values": {
+          "port": "5000",
+          "targetport": "5000"
         },
         "S3": "one",
         "credentials": {
@@ -370,8 +394,9 @@
         ],
         "default_values": {
           "is_tar": "False",
-          "port": "5000"
-        },
+          "port": "5000",
+          "targetport": "8501"
+      },
         "permissions": {
           "public": {
             "value": "false",
@@ -412,6 +437,10 @@
         "apps": {
           "MongoDB": "one"
         },
+        "default_values": {
+          "port": "80",
+          "targetport": "8081"
+        },
         "permissions": {
           "public": {
             "value": "false",
@@ -448,6 +477,10 @@
       "settings": {
         "apps": {
           "Persistent Volume": "one"
+        },
+        "default_values": {
+          "port": "27017",
+          "targetport": "27017"
         },
         "credentials": {
           "username": {
@@ -498,6 +531,10 @@
         "apps": {
           "Persistent Volume": "many"
         },
+        "default_values": {
+          "port": "80",
+          "targetport": "8787"
+        },
         "flavor": "one",
         "permissions": {
           "public": {
@@ -535,6 +572,10 @@
       "settings": {
         "model": {
           "object_type": "tensorflow"
+        },
+        "default_values": {
+          "port": "80",
+          "targetport": "8501"
         },
         "flavor": "one",
         "logs": [
@@ -581,6 +622,10 @@
         "apps": {
           "Persistent Volume": "many"
         },
+        "default_values": {
+          "port": "80",
+          "targetport": "3000"
+        },
         "flavor": "one",
         "environment": {
           "name": "from",
@@ -626,6 +671,10 @@
         "logs": [
           "serve"
         ],
+        "default_values": {
+          "port": "80",
+          "targetport": "8080"
+        },
         "permissions": {
           "public": {
             "value": "false",
@@ -697,6 +746,10 @@
             "title": "AccessModes"
           }
         },
+        "default_values": {
+          "port": "port",
+          "targetport": "targetport"
+        },
         "permissions": {
           "public": {
             "value": "false",
@@ -732,6 +785,10 @@
       "settings": {
         "apps": {
           "Persistent Volume": "many"
+        },
+        "default_values": {
+          "port": "80",
+          "targetport": "8080"
         },
         "export-cli": "True",
         "permissions": {
