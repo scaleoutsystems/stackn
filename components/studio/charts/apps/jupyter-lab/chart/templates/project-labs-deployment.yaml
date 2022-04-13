@@ -51,7 +51,7 @@ spec:
         - name: NOTEBOOK_TOKEN
           value: ""
         - name: MLFLOW_TRACKING_URI
-          value: "{{ .Values.mlflow.service }}:{{ .Values.mlflow.port }}"
+          value: "http://{{ .Values.mlflow.service }}:{{ .Values.mlflow.port }}"
         - name: MLFLOW_TRACKING_USERNAME
           value: {{ .Values.mlflow.username }}
         - name: MLFLOW_TRACKING_PASSWORD
