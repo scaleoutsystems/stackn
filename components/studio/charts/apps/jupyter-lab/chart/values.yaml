@@ -46,6 +46,11 @@ ingress:
   v1beta1: false
   secretName: prod-ingress
 
+service:
+  name: ""
+  port: 80
+  targetport: 8888
+
 mlflow:
   url: ""
   s3url: ""

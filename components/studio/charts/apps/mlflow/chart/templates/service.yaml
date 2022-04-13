@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-mlflow-svc
+  name: {{ .Values.service.name }}-ui
   namespace: {{ .Values.namespace }}
   labels:
-    run: {{ .Release.Name }}-mlflow-svc
+    run: {{ .Release.Name }}-mlflow
 spec:
   ports:
   - port: 80

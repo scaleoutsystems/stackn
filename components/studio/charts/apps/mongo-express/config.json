@@ -11,6 +11,10 @@
         "apps":{
             "MongoDB":"one"
         },
+        "default_values": {
+            "port": "80",
+            "targetport": "8081"
+          },
         "permissions": {
             "public": {"value":"false", "option": "false"},
             "project": {"value":"true", "option": "true"},

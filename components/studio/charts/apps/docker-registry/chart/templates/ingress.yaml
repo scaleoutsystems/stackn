@@ -6,6 +6,9 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -13,8 +16,8 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}
-            servicePort: 80
+            serviceName: {{ .Values.service.name }}
+            servicePort: {{ .Values.service.port }}
   tls:
     - secretName: {{ .Values.ingress.secretName }}
       hosts:
@@ -27,6 +30,9 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -35,9 +41,9 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-registry
+              name: {{ .Values.service.name }}
               port:
-                number: 80
+                number: {{ .Values.service.port }}
           pathType: ImplementationSpecific
   tls:
     - secretName: {{ .Values.ingress.secretName }}

@@ -68,7 +68,7 @@ spec:
         - name: AWS_REGION
           value: us-east-1
         - name: S3_ENDPOINT
-          value: {{ .Values.model.url }}
+          value: {{ .Values.model.url }} #TODO: "{{ .Values.model.service }}:{{ .Values.model.port }}
         - name: STACKN_MODEL_BUCKET
           value: {{ .Values.model.bucket }}
         - name: STACKN_MODEL_FILE

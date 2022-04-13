@@ -21,6 +21,10 @@
         "logs": [
             "serve"
         ],
+        "default_values": {
+            "port": "8501",
+            "targetport": "8501"
+          },
         "permissions": {
             "public": {
                 "value": "false",
@@ -34,6 +38,6 @@
                 "value": "false",
                 "option": "true"
             }
-        },
+        }
     }
 }

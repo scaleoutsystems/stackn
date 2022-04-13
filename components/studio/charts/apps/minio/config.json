@@ -15,6 +15,10 @@
             "access_key": {"type": "string", "default":"accesskey", "title": "Access Key"},
             "secret_key": {"type": "string", "default": "secretkey123", "title": "Secret Key"}
         },
+        "default_values": {
+            "port": "9000",
+            "targetport": "9000"
+          },
         "keycloak-config": {
             "roles": ["readwrite"],
             "default-roles": ["readwrite"]

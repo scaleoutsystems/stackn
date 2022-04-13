@@ -8,6 +8,9 @@ metadata:
     io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -15,7 +18,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ .Release.Name }}-mlflow-server-svc
+            serviceName: {{ .Values.service.name }}-{{ .Values.app_name }} 
             servicePort: 80
   tls:
     - secretName: {{ .Values.ingress.secretName }}
@@ -27,10 +30,13 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-ingress
+  name: {{ .Release.Name }}-ingress-server
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
     - host: {{ .Release.Name }}.{{ .Values.global.domain }}
@@ -39,7 +45,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ .Release.Name }}-mlflow-server-svc
+              name: {{ .Values.service.name }}
               port:
                 number: 5000
           pathType: ImplementationSpecific
@@ -47,5 +53,6 @@ spec:
     - secretName: {{ .Values.ingress.secretName }}
       hosts:
         - {{ .Release.Name }}.{{ .Values.global.domain }}
+apiVersion: networking.k8s.io/v1
 
 {{- end }}
