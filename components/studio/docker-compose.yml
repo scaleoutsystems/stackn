@@ -12,7 +12,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - db.<your-domain>
+          - db.127.0.0.1.nip.io
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -36,7 +36,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - studio.<your-domain>
+          - studio.127.0.0.1.nip.io
 
   ingress:
     build:
@@ -56,7 +56,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - studio.<your-domain>
+          - studio.127.0.0.1.nip.io
 
   redis:
     image: redis
@@ -67,7 +67,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - redis.<your-domain>
+          - redis.127.0.0.1.nip.io
   
   rabbit:
     image: rabbitmq
@@ -82,7 +82,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - rabbit.<your-domain>
+          - rabbit.127.0.0.1.nip.io
 
   celery-worker:
     build: .
@@ -108,7 +108,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - celery.<your-domain>
+          - celery.127.0.0.1.nip.io
 
   celery-beat:
     build: .
@@ -134,7 +134,7 @@ services:
     networks:
       internal_network:
         aliases:
-          - celery-beat.<your-domain>
+          - celery-beat.127.0.0.1.nip.io
 
 networks:
   internal_network:

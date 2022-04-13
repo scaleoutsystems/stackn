@@ -249,10 +249,10 @@ NAMESPACE = 'default'
 REGISTRY_SVC = 'stack-docker-registry'
 STORAGECLASS = 'microk8s-hostpath'
 # This can be simply "localhost", but it's better to test with a wildcard dns such as nip.io
-DOMAIN = '<your-domain>'
-STUDIO_URL = 'http://studio.<your-domain>:8080'
+DOMAIN = '127.0.0.1.nip.io'
+STUDIO_URL = 'http://studio.127.0.0.1.nip.io:8080'
 #To enable sticky sessions for k8s ingress  
-SESSION_COOKIE_DOMAIN=".<your-domain>"
+SESSION_COOKIE_DOMAIN=".127.0.0.1.nip.io"
 
 #Local dependecies Models
 PROJECTS_MODEL = 'projects.Project'
