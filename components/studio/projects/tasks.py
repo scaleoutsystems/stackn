@@ -3,13 +3,17 @@ import json
 import secrets
 import string
 
+from django.http import HttpRequest
+
 from .exceptions import ProjectCreationException
 from .models import Flavor, Environment, Project, S3, MLFlow
 from apps.models import Apps, AppInstance
+from django.contrib.auth.models import User
 import apps.views as appviews
 import apps.tasks as apptasks
 from celery import shared_task
 from django.conf import settings
+from django.http import HttpRequest
 from logging import raiseExceptions
 
 
@@ -88,8 +92,9 @@ def create_resources_from_template(user, project_slug, template):
                 data = {**data, **item}
                 print("DATA TEMPLATE")
                 print(data)
-
-                res = appviews.create([], user, project.slug, app_slug=item['slug'], data=data, wait=True)
+                request = HttpRequest()
+                request.user = User.objects.get(username=user)
+                res = appviews.create(request=request, user=user, project=project.slug, app_slug=item['slug'], data=data, wait=True, call=True)
 
         elif 'settings' == key:
             print("PARSING SETTINGS")
