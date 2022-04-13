@@ -208,11 +208,11 @@ def remove_tag(request, user, project, ai_id):
 
 @permission_required_or_403('can_view_project',
     (Project, 'slug', 'project'))
-def create(request, user, project, app_slug, data=[], wait=False):
+def create(request, user, project, app_slug, data=[], wait=False, call=False):
     template = 'create.html'
     app_action = "Create"
     
-    if request:
+    if not call:
         user = request.user
         if 'from' in request.GET:
             from_page = request.GET.get('from')

@@ -11,6 +11,10 @@
     "apps": {
         "Persistent Volume":"many"
     },
+    "default_values": {
+      "port": "80",
+      "targetport": "8888"
+    },
     "flavor": "one",
     "environment": {
         "name": "from",

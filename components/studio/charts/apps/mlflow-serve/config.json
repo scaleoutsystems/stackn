@@ -22,7 +22,8 @@
         "logs": ["serve"],
         "default_values": {
             "is_tar": "False",
-            "port": "5000"
+            "port": "5000",
+            "targetport": "8501"
         },
         "permissions": {
             "public": {"value":"false", "option": "true"},

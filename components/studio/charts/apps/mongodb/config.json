@@ -11,6 +11,10 @@
         "apps":{
             "Persistent Volume":"one"
         },
+        "default_values": {
+            "port": "27017",
+            "targetport": "27017"
+          },
         "credentials": {
             "username": {"type": "string", "default":"admin","title":"Username"},
             "password": {"type": "string", "default":"password","title":"Password"}

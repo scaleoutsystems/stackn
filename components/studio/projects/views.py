@@ -79,9 +79,9 @@ def settings(request, user, project_slug):
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
 
-    s3instances = S3.objects.filter(project=project)
+    s3instances = S3.objects.filter(Q(project=project), Q(app__state='Running'))
     flavors = Flavor.objects.filter(project=project)
-    mlflows = MLFlow.objects.filter(project=project)
+    mlflows = MLFlow.objects.filter(Q(project=project), Q(app__state='Running'))
     
     registry_app = Apps.objects.get(slug='docker-registry')
     registries = AppInstance.objects.filter(app=registry_app.pk, project=project)

@@ -23,7 +23,7 @@
                         <label class="form-label mt-1">App*</label><small> (where the trained models are located)</small>
                         <select name="app" id="app" class="form-control" required>
                             {% for app in apps %}
-                            <option value="{{ app.name }}">{{ app.name }}</option> 
+                            <option value="{{ app.pk }}">{{ app.name }}</option> 
                             {% endfor %}
                         </select>
 

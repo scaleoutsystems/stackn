@@ -10,6 +10,10 @@
     "apps":{
         "Persistent Volume":"one"
     },
+    "default_values": {
+      "port": "80",
+      "targetport": "80"
+    },
     "credentials": {
         "username": {"type": "string", "default":"admin","title":"Username"},
         "password": {"type": "string", "default":"password","title":"Password"}

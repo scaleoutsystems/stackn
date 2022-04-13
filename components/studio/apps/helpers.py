@@ -6,7 +6,7 @@ def create_instance_params(instance, action="create"):
     RELEASE_NAME = 'r'+uuid.uuid4().hex[0:8] #instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
     print("RELEASE_NAME: "+RELEASE_NAME)
 
-    SERVICE_NAME = RELEASE_NAME
+    SERVICE_NAME = RELEASE_NAME + '-' + instance.app.slug
     # TODO: Fix for multicluster setup, look at e.g. labs
     HOST = settings.DOMAIN
     NAMESPACE = settings.NAMESPACE
@@ -27,7 +27,9 @@ def create_instance_params(instance, action="create"):
             "image": "scaleoutsystems/s3-sync:latest"
         },
         "service": {
-            "name": SERVICE_NAME
+            "name": SERVICE_NAME,
+            "port": instance.parameters["default_values"]["port"],
+            "targetport": instance.parameters["default_values"]["targetport"]
         },
         "storageClass": settings.STORAGECLASS
     }
