@@ -9,6 +9,7 @@ def create_instance_params(instance, action="create"):
     SERVICE_NAME = RELEASE_NAME + '-' + instance.app.slug
     # TODO: Fix for multicluster setup, look at e.g. labs
     HOST = settings.DOMAIN
+    AUTH_HOST = settings.AUTH_DOMAIN
     NAMESPACE = settings.NAMESPACE
 
     # Add some generic parameters.
@@ -22,6 +23,7 @@ def create_instance_params(instance, action="create"):
 
         "global": {
             "domain": HOST,
+            "auth_domain": AUTH_HOST,
         },
         "s3sync": {
             "image": "scaleoutsystems/s3-sync:latest"
