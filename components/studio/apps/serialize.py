@@ -50,6 +50,9 @@ def serialize_model(form_selection):
                 "release_type": obj[0].release_type,
                 "description": obj[0].description,
                 "url": "http://{}".format(obj[0].s3.host),
+                "service": obj[0].s3.app.parameters["service"]["name"],
+                "port": obj[0].s3.app.parameters["service"]["port"],
+                "targetport": obj[0].s3.app.parameters["service"]["targetport"],
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
                 "bucket": obj[0].bucket,
@@ -76,6 +79,9 @@ def serialize_S3(form_selection, project):
                 "pk": obj[0].pk,
                 "name": obj[0].name,
                 "host": obj[0].host,
+                "service": obj[0].app.parameters["service"]["name"],
+                "port": obj[0].app.parameters["service"]["port"],
+                "targetport": obj[0].app.parameters["service"]["targetport"],
                 "access_key": obj[0].access_key,
                 "secret_key": obj[0].secret_key,
                 "region": obj[0].region
@@ -232,7 +238,13 @@ def serialize_project(project):
     if project.mlflow:
         parameters['mlflow'] = {
             "url": project.mlflow.mlflow_url,
+            "service": project.mlflow.app.parameters["service"]["name"],
+            "port": project.mlflow.app.parameters["service"]["port"],
+            "targetport": project.mlflow.app.parameters["service"]["targetport"],
             "s3url": 'https://'+project.mlflow.s3.host,
+            "s3service": project.mlflow.s3.app.parameters["service"]["name"],
+            "s3port": project.mlflow.s3.app.parameters["service"]["port"],
+            "s3targetport": project.mlflow.s3.app.parameters["service"]["targetport"],
             "access_key": project.mlflow.s3.access_key,
             "secret_key": project.mlflow.s3.secret_key,
             "region": project.mlflow.s3.region,
