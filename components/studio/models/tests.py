@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Model
+from .models import Model, ObjectType
 from projects.models import Project
 from django.conf import settings
 from django.urls import reverse
@@ -248,3 +248,25 @@ class ModelViewForbidden(TestCase):
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
+
+class TestFixtures(TestCase):
+    fixtures = ['models/fixtures/objecttype_fixtures.json']
+    def test_objecttype_mlflow(self):
+        obj_type = ObjectType.objects.get(slug='mlflow')
+        self.assertEqual(obj_type.slug, 'mlflow')
+    
+    def test_objecttype_tfmodel(self):
+        obj_type = ObjectType.objects.get(slug='tensorflow')
+        self.assertEqual(obj_type.slug, 'tensorflow')
+    
+    def test_objecttype_tfmodel(self):
+        obj_type = ObjectType.objects.get(slug='python')
+        self.assertEqual(obj_type.slug, 'python')
+    
+    def test_objecttype_tfmodel(self):
+        obj_type = ObjectType.objects.get(slug='default')
+        self.assertEqual(obj_type.slug, 'default')
+    
+    def test_objecttype_tfmodel(self):
+        obj_type = ObjectType.objects.get(slug='pytorch')
+        self.assertEqual(obj_type.slug, 'pytorch')

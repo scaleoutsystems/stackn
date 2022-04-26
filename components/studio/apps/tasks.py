@@ -12,6 +12,7 @@ from celery import shared_task
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
+from django.core.exceptions import EmptyResultSet
 from datetime import datetime
 from models.models import Model, ObjectType
 from projects.models import S3, Environment, MLFlow, BasicAuth, Project
@@ -91,6 +92,19 @@ def post_create_hooks(instance):
 
     if instance.app.slug == 'mlflow':
         params = instance.parameters
+
+        # OBS!! TEMP WORKAROUND to be able to connect to mlflow (internal dns between docker and k8s does not work currently)
+        # Sure one could use FQDN but lets avoid going via the internet
+        mlflow_svc = instance.parameters['service']["name"]
+        cmd = 'kubectl get svc ' + mlflow_svc + ' -o jsonpath="{.spec.clusterIP"}'
+        mlflow_host_ip = ''
+        try:
+            result=subprocess.run(cmd, shell=True, capture_output=True)
+            mlflow_host_ip=result.stdout.decode('utf-8')
+            mlflow_host_ip+=':{}'.format(instance.parameters['service']["port"])
+        except subprocess.CalledProcessError:
+            print('Oops, something went wrong running the command: {}'.format(cmd))
+
         s3 = S3.objects.get(pk=instance.parameters['s3']['pk'])
         basic_auth = BasicAuth(owner=instance.owner,
                                name=instance.name,
@@ -102,6 +116,7 @@ def post_create_hooks(instance):
                      project=instance.project,
                      mlflow_url='https://{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain']),
                      s3=s3,
+                     host=mlflow_host_ip,
                      basic_auth=basic_auth,
                      app=instance,
                      owner=instance.owner)
@@ -428,7 +443,10 @@ def sync_mlflow_models():
     for mlflow_app in mlflow_apps:
 
         current_time = time.time()-600
-        url = 'http://{}:5000/{}'.format(mlflow_app.parameters['release'], 'api/2.0/preview/mlflow/model-versions/search')
+        url = 'http://{}/{}'.format(
+            mlflow_app.project.mlflow.host, 
+            'api/2.0/preview/mlflow/model-versions/search'
+        )
         res = False
         try:
             res = requests.get(url)
@@ -459,10 +477,13 @@ def sync_mlflow_models():
                     except:
                         model_found = False
                     if not model_found:
-                        model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
-                        model.save()
-                        obj_type = ObjectType.objects.filter(slug='mlflow-model')
-                        model.object_type.set(obj_type)
+                        obj_type = ObjectType.objects.filter(slug='mlflow')
+                        if obj_type.exists():
+                            model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
+                            model.save()
+                            model.object_type.set(obj_type)
+                        else:
+                            raise EmptyResultSet
                     else:
                         if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
                             stackn_model.status = "AR"
