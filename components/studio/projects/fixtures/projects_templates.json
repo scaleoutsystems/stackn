@@ -118,6 +118,11 @@
             "volume.size": "5Gi",
             "permission": "project"
           },
+          "mlflow-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project"
+        },
           "reg-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
@@ -137,6 +142,14 @@
             "credentials.secret_key": "secretkey193",
             "permission": "project"
           },
+          "mlflow-server": {
+            "slug": "mlflow",
+            "app:volumeK8s": ["mlflow-vol"],
+            "S3": "project-minio",
+            "credentials.username": "username",
+            "credentials.password": "password",
+            "permission": "project"
+        },
           "project-registry": {
             "slug": "docker-registry",
             "app:volumeK8s": [
@@ -148,7 +161,8 @@
           }
         },
         "settings": {
-          "project-S3": "project-minio"
+          "project-S3": "project-minio",
+          "project-MLflow": "mlflow-server"
         }
       }
     }
