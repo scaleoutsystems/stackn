@@ -116,22 +116,42 @@
           "minio-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
-            "permission": "project"
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
           },
           "mlflow-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
-            "permission": "project"
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
         },
           "reg-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
-            "permission": "project"
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
           },
           "project-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
-            "permission": "project"
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
           },
           "project-minio": {
             "slug": "minio",
