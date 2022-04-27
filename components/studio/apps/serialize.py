@@ -238,6 +238,7 @@ def serialize_project(project):
     if project.mlflow:
         parameters['mlflow'] = {
             "url": project.mlflow.mlflow_url,
+            "host": project.mlflow.host,
             "service": project.mlflow.app.parameters["service"]["name"],
             "port": project.mlflow.app.parameters["service"]["port"],
             "targetport": project.mlflow.app.parameters["service"]["targetport"],

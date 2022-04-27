@@ -100,7 +100,7 @@ class Model(models.Model):
     bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
     path = models.CharField(max_length=200, null=True, blank=True, default="models")
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    tags = TagField()
+    tags = TagField(blank=True)
     project = models.ForeignKey(
         'projects.Project',
         on_delete=models.SET_NULL,
