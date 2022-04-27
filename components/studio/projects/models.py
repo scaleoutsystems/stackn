@@ -83,6 +83,7 @@ class MLFlow(models.Model):
     basic_auth = models.ForeignKey(BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     mlflow_url = models.CharField(max_length=512)
+    host = models.CharField(max_length=512, blank=True, default="")
     name = models.CharField(max_length=512)
     owner = models.ForeignKey(get_user_model(), on_delete=models.DO_NOTHING)
     project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE, related_name='mlflow_project')
