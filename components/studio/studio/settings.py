@@ -223,6 +223,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
+#If True, users will be inactive by default on account creation
+INACTIVE_USERS = False
 
 # Specific to Studio stack:
 # Redis settings
