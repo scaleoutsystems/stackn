@@ -303,7 +303,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="environment_name">Registry</label>
-                                    <select type="text" class="form-control" id="environment_registry" name="environment_registry" maxlength="256" required>
+                                    <select type="text" class="form-control" id="environment_registry" name="environment_registry" maxlength="256">
                                         {% for registry in registries %}
                                             <option value="{{ registry.pk }}">{{ registry.name }}</option>
                                         {% endfor %}
