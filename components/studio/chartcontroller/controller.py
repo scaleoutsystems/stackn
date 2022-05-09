@@ -25,7 +25,7 @@ def deploy(options):
     app = Apps.objects.get(slug=options['app_slug'], revision=options['app_revision'])
     if app.chart_archive and app.chart_archive != '':
         try:
-            chart_file = base_path+settings.MEDIA_ROOT+app.chart_archive.name
+            chart_file = settings.MEDIA_ROOT+app.chart_archive.name
             tar = tarfile.open(chart_file, "r:gz")
             extract_path = '/app/extracted_charts/'+app.slug+'/'+str(app.revision)
             tar.extractall(extract_path)
