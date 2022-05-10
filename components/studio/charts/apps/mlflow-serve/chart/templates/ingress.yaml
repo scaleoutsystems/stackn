@@ -6,8 +6,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
-    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     # nginx.ingress.kubernetes.io/rewrite-target: /$1
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}
@@ -32,8 +32,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
-    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     # nginx.ingress.kubernetes.io/rewrite-target: /$1
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Values.namespace }}

@@ -8,8 +8,8 @@ metadata:
     io.kompose.service: {{ .Release.Name }}-ingress
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
-    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
@@ -34,8 +34,8 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5500m"
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
-    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
 spec:
   rules:
