@@ -25,7 +25,7 @@ urlpatterns = [
     path('', include('models.urls', namespace='models')),
     path('', include('portal.urls', namespace='portal')),
     path('', include('projects.urls', namespace='projects')),
-    path('auth/', views.auth),
+    path('auth/', views.AuthView.as_view()),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls', namespace='api')),
