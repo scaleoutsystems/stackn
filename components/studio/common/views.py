@@ -3,6 +3,7 @@ from django.http.response import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 from .forms import SignUpForm
+from django.conf import settings
 
 # Create your views here.
 class HomeView(TemplateView):
@@ -17,7 +18,11 @@ class SignUpView(CreateView):
         form = self.get_form()
         if form.is_valid():
             form.save()
-            messages.success(request, "Account created successfully!")
+            if settings.INACTIVE_USERS:
+                messages.success(request, "Account request has been registered! Please wait for admin to approve!")    
+            else:
+                messages.success(request, "Account created successfully!")
+
             return HttpResponseRedirect(reverse_lazy('login'))
 
         # Otherwise use built-in parent class-based checks
