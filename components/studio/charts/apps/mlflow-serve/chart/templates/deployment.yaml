@@ -12,10 +12,10 @@ spec:
   selector:
     matchLabels:
       release: {{ .Release.Name }}
-      app: fastapi-serve
+      app: mlflow-serve
       project: {{ .Values.project.slug }}
       type: app
-      pod: fastapi-serve
+      pod: mlflow-serve
   template:
     metadata:
       annotations:
@@ -24,10 +24,10 @@ spec:
         prometheus.io/port: "8501"
       labels:
         release: {{ .Release.Name }}
-        app: fastapi-serve
+        app: mlflow-serve
         project: {{ .Values.project.slug }}
         type: app
-        pod: fastapi-serve
+        pod: mlflow-serve
     spec:
       volumes:
       - name: rp-conf
@@ -40,9 +40,6 @@ spec:
       {{ end }}
       - name: model-vol
         emptyDir: {}
-      {{- with .Values.extraVolumes }}
-      {{- tpl . $ | nindent 6 }}
-      {{- end }}
       {{ if .Values.environment.registry }}
       imagePullSecrets:
         - name: {{ .Release.Name }}-pull-secret
@@ -119,6 +116,8 @@ spec:
             memory: 128Mi
       {{ end }}
       - name: serve
+        command: ["/bin/sh"]
+        args: ["-c", "mlflow models serve -m models/model -h 0.0.0.0"]
         resources:
           limits:
             cpu: {{ .Values.flavor.limits.cpu }}
@@ -132,13 +131,13 @@ spec:
         {{- with .Values.extraVolumeMounts }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
-        env:
-        - name: GUNICORN_CMD_ARGS
-          value: "--limit-request-field_size 0"
-          {{- with .Values.extraEnv }}
-          {{- tpl . $ | nindent 10 }}
-          {{- end }}
+        # env:
+        # - name: GUNICORN_CMD_ARGS
+        #   value: "--limit-request-field_size 0"
+        #   {{- with .Values.extraEnv }}
+        #   {{- tpl . $ | nindent 10 }}
+        #   {{- end }}
         image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
         imagePullPolicy: Always
         ports:
-        - containerPort: {{ .Values.default_values.port }}
+        - containerPort: 5000
