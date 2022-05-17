@@ -252,12 +252,15 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
         permission.projects.set([])
         permission.users.set([])
         
+        access = ""
 
         if parameters_out['permissions']['public']:
             permission.public = True
+            access = "public"
         elif parameters_out['permissions']['project']:
             print("PROJECT PERMISSIONS")
             client_id = project.slug
+            access = "project"
 
             if not 'project' in parameters_out:
                 parameters_out['project'] = dict()
@@ -268,10 +271,11 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
             parameters_out['project']['name'] = project.name
             permission.projects.set([project])
         elif parameters_out['permissions']['private']:
+            access = "private"
             permission.users.set([user])
         permission.save()
 
-        app_instance = AppInstance(name=app_name, app=app, project=project, info={},
+        app_instance = AppInstance(name=app_name, access=access, app=app, project=project, info={},
                                     parameters=parameters_out,owner=user)
 
         if data.get('app_action') == "Create":
