@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "20000m"
-    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?release={{ .Values.release }}"
     nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
   name: {{ .Release.Name }}-minio
@@ -28,7 +28,7 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "20000m"
-    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?project={{ .Values.project.slug }}"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?release={{ .Values.release }}"
     nginx.ingress.kubernetes.io/auth-signin: "{{ .Values.global.protocol }}://{{ .Values.global.domain }}:8080/accounts/login/?next=$scheme%3A%2F%2F$host"
     #nginx.ingress.kubernetes.io/auth-response-headers: X-Forwarded-Host
   name: {{ .Release.Name }}-minio
