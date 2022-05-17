@@ -452,7 +452,9 @@ def details(request, user, project_slug):
             rslugs.append({"slug": cat.slug, "name": cat.name})
 
         for rslug in rslugs:
-            tmp = AppInstance.objects.filter(~Q(state="Deleted"), project=project, app__category__slug=rslug['slug']).order_by('-created_on')[:5]
+            tmp = AppInstance.objects.filter(~Q(state="Deleted"),Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), 
+                                            project=project, 
+                                            app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
                 pk_list += str(instance.pk)+','
             apps_filtered = Apps.objects.filter(category__slug=rslug['slug']).order_by('slug', '-revision').distinct('slug')
