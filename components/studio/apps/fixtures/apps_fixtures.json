@@ -668,6 +668,9 @@
       "description": "",
       "priority": "500",
       "settings": {
+        "model": {
+          "object_type": "pytorch"
+        },
         "logs": [
           "serve"
         ],
