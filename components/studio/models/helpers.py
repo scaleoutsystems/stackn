@@ -1,3 +1,4 @@
+from rsa import verify
 from .models import Model
 from minio import Minio
 from portal.models import PublicModelObject, PublishedModel
@@ -60,11 +61,12 @@ def get_download_url(model_id):
             access_key=minio_access_key,
             secret_key=minio_secret_key,
             region=minio_region,
+            secure=False
         )
 
-        download_url = client.presigned_get_object(bucket, path + uid)
+        download_url = client.presigned_get_object(bucket, uid)
     except Exception as e:
-        print(e)
+        print(e, flush=True)
 
     return download_url
 
