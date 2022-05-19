@@ -15,7 +15,7 @@ from django.views.generic import View
 from django.urls import reverse, reverse_lazy
 
 from .forms import UploadModelCardHeadlineForm, EnvironmentForm, ModelForm
-from .helpers import set_artifact
+from .helpers import set_artifact, get_download_url
 from .models import Model, ModelLog, Metadata, ObjectType
 
 from apps.models import Apps, AppInstance
@@ -645,6 +645,7 @@ def details_private(request, user, project, id):
     # model = latest_model_obj.model
     # print(model_objs)
     # print(latest_model_obj)
+    media_url = get_download_url(id)
 
     return render(request, 'models_details_public.html', locals())
 
@@ -673,14 +674,15 @@ def details_public(request, id):
     else:
         base_template = 'base.html'
 
-    media_url = settings.MEDIA_URL
+    media_url = get_download_url(id)
+    print(media_url, flush=True)
     published_model = PublishedModel(pk=id)
-    print(published_model)
+    print(published_model, flush=True)
     model_objs = published_model.model_obj.order_by('-model__version')
     latest_model_obj = model_objs[0]
     model = latest_model_obj.model
-    print(model_objs)
-    print(latest_model_obj)
+    print(model_objs, flush=True)
+    print(latest_model_obj, flush=True)
 
     return render(request, 'models_details_public.html', locals())
 
