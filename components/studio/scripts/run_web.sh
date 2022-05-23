@@ -31,11 +31,6 @@ if $INIT; then
     python3 manage.py createsuperuser --email 'admin@test.com' --username 'admin' --no-input
 fi
 
-# To enable FEDn in STACKn
-if $FEDN; then
-    sh ./scripts/load_FEDn.sh
-fi
-
 echo "Starting the Studio server..."
 python3 manage.py runserver 0.0.0.0:8080
 

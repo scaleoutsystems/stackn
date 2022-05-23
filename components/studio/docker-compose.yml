@@ -27,7 +27,6 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=dGhpaXNhdmVyeW5vdHNhZmVvbmx
       - DEBUG=true
       - INIT=true
-      - FEDN=false
     volumes:
       - .:/app:cached
       - ${PWD}/cluster.conf:/root/.kube/config
