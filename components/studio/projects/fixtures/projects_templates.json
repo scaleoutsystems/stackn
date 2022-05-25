@@ -33,25 +33,10 @@
             "image": "jupyter-stackn:v0.1.5",
             "app": "jupyter-lab"
           },
-          "Default Serving": {
-            "repository": "scaleoutsystems",
-            "image": "default-python:latest",
-            "app": "fastapi-serve"
-          },
           "MLflow Serving": {
             "repository": "scaleoutsystems",
             "image": "mlflow-serve:latest",
             "app": "mlflow-serve"
-          },
-          "Ubuntu": {
-            "repository": "scaleoutsystems",
-            "image": "wetty-ubuntu:v0.1.2",
-            "app": "wetty-terminal"
-          },
-          "Dask": {
-            "repository": "daskdev",
-            "image": "dask",
-            "app": "dask-cluster"
           }
         }
       }
@@ -91,25 +76,10 @@
             "image": "jupyter-stackn:v0.1.5",
             "app": "jupyter-lab"
           },
-          "Default Serving": {
-            "repository": "scaleoutsystems",
-            "image": "default-python:latest",
-            "app": "fastapi-serve"
-          },
           "MLflow Serving": {
             "repository": "scaleoutsystems",
             "image": "mlflow-serve:latest",
             "app": "mlflow-serve"
-          },
-          "Ubuntu": {
-            "repository": "scaleoutsystems",
-            "image": "wetty:latest",
-            "app": "wetty-terminal"
-          },
-          "Dask": {
-            "repository": "daskdev",
-            "image": "dask",
-            "app": "dask-cluster"
           }
         },
         "apps": {
