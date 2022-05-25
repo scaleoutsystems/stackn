@@ -30,7 +30,7 @@
         "environments": {
           "Jupyter Notebook": {
             "repository": "scaleoutsystems",
-            "image": "jupyter-stackn:v0.1.5",
+            "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
@@ -73,7 +73,7 @@
         "environments": {
           "Jupyter Notebook": {
             "repository": "scaleoutsystems",
-            "image": "jupyter-stackn:v0.1.5",
+            "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {

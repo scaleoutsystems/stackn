@@ -39,7 +39,7 @@ spec:
       subdomain: default-subdomain
       containers:
       - name: labs
-        image: {{ .Values.labs.image }}
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8888
