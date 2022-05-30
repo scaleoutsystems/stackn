@@ -214,6 +214,7 @@
             var self = $(this)
             swal({
                 title: "Do You Really Want to Delete This?",
+                text: "Observe that this app might be a dependecy in other app instances!",
                 icon: "warning",
                 buttons: true,
                 dangerMode: true,
@@ -223,6 +224,7 @@
                     swal({
                     title: "Done!",
                     icon: "success",
+                    buttons: false
                     });
                     setTimeout(() => { console.log("Showing result for 1 sec..."); location.href = self.attr('href')}, 800);
                 }

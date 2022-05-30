@@ -127,10 +127,17 @@ def post_delete_hooks(instance):
     # Free up release name (if reserved)
     print("TASK - POST DELETE HOOK...")
     rel_names = instance.releasename_set.all()
+    project = instance.project
     for rel_name in rel_names:
         rel_name.status = 'active'
         rel_name.app = None
         rel_name.save()
+    if project.s3storage.app == instance:
+        project.s3storage.delete()
+    elif project.mlflow.app == instance:
+        project.mlflow.delete()
+        
+
 
 @shared_task
 @transaction.atomic
