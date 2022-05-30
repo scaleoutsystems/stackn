@@ -242,8 +242,8 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
             permission = AppPermission(name=app_name)
             permission.save()
         elif data.get('app_action') == "Settings":
-            instance = AppInstance.objects.get(pk=data.get('app_id'))
-            permission = instance.permission
+            app_instance = AppInstance.objects.get(pk=data.get('app_id'))
+            permission = app_instance.permission
         else:
             print("No action set, aborting...")
             print(data.get('app_action'))
@@ -275,11 +275,10 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
             permission.users.set([user])
         permission.save()
 
-        app_instance = AppInstance(name=app_name, access=access, app=app, project=project, info={},
-                                    parameters=parameters_out,owner=user)
-
         if data.get('app_action') == "Create":
-
+            app_instance = AppInstance(name=app_name, access=access, app=app, project=project, info={},
+                                    parameters=parameters_out,owner=user)
+            
             create_instance_params(app_instance, "create")
             
             # Attempt to create a ReleaseName model object
