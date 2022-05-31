@@ -4,6 +4,8 @@ from django.db.models import Q
 from .models import Apps, AppInstance, AppCategories, AppPermission
 from projects.models import Project, Flavor, Environment, S3
 from models.models import Model
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 from projects.helpers import get_minio_keys
 from django.template import engines
 import requests
@@ -255,12 +257,15 @@ def serialize_project(project):
     return parameters
 
 def serialize_cli(username, project, aset):
+    user = User.objects.get(username=username)
+    token, created = Token.objects.get_or_create(user=user)
     parameters = dict()
     if 'export-cli' in aset and aset['export-cli']=='True':
         parameters['cli_setup'] = {
-            "url": settings.DOMAIN,
+            "url": settings.STUDIO_URL,
             "project": project.name,
             "user": username,
+            "token": token.key
         }
     return parameters
 
