@@ -107,10 +107,15 @@ def _load_config_file_url(conf, is_login=False):
     stackn_config_full = _load_config_file_full(conf)
     if stackn_config_full:
         try:
-            stackn_config = stackn_config_full[_get_studio_url_key(conf['STACKN_URL'])]
-        except:
+            no_scheme_url = _get_studio_url_key(conf['STACKN_URL'])
+            if no_scheme_url in stackn_config_full.keys():
+                stackn_config = stackn_config_full[no_scheme_url]
+            else:
+                stackn_config = stackn_config_full[conf['STACKN_URL']]
+        except KeyError as e:
             if conf['STACKN_URL'] and not is_login:
                 print("Failed to load config file from URL: {} not set up.".format(conf['STACKN_URL']))
+                print(e)
                 return False
             else:
                 stackn_config = []

@@ -1,0 +1,19 @@
+{
+    "http://studio.test.domain": {
+        "STACKN_URL": "test_url",
+        "STACKN_PROJECT": "test_project",
+        "STACKN_ACCESS_TOKEN": "test_token",
+        "STACKN_USER": "test_user"
+    },
+    "studio._test.domain": {
+        "STACKN_URL": "_test_url",
+        "STACKN_PROJECT": "_test_project",
+        "STACKN_ACCESS_TOKEN": "_test_token",
+        "STACKN_USER": "_test_user"
+    },
+    "current": {
+        "STACKN_URL": "",
+        "STACKN_PROJECT": "",
+        "STACKN_SECURE": ""
+    }
+}
