@@ -55,7 +55,7 @@ jobs:
       - name: Check Python formatting
         working-directory: ${{env.working-directory}}
         run: |
-          autopep8 . --recursive --diff  
+          autopep8 . --recursive --diff --exclude="migrations, deployments"
       - name: Test with django test framework
         working-directory: ${{env.working-directory}}
         run: |
