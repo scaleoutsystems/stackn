@@ -1,0 +1,52 @@
+name: CLI code checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+    - 'components/studio/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+    - 'components/studio/**'
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+    env:
+      working-directory: ./cli
+    strategy:
+      matrix:
+        python-version: ["3.5", 3.6", "3.7", "3.8", "3.9"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ${{env.working-directory}}
+        run: |
+          python -m pip install --upgrade pip
+          pip install autopep8 isort .
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Check Python imports
+        working-directory: ${{env.working-directory}}
+        run: |
+          isort . --check --diff
+      - name: Check Python formatting
+        working-directory: ${{env.working-directory}}
+        run: |
+          autopep8 . --recursive --diff  
+      - name: Test with unittest
+        working-directory: ${{env.working-directory}}
+        run: |
+          unittest

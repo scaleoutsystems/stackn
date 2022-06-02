@@ -3,58 +3,60 @@ name: Build studio and ingress
 
 on:
   push:
-    branches: '*'
-    paths:
-    - 'components/studio/**'
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  release:
+    types: [published]
 
 jobs:
  
-  build:
-    
-    runs-on: ubuntu-latest
+  build-containers:
+    runs-on: ubuntu-20.04
+    permissions:
+      packages: write
+      contents: read
     env:
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       working-directory: ./components/studio
     steps:
+      - uses: actions/checkout@v2     
+
+      - name: Setup variables
+        id: wf-vars
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}
+          VERSION=${GITHUB_REF##*-}
+          IMAGE_NAME="studio"
+          echo "BASE_BRANCH=${BASE_BRANCH}"
+          echo "IMAGE_TAG=${IMAGE_TAG}"
+          echo ::set-output name=IMAGE_NAME::$IMAGE_NAME
+          echo ::set-output name=IMAGE_TAG::$IMAGE_TAG
     
-    - uses: actions/checkout@v2     
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup variables
-      id: wf-vars
-      env:
-        BASE_BRANCH: ${{ github.base_ref }}
-      run: |
-        echo "name of github basebranch is ${BASE_BRANCH}"
-        BRANCH=${GITHUB_REF##*/}
-        VERSION=${GITHUB_REF##*-}
-        IMAGE_NAME="studio"
-        IMAGE_TAG="$BRANCH"
-        echo ::set-output name=IMAGE_NAME::$IMAGE_NAME
-        echo ::set-output name=IMAGE_TAG::$IMAGE_TAG
-  
-    - name: docker login
-      run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-
-    - name: docker build studio
-      env:      
-        DOCKER_URL: scaleoutsystems
-      working-directory: ${{env.working-directory}}
-      run: |
-        docker build -t $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }} .
+      - name: build and push studio
+        uses: docker/build-push-action@v2
+        working-directory: ${{env.working-directory}}
+        with:
+          push: "${{ github.event_name != 'pull_request' }}"
+          tags: docker.pkg.github.com/${{ github.repository }}/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}
+          file: Dockerfile
         
-    - name: docker build ingress
-      env:      
-        DOCKER_URL: scaleoutsystems
-      working-directory: ${{env.working-directory}}
-      run: |
-        docker build -f Dockerfile.nginx -t $DOCKER_URL/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }} .
-
-    - name: docker push
-      env:      
-        DOCKER_URL: scaleoutsystems
-      working-directory: ${{env.working-directory}}
-      run: |
-        docker push $DOCKER_URL/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }}
-        docker push $DOCKER_URL/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}
+      - name: docker build ingress
+        uses: docker/build-push-action@v2
+        working-directory: ${{env.working-directory}}
+        with:
+          push: "${{ github.event_name != 'pull_request' }}"
+          tags: docker.pkg.github.com/${{ github.repository }}/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }}
+          file: Dockerfile.nginx
