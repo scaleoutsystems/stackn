@@ -1,5 +1,5 @@
 import os
-from unittest import TestCase, mock, skip
+from unittest import TestCase, mock
 
 import stackn.auth as auth
 
@@ -7,16 +7,16 @@ import stackn.auth as auth
 class CLIAuthTests(TestCase):
 
     @mock.patch.dict(os.environ, {
-        "STACKN_CONFIG_PATH": os.getcwd(), 
+        "STACKN_CONFIG_PATH": os.path.dirname(os.path.realpath(__file__)), 
         "STACKN_CONFIG_FILE": "test_config.json"
         })
     def test_get_stackn_config_path(self):
         config_path = auth._get_stackn_config_path()
-        self.assertEqual(config_path, os.getcwd()+"/test_config.json")
+        self.assertEqual(config_path, os.path.dirname(os.path.realpath(__file__))+"/test_config.json")
 
     
     @mock.patch.dict(os.environ, {
-        "STACKN_CONFIG_PATH": os.getcwd(), 
+        "STACKN_CONFIG_PATH": os.path.dirname(os.path.realpath(__file__)), 
         "STACKN_CONFIG_FILE": "test_config.json"
         })
     def test_load_config_file_full(self):
@@ -46,9 +46,10 @@ class CLIAuthTests(TestCase):
         
 
     
-    @mock.patch.dict(os.environ, {"STACKN_CONFIG_PATH": os.getcwd(), 
-                                 'STACKN_CONFIG_FILE': 'test_config.json'
-                                 })
+    @mock.patch.dict(os.environ, {
+        "STACKN_CONFIG_PATH": os.path.dirname(os.path.realpath(__file__)), 
+        'STACKN_CONFIG_FILE': 'test_config.json'
+        })
     def test_load_config_file_url_with_scheme(self):
         stackn_url = {'STACKN_URL': 'http://studio.test.domain'}
         config_for_url = auth._load_config_file_url(stackn_url)
@@ -62,7 +63,7 @@ class CLIAuthTests(TestCase):
         self.assertEqual(config_for_url, expected_config)
     
     @mock.patch.dict(os.environ, {
-        "STACKN_CONFIG_PATH": os.getcwd(), 
+        "STACKN_CONFIG_PATH": os.path.dirname(os.path.realpath(__file__)), 
         "STACKN_CONFIG_FILE": "test_config.json"
         })
     def test_load_config_file_url_without_scheme(self):
