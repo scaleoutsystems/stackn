@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 
 AUTHENTICATION_BACKENDS = [
     'social_core.backends.github.GithubOAuth2',
@@ -173,7 +174,19 @@ ASGI_APPLICATION = 'studio.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 # Dummy backend here to allow for local development with docker-compose!
-DATABASES = {
+if sys.argv[1] == 'test':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+else:
+    DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
