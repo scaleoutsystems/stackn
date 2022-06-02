@@ -14,6 +14,7 @@ class AliasedGroup(click.Group):
             pass
         return super().get_command(ctx, cmd_name)
 
+
 def _print_table(resource, names, keys):
     x = prettytable.PrettyTable()
     x.field_names = names
@@ -21,6 +22,7 @@ def _print_table(resource, names, keys):
         row = [item[k] for k in keys]
         x.add_row(row)
     print(x)
+
 
 def _find_dict_by_value(dicts, key, value):
     try:
@@ -33,7 +35,7 @@ def _find_dict_by_value(dicts, key, value):
 
 @main.group('get', cls=AliasedGroup)
 def get():
-  pass
+    pass
 
 
 @get.command('app')
@@ -43,7 +45,8 @@ def app(category, secure):
     params = []
     if category:
         params = {"app__category": category.lower()}
-    apps = call_project_endpoint('appinstances', params=params, conf={"STACKN_SECURE": secure})
+    apps = call_project_endpoint('appinstances', params=params, conf={
+                                 "STACKN_SECURE": secure})
 
     # call_project_endpoint can return false for various reasons
     if apps == False:
@@ -61,16 +64,15 @@ def app(category, secure):
         tmp['app_cat'] = app['app']['category']['name']
         tmp['url'] = ''
         tmp['state'] = app['state']
-        status = max(app['status'], key=lambda x:x['id'])
+        status = max(app['status'], key=lambda x: x['id'])
         tmp['status'] = status['status_type']
-        if 'url'in app['table_field']:
+        if 'url' in app['table_field']:
             tmp['url'] = app['table_field']['url']
         applist.append(tmp)
-    applist = sorted(applist, key=lambda k: k['app_cat']) 
+    applist = sorted(applist, key=lambda k: k['app_cat'])
 
-    _print_table(applist, ['Category', 'App', 'Name', 'URL', 'Status'], ['app_cat', 'app_name', 'name', 'url', 'status'])
-
-    
+    _print_table(applist, ['Category', 'App', 'Name', 'URL', 'Status'], [
+                 'app_cat', 'app_name', 'name', 'url', 'status'])
 
 
 @get.command('current')
@@ -88,22 +90,22 @@ def get_curr(secure):
                 print("Project: {}".format(current['STACKN_PROJECT']))
             else:
                 print("No project set.")
- 
+
 
 @get.command('environment')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', required=False, default=True)
 def environment(project, studio_url, secure):
-    
+
     conf = {
         'STACKN_PROJECT': project,
         'STACKN_URL': studio_url,
         'STACKN_SECURE': secure
     }
-    
+
     environments = call_project_endpoint('environments', conf=conf)
-    
+
     if environments == False:
         return False
     elif len(environments) == 0:
@@ -120,7 +122,7 @@ def environment(project, studio_url, secure):
         envlist.append(tmp)
     header = ['Category', 'App', 'Name', 'Image']
     fields = ['cat', 'app_name', 'name', 'image']
-    envlist = sorted(envlist, key=lambda k: k['cat']) 
+    envlist = sorted(envlist, key=lambda k: k['cat'])
 
     _print_table(envlist, header, fields)
 
@@ -138,15 +140,17 @@ def flavor(project, studio_url, secure):
     }
 
     flavors = call_project_endpoint('flavors', conf=conf)
-    
+
     if flavors == False:
         return False
     elif len(flavors) == 0:
         print("No flavors are associated to the current project.")
         return
 
-    header = ['Name', 'CPU req', 'CPU lim', 'Mem req', 'Mem lim', 'GPUs', 'Eph mem req', 'Eph mem lim']
-    fields = ['name', 'cpu_req', 'cpu_lim', 'mem_req', 'mem_lim', 'gpu_req', 'ephmem_req', 'ephmem_lim']
+    header = ['Name', 'CPU req', 'CPU lim', 'Mem req',
+              'Mem lim', 'GPUs', 'Eph mem req', 'Eph mem lim']
+    fields = ['name', 'cpu_req', 'cpu_lim', 'mem_req',
+              'mem_lim', 'gpu_req', 'ephmem_req', 'ephmem_lim']
 
     _print_table(flavors, header, fields)
 
@@ -164,13 +168,13 @@ def mlflow(project, studio_url, secure):
     }
 
     mlflows = call_project_endpoint('mlflow', conf=conf)
-    
+
     if mlflows == False:
         return False
     elif len(mlflows) == 0:
         print("No MLflows endpoints are associated to the current project.")
         return
-    
+
     mlflowlist = list()
     for mlflow in mlflows:
         tmp = dict()
@@ -178,7 +182,7 @@ def mlflow(project, studio_url, secure):
         tmp['URL'] = mlflow['mlflow_url']
         tmp['S3'] = mlflow['s3']['name']
         mlflowlist.append(tmp)
-    
+
     _print_table(mlflowlist, ['Name', 'URL', 'S3'], ['name', 'URL', 'S3'])
 
 
@@ -206,9 +210,9 @@ def obj(object_type, project, studio_url, secure):
     if not obj_type:
         print("No model objects found for this project.")
         return
-    
+
     params = {'object_type': obj_type['id']}
-    
+
     objects = call_project_endpoint('models', conf=conf, params=params)
 
     if objects == False:
@@ -223,7 +227,8 @@ def obj(object_type, project, studio_url, secure):
     for obj in objects:
         obj['object_type'] = obj_dict[str(obj['object_type'][0])]
 
-    _print_table(objects, ['Name', 'Version', 'Type', 'Created'], ['name', 'version','object_type', 'uploaded_at'])
+    _print_table(objects, ['Name', 'Version', 'Type', 'Created'], [
+                 'name', 'version', 'object_type', 'uploaded_at'])
 
 
 @get.command('project')
@@ -233,17 +238,17 @@ def project(studio_url, secure):
 
     conf = {
         'STACKN_URL': studio_url,
-        'STACKN_SECURE': secure 
+        'STACKN_SECURE': secure
     }
 
     projects = get_projects(conf=conf)
-    
+
     if projects == False:
         return False
     elif len(projects) == 0:
         print("There are no projects associated to the current user.")
         return
-    
+
     _print_table(projects, ['Name', 'Created'], ['name', 'created_at'])
 
 
@@ -272,14 +277,15 @@ def templates(studio_url, secure):
         tmp['description'] = template['description']
         templateslist.append(tmp)
 
-    _print_table(templateslist, ['Name', 'Description'], ['name', 'description'])
+    _print_table(templateslist, ['Name', 'Description'], [
+                 'name', 'description'])
 
 
 @get.command('remote')
 @click.option('--secure/--insecure', required=False, default=True)
 def get_rem(secure):
 
-    current_remote = get_remote(inp_conf = {'STACKN_SECURE': secure })
+    current_remote = get_remote(inp_conf={'STACKN_SECURE': secure})
 
     if not current_remote:
         return False
@@ -302,7 +308,7 @@ def s3(project, studio_url, name, secure):
     params = []
     if name:
         params = {"name": name}
-    
+
     s3s = call_project_endpoint('s3', params=params, conf=conf)
 
     if s3s == False:
@@ -311,7 +317,8 @@ def s3(project, studio_url, name, secure):
         print("There are no S3 endpoints associated with the current project.")
         return
     else:
-        _print_table(s3s, ['Name', 'Host', 'Region'], ['name', 'host', 'region'])
+        _print_table(s3s, ['Name', 'Host', 'Region'],
+                     ['name', 'host', 'region'])
 
 
 ALIASES = {

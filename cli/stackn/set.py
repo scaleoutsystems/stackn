@@ -13,9 +13,11 @@ class AliasedGroup(click.Group):
             pass
         return super().get_command(ctx, cmd_name)
 
+
 @main.group('set', cls=AliasedGroup)
 def set():
-  pass
+    pass
+
 
 @set.command('current')
 @click.option('-p', '--project', required=False, default='')

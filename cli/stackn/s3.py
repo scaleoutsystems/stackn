@@ -26,11 +26,13 @@ def create_client(config, secure_mode=True):
         minio_url = config['host']
 
     if not secure_mode:
-        client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=secure_mode)
+        client = Minio(minio_url, access_key=access_key,
+                       secret_key=secret_key, secure=secure_mode)
     else:
         client = Minio(minio_url, access_key=access_key, secret_key=secret_key)
 
     return client
+
 
 def set_artifact(instance_name, instance, bucket, config, is_file=False, secure_mode=True):
     """ Instance must be a byte-like object. """
@@ -47,9 +49,9 @@ def set_artifact(instance_name, instance, bucket, config, is_file=False, secure_
         client.fput_object(bucket, instance_name, instance)
     else:
         try:
-            client.put_object(bucket, instance_name, io.BytesIO(instance), len(instance))
+            client.put_object(bucket, instance_name,
+                              io.BytesIO(instance), len(instance))
         except Exception as e:
             raise Exception("Could not load data into bytes {}".format(e))
 
     return True
-

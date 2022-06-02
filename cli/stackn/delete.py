@@ -13,9 +13,10 @@ class AliasedGroup(click.Group):
             pass
         return super().get_command(ctx, cmd_name)
 
+
 @main.group('delete')
 def delete():
-  pass
+    pass
 
 
 @delete.command('app')
@@ -33,7 +34,8 @@ def app(name, studio_url, project, secure):
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def delete_env(name, project, studio_url, secure):
-    delete_meta_resource('environments', name, project=project, studio_url=studio_url, secure=secure)
+    delete_meta_resource('environments', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
 
 @delete.command('flavor')
@@ -42,7 +44,8 @@ def delete_env(name, project, studio_url, secure):
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def delete_flavor(name, project, studio_url, secure):
-    delete_meta_resource('flavors', name, project=project, studio_url=studio_url, secure=secure)
+    delete_meta_resource('flavors', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
 
 @delete.command('mlflow')
@@ -51,7 +54,8 @@ def delete_flavor(name, project, studio_url, secure):
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def delete_mlflow(name, project, studio_url, secure):
-    delete_meta_resource('mlflow', name, project=project, studio_url=studio_url, secure=secure)
+    delete_meta_resource('mlflow', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
 
 @delete.command('model-obj')
@@ -82,7 +86,8 @@ def delete_proj(name, studio_url, secure):
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def delete_s3(name, project, studio_url, secure):
-    delete_meta_resource('s3', name, project=project, studio_url=studio_url, secure=secure)
+    delete_meta_resource('s3', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
 
 ALIASES = {
