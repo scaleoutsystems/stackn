@@ -17,14 +17,14 @@ on:
     types: [published]
 
 jobs:
-  build:
+  python-code-checks:
 
     runs-on: ubuntu-20.04
     env:
       working-directory: ./cli
     strategy:
       matrix:
-        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.6", "3.7", "3.8", "3.9"]
 
     steps:
       - uses: actions/checkout@v2
