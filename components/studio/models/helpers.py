@@ -1,10 +1,13 @@
-from rsa import verify
-from .models import Model
+import io
+
+import s3fs
 from minio import Minio
+from rsa import verify
+
 from portal.models import PublicModelObject, PublishedModel
 
-import io
-import s3fs
+from .models import Model
+
 
 def add_pmo_to_publish(mdl, pmodel):
     print(mdl.name)

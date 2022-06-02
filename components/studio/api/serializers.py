@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from rest_framework.serializers import ModelSerializer
 
-from models.models import Model, ModelLog, Metadata, ObjectType
-from projects.models import Project, S3, Flavor, Environment, MLFlow, ReleaseName, ProjectTemplate
-from apps.models import AppInstance, Apps, AppCategories, AppStatus
-from django.contrib.auth.models import User
+from apps.models import AppCategories, AppInstance, Apps, AppStatus
+from models.models import Metadata, Model, ModelLog, ObjectType
+from projects.models import (S3, Environment, Flavor, MLFlow, Project,
+                             ProjectTemplate, ReleaseName)
+
 
 class MLModelSerializer(ModelSerializer):
     class Meta:

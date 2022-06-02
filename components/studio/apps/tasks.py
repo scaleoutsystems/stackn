@@ -1,22 +1,25 @@
 
-from unittest import skip
-import chartcontroller.controller as controller
 import json
 import os
-import requests
 import subprocess
 import time
+from datetime import datetime
+from unittest import skip
 
-from .models import AppInstance, ResourceData, AppStatus, Apps
+import requests
 from celery import shared_task
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.db import transaction
 from django.db.models import Q
-from django.core.exceptions import EmptyResultSet
-from datetime import datetime
+
+import chartcontroller.controller as controller
 from models.models import Model, ObjectType
-from projects.models import S3, Environment, MLFlow, BasicAuth, Project
+from projects.models import S3, BasicAuth, Environment, MLFlow, Project
 from studio.celery import app
+
+from .models import AppInstance, Apps, AppStatus, ResourceData
+
 
 def get_URI(parameters):
     URI =  'https://'+parameters['release']+'.'+parameters['global']['domain']

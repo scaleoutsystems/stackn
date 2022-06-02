@@ -1,5 +1,7 @@
-from django.conf import settings
 import uuid
+
+from django.conf import settings
+
 
 def create_instance_params(instance, action="create"):
     print("HELPER - CREATING INSTANCE PARAMS")

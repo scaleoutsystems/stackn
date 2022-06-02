@@ -1,15 +1,17 @@
-from django.conf import settings
-from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete, pre_save
-from django import forms
-from django.utils.module_loading import import_string
 # from deployments.models import DeploymentInstance
 from ast import literal_eval
 from functools import cmp_to_key
-from projects.helpers import get_minio_keys
+
+from django import forms
+from django.conf import settings
+from django.db import models
+from django.db.models.signals import pre_delete, pre_save
+from django.dispatch import receiver
+from django.utils.module_loading import import_string
 from minio import Minio
 from tagulous.models import TagField
+
+from projects.helpers import get_minio_keys
 
 
 def compare_version(v1, v2):

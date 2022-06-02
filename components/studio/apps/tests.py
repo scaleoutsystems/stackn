@@ -1,12 +1,12 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
-from .models import Apps, AppInstance
-from projects.models import Project
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
 from django.urls import reverse
-from guardian.shortcuts import remove_perm, assign_perm
+from guardian.shortcuts import assign_perm, remove_perm
 
+from projects.models import Project
 
+from .models import AppInstance, Apps
 
 
 class AppsViewForbidden(TestCase):

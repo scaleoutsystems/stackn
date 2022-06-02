@@ -1,6 +1,7 @@
-from django.conf import settings
-import requests as r
 import logging
+
+import requests as r
+from django.conf import settings
 
 
 def pod_up(app_name):

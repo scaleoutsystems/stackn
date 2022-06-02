@@ -1,16 +1,19 @@
-from django.conf import settings
-from django.utils.text import slugify
-from django.db.models import Q
-from .models import Apps, AppInstance, AppCategories, AppPermission
-from projects.models import Project, Flavor, Environment, S3
-from models.models import Model
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from projects.helpers import get_minio_keys
-from django.template import engines
-import requests
-import flatten_json
 import json
+
+import flatten_json
+import requests
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.template import engines
+from django.utils.text import slugify
+from rest_framework.authtoken.models import Token
+
+from models.models import Model
+from projects.helpers import get_minio_keys
+from projects.models import S3, Environment, Flavor, Project
+
+from .models import AppCategories, AppInstance, AppPermission, Apps
 
 key_words = ['appobj',
              'model',

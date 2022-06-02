@@ -1,23 +1,26 @@
-from django.shortcuts import render, reverse
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
-from .exceptions import ProjectCreationException
-from django.contrib.auth import get_user_model
-from django.conf import settings as django_settings
-from django.core.files import File
-import logging
-import markdown
-import random
-from .forms import TransferProjectOwnershipForm, PublishProjectToGitHub
-from django.db.models import Q
-import requests as r
 import base64
-from .models import Project, ProjectLog, Environment, S3, Flavor, ProjectTemplate, MLFlow
-from .tasks import create_resources_from_template
+import logging
+import random
+
+import markdown
+import requests as r
 from django.apps import apps
+from django.conf import settings as django_settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.core.files import File
+from django.db.models import Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, reverse
 from guardian.decorators import permission_required_or_403
 from guardian.shortcuts import assign_perm, remove_perm
+
+from .exceptions import ProjectCreationException
+from .forms import PublishProjectToGitHub, TransferProjectOwnershipForm
+from .models import (S3, Environment, Flavor, MLFlow, Project, ProjectLog,
+                     ProjectTemplate)
+from .tasks import create_resources_from_template
 
 logger = logging.getLogger(__name__)
 Apps = apps.get_model(app_label=django_settings.APPS_MODEL)

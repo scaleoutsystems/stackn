@@ -1,36 +1,40 @@
-import uuid
 import json
 import random
+import uuid
 
-from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
-from django.db.models import Q
-from django.utils.text import slugify
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.viewsets import GenericViewSet 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics
-from .APIpermissions import ProjectPermission, AdminPermission
-from projects.tasks import create_resources_from_template, delete_project_apps
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.files import File
-from projects.models import Environment, Flavor, S3, MLFlow, ProjectTemplate, ProjectLog, ReleaseName, ProjectTemplate
-from models.models import ObjectType
-from apps.models import AppInstance, Apps, AppCategories
-from portal.models import PublishedModel
-
-from .serializers import Model, MLModelSerializer, ModelLog, ModelLogSerializer, Metadata, MetadataSerializer, Project, ProjectSerializer, UserSerializer
-from .serializers import ObjectTypeSerializer, AppInstanceSerializer, FlavorsSerializer
-from .serializers import EnvironmentSerializer, S3serializer, MLflowSerializer, ReleaseNameSerializer
-from .serializers import AppSerializer, ProjectTemplateSerializer
-
-from projects.tasks import create_resources_from_template
-from apps.tasks import delete_resource
-
-from rest_framework.authtoken.views import ObtainAuthToken
+from django.db.models import Q
+from django.http import HttpResponse
+from django.utils.text import slugify
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   RetrieveModelMixin, UpdateModelMixin)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
+from apps.models import AppCategories, AppInstance, Apps
+from apps.tasks import delete_resource
+from models.models import ObjectType
+from portal.models import PublishedModel
+from projects.models import (S3, Environment, Flavor, MLFlow, ProjectLog,
+                             ProjectTemplate, ReleaseName)
+from projects.tasks import create_resources_from_template, delete_project_apps
+
+from .APIpermissions import AdminPermission, ProjectPermission
+from .serializers import (AppInstanceSerializer, AppSerializer,
+                          EnvironmentSerializer, FlavorsSerializer, Metadata,
+                          MetadataSerializer, MLflowSerializer,
+                          MLModelSerializer, Model, ModelLog,
+                          ModelLogSerializer, ObjectTypeSerializer, Project,
+                          ProjectSerializer, ProjectTemplateSerializer,
+                          ReleaseNameSerializer, S3serializer, UserSerializer)
+
 
 # A customized version of the obtain_auth_token view
 # It will either create or fetch the user token

@@ -1,10 +1,12 @@
+from django.conf import settings
 from django.contrib import messages
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
+
 from .forms import SignUpForm
-from django.conf import settings
+
 
 # Create your views here.
 class HomeView(TemplateView):

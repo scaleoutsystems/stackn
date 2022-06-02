@@ -1,28 +1,22 @@
-import uuid
 import random
-import requests
+import uuid
 from datetime import datetime
 
-from django.core.cache import cache
-
 import dash
-from dash.dependencies import MATCH, ALL
-from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
-
 import dpd_components as dpd
-
+import pymongo
+import requests
+from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-
+from django.core.cache import cache
 from django_plotly_dash import DjangoDash
 from django_plotly_dash.consumers import send_to_pipe_channel
 
-import pymongo
-
-from projects.models import Project
 from apps.models import AppInstance, Apps
+from projects.models import Project
 
 app = DjangoDash("FEDnDashboard")
 

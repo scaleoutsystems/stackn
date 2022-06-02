@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
+
 from .serializers import Project
+
 
 class ProjectPermission(BasePermission):
 

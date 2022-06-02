@@ -1,12 +1,14 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
-from .models import Environment, Project
 import os
-from django.conf import settings
-from .helpers import decrypt_key
-from django.urls import reverse
+
 import yaml
-from guardian.shortcuts import remove_perm, assign_perm
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.urls import reverse
+from guardian.shortcuts import assign_perm, remove_perm
+
+from .helpers import decrypt_key
+from .models import Environment, Project
 
 
 class ProjectTestCase(TestCase):

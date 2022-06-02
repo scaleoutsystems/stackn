@@ -1,6 +1,7 @@
+import json
+
 from django import template
 from django.db.models.functions import Length
-import json
 
 register = template.Library()
 

@@ -1,8 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
+from tagulous.models import TagField
+
 from models.models import Model
 from projects.models import Project
-from django.contrib.auth.models import User
-from tagulous.models import TagField
 
 
 class AppPermission(models.Model):

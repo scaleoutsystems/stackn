@@ -1,18 +1,21 @@
-from django.shortcuts import render, HttpResponseRedirect, reverse
-from django.conf import settings
-from django.utils.text import slugify
-from django.db.models import Q
-from django.template import engines
-from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Flavor, Environment, S3, ReleaseName
-from models.models import Model
-from projects.helpers import get_minio_keys
-from .serialize import serialize_app
-from .tasks import deploy_resource, delete_resource
-import requests
-import flatten_json
 import uuid
 from datetime import datetime, timedelta
+
+import flatten_json
+import requests
+from django.conf import settings
+from django.db.models import Q
+from django.shortcuts import HttpResponseRedirect, render, reverse
+from django.template import engines
+from django.utils.text import slugify
+
+from models.models import Model
+from projects.helpers import get_minio_keys
+from projects.models import S3, Environment, Flavor, Project, ReleaseName
+
+from .models import AppCategories, AppInstance, AppPermission, Apps, AppStatus
+from .serialize import serialize_app
+from .tasks import delete_resource, deploy_resource
 
 key_words = ['appobj',
              'model',

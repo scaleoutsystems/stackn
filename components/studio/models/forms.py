@@ -1,5 +1,6 @@
 from django import forms
-from .models import Model, ModelLog, Metadata
+
+from .models import Metadata, Model, ModelLog
 
 
 class ModelForm(forms.ModelForm):

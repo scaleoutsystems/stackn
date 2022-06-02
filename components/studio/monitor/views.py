@@ -1,23 +1,25 @@
-from django.shortcuts import render, reverse
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.contrib.auth.models import User
-from django.conf import settings as sett
-import logging
-
-from datetime import datetime
-import time
-from django.db.models import Count, Sum, F
 import itertools
+import logging
+import time
+from datetime import datetime
 
-from projects.models import Project
-from .helpers import get_total_labs_cpu_usage_60s, get_total_labs_memory_usage_60s
-from .helpers import get_labs_cpu_requests, get_labs_memory_requests
-from .helpers import get_total_cpu_usage_60s_ts
-from .helpers import get_resource, get_all
+from django.conf import settings as sett
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Count, F, Sum
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, reverse
+
+from apps.models import AppInstance, ResourceData
 # from deployments.models import DeploymentInstance
 from models.models import Model
-from apps.models import AppInstance, ResourceData
+from projects.models import Project
+
+from .helpers import (get_all, get_labs_cpu_requests, get_labs_memory_requests,
+                      get_resource, get_total_cpu_usage_60s_ts,
+                      get_total_labs_cpu_usage_60s,
+                      get_total_labs_memory_usage_60s)
+
 
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()

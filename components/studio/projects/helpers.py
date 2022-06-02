@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 
+
 def urlify(s):
 
     # Remove all non-word characters (everything except numbers and letters)

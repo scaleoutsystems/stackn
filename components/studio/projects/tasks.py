@@ -2,19 +2,19 @@ import collections
 import json
 import secrets
 import string
+from logging import raiseExceptions
 
-from django.http import HttpRequest
-
-from .exceptions import ProjectCreationException
-from .models import Flavor, Environment, Project, S3, MLFlow
-from apps.models import Apps, AppInstance
-from django.contrib.auth.models import User
-import apps.views as appviews
-import apps.tasks as apptasks
 from celery import shared_task
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.http import HttpRequest
-from logging import raiseExceptions
+
+import apps.tasks as apptasks
+import apps.views as appviews
+from apps.models import AppInstance, Apps
+
+from .exceptions import ProjectCreationException
+from .models import S3, Environment, Flavor, MLFlow, Project
 
 
 @shared_task

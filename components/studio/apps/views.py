@@ -1,21 +1,25 @@
-from django.shortcuts import render, HttpResponseRedirect, reverse, redirect
-from django.http import JsonResponse
-from django.conf import settings
-from django.utils.text import slugify
-from django.db.models import Q, Subquery
-from django.template import engines
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-from .models import Apps, AppInstance, AppCategories, AppPermission, AppStatus
-from projects.models import Project, Flavor, Environment, ReleaseName
-from .serialize import serialize_app
-from .tasks import deploy_resource, delete_resource
-import requests
 import time
 from datetime import datetime, timedelta
+
+import requests
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models import Q, Subquery
+from django.http import JsonResponse
+from django.shortcuts import HttpResponseRedirect, redirect, render, reverse
+from django.template import engines
+from django.utils.text import slugify
+from django.views.decorators.csrf import csrf_exempt
+from guardian.decorators import permission_required_or_403
+
+from projects.models import Environment, Flavor, Project, ReleaseName
+
 from .generate_form import generate_form
 from .helpers import create_instance_params
-from guardian.decorators import permission_required_or_403
+from .models import AppCategories, AppInstance, AppPermission, Apps, AppStatus
+from .serialize import serialize_app
+from .tasks import delete_resource, deploy_resource
+
 
 def get_status_defs():
     status_success = settings.APPS_STATUS_SUCCESS

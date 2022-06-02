@@ -1,11 +1,13 @@
 # Currently Apps are pre-populated via django fixtures (as json files)
 # However files cannot be uploade into the db via json. This utility script does that.
 # Script can either fetch chart folder path from django settings or as a command line args
-from apps.models import Apps
+import os
+
 from django.conf import settings
 from django.core.files import File
 
-import os
+from apps.models import Apps
+
 
 def run(*args):
     subfolders = []

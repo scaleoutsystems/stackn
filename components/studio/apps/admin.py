@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from .models import Apps, AppInstance, AppCategories, AppPermission, ResourceData, AppStatus
-
+from .models import (AppCategories, AppInstance, AppPermission, Apps,
+                     AppStatus, ResourceData)
 
 admin.site.register(Apps)
 admin.site.register(AppInstance)

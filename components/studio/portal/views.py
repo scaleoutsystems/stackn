@@ -1,20 +1,20 @@
-import requests
-import uuid
 import time
+import uuid
 
-from django.shortcuts import render, HttpResponseRedirect, reverse, redirect
-from django.http import JsonResponse
+import requests
 from django.conf import settings
-from django.utils.text import slugify
-from django.db.models import Q
-from django.template import engines
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import HttpResponseRedirect, redirect, render, reverse
+from django.template import engines
+from django.utils.text import slugify
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-
-from apps.models import Apps, AppInstance
+from apps.models import AppInstance, Apps
 from projects.models import Project
+
 
 def index(request,id=0):
     try:

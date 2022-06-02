@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
 
+from . import views
 from .dash_demo import app
 
 app_name = 'monitor'

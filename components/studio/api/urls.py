@@ -1,13 +1,14 @@
+import rest_framework.routers as drfrouters
 from django.conf.urls import include
 from django.urls import path
-import rest_framework.routers as drfrouters
-from .views import ModelList, ModelLogList, MetadataList, ProjectList, MembersList, ObjectTypeList
-from .views import AppInstanceList, FlavorsList, EnvironmentList, S3List, MLflowList, ResourceList
-from .views import ReleaseNameList, AppList, ProjectTemplateList
-from .views import CustomAuthToken
-from .public_views import get_studio_settings
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework_nested import routers
+
+from .public_views import get_studio_settings
+from .views import (AppInstanceList, AppList, CustomAuthToken, EnvironmentList,
+                    FlavorsList, MembersList, MetadataList, MLflowList,
+                    ModelList, ModelLogList, ObjectTypeList, ProjectList,
+                    ProjectTemplateList, ReleaseNameList, ResourceList, S3List)
 
 app_name = 'api'
 

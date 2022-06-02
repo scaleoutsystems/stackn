@@ -1,35 +1,33 @@
+import ast
+import logging
+import os
+import subprocess
+import uuid
 from collections import defaultdict
 from importlib.resources import path
 from unicodedata import decimal
 
+import markdown
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from guardian.mixins import PermissionRequiredMixin
 from django.core.files import File
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import View
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-
-from .forms import UploadModelCardHeadlineForm, EnvironmentForm, ModelForm
-from .helpers import set_artifact, get_download_url
-from .models import Model, ModelLog, Metadata, ObjectType
-
-from apps.models import Apps, AppInstance
-from portal.models import PublicModelObject, PublishedModel
-from projects.models import Project, ProjectLog, Environment
+from django.views.generic import View
 from guardian.decorators import permission_required_or_403
+from guardian.mixins import PermissionRequiredMixin
 
-import ast
-import logging
-import markdown
-import os
-import subprocess
-import uuid
+from apps.models import AppInstance, Apps
+from portal.models import PublicModelObject, PublishedModel
+from projects.models import Environment, Project, ProjectLog
 
+from .forms import EnvironmentForm, ModelForm, UploadModelCardHeadlineForm
+from .helpers import get_download_url, set_artifact
+from .models import Metadata, Model, ModelLog, ObjectType
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
@@ -302,9 +300,12 @@ def unpublish_model(request, user, project, id):
     (Project, 'slug', 'project'))
 def publish_model(request, user, project, id):
     print("PUBLISHING MODEL")
-    import s3fs
     import random
+
+    import s3fs
+
     from .helpers import add_pmo_to_publish
+
     # TODO: Check that user has access to this particular model.
     model = Model.objects.get(pk=id)
     print(model)

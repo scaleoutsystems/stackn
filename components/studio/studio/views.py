@@ -1,17 +1,18 @@
-from django.http import HttpResponseRedirect
-from projects.models import Project
-from apps.models import AppInstance
-
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
-from django.contrib.auth.models import User
 from django.conf import settings
-
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from rest_framework.permissions import BasePermission
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.http import HttpResponseRedirect
+from rest_framework.authentication import (BasicAuthentication,
+                                           SessionAuthentication,
+                                           TokenAuthentication)
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from apps.models import AppInstance
+from projects.models import Project
+
 
 @receiver(pre_save, sender=User)
 def set_new_user_inactive(sender, instance, **kwargs):
