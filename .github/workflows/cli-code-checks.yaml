@@ -6,13 +6,13 @@ on:
       - main
       - develop
     paths:
-    - 'components/studio/**'
+    - 'cli/**'
   pull_request:
     branches:
       - main
       - develop
     paths:
-    - 'components/studio/**'
+    - 'cli/**'
   release:
     types: [published]
 
