@@ -1,5 +1,5 @@
 FROM python:3.8.10 as pybuild1
-LABEL maintainer="matteo@scaleoutsystems.com"
+LABEL maintainer="fredrik@scaleoutsystems.com"
 
 # Non-root user with sudo access
 ARG USERNAME=stackn
@@ -10,7 +10,7 @@ RUN usermod -aG sudo $USERNAME
 # Install stackn pip deps
 RUN mkdir /app
 COPY requirements.txt /app/
-RUN pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
