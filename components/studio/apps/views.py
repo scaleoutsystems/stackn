@@ -28,9 +28,9 @@ def get_status_defs():
 
 
 # Create your views here.
-#TODO: Is this view used?
+# TODO: Is this view used?
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def index(request, user, project):
     print("hello")
     category = 'store'
@@ -39,13 +39,14 @@ def index(request, user, project):
     cat_obj = AppCategories.objects.get(slug=category)
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
-    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), app__category=cat_obj)
+    appinstances = AppInstance.objects.filter(Q(owner=request.user) | Q(
+        permission__projects__slug=project.slug) | Q(permission__public=True), app__category=cat_obj)
 
-        
     return render(request, template, locals())
 
+
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def logs(request, user, project, ai_id):
     template = "logs.html"
     app = AppInstance.objects.get(pk=ai_id)
@@ -60,20 +61,20 @@ def logs(request, user, project, ai_id):
         if 'container' in request.GET:
             container = request.GET.get('container')
             print("Got container in request: "+container)
-        
 
         try:
             url = settings.LOKI_SVC+'/loki/api/v1/query_range'
             app_params = app.parameters
-            print('{container="'+container+'",release="'+app_params['release']+'"}')
+            print('{container="'+container +
+                  '",release="'+app_params['release']+'"}')
             query = {
-            'query': '{container="'+container+'",release="'+app_params['release']+'"}',
-            'limit': 50,
-            'start': 0,
+                'query': '{container="'+container+'",release="'+app_params['release']+'"}',
+                'limit': 50,
+                'start': 0,
             }
             res = requests.get(url, params=query)
             res_json = res.json()['data']['result']
-            
+
             for item in res_json:
                 logs.append('----------BEGIN CONTAINER------------')
                 logline = ''
@@ -86,11 +87,13 @@ def logs(request, user, project, ai_id):
 
     return render(request, template, locals())
 
+
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
-    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active')
+    projects = Project.objects.filter(Q(owner=request.user) | Q(
+        authorized=request.user), status='active')
     status_success, status_warning = get_status_defs()
     menu = dict()
 
@@ -106,15 +109,17 @@ def filtered(request, user, project, category):
     project = Project.objects.get(slug=project)
     try:
         apps = Apps.objects.filter(pk__in=Subquery(
-            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj).order_by('slug', '-revision').distinct('slug').values('pk')
+            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj).order_by(
+                'slug', '-revision').distinct('slug').values('pk')
         )).order_by('-priority')
     except Exception as err:
         print(err)
-    
+
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
     appinstances = AppInstance.objects.filter(
-        Q(owner=request.user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+        Q(owner=request.user) | Q(permission__projects__slug=project.slug) | Q(
+            permission__public=True),
         ~Q(state='Deleted') | Q(deleted_on__gte=time_threshold),
         app__category=cat_obj,
         project=project).order_by('-created_on')
@@ -126,8 +131,9 @@ def filtered(request, user, project, category):
     apps_installed = False
     if appinstances:
         apps_installed = True
-        
+
     return render(request, template, locals())
+
 
 @csrf_exempt
 def get_status(request, user, project):
@@ -139,14 +145,14 @@ def get_status(request, user, project):
     pk = pk.split(',')
     print(pk)
     res = {}
-    if len(pk)>0 and not (len(pk)==1 and pk[0]==''):
+    if len(pk) > 0 and not (len(pk) == 1 and pk[0] == ''):
         appinstances = AppInstance.objects.filter(pk__in=pk)
         print(appinstances)
         res = dict()
         for instance in appinstances:
             try:
                 status = instance.status.latest().status_type
-                
+
             except:
                 status = instance.state
             if status in status_success:
@@ -155,7 +161,8 @@ def get_status(request, user, project):
                 span_class = 'bg-warning'
             else:
                 span_class = 'bg-danger'
-            res['status-{}'.format(instance.pk)] = '<span class="badge {}">{}</span>'.format(span_class, status)
+            res['status-{}'.format(instance.pk)
+                ] = '<span class="badge {}">{}</span>'.format(span_class, status)
             print(status)
         print(pk)
     return JsonResponse(res)
@@ -164,8 +171,9 @@ def get_status(request, user, project):
     #     appinstances = AppInstance.objects.filter(pk__in=pk)
     #     print(appinstances)
 
+
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def appsettings(request, user, project, ai_id):
     all_tags = AppInstance.tags.tag_model.objects.all()
     template = 'create.html'
@@ -185,37 +193,40 @@ def appsettings(request, user, project, ai_id):
     form = generate_form(aset, project, app, request.user, appinstance)
     return render(request, template, locals())
 
+
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def add_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
     if request.method == 'POST':
         new_tag = request.POST.get('tag', '')
-        print("New Tag: ",new_tag)
+        print("New Tag: ", new_tag)
         appinstance.tags.add(new_tag)
         appinstance.save()
 
-    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
+    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user': user, 'project': project, 'ai_id': ai_id}))
+
 
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def remove_tag(request, user, project, ai_id):
     appinstance = AppInstance.objects.get(pk=ai_id)
     if request.method == 'POST':
         print(request.POST)
         new_tag = request.POST.get('tag', '')
-        print("Remove Tag: ",new_tag)
+        print("Remove Tag: ", new_tag)
         appinstance.tags.remove(new_tag)
         appinstance.save()
 
-    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user':user, 'project':project, 'ai_id':ai_id}))
+    return HttpResponseRedirect(reverse('apps:appsettings', kwargs={'user': user, 'project': project, 'ai_id': ai_id}))
+
 
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def create(request, user, project, app_slug, data=[], wait=False, call=False):
     template = 'create.html'
     app_action = "Create"
-    
+
     if not call:
         user = request.user
         if 'from' in request.GET:
@@ -229,7 +240,6 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
     project = Project.objects.get(slug=project)
     app = Apps.objects.filter(slug=app_slug).order_by('-revision')[0]
     app_sett = app.settings
-    
 
     # Set up form
     print("CREATING APP...")
@@ -240,7 +250,8 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
         if not data:
             data = request.POST
         app_name = data.get('app_name')
-        parameters_out, app_deps, model_deps = serialize_app(data, project, app_sett, user.username)
+        parameters_out, app_deps, model_deps = serialize_app(
+            data, project, app_sett, user.username)
 
         if data.get('app_action') == "Create":
             permission = AppPermission(name=app_name)
@@ -255,7 +266,7 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
         permission.public = False
         permission.projects.set([])
         permission.users.set([])
-        
+
         access = ""
 
         if parameters_out['permissions']['public']:
@@ -281,16 +292,17 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
 
         if data.get('app_action') == "Create":
             app_instance = AppInstance(name=app_name, access=access, app=app, project=project, info={},
-                                    parameters=parameters_out,owner=user)
-            
+                                       parameters=parameters_out, owner=user)
+
             create_instance_params(app_instance, "create")
-            
+
             # Attempt to create a ReleaseName model object
             rel_name_obj = []
             if 'app_release_name' in data and data.get('app_release_name') != '':
                 submitted_rn = data.get('app_release_name')
                 try:
-                    rel_name_obj = ReleaseName.objects.get(name=submitted_rn, project=project, status='active')
+                    rel_name_obj = ReleaseName.objects.get(
+                        name=submitted_rn, project=project, status='active')
                     rel_name_obj.status = 'in-use'
                     rel_name_obj.save()
                     app_instance.parameters['release'] = submitted_rn
@@ -298,12 +310,13 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
                     print("Error: Submitted release name is not owned by project.")
                     print(e)
                     return HttpResponseRedirect(
-                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))    
+                        reverse('projects:details', kwargs={'user': request.user, 'project_slug': str(project.slug)}))
 
-            # Add fields for apps table: to be displayed as app details in views    
+            # Add fields for apps table: to be displayed as app details in views
             if app_instance.app.table_field and app_instance.app.table_field != "":
                 django_engine = engines['django']
-                info_field = django_engine.from_string(app_instance.app.table_field).render(app_instance.parameters)
+                info_field = django_engine.from_string(
+                    app_instance.app.table_field).render(app_instance.parameters)
                 app_instance.table_field = eval(info_field)
             else:
                 app_instance.table_field = {}
@@ -356,14 +369,15 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
                         reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
             else:
                 return HttpResponseRedirect(
-                        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
+                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project.slug), 'category': app_instance.app.category.slug}))
         else:
             return JsonResponse({"status": "ok"})
     # If not POST, thus GET...
     return render(request, template, locals())
 
+
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def publish(request, user, project, category, ai_id):
     print("Publish app {}".format(ai_id))
     print(project)
@@ -383,10 +397,11 @@ def publish(request, user, project, category, ai_id):
         print(err)
 
     return HttpResponseRedirect(
-                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+
 
 @permission_required_or_403('can_view_project',
-    (Project, 'slug', 'project'))
+                            (Project, 'slug', 'project'))
 def delete(request, user, project, category, ai_id):
     print("PK="+str(ai_id))
 
@@ -395,7 +410,7 @@ def delete(request, user, project, category, ai_id):
     else:
         from_page = 'filtered'
 
-    delete_resource.delay(ai_id)        
+    delete_resource.delay(ai_id)
 
     if 'from' in request.GET:
         from_page = request.GET.get('from')
@@ -407,7 +422,7 @@ def delete(request, user, project, category, ai_id):
                 reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
         else:
             return HttpResponseRedirect(
-                    reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
 
     return HttpResponseRedirect(
-                reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))
+        reverse('apps:filtered', kwargs={'user': request.user, 'project': str(project), 'category': category}))

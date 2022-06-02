@@ -18,10 +18,12 @@ class PublicModelObject(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
+
 class PublishedModel(models.Model):
     name = models.CharField(max_length=512)
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
     model_obj = models.ManyToManyField(PublicModelObject)
-    img = models.ImageField(upload_to='models/image', null=True, blank=True, default=None)
+    img = models.ImageField(upload_to='models/image',
+                            null=True, blank=True, default=None)
     updated_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)

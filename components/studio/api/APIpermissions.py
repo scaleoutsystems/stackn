@@ -28,13 +28,13 @@ class ProjectPermission(BasePermission):
 
 
 class AdminPermission(BasePermission):
-    
+
     def has_permission(self, request, view):
         """
         Should simply return, or raise a 403 response.
         """
         is_authorized = False
-       
+
         if request.user.is_superuser:
             is_authorized = True
         print('Is authorized: {}'.format(is_authorized))

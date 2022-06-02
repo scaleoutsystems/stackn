@@ -58,16 +58,17 @@ class ObjectTypeList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Updat
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = ObjectTypeSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'slug']
+    filterset_fields = ['id', 'name', 'slug']
 
     def get_queryset(self):
         return ObjectType.objects.all()
+
 
 class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = MLModelSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'version', 'object_type']
+    filterset_fields = ['id', 'name', 'version', 'object_type']
 
     def get_queryset(self):
         """
@@ -79,7 +80,7 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
     def destroy(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
         model = self.get_object()
-        if model.project==project:
+        if model.project == project:
             model.delete()
             return HttpResponse('ok', 200)
         else:
@@ -91,19 +92,20 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 
         try:
             model_name = request.data['name']
-            prev_model = Model.objects.filter(name=model_name, project=project).order_by('-version')
+            prev_model = Model.objects.filter(
+                name=model_name, project=project).order_by('-version')
             print("INFO - Previous Model Objects: {}".format(prev_model))
-            if len(prev_model)>0:
+            if len(prev_model) > 0:
                 print("ACCESS")
                 access = prev_model[0].access
                 print(access)
-                
+
             else:
                 access = "PR"
             release_type = request.data['release_type']
             version = request.data['version']
             description = request.data['description']
-            model_card= request.data['model_card']
+            model_card = request.data['model_card']
             model_uid = request.data['uid']
             object_type_slug = request.data['object_type']
             # if 'image' not in request.FILES:
@@ -119,27 +121,27 @@ class ModelList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMode
 
         try:
             new_model = Model(uid=model_uid,
-                            name=model_name,
-                            description=description,
-                            release_type=release_type,
-                            version=version,
-                            model_card=model_card,
-                            project=project,
-                            s3=project.s3storage,
-                            access=access)
+                              name=model_name,
+                              description=description,
+                              release_type=release_type,
+                              version=version,
+                              model_card=model_card,
+                              project=project,
+                              s3=project.s3storage,
+                              access=access)
             new_model.save()
             img_uid = str(uuid.uuid1().hex)
             # new_model.model_card_headline.save(img_uid, image)
             new_model.object_type.set([object_type])
 
-            pmodel = PublishedModel.objects.get(name=new_model.name, project=new_model.project)
+            pmodel = PublishedModel.objects.get(
+                name=new_model.name, project=new_model.project)
             if pmodel:
                 # Model is published, so we should create a new
                 # PublishModelObject.
-                
+
                 from models.helpers import add_pmo_to_publish
                 add_pmo_to_publish(new_model, pmodel)
-
 
         except Exception as err:
             print(err)
@@ -155,12 +157,12 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
 
     # Not sure if this kind of function is needed for ModelLog?
     def get_queryset(self):
-        
+
         return ModelLog.objects.filter(project__pk=self.kwargs['project_pk'])
 
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
-        
+
         try:
             run_id = request.data['run_id']
             trained_model = request.data['trained_model']
@@ -176,7 +178,7 @@ class ModelLogList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
             return HttpResponse('Failed to create training session log.', 400)
 
         new_log = ModelLog(run_id=run_id, trained_model=trained_model, project=project.name, training_started_at=training_started_at, execution_time=execution_time,
-                           code_version=code_version, current_git_repo=current_git_repo, latest_git_commit=latest_git_commit, 
+                           code_version=code_version, current_git_repo=current_git_repo, latest_git_commit=latest_git_commit,
                            system_details=system_details, cpu_details=cpu_details, training_status=training_status, )
         new_log.save()
         return HttpResponse('ok', 200)
@@ -187,10 +189,10 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
     serializer_class = MetadataSerializer
     filter_backends = [DjangoFilterBackend]
     #filterset_fields = ['id','name', 'version']
-    
+
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
-        
+
         try:
             run_id = request.data['run_id']
             trained_model = request.data['trained_model']
@@ -200,11 +202,10 @@ class MetadataList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         except:
             return HttpResponse('Failed to create metadata log.', 400)
 
-        new_md = Metadata(run_id=run_id, trained_model=trained_model, project=project.name,  
+        new_md = Metadata(run_id=run_id, trained_model=trained_model, project=project.name,
                           model_details=model_details, parameters=parameters, metrics=metrics, )
         new_md.save()
         return HttpResponse('ok', 200)
-
 
 
 class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
@@ -212,7 +213,7 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
     permission_classes = (IsAuthenticated, ProjectPermission, )
     serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
-    
+
     def get_queryset(self):
         """
         This view should return a list of all the members
@@ -260,6 +261,7 @@ class MembersList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
             return HttpResponse('Cannot remove owner of project.', status=400)
         return HttpResponse('Failed to remove user.', status=400)
 
+
 class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
                   ListModelMixin):
     permission_classes = (IsAuthenticated,)
@@ -274,7 +276,7 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
         """
         current_user = self.request.user
         return Project.objects.filter(Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk), ~Q(status='archived')).distinct('name')
-    
+
     def destroy(self, request, *args, **kwargs):
         project = self.get_object()
         if (request.user == project.owner or request.user.is_superuser) and project.status.lower() != "deleted":
@@ -304,13 +306,14 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                                                  description=description,
                                                  repository=repository)
         success = True
-        
+
         try:
             # Create resources from the chosen template
             template_slug = request.data['template']
             template = ProjectTemplate.objects.get(slug=template_slug)
             project_template = ProjectTemplate.objects.get(pk=template.pk)
-            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
+            create_resources_from_template.delay(
+                request.user.username, project.slug, project_template.template)
 
             # Reset user token
             if 'oidc_id_token_expiration' in request.session:
@@ -335,7 +338,6 @@ class ProjectList(generics.ListAPIView, GenericViewSet, CreateModelMixin, Retrie
                             description='Getting started with project {}'.format(project.name))
             l2.save()
 
-
         if success:
             project.save()
             return HttpResponse(project.slug, status=200)
@@ -345,11 +347,11 @@ class ResourceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = AppInstanceSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'app__category']
+    filterset_fields = ['id', 'name', 'app__category']
 
     # def get_queryset(self):
     #     return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs['project_pk'])
-    
+
     def create(self, request, *args, **kwargs):
         template = request.data
         # template = {
@@ -357,18 +359,20 @@ class ResourceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateM
         # }
         print(template)
         project = Project.objects.get(id=self.kwargs['project_pk'])
-        create_resources_from_template.delay(request.user.username, project.slug, json.dumps(template))
+        create_resources_from_template.delay(
+            request.user.username, project.slug, json.dumps(template))
         return HttpResponse("Submitted request to create app.", status=200)
+
 
 class AppInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = AppInstanceSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'app__category']
+    filterset_fields = ['id', 'name', 'app__category']
 
     def get_queryset(self):
         return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs['project_pk'])
-    
+
     def create(self, request, *args, **kwargs):
         return HttpResponse("Use 'resources' endpoint instead.", status=200)
 
@@ -395,11 +399,12 @@ class AppInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
             return HttpResponse("User is not allowed to delete resource.", status=403)
         return HttpResponse("Deleted app.", status=200)
 
+
 class FlavorsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = FlavorsSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name']
+    filterset_fields = ['id', 'name']
 
     def get_queryset(self):
         return Flavor.objects.filter(project__pk=self.kwargs['project_pk'])
@@ -412,15 +417,16 @@ class FlavorsList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMo
         obj.delete()
         return HttpResponse("Deleted object.", status=200)
 
+
 class EnvironmentList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = EnvironmentSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name']
+    filterset_fields = ['id', 'name']
 
     def get_queryset(self):
         return Environment.objects.filter(project__pk=self.kwargs['project_pk'])
-    
+
     def destroy(self, request, *args, **kwargs):
         try:
             obj = self.get_object()
@@ -429,11 +435,12 @@ class EnvironmentList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
         obj.delete()
         return HttpResponse("Deleted object.", status=200)
 
+
 class S3List(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = S3serializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'host', 'region']
+    filterset_fields = ['id', 'name', 'host', 'region']
 
     def get_queryset(self):
         return S3.objects.filter(project__pk=self.kwargs['project_pk'])
@@ -446,11 +453,12 @@ class S3List(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMi
         obj.delete()
         return HttpResponse("Deleted object.", status=200)
 
+
 class MLflowList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = MLflowSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name']
+    filterset_fields = ['id', 'name']
 
     def get_queryset(self):
         return MLFlow.objects.filter(project__pk=self.kwargs['project_pk'])
@@ -463,11 +471,12 @@ class MLflowList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateMod
         obj.delete()
         return HttpResponse("Deleted object.", status=200)
 
+
 class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, ListModelMixin):
     permission_classes = (IsAuthenticated, ProjectPermission,)
     serializer_class = ReleaseNameSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id','name', 'project']
+    filterset_fields = ['id', 'name', 'project']
 
     def get_queryset(self):
         return ReleaseName.objects.filter(project__pk=self.kwargs['project_pk'])
@@ -480,7 +489,7 @@ class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
                 print("ReleaseName already in use.")
                 return HttpResponse("Release name already in use.", status=200)
         status = 'active'
-        
+
         rn = ReleaseName(name=name, status=status, project=project)
         rn.save()
         return HttpResponse("Created release name {}.".format(name), status=200)
@@ -501,8 +510,9 @@ class ReleaseNameList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
 #     def get_queryset(self):
 #         return HttpResponse("Admin endpoints.", status=200)
 
+
 class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
+              ListModelMixin):
     permission_classes = (IsAuthenticated, AdminPermission,)
     serializer_class = AppSerializer
     filter_backends = [DjangoFilterBackend]
@@ -510,7 +520,7 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
 
     def get_queryset(self):
         return Apps.objects.all()
-    
+
     def create(self, request, *args, **kwargs):
         print("IN CREATE")
         try:
@@ -547,22 +557,23 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
         print(name)
         print(slug)
         try:
-            app_latest_rev = Apps.objects.filter(slug=slug).order_by('-revision')
+            app_latest_rev = Apps.objects.filter(
+                slug=slug).order_by('-revision')
             if app_latest_rev:
                 revision = app_latest_rev[0].revision+1
             else:
                 revision = 1
             app = Apps(name=name,
-                    slug=slug,
-                    category=category,
-                    settings=settings,
-                    chart_archive=request.FILES['chart'],
-                    revision=revision,
-                    description=description,
-                    table_field=table_field,
-                    priority=int(priority),
-                    access=access,
-                    logo_file=request.FILES['logo'])
+                       slug=slug,
+                       category=category,
+                       settings=settings,
+                       chart_archive=request.FILES['chart'],
+                       revision=revision,
+                       description=description,
+                       table_field=table_field,
+                       priority=int(priority),
+                       access=access,
+                       logo_file=request.FILES['logo'])
             app.save()
             app.projects.add(*proj_list)
         except Exception as err:
@@ -578,9 +589,8 @@ class AppList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveMo
         return HttpResponse("Deleted object.", status=200)
 
 
-
 class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
-                  ListModelMixin):
+                          ListModelMixin):
     permission_classes = (IsAuthenticated, AdminPermission,)
     serializer_class = ProjectTemplateSerializer
     filter_backends = [DjangoFilterBackend]
@@ -588,7 +598,7 @@ class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin
 
     def get_queryset(self):
         return ProjectTemplate.objects.all()
-    
+
     def create(self, request, *args, **kwargs):
         print(request.data)
         try:
@@ -604,7 +614,8 @@ class ProjectTemplateList(generics.ListAPIView, GenericViewSet, CreateModelMixin
             return HttpResponse("Failed to create new template.".format(name), status=400)
 
         try:
-            template_latest_rev = ProjectTemplate.objects.filter(slug=slug).order_by('-revision')
+            template_latest_rev = ProjectTemplate.objects.filter(
+                slug=slug).order_by('-revision')
             if template_latest_rev:
                 revision = template_latest_rev[0].revision+1
             else:

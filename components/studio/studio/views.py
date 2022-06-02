@@ -23,8 +23,11 @@ def set_new_user_inactive(sender, instance, **kwargs):
         print("Updating User Record")
 
 # Since this is a production feature, it will only work if DEBUG is set to False
+
+
 def handle_page_not_found(request, exception):
     return HttpResponseRedirect('/')
+
 
 class AccessPermission(BasePermission):
 
@@ -34,19 +37,22 @@ class AccessPermission(BasePermission):
         """
         try:
             release = request.GET.get('release')
-            app_instance = AppInstance.objects.get(parameters__contains={'release':release})
+            app_instance = AppInstance.objects.get(
+                parameters__contains={'release': release})
             project = app_instance.project
         except:
             project_slug = request.GET.get('project')
             project = Project.objects.get(slug=project_slug)
             return request.user.has_perm('can_view_project', project)
-        
+
         if app_instance.access == "private":
             return app_instance.owner == request.user
         elif app_instance.access == "project":
             return request.user.has_perm('can_view_project', project)
         else:
             return True
+
+
 class ModifiedSessionAuthentication(SessionAuthentication):
     """
     This class is needed, because REST Framework's default SessionAuthentication does never return 401's,
@@ -57,11 +63,14 @@ class ModifiedSessionAuthentication(SessionAuthentication):
     We do set authenticate_header function in SessionAuthentication, so that a value for the WWW-Authenticate
     header can be retrieved and the response code is automatically set to 401 in case of unauthenticated requests.
     """
+
     def authenticate_header(self, request):
         return 'Session'
 
+
 class AuthView(APIView):
-    authentication_classes = [ModifiedSessionAuthentication, TokenAuthentication]
+    authentication_classes = [
+        ModifiedSessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, AccessPermission]
 
     def get(self, request, format=None):

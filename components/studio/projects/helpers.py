@@ -14,6 +14,7 @@ def urlify(s):
 
     return s
 
+
 def get_minio_keys(project):
     return {
         'project_key': decrypt_key(project.project_key),

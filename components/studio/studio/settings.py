@@ -24,7 +24,7 @@ AUTHENTICATION_BACKENDS = [
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Crispy Forms
-CRISPY_TEMPLATE_PACK="bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -50,11 +50,11 @@ DEFAULT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
- ]
+]
 
 THIRD_PARTY_APPS = [
     # add apps which you install using pip
-    "crispy_forms",            
+    "crispy_forms",
     'corsheaders',
     'django_celery_beat',
     'django_extensions',    # for executing runscript among others
@@ -67,7 +67,7 @@ THIRD_PARTY_APPS = [
     'guardian',
 ]
 
-LOCAL_APPS =[
+LOCAL_APPS = [
     # add local apps which you create using startapp
     'api',
     'apps',
@@ -108,7 +108,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-#Django guardian 403 templates
+# Django guardian 403 templates
 GUARDIAN_RENDER_403 = True
 GUARDIAN_TEMPLATE_403 = '403.html'
 
@@ -159,7 +159,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',  # Add
-                'social_django.context_processors.login_redirect', # Add
+                'social_django.context_processors.login_redirect',  # Add
             ],
             'libraries': {
                 'custom_tags': 'models.templatetags.custom_tags',
@@ -187,15 +187,15 @@ if sys.argv[1] == 'test':
     }
 else:
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': '5432',
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'db',
+            'PORT': '5432',
+        }
     }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -236,7 +236,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
-#If True, users will be inactive by default on account creation
+# If True, users will be inactive by default on account creation
 INACTIVE_USERS = False
 
 # Specific to Studio stack:
@@ -257,7 +257,7 @@ VERSION_BACKEND = 'studio.version.Version'
 
 # Other Helm/k8s deployment settings
 CHART_CONTROLLER_URL = 'http://stack-chart-controller'
-CHART_FOLDER="/app/charts/apps"
+CHART_FOLDER = "/app/charts/apps"
 EXTERNAL_KUBECONF = True
 KUBECONFIG = "/root/.kube/config"
 NAMESPACE = 'default'
@@ -268,16 +268,17 @@ DOMAIN = '<your-domain>'
 AUTH_DOMAIN = '<your-auth-domain>'
 AUTH_PROTOCOL = 'http'
 STUDIO_URL = 'http://studio.<your-domain>:8080'
-#To enable sticky sessions for k8s ingress  
-SESSION_COOKIE_DOMAIN=".<your-domain>"
+# To enable sticky sessions for k8s ingress
+SESSION_COOKIE_DOMAIN = ".<your-domain>"
 
-#Local dependecies Models
+# Local dependecies Models
 PROJECTS_MODEL = 'projects.Project'
 APPINSTANCE_MODEL = 'apps.AppInstance'
 APPS_MODEL = 'apps.Apps'
 APPCATEGORIES_MODEL = 'apps.AppCategories'
 MODELS_MODEL = 'models.Model'
 
-#App statuses
+# App statuses
 APPS_STATUS_SUCCESS = ['Running', 'Succeeded', 'Success']
-APPS_STATUS_WARNING = ['Pending', 'Installed', 'Waiting', 'Installing', 'Created']
+APPS_STATUS_WARNING = ['Pending', 'Installed',
+                       'Waiting', 'Installing', 'Created']

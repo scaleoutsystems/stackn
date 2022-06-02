@@ -32,7 +32,8 @@ urlpatterns = [
     path('api/', include('api.urls', namespace='api')),
     #path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('oauth/', include('social_django.urls', namespace='social')),
-    path('<user>/<project>/monitor/', include('monitor.urls', namespace='monitor')),
+    path('<user>/<project>/monitor/',
+         include('monitor.urls', namespace='monitor')),
     path('<user>/<project>/apps/', include('apps.urls', namespace='apps')),
 ] + staticfiles_urlpatterns() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

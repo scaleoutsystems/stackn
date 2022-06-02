@@ -12,10 +12,13 @@ from .forms import SignUpForm
 class HomeView(TemplateView):
     template_name = 'common/landing.html'
 
+
 class RegistrationCompleteView(TemplateView):
     template_name = 'registration/registration_complete.html'
 
 # Sign Up View
+
+
 class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = 'common/signup.html'
@@ -25,7 +28,8 @@ class SignUpView(CreateView):
         if form.is_valid():
             form.save()
             if settings.INACTIVE_USERS:
-                messages.success(request, "Account request has been registered! Please wait for admin to approve!")
+                messages.success(
+                    request, "Account request has been registered! Please wait for admin to approve!")
                 redirect_name = 'common:success'
             else:
                 messages.success(request, "Account created successfully!")

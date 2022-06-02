@@ -14,25 +14,24 @@ class ModelViewForbidden(TestCase):
         user = User.objects.create_user('foo', 'foo@test.com', 'bar')
 
         project = Project.objects.create_project(
-            name='test-perm', 
-            owner=user, 
-            description='', 
+            name='test-perm',
+            owner=user,
+            description='',
             repository=''
         )
 
         new_model = Model(uid="test_uid",
-                            name="test",
-                            bucket="",
-                            description="model_description",
-                            model_card="",
-                            project=project,
-                            access='PR')
+                          name="test",
+                          bucket="",
+                          description="model_description",
+                          model_card="",
+                          project=project,
+                          access='PR')
         new_model.save()
 
         user = User.objects.create_user("member", 'foo@test.com', 'bar')
         self.client.login(username='member', password='bar')
-    
-    
+
     def test_forbidden_models_list(self):
         """
         Test non-project member not allowed to access /models 
@@ -41,10 +40,10 @@ class ModelViewForbidden(TestCase):
         project = Project.objects.get(name='test-perm')
         response = self.client.get(
             reverse(
-                'models:list', 
+                'models:list',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug
+                    'user': owner,
+                    'project': project.slug
                 }
             )
         )
@@ -59,16 +58,16 @@ class ModelViewForbidden(TestCase):
         project = Project.objects.get(name='test-perm')
         response = self.client.get(
             reverse(
-                'models:create', 
+                'models:create',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug
+                    'user': owner,
+                    'project': project.slug
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_details_private(self):
         """
         Test non-project member not allowed to access /models/<int:id>
@@ -78,11 +77,11 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:details_private', 
+                'models:details_private',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
@@ -98,17 +97,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:delete', 
+                'models:delete',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_publish(self):
         """
         Test non-project member not allowed to access /models/<int:id>/publish
@@ -118,17 +117,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:publish_model', 
+                'models:publish_model',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_add_tag(self):
         """
         Test non-project member not allowed to access /models/<int:id>/add_tag
@@ -138,17 +137,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:add_tag_private', 
+                'models:add_tag_private',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_remove_tag(self):
         """
         Test non-project member not allowed to access /models/<int:id>/remove_tag
@@ -158,17 +157,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:remove_tag_private', 
+                'models:remove_tag_private',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_unpublidh(self):
         """
         Test non-project member not allowed to access /models/<int:id>/unpublish
@@ -178,17 +177,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:unpublish_model', 
+                'models:unpublish_model',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_access(self):
         """
         Test non-project member not allowed to access /models/<int:id>/access
@@ -198,17 +197,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:change_access', 
+                'models:change_access',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_upload(self):
         """
         Test non-project member not allowed to access /models/<int:id>/upload
@@ -218,17 +217,17 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:upload_model_headline', 
+                'models:upload_model_headline',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
-    
+
     def test_forbidden_models_docker(self):
         """
         Test non-project member not allowed to access /models/<int:id>/docker
@@ -238,35 +237,37 @@ class ModelViewForbidden(TestCase):
         model = Model.objects.get(name='test')
         response = self.client.get(
             reverse(
-                'models:add_docker_image', 
+                'models:add_docker_image',
                 kwargs={
-                    'user':owner, 
-                    'project':project.slug,
-                    'id':model.id
+                    'user': owner,
+                    'project': project.slug,
+                    'id': model.id
                 }
             )
         )
         self.assertTemplateUsed(response, '403.html')
         self.assertEqual(response.status_code, 403)
 
+
 class TestFixtures(TestCase):
     fixtures = ['models/fixtures/objecttype_fixtures.json']
+
     def test_objecttype_mlflow(self):
         obj_type = ObjectType.objects.get(slug='mlflow')
         self.assertEqual(obj_type.slug, 'mlflow')
-    
+
     def test_objecttype_tfmodel(self):
         obj_type = ObjectType.objects.get(slug='tensorflow')
         self.assertEqual(obj_type.slug, 'tensorflow')
-    
+
     def test_objecttype_tfmodel(self):
         obj_type = ObjectType.objects.get(slug='python')
         self.assertEqual(obj_type.slug, 'python')
-    
+
     def test_objecttype_tfmodel(self):
         obj_type = ObjectType.objects.get(slug='default')
         self.assertEqual(obj_type.slug, 'default')
-    
+
     def test_objecttype_tfmodel(self):
         obj_type = ObjectType.objects.get(slug='pytorch')
         self.assertEqual(obj_type.slug, 'pytorch')

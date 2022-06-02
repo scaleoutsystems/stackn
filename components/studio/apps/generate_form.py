@@ -32,6 +32,7 @@ key_words = ['appobj',
              'env_variables',
              'publishable']
 
+
 def get_form_models(aset, project, appinstance=[]):
     dep_model = False
     models = []
@@ -42,8 +43,9 @@ def get_form_models(aset, project, appinstance=[]):
             object_type = aset['model']['object_type']
         else:
             object_type = 'default'
-        models = Model.objects.filter(project=project, object_type__slug=object_type)
-        
+        models = Model.objects.filter(
+            project=project, object_type__slug=object_type)
+
         for model in models:
             if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():
                 print(model)
@@ -51,6 +53,7 @@ def get_form_models(aset, project, appinstance=[]):
             else:
                 model.selected = ""
     return dep_model, models
+
 
 def get_form_apps(aset, project, myapp, user, appinstance=[]):
     dep_apps = False
@@ -62,29 +65,30 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
         for app_name, option_type in apps.items():
             print(">>>>>")
             print(app_name)
-            app_obj = Apps.objects.filter(name=app_name) #.order_by('-revision').first()
+            # .order_by('-revision').first()
+            app_obj = Apps.objects.filter(name=app_name)
             print(app_obj)
             print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
-            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
-                                                      ~Q(state="Deleted"),
-                                                      project=project,
-                                                      app__name=app_name)
+            app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) | Q(permission__public=True),
+                                                       ~Q(state="Deleted"),
+                                                       project=project,
+                                                       app__name=app_name)
             # TODO: Special case here for "environment" app. Maybe fix, or maybe OK.
             # Could be solved by supporting "condition": '"appobj.app_slug":"true"'
             if app_name == "Environment":
                 key = 'appobj'+'.'+myapp.slug
 
-                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True),
+                app_instances = AppInstance.objects.filter(Q(owner=user) | Q(permission__projects__slug=project.slug) | Q(permission__public=True),
                                                            ~Q(state="Deleted"),
                                                            project=project,
                                                            app__name=app_name,
                                                            parameters__contains={
                                                                "appobj": {
-                                                                    myapp.slug: True
-                                                                }
-                                                           })
-            
+                                                                   myapp.slug: True
+                                                               }
+                })
+
             for ain in app_instances:
                 if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
                     ain.selected = "selected"
@@ -92,10 +96,13 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
                     ain.selected = ""
 
             if option_type == "one":
-                app_deps[app_name] = {"instances": app_instances, "option_type": ""}
+                app_deps[app_name] = {
+                    "instances": app_instances, "option_type": ""}
             else:
-                app_deps[app_name] = {"instances": app_instances, "option_type": "multiple"}
+                app_deps[app_name] = {
+                    "instances": app_instances, "option_type": "multiple"}
     return dep_apps, app_deps
+
 
 def get_form_primitives(aset, project, appinstance=[]):
     all_keys = aset.keys()
@@ -114,18 +121,19 @@ def get_form_primitives(aset, project, appinstance=[]):
                 for subkey, subval in aset[key].items():
                     print(subkey)
                     try:
-                        if subkey != 'meta' and subkey!='meta_title':
+                        if subkey != 'meta' and subkey != 'meta_title':
                             primitives[key][subkey]['default'] = ai_vals[key+'.'+subkey]
                     except Exception as err:
                         print(err)
     print(primitives)
     return primitives
 
+
 def get_form_permission(aset, project, appinstance=[]):
     form_permissions = {
-        "public": {"value":"false", "option": "false"},
-        "project": {"value":"false", "option": "false"},
-        "private": {"value":"true", "option": "true"}
+        "public": {"value": "false", "option": "false"},
+        "project": {"value": "false", "option": "false"},
+        "private": {"value": "true", "option": "true"}
     }
     dep_permissions = True
     if 'permissions' in aset:
@@ -146,6 +154,7 @@ def get_form_permission(aset, project, appinstance=[]):
                 print("Permissions not set for app instance, using default.")
     return dep_permissions, form_permissions
 
+
 def get_form_appobj(aset, project, appinstance=[]):
     print("CHECKING APP OBJ")
     dep_appobj = False
@@ -160,6 +169,7 @@ def get_form_appobj(aset, project, appinstance=[]):
     print(appobjs)
     return dep_appobj, appobjs
 
+
 def get_form_environments(aset, project, app, appinstance=[]):
     print("CHECKING ENVIRONMENT")
     dep_environment = False
@@ -167,18 +177,21 @@ def get_form_environments(aset, project, app, appinstance=[]):
     if 'environment' in aset:
         dep_environment = True
         if aset['environment']['type'] == "match":
-            environments['objs'] = Environment.objects.filter(project=project, app__slug=app.slug)
+            environments['objs'] = Environment.objects.filter(
+                project=project, app__slug=app.slug)
         elif aset['environment']['type'] == "any":
             environments['objs'] = Environment.objects.filter(project=project)
         elif 'apps' in aset['environment']:
-            environments['objs'] = Environment.objects.filter(project=project, app__slug__in=aset['environment']['apps'])
-        
+            environments['objs'] = Environment.objects.filter(
+                project=project, app__slug__in=aset['environment']['apps'])
+
         environments['title'] = aset['environment']['title']
         if appinstance:
             ai_vals = appinstance.parameters
             environments['selected'] = ai_vals['environment']['pk']
 
     return dep_environment, environments
+
 
 def get_form_S3(aset, project, app, appinstance=[]):
     print("CHECKING S3")
@@ -187,7 +200,7 @@ def get_form_S3(aset, project, app, appinstance=[]):
     if 'S3' in aset:
         dep_S3 = True
         s3stores = S3.objects.filter(project=project)
-        
+
         # for s3store in s3stores:
         #     if appinstance and s3store.app.appinstance_set.filter(pk=appinstance.pk).exists():
         #         print(model)
@@ -199,27 +212,33 @@ def get_form_S3(aset, project, app, appinstance=[]):
 
 def generate_form(aset, project, app, user, appinstance=[]):
     form = dict()
-    form['dep_model'], form['models'] = get_form_models(aset, project, appinstance)
-    form['dep_apps'], form['app_deps'] = get_form_apps(aset, project, app, user, appinstance)
-    form['dep_appobj'], form['appobjs'] = get_form_appobj(aset, project, appinstance)
-    form['dep_environment'], form['environments'] = get_form_environments(aset, project, app, appinstance)
-    form['dep_S3'], form['s3stores'] = get_form_S3(aset, project, app, appinstance)
+    form['dep_model'], form['models'] = get_form_models(
+        aset, project, appinstance)
+    form['dep_apps'], form['app_deps'] = get_form_apps(
+        aset, project, app, user, appinstance)
+    form['dep_appobj'], form['appobjs'] = get_form_appobj(
+        aset, project, appinstance)
+    form['dep_environment'], form['environments'] = get_form_environments(
+        aset, project, app, appinstance)
+    form['dep_S3'], form['s3stores'] = get_form_S3(
+        aset, project, app, appinstance)
 
     form['dep_vols'] = False
     form['dep_flavor'] = False
     if 'flavor' in aset:
         form['dep_flavor'] = True
         form['flavors'] = Flavor.objects.filter(project=project)
-    
+
     # form['dep_environment'] = False
     # if 'environment' in aset:
     #     form['dep_environment'] = True
     #     form['environments'] = Environment.objects.all()
 
-
     form['primitives'] = get_form_primitives(aset, project, appinstance)
-    form['dep_permissions'], form['form_permissions'] = get_form_permission(aset, project, appinstance)
-    release_names = ReleaseName.objects.filter(project=project, status='active')
+    form['dep_permissions'], form['form_permissions'] = get_form_permission(
+        aset, project, appinstance)
+    release_names = ReleaseName.objects.filter(
+        project=project, status='active')
     form['release_names'] = release_names
     # if 'subdomain' in aset and aset['subdomain'] == 'True':
     #     form['release_names'] = list()
