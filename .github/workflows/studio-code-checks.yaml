@@ -50,7 +50,7 @@ jobs:
       - name: Check Python imports
         working-directory: ${{env.working-directory}}
         run: |
-          isort . --check --diff
+          isort . --check --diff --skip migrations
       - name: Check Python formatting
         working-directory: ${{env.working-directory}}
         run: |
