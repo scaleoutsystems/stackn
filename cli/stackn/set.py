@@ -4,6 +4,7 @@ import prettytable
 from .main import main
 from .stackn import set_current
 
+
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
         try:

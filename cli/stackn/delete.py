@@ -1,6 +1,8 @@
 import click
+
 from .main import main
-from .stackn import delete_app, delete_object, delete_project,  delete_meta_resource
+from .stackn import (delete_app, delete_meta_resource, delete_object,
+                     delete_project)
 
 
 class AliasedGroup(click.Group):

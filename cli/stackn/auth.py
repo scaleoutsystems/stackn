@@ -1,16 +1,17 @@
 
-import os
-import requests
-import json
-import jwt
 import base64
+import json
+import os
+import urllib.parse
 from getpass import getpass
 from pathlib import Path
-import urllib.parse
+
+import jwt
+import requests
+import urllib3
 
 import stackn.error_msg
 
-import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 STACKN_CONFIG_PATH = '~/.scaleout'

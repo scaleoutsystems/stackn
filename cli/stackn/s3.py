@@ -3,6 +3,7 @@ import io
 from minio import Minio
 from minio.error import S3Error
 
+
 def create_client(config, secure_mode=True):
     try:
         access_key = config['access_key']

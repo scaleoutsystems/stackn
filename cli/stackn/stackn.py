@@ -1,12 +1,13 @@
-import os
 import json
-import uuid
-import requests
+import os
 import subprocess
+import uuid
+
+import requests
 
 import stackn.auth
-import stackn.s3
 import stackn.error_msg
+import stackn.s3
 
 
 def _check_status(r, error_msg="Failed"):

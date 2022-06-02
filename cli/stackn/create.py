@@ -1,8 +1,10 @@
 import click
 
 from .main import main
-from .stackn import create_object, create_project, create_meta_resource, create_app, create_apps
-from .stackn import create_template, create_templates
+from .stackn import (create_app, create_apps, create_meta_resource,
+                     create_object, create_project, create_template,
+                     create_templates)
+
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):

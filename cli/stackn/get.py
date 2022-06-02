@@ -2,8 +2,9 @@ import click
 import prettytable
 
 from .main import main
-from .stackn import get_projects, call_project_endpoint, get_current, get_remote
-from .stackn import call_admin_endpoint
+from .stackn import (call_admin_endpoint, call_project_endpoint, get_current,
+                     get_projects, get_remote)
+
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):

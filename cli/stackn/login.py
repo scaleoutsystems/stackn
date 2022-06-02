@@ -1,6 +1,8 @@
 import click
-from .main import main
+
 from .auth import stackn_login
+from .main import main
+
 
 @main.command('login')
 @click.option('-h', '--url', required=False, default=[])
