@@ -49,4 +49,4 @@ jobs:
       - name: Test with unittest
         working-directory: ${{env.working-directory}}
         run: |
-          unittest
+          python -m unittest
