@@ -51,16 +51,16 @@ jobs:
 
       - name: build and push studio
         uses: docker/build-push-action@v2
-        working-directory: ${{env.working-directory}}
         with:
+          context: ${{env.working-directory}}
           push: "${{ github.event_name != 'pull_request' }}"
           tags: docker.pkg.github.com/${{ github.repository }}/${{ steps.wf-vars.outputs.IMAGE_NAME }}:${{ steps.wf-vars.outputs.IMAGE_TAG }}
           file: Dockerfile
         
       - name: docker build ingress
         uses: docker/build-push-action@v2
-        working-directory: ${{env.working-directory}}
         with:
+          context: ${{env.working-directory}}
           push: "${{ github.event_name != 'pull_request' }}"
           tags: docker.pkg.github.com/${{ github.repository }}/ingress:${{ steps.wf-vars.outputs.IMAGE_TAG }}
           file: Dockerfile.nginx
