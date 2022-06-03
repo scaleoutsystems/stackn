@@ -1,9 +1,12 @@
-from django.conf import settings
 import uuid
+
+from django.conf import settings
+
 
 def create_instance_params(instance, action="create"):
     print("HELPER - CREATING INSTANCE PARAMS")
-    RELEASE_NAME = 'r'+uuid.uuid4().hex[0:8] #instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+    # instance.app.slug.replace('_', '-')+'-'+instance.project.slug+'-'+uuid.uuid4().hex[0:4]
+    RELEASE_NAME = 'r'+uuid.uuid4().hex[0:8]
     print("RELEASE_NAME: "+RELEASE_NAME)
 
     SERVICE_NAME = RELEASE_NAME + '-' + instance.app.slug
@@ -39,8 +42,9 @@ def create_instance_params(instance, action="create"):
     }
 
     instance.parameters.update(parameters)
-    
+
     if 'project' not in instance.parameters:
         instance.parameters['project'] = dict()
-        
-    instance.parameters['project'].update({'name': instance.project.name, 'slug': instance.project.slug})
+
+    instance.parameters['project'].update(
+        {'name': instance.project.name, 'slug': instance.project.slug})

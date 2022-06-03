@@ -1,8 +1,8 @@
-from django.conf import settings
-from string import Template
 import os
 from pathlib import Path
+from string import Template
 
+from django.conf import settings
 
 DEPLOY_DEFAULT_TEMPLATE = """apiVersion: openfaas.com/v1
 kind: Function
@@ -89,6 +89,7 @@ def start_job(definition):
 
 def build_definition(instance):
     import uuid
+
     from projects.helpers import get_minio_keys
 
     minio_keys = get_minio_keys(instance.project)

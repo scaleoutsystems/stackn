@@ -1,16 +1,17 @@
 
-import os
-import requests
-import json
-import jwt
 import base64
+import json
+import os
+import urllib.parse
 from getpass import getpass
 from pathlib import Path
-import urllib.parse
+
+import jwt
+import requests
+import urllib3
 
 import stackn.error_msg
 
-import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 STACKN_CONFIG_PATH = '~/.scaleout'
@@ -33,7 +34,7 @@ env_vars = {
     'STACKN_OBJECT_TYPE': [],
     'STACKN_ACCESS_TOKEN': [],
     'STACKN_SECURE': True
-    #'STACKN_REFRESH_TOKEN': []
+    # 'STACKN_REFRESH_TOKEN': []
 }
 
 
@@ -43,7 +44,7 @@ env_vars = {
 def _check_flag_insecure(inp_conf):
     stackn_conf_file = _load_config_file_full({})
 
-    # If the general default STACKN_SECURE is still True, but in the configuration file shows that 
+    # If the general default STACKN_SECURE is still True, but in the configuration file shows that
     # it is set to False instead (because the user has logged in with --insecure) Then we remind the user to use --insecure
     if stackn_conf_file['current']['STACKN_SECURE'] == False and inp_conf['STACKN_SECURE']:
         print("Do you perhaps have a local STACKn deployment? If so, don't forget to use --insecure to make stackn API calls working.")
@@ -67,8 +68,9 @@ def _get_stackn_config_path():
     path_to_config = os.path.join(dirpath, config_file_path)
     return path_to_config
 
+
 def _get_studio_url_key(studio_url):
-    return studio_url.replace('https://', '').replace('http://', '').strip('/')  
+    return studio_url.replace('https://', '').replace('http://', '').strip('/')
 
 
 def _get_config_file(rw='r'):
@@ -77,7 +79,7 @@ def _get_config_file(rw='r'):
         fin = open(path_to_config, rw)
     except Exception as err:
         return []
-    
+
     return fin
 
 
@@ -103,6 +105,7 @@ def _load_config_file_full(conf):
             return []
     return stackn_config
 
+
 def _load_config_file_url(conf, is_login=False):
     stackn_config_full = _load_config_file_full(conf)
     if stackn_config_full:
@@ -114,15 +117,17 @@ def _load_config_file_url(conf, is_login=False):
                 stackn_config = stackn_config_full[conf['STACKN_URL']]
         except KeyError as e:
             if conf['STACKN_URL'] and not is_login:
-                print("Failed to load config file from URL: {} not set up.".format(conf['STACKN_URL']))
+                print("Failed to load config file from URL: {} not set up.".format(
+                    conf['STACKN_URL']))
                 print(e)
                 return False
             else:
                 stackn_config = []
     else:
         stackn_config = []
-    
+
     return stackn_config
+
 
 def _get_remote(conf):
     stackn_config_full = _load_config_file_full(conf)
@@ -132,17 +137,18 @@ def _get_remote(conf):
         pass
     keys = stackn_config_full.keys()
     return keys
-    
+
 
 def _get_current(conf):
     stackn_config_full = _load_config_file_full(conf)
     if stackn_config_full and 'current' in stackn_config_full:
         return stackn_config_full['current']
-    
+
     return False
 
+
 def _set_current(conf):
-    
+
     current = {
         'STACKN_URL': False,
         'STACKN_PROJECT': False,
@@ -169,7 +175,8 @@ def _set_current(conf):
 
     stackn_config = _load_config_file_full(conf)
     if not 'current' in stackn_config:
-        stackn_config['current'] = {'STACKN_URL': '', 'STACKN_PROJECT': '', 'STACKN_SECURE': ''}
+        stackn_config['current'] = {'STACKN_URL': '',
+                                    'STACKN_PROJECT': '', 'STACKN_SECURE': ''}
     if current['STACKN_URL']:
         stackn_config['current']['STACKN_URL'] = current['STACKN_URL']
         if current['STACKN_PROJECT']:
@@ -183,14 +190,17 @@ def _set_current(conf):
 
     if 'STACKN_URL' in os.environ and stackn_config['current']['STACKN_URL'] != '':
         print("STACKN_URL set as environment variable and this takes priority.")
-        print("Set by 'export STACKN_URL={}'".format(stackn_config['current']['STACKN_URL']))
+        print("Set by 'export STACKN_URL={}'".format(
+            stackn_config['current']['STACKN_URL']))
     if 'STACKN_PROJECT' in os.environ and stackn_config['current']['STACKN_PROJECT'] != '':
         print("STACKN_PROJECT set as environment variable and this takes priority.")
-        print("Set by 'export STACKN_PROJECT={}'".format(stackn_config['current']['STACKN_PROJECT']))
+        print("Set by 'export STACKN_PROJECT={}'".format(
+            stackn_config['current']['STACKN_PROJECT']))
     if 'STACKN_SECURE' in os.environ and stackn_config['current']['STACKN_SECURE'] != '':
         print("STACKN_SECURE set as environment variable and this takes priority.")
-        print("Set by 'export STACKN_SECURE={}'".format(stackn_config['current']['STACKN_SECURE']))
-    
+        print("Set by 'export STACKN_SECURE={}'".format(
+            stackn_config['current']['STACKN_SECURE']))
+
     # Write to file
     fout = _get_config_file('w')
     if fout:
@@ -200,9 +210,6 @@ def _set_current(conf):
     else:
         print("Failed to write current settings to file.")
         return []
-
-    
-
 
 
 def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=True):
@@ -234,7 +241,6 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         else:
             conf[var] = val
 
-
     # Fetch "current" context: remote_url, project and secure_mode
     config_file_full = _load_config_file_full(conf)
     try:
@@ -248,9 +254,8 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         if 'STACKN_PROJECT' in current:
             conf['STACKN_PROJECT'] = current['STACKN_PROJECT']
 
-
     # Checking flag STACKN_SECURE and initialize it if needed
-    if 'STACKN_SECURE' in current and (conf['STACKN_SECURE']=="" or conf['STACKN_SECURE']==None):
+    if 'STACKN_SECURE' in current and (conf['STACKN_SECURE'] == "" or conf['STACKN_SECURE'] == None):
         if print_warnings and current['STACKN_SECURE'] == False:
             print("Insecure mode is set in config, will not verify certificates.")
             print("Use stackn set current --secure to disable.")
@@ -260,7 +265,7 @@ def get_config(inp_config=dict(), required=[], is_login=False, print_warnings=Tr
         config_file = _load_config_file_url(conf, is_login)
         if config_file:
             for key, val in config_file.items():
-                if not (key in conf) or not conf[key] or key=='STACKN_ACCESS_TOKEN':
+                if not (key in conf) or not conf[key] or key == 'STACKN_ACCESS_TOKEN':
                     conf[key] = val
         elif not is_login:
             return conf, False
@@ -279,16 +284,17 @@ def get_token(conf={}):
         studio_url = "http://" + conf['STACKN_URL']
     else:
         studio_url = conf['STACKN_URL']
-    token_url = studio_url.strip('/')+'/api/token-auth/' # previously keycloak token url
-    
+    # previously keycloak token url
+    token_url = studio_url.strip('/')+'/api/token-auth/'
+
     print("INFO: Token URL is: {}".format(token_url))
 
     req = {'username': conf['STACKN_USER'],
            'password': conf['STACKN_PASS'],
-    }
+           }
     res = requests.post(token_url, json=req, verify=conf['STACKN_SECURE'])
     resp = res.json()
-    
+
     if 'token' in resp:
         print('Token retrieved successfully.')
         return resp['token']
@@ -301,7 +307,7 @@ def get_token(conf={}):
 def write_config(conf):
 
     studio_url = conf['STACKN_URL']
-    
+
     path_to_config = _get_stackn_config_path()
     Path(path_to_config).touch()
 
@@ -365,7 +371,7 @@ def stackn_login(studio_url=[], client_id=[], username=[], password=[], secure=T
     write_config(conf)
 
     # adding flag in conf for informing  that set_current is begin invoked by stackn_login
-    conf.update(is_login = "True")
+    conf.update(is_login="True")
     _set_current(conf)
 
     return conf

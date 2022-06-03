@@ -4,6 +4,7 @@ import prettytable
 from .main import main
 from .stackn import set_current
 
+
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
         try:
@@ -12,9 +13,11 @@ class AliasedGroup(click.Group):
             pass
         return super().get_command(ctx, cmd_name)
 
+
 @main.group('set', cls=AliasedGroup)
 def set():
-  pass
+    pass
+
 
 @set.command('current')
 @click.option('-p', '--project', required=False, default='')

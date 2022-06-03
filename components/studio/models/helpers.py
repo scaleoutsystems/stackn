@@ -1,10 +1,13 @@
-from rsa import verify
-from .models import Model
+import io
+
+import s3fs
 from minio import Minio
+from rsa import verify
+
 from portal.models import PublicModelObject, PublishedModel
 
-import io
-import s3fs
+from .models import Model
+
 
 def add_pmo_to_publish(mdl, pmodel):
     print(mdl.name)
@@ -76,12 +79,14 @@ def create_client(S3_storage, secure_mode=True):
     try:
         access_key = S3_storage.access_key
     except Exception:
-        print("No access key could be found with the current S3 storage instance: {}".format(S3_storage))
+        print("No access key could be found with the current S3 storage instance: {}".format(
+            S3_storage))
         return []
     try:
         secret_key = S3_storage.secret_key
     except Exception:
-        print("No secret key could be found with the current S3 storage instance: {}".format(S3_storage))
+        print("No secret key could be found with the current S3 storage instance: {}".format(
+            S3_storage))
         return []
 
     # API connection does not want scheme in the minio URL
@@ -94,7 +99,8 @@ def create_client(S3_storage, secure_mode=True):
         minio_url = S3_storage.host
 
     if not secure_mode:
-        client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=secure_mode)
+        client = Minio(minio_url, access_key=access_key,
+                       secret_key=secret_key, secure=secure_mode)
     else:
         client = Minio(minio_url, access_key=access_key, secret_key=secret_key)
 
@@ -111,7 +117,7 @@ def set_artifact(artifact_name, artifact_file, bucket, S3_storage, is_file=False
     except Exception as err:
         print('EXCEPTION LOG: Client could not verify if bucket exists')
         return False
-    
+
     if not found:
         try:
             client.make_bucket(bucket)
@@ -127,7 +133,8 @@ def set_artifact(artifact_name, artifact_file, bucket, S3_storage, is_file=False
             return False
     else:
         try:
-            client.put_object(bucket, artifact_name, io.BytesIO(artifact_file), len(artifact_file))
+            client.put_object(bucket, artifact_name, io.BytesIO(
+                artifact_file), len(artifact_file))
         except Exception as e:
             print('Client method put_object failed')
             return False

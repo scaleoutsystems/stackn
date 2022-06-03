@@ -4,6 +4,7 @@ def studio_url_missing():
     print("1. Pass it as an option")
     print("2. Set the environment variable STACKN_STUDIO_URL")
 
+
 def project_missing():
     print("Failed to determine active project.")
     print("You have three options:")

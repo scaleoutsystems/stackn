@@ -1,0 +1,61 @@
+name: Studio code checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+    - 'components/studio/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+    - 'components/studio/**'
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+    env:
+      working-directory: ./components/studio
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          #Python version should be the same as the base image in Dockerfile
+          python-version: "3.8.10"
+      - name: Install dependencies
+        working-directory: ${{env.working-directory}}
+        run: |
+          python -m pip install --upgrade pip
+          pip install autopep8 isort
+          if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
+      - name: Check Python imports
+        working-directory: ${{env.working-directory}}
+        run: |
+          isort . --check --diff --skip migrations
+      - name: Check Python formatting
+        working-directory: ${{env.working-directory}}
+        run: |
+          autopep8 . --recursive --diff --exclude="migrations, deployments"
+      - name: Test with django test framework
+        working-directory: ${{env.working-directory}}
+        run: |
+          python manage.py test -v 2

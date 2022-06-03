@@ -5,8 +5,9 @@ class Version:
         self.major = int(numbers[0])
         self.minor = int(numbers[1])
         self.patch = int(numbers[2])
-        if self.major<0 or self.minor<0 or self.patch<0:
-            raise Exception('Major, minor, patch should be nonegative integers.')
+        if self.major < 0 or self.minor < 0 or self.patch < 0:
+            raise Exception(
+                'Major, minor, patch should be nonegative integers.')
 
     # Release a new version
     # Default is new minor version
@@ -22,9 +23,9 @@ class Version:
             self.patch = 0
         else:
             return False, "Incorrect release type (major, minor, patch)."
-        
+
         return True, self.__str__()
-    
+
     # Implement comparison operators to allow for sorting
     # of models
     def __gt__(self, other):
@@ -32,7 +33,7 @@ class Version:
             return True
         elif other.major > self.major:
             return False
-        
+
         if self.minor > other.minor:
             return True
         elif other.minor > self.minor:
@@ -42,21 +43,21 @@ class Version:
             return True
         elif other.patch > self.patch:
             return False
-        
+
         return False
 
     def __eq__(self, other):
-        if self.major==other.major and self.minor==other.minor and self.patch==other.minor:
+        if self.major == other.major and self.minor == other.minor and self.patch == other.minor:
             return True
-          
+
         return False
 
     def __lt__(self, other):
         if other.__gt__(self) or self.__eq__(other):
             return False
-        
+
         return True
-    
+
     def release_types(self):
         return ['major', 'minor', 'patch']
 

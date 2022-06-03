@@ -1,8 +1,10 @@
 import click
 
 from .main import main
-from .stackn import create_object, create_project, create_meta_resource, create_app, create_apps
-from .stackn import create_template, create_templates
+from .stackn import (create_app, create_apps, create_meta_resource,
+                     create_object, create_project, create_template,
+                     create_templates)
+
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -15,7 +17,7 @@ class AliasedGroup(click.Group):
 
 @main.group('create', cls=AliasedGroup)
 def create():
-  pass
+    pass
 
 
 # Admin-privileges commands
@@ -33,12 +35,13 @@ def app(settings, chart, logo, studio_url, secure):
                studio_url=studio_url,
                secure_mode=secure)
 
+
 @create.command('apps')
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def apps(studio_url, secure):
     create_apps(studio_url=studio_url,
-               secure_mode=secure)
+                secure_mode=secure)
 
 
 @create.command('projecttemplate')
@@ -51,6 +54,7 @@ def template(settings, image, studio_url, secure):
                     image=image,
                     studio_url=studio_url,
                     secure_mode=secure)
+
 
 @create.command('projecttemplates')
 @click.option('-u', '--studio-url', required=False, default=[])
@@ -68,7 +72,8 @@ def templates(studio_url, secure):
 @click.option('-p', '--project', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def metaresource(filename, studio_url, project, secure):
-    create_meta_resource(filename, studio_url=studio_url, project=project, secure=secure)
+    create_meta_resource(filename, studio_url=studio_url,
+                         project=project, secure=secure)
 
 
 @create.command('model-obj')
@@ -104,7 +109,8 @@ def obj(name, object_type, file_name, release_type, version, description, model_
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def project(name, description, template, studio_url, secure):
-    create_project(name, description=description, template=template, secure_mode=secure)
+    create_project(name, description=description,
+                   template=template, secure_mode=secure)
 
 
 ALIASES = {
