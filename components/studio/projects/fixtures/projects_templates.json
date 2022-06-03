@@ -28,7 +28,7 @@
           }
         },
         "environments": {
-          "Jupyter Notebook": {
+          "Jupyter Lab": {
             "repository": "ghcr.io/scaleoutsystems/stackn",
             "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
@@ -71,7 +71,7 @@
           }
         },
         "environments": {
-          "Jupyter Notebook": {
+          "Jupyter Lab": {
             "repository": "ghcr.io/scaleoutsystems/stackn",
             "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
@@ -152,7 +152,7 @@
           "jupyter-lab": {
             "slug": "jupyter-lab",
             "app:volumeK8s": ["project-vol"],
-            "environment": "Jupyter Notebook",
+            "environment": "Jupyter Lab",
             "permission": "project",
             "flavor": "Medium"
         }
