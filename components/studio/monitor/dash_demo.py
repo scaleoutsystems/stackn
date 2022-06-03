@@ -1,34 +1,28 @@
-import uuid
 import random
-import requests
+import uuid
 from datetime import datetime
 
-from django.core.cache import cache
-
 import dash
-from dash.dependencies import MATCH, ALL
-from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
-
 import dpd_components as dpd
-
+import pymongo
+import requests
+from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-
+from django.core.cache import cache
 from django_plotly_dash import DjangoDash
 from django_plotly_dash.consumers import send_to_pipe_channel
 
-import pymongo
-
-from projects.models import Project
 from apps.models import AppInstance, Apps
+from projects.models import Project
 
 app = DjangoDash("FEDnDashboard")
 
 
 menu = html.Div([
-            dbc.Row([
+    dbc.Row([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody([
@@ -41,59 +35,62 @@ menu = html.Div([
                     ])
                 ], className="col-4"),
                 dbc.Col(id="reducer-state", className="col-2")
-            ]),
-            dbc.Row(id="submenu")
-        ])
+                ]),
+    dbc.Row(id="submenu")
+])
 
 main = dbc.Row([
-            dbc.Col([
-                dbc.Card([
-                    dbc.CardBody([
-                        html.H4("Combiners", className="card-title"),
-                        dbc.Table([
-                            html.Thead([
-                                html.Tr([
-                                    html.Th("Name"),
-                                    html.Th("Active Clients"),
-                                    html.Th("IP"),
-                                    html.Th("Country"),
-                                    html.Th("Region"),
-                                    html.Th("City")
-                                ])
-                            ]),
-                            html.Tbody([
-
-                            ], id="combiner-info-table")
+    dbc.Col([
+        dbc.Card([
+            dbc.CardBody([
+                html.H4("Combiners", className="card-title"),
+                dbc.Table([
+                    html.Thead([
+                        html.Tr([
+                            html.Th("Name"),
+                            html.Th("Active Clients"),
+                            html.Th("IP"),
+                            html.Th("Country"),
+                            html.Th("Region"),
+                            html.Th("City")
                         ])
-                    ])
-                ]),
-                dbc.Card([
-                    dbc.CardBody([
-                        html.H4("Round Time", className="card-title"),
-                        dcc.Graph(id="combiners-round-plot"),
-                    ])
-                ]),
-                dbc.Card([
-                    dbc.CardBody([
-                        html.H4("Combiner Load", className="card-title"),
-                        dcc.Graph(id="combiners-combiner-plot"),
-                    ])
-                ]),
-                dbc.Card([
-                    dbc.CardBody([
-                        html.H4("Controller MEM and CPU Monitoring", className="card-title"),
-                        dcc.Graph(id="combiners-memcpu-plot"),
-                    ])
+                    ]),
+                    html.Tbody([
+
+                    ], id="combiner-info-table")
                 ])
             ])
+        ]),
+        dbc.Card([
+            dbc.CardBody([
+                html.H4("Round Time", className="card-title"),
+                dcc.Graph(id="combiners-round-plot"),
+            ])
+        ]),
+        dbc.Card([
+            dbc.CardBody([
+                html.H4("Combiner Load", className="card-title"),
+                dcc.Graph(id="combiners-combiner-plot"),
+            ])
+        ]),
+        dbc.Card([
+            dbc.CardBody([
+                html.H4("Controller MEM and CPU Monitoring",
+                        className="card-title"),
+                dcc.Graph(id="combiners-memcpu-plot"),
+            ])
         ])
+    ])
+])
 
 app.layout = html.Div([menu, main])
+
 
 @app.callback(
     Output(component_id='combiner-info-table', component_property='children'),
     Output(component_id='combiners-round-plot', component_property='figure'),
-    Output(component_id='combiners-combiner-plot', component_property='figure'),
+    Output(component_id='combiners-combiner-plot',
+           component_property='figure'),
     Output(component_id='combiners-memcpu-plot', component_property='figure'),
     Output(component_id='reducer-state', component_property='children'),
     Output(component_id='reducer-select', component_property='options'),
@@ -107,10 +104,11 @@ def reducer_select(red_select, request):
         raise PreventUpdate()
     reducer_app = Apps.objects.get(slug='reducer')
     this_project = Project.objects.get(slug=project_slug)
-    reducers = AppInstance.objects.filter(app=reducer_app, project=this_project)
+    reducers = AppInstance.objects.filter(
+        app=reducer_app, project=this_project)
     options = []
     for reducer in reducers:
-        options.append({"label": reducer.name, "value": str(reducer.pk)}) 
+        options.append({"label": reducer.name, "value": str(reducer.pk)})
 
     combiners_info = []
     roundplot = {}
@@ -119,7 +117,8 @@ def reducer_select(red_select, request):
     state = ""
     if red_select != None:
         # TODO: Check that user has access to project.
-        sel_reducer = AppInstance.objects.get(pk=red_select, project__slug=project_slug)
+        sel_reducer = AppInstance.objects.get(
+            pk=red_select, project__slug=project_slug)
         reducer_params = sel_reducer.parameters
         r_host = reducer_params['release']
         r_domain = reducer_params['global']['domain']
@@ -128,16 +127,16 @@ def reducer_select(red_select, request):
         # mdb_host = mongodb_params[mdb_name]['release']
         # mdb_domain = mongodb_params[mdb_name]['global']['domain']
 
-        # 
+        #
         # creds = mongodb_params[mdb_name]['credentials']
-        
+
         # client = pymongo.MongoClient('mongodb://{}:{}@{}:27017'.format(creds['username'], creds['password'], mdb_host))
         # fndb = client['fedn-network']
         # combiners = fndb['network.combiners']
         # cursor = combiners.find({})
         # for document in cursor:
         #     print(document)
-        
+
         try:
             url = 'https://{}.{}/api/state'.format(r_host, r_domain)
             res = requests.get(url, verify=False)
@@ -145,9 +144,8 @@ def reducer_select(red_select, request):
         except Exception as err:
             print(err)
         state = dbc.Card([
-                    dbc.CardBody(current_state)
-                ])
-
+            dbc.CardBody(current_state)
+        ])
 
         try:
             url = 'https://{}.{}/api/combiners/info'.format(r_host, r_domain)
@@ -169,7 +167,8 @@ def reducer_select(red_select, request):
             combiners_info.append(html.Tr(row))
 
         try:
-            url = 'https://{}.{}/api/combiners/roundplot'.format(r_host, r_domain)
+            url = 'https://{}.{}/api/combiners/roundplot'.format(
+                r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             roundplot = res.json()
@@ -177,7 +176,8 @@ def reducer_select(red_select, request):
             print(err)
 
         try:
-            url = 'https://{}.{}/api/combiners/combinerplot'.format(r_host, r_domain)
+            url = 'https://{}.{}/api/combiners/combinerplot'.format(
+                r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             combinerplot = res.json()
@@ -185,7 +185,8 @@ def reducer_select(red_select, request):
             print(err)
 
         try:
-            url = 'https://{}.{}/api/combiners/memcpuplot'.format(r_host, r_domain)
+            url = 'https://{}.{}/api/combiners/memcpuplot'.format(
+                r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             memcpuplot = res.json()
@@ -193,9 +194,3 @@ def reducer_select(red_select, request):
             print(err)
 
     return combiners_info, roundplot, combinerplot, memcpuplot, state, options
-
-
-
-
-
-
