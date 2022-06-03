@@ -1,16 +1,19 @@
-from django.conf import settings
-from django.utils.text import slugify
-from django.db.models import Q
-from .models import Apps, AppInstance, AppCategories, AppPermission
-from projects.models import Project, Flavor, Environment, S3
-from models.models import Model
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from projects.helpers import get_minio_keys
-from django.template import engines
-import requests
-import flatten_json
 import json
+
+import flatten_json
+import requests
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.template import engines
+from django.utils.text import slugify
+from rest_framework.authtoken.models import Token
+
+from models.models import Model
+from projects.helpers import get_minio_keys
+from projects.models import S3, Environment, Flavor, Project
+
+from .models import AppCategories, AppInstance, AppPermission, Apps
 
 key_words = ['appobj',
              'model',
@@ -27,6 +30,7 @@ key_words = ['appobj',
              'env_variables',
              'publishable']
 
+
 def serialize_model(form_selection):
     print("SERIALIZING MODEL")
     model_json = dict()
@@ -36,7 +40,6 @@ def serialize_model(form_selection):
         obj = Model.objects.filter(pk=model_id)
         print("Fetching selected model:")
 
-        
         # model_json['model'] = dict()
         keys = get_minio_keys(obj[0].project)
         object_type = obj[0].object_type.all()
@@ -66,11 +69,12 @@ def serialize_model(form_selection):
 
     return model_json, obj
 
+
 def serialize_S3(form_selection, project):
     print("SERIALIZING S3")
     s3_json = dict()
     if "S3" in form_selection:
-        
+
         s3_id = form_selection.get('S3', None)
         try:
             obj = S3.objects.filter(pk=s3_id)
@@ -90,6 +94,7 @@ def serialize_S3(form_selection, project):
             }
         }
     return s3_json
+
 
 def serialize_flavor(form_selection, project):
     print("SERIALIZING FLAVOR")
@@ -122,6 +127,7 @@ def serialize_flavor(form_selection, project):
 
     return flavor_json
 
+
 def serialize_environment(form_selection, project):
     print("SERIALIZING ENVIRONMENT")
     environment_json = dict()
@@ -130,7 +136,8 @@ def serialize_environment(form_selection, project):
         try:
             environment = Environment.objects.get(pk=environment_id)
         except:
-            environment = Environment.objects.get(name=environment_id, project=project)
+            environment = Environment.objects.get(
+                name=environment_id, project=project)
         environment_json['environment'] = {
             "pk": environment.pk,
             "repository": environment.repository,
@@ -152,30 +159,35 @@ def serialize_apps(form_selection, project):
     app_deps = []
     for key in form_selection.keys():
         if "app:" in key and key[0:4] == "app:":
-            
+
             app_name = key[4:]
             try:
-                app = Apps.objects.filter(name=app_name).order_by('-revision').first()
+                app = Apps.objects.filter(
+                    name=app_name).order_by('-revision').first()
                 if not app:
-                    app = Apps.objects.filter(slug=app_name).order_by('-revision').first()
+                    app = Apps.objects.filter(
+                        slug=app_name).order_by('-revision').first()
             except Exception as err:
                 print("Failed to fetch app: {}".format(app_name))
                 print(err)
                 raise
             if not app:
                 print("App not found: {}".format(app_name))
-                
+
             parameters['apps'][app.slug] = dict()
             print(app_name)
             print('id: '+str(form_selection[key]))
             try:
-                objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
+                objs = AppInstance.objects.filter(
+                    pk__in=form_selection.getlist(key))
             except:
-                objs = AppInstance.objects.filter(name__in=form_selection[key], project=project)
+                objs = AppInstance.objects.filter(
+                    name__in=form_selection[key], project=project)
 
             for obj in objs:
                 app_deps.append(obj)
-                parameters['apps'][app.slug][slugify(obj.name)] = obj.parameters
+                parameters['apps'][app.slug][slugify(
+                    obj.name)] = obj.parameters
 
     return parameters, app_deps
 
@@ -194,6 +206,7 @@ def serialize_primitives(form_selection):
     print(parameters)
     return flatten_json.unflatten(parameters, '.')
 
+
 def serialize_permissions(form_selection):
     print("SERIALIZING PERMISSIONS")
     parameters = dict()
@@ -208,6 +221,7 @@ def serialize_permissions(form_selection):
     print(parameters)
     return parameters
 
+
 def serialize_appobjs(form_selection):
     print("SERIALIZING APPOBJS")
     parameters = dict()
@@ -220,6 +234,7 @@ def serialize_appobjs(form_selection):
             parameters['appobj'][app.slug] = True
     print(parameters)
     return parameters
+
 
 def serialize_default_values(aset):
     parameters = []
@@ -234,6 +249,7 @@ def serialize_default_values(aset):
                 parameters['default_values'][key] = True
 
     return parameters
+
 
 def serialize_project(project):
     parameters = dict()
@@ -256,11 +272,12 @@ def serialize_project(project):
         }
     return parameters
 
+
 def serialize_cli(username, project, aset):
     user = User.objects.get(username=username)
     token, created = Token.objects.get_or_create(user=user)
     parameters = dict()
-    if 'export-cli' in aset and aset['export-cli']=='True':
+    if 'export-cli' in aset and aset['export-cli'] == 'True':
         parameters['cli_setup'] = {
             "url": settings.STUDIO_URL,
             "project": project.name,
@@ -269,13 +286,15 @@ def serialize_cli(username, project, aset):
         }
     return parameters
 
+
 def serialize_env_variables(username, project, aset):
     print("SERIALIZING ENV VARIABLES")
     parameters = dict()
     parameters['app_env'] = dict()
     print("fetching apps")
     try:
-        apps = AppInstance.objects.filter(Q(owner__username=username) | Q(permission__projects__slug=project.slug) |  Q(permission__public=True), ~Q(state="Deleted"), project=project)
+        apps = AppInstance.objects.filter(Q(owner__username=username) | Q(
+            permission__projects__slug=project.slug) | Q(permission__public=True), ~Q(state="Deleted"), project=project)
     except Exception as err:
         print(err)
     print("Creating template engine")
@@ -286,12 +305,14 @@ def serialize_env_variables(username, project, aset):
         appsettings = app.app.settings
         if 'env_variables' in appsettings:
             tmp = json.dumps(appsettings['env_variables'])
-            env_vars = json.loads(django_engine.from_string(tmp).render(params))
+            env_vars = json.loads(
+                django_engine.from_string(tmp).render(params))
             for key in env_vars.keys():
                 parameters['app_env'][slugify(key)] = env_vars[key]
     print(parameters)
- 
+
     return parameters
+
 
 def serialize_app(form_selection, project, aset, username):
     print("SERIALIZING APP")
