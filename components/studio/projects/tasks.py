@@ -2,26 +2,26 @@ import collections
 import json
 import secrets
 import string
+from logging import raiseExceptions
 
-from django.http import HttpRequest
-
-from .exceptions import ProjectCreationException
-from .models import Flavor, Environment, Project, S3, MLFlow
-from apps.models import Apps, AppInstance
-from django.contrib.auth.models import User
-import apps.views as appviews
-import apps.tasks as apptasks
 from celery import shared_task
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.http import HttpRequest
-from logging import raiseExceptions
+
+import apps.tasks as apptasks
+import apps.views as appviews
+from apps.models import AppInstance, Apps
+
+from .exceptions import ProjectCreationException
+from .models import S3, Environment, Flavor, MLFlow, Project
 
 
 @shared_task
 def create_resources_from_template(user, project_slug, template):
     print("Create Resources From Project Template...")
     decoder = json.JSONDecoder(object_pairs_hook=collections.OrderedDict)
-    parsed_template = template.replace('\'','\"')
+    parsed_template = template.replace('\'', '\"')
     template = decoder.decode(parsed_template)
     alphabet = string.ascii_letters + string.digits
     project = Project.objects.get(slug=project_slug)
@@ -48,7 +48,8 @@ def create_resources_from_template(user, project_slug, template):
             print("Environments: {}".format(environments))
             for key, item in environments.items():
                 try:
-                    app = Apps.objects.filter(slug=item['app']).order_by('-revision')[0]
+                    app = Apps.objects.filter(
+                        slug=item['app']).order_by('-revision')[0]
                 except Exception as err:
                     print("App for environment not found.")
                     print(item['app'])
@@ -58,10 +59,10 @@ def create_resources_from_template(user, project_slug, template):
                     raise
                 try:
                     environment = Environment(name=key,
-                                            project=project,
-                                            repository=item['repository'],
-                                            image=item['image'],
-                                            app=app)
+                                              project=project,
+                                              repository=item['repository'],
+                                              image=item['image'],
+                                              app=app)
                     environment.save()
                 except Exception as err:
                     print("Failed to create new environment: {}".format(key))
@@ -70,7 +71,7 @@ def create_resources_from_template(user, project_slug, template):
                     print(item['image'])
                     print(app)
                     print(user)
-                    print(err)   
+                    print(err)
         elif 'apps' == key:
             apps = item
             print("Apps: {}".format(apps))
@@ -81,39 +82,45 @@ def create_resources_from_template(user, project_slug, template):
                     "app_action": "Create"
                 }
                 if 'credentials.access_key' in item:
-                    item['credentials.access_key'] = ''.join(secrets.choice(alphabet) for i in range(8))
+                    item['credentials.access_key'] = ''.join(
+                        secrets.choice(alphabet) for i in range(8))
                 if 'credentials.secret_key' in item:
-                    item['credentials.secret_key'] = ''.join(secrets.choice(alphabet) for i in range(14))
+                    item['credentials.secret_key'] = ''.join(
+                        secrets.choice(alphabet) for i in range(14))
                 if 'credentials.username' in item:
                     item['credentials.username'] = 'admin'
                 if 'credentials.password' in item:
-                    item['credentials.password'] = ''.join(secrets.choice(alphabet) for i in range(14))
-                
+                    item['credentials.password'] = ''.join(
+                        secrets.choice(alphabet) for i in range(14))
+
                 data = {**data, **item}
                 print("DATA TEMPLATE")
                 print(data)
                 request = HttpRequest()
                 request.user = User.objects.get(username=user)
-                res = appviews.create(request=request, user=user, project=project.slug, app_slug=item['slug'], data=data, wait=True, call=True)
+                res = appviews.create(request=request, user=user, project=project.slug,
+                                      app_slug=item['slug'], data=data, wait=True, call=True)
 
         elif 'settings' == key:
             print("PARSING SETTINGS")
             print("Settings: {}".format(settings))
             if 'project-S3' in item:
                 print("SETTING DEFAULT S3")
-                s3storage=item['project-S3']
-                s3obj = S3.objects.get(name=s3storage, project=project) # Add logics: here it is referring to minio basically. It is assumed that minio exist, but if it doesn't then it blows up of course
+                s3storage = item['project-S3']
+                # Add logics: here it is referring to minio basically. It is assumed that minio exist, but if it doesn't then it blows up of course
+                s3obj = S3.objects.get(name=s3storage, project=project)
                 project.s3storage = s3obj
                 project.save()
             if 'project-MLflow' in item:
                 print("SETTING DEFAULT MLflow")
-                mlflow=item['project-MLflow']
+                mlflow = item['project-MLflow']
                 mlflowobj = MLFlow.objects.get(name=mlflow, project=project)
                 project.mlflow = mlflowobj
                 project.save()
         else:
             print("Template has either not valid or unknown keys")
             raise(ProjectCreationException)
+
 
 @shared_task
 def delete_project_apps(project_slug):

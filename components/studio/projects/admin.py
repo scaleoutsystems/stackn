@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from .models import Project, Environment, Flavor, ProjectLog, S3, ProjectTemplate, MLFlow, BasicAuth, ReleaseName
-
+from .models import (S3, BasicAuth, Environment, Flavor, MLFlow, Project,
+                     ProjectLog, ProjectTemplate, ReleaseName)
 
 admin.site.register(ProjectTemplate)
 admin.site.register(Project)

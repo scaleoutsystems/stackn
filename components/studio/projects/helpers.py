@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 
+
 def urlify(s):
 
     # Remove all non-word characters (everything except numbers and letters)
@@ -12,6 +13,7 @@ def urlify(s):
     s = re.sub(r"\s+", '-', s)
 
     return s
+
 
 def get_minio_keys(project):
     return {
