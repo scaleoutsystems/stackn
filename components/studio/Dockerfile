@@ -32,6 +32,7 @@ FROM pybuild1
 
 # Set working directory
 COPY . /app/
+RUN chown stackn /app/
 WORKDIR /app
 
 USER $USERNAME
