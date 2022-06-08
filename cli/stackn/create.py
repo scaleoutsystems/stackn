@@ -105,7 +105,7 @@ def obj(name, object_type, file_name, release_type, version, description, model_
 @create.command('project')
 @click.argument('name')
 @click.option('-d', '--description', required=False, default="")
-@click.option('-t', '--template', required=False, default="stackn-default")
+@click.option('-t', '--template', required=False, default="default")
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def project(name, description, template, studio_url, secure):
