@@ -6,6 +6,7 @@ ARG USERNAME=stackn
 RUN useradd -s /bin/bash $USERNAME
 # Provide root privileges to this user
 RUN usermod -aG sudo $USERNAME
+RUN usermod -aG root $USERNAME
 
 # Install stackn pip deps
 RUN mkdir /app
@@ -32,7 +33,7 @@ FROM pybuild1
 
 # Set working directory
 COPY . /app/
-RUN chown stackn /app/
+RUN chown -R stackn /app/
 WORKDIR /app
 
 USER $USERNAME
