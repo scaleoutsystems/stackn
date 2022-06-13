@@ -142,9 +142,9 @@ def post_delete_hooks(instance):
         rel_name.status = 'active'
         rel_name.app = None
         rel_name.save()
-    if project.s3storage.app == instance:
+    if project.s3storage and project.s3storage.app == instance:
         project.s3storage.delete()
-    elif project.mlflow.app == instance:
+    elif project.mlflow and project.mlflow.app == instance:
         project.mlflow.delete()
 
 
