@@ -486,7 +486,7 @@ def details(request, user, project_slug):
                                              app__category__slug=rslug['slug']).order_by('-created_on')[:5]
             for instance in tmp:
                 pk_list += str(instance.pk)+','
-            apps_filtered = Apps.objects.filter(category__slug=rslug['slug']).order_by(
+            apps_filtered = Apps.objects.filter(category__slug=rslug['slug'], user_can_create=True).order_by(
                 'slug', '-revision').distinct('slug')
             resources.append(
                 {"title": rslug['name'], "objs": tmp, "apps": apps_filtered})
