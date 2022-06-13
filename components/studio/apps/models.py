@@ -28,6 +28,7 @@ class AppCategories(models.Model):
 
 
 class Apps(models.Model):
+    user_can_create = models.BooleanField(default=True)
     access = models.CharField(
         max_length=20, blank=True, null=True, default="public")
     category = models.ForeignKey(
