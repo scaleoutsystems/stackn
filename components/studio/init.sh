@@ -11,7 +11,7 @@ echo "Running the utility script for setting up initial values"
 
 # Generate k8s cluster config file - NOTE: we assume that microk8s is already installed and configured
 echo "Copying k8s cluster config values into the cluster.conf file"
-microk8s.config > ./cluster.conf
+sudo microk8s.config > ./cluster.conf
 
 # Extract currently assigned IP address (which is connected to Internet!)
 echo "Extracting IP address..."
