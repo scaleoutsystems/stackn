@@ -1,0 +1,36 @@
+name: Test Microk8s
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    name: A job to install MicroK8s
+    steps:
+    - uses: balchua/microk8s-actions@v0.2.1
+      with:
+        channel: '1.20/stable'
+        addons: '["dns", "rbac", "storage", "ingress"]'
+    - name: Check k8s
+      id: myactions
+      run: |
+        echo "Checking k8s cluster"
+        kubectl get no
+        kubectl get pods -A -o wide
+    - name: start studio
+      id: setup
+      run: |
+        set -ex
+        echo "Running init script"
+        ./init.sh
+        echo "Deploying studio"
+        docker-compose up -d
