@@ -18,6 +18,7 @@ jobs:
       working-directory: ./components/studio
     name: Install MicroK8s
     steps:
+    - uses: actions/checkout@v2
     - uses: balchua/microk8s-actions@v0.2.1
       with:
         channel: '1.20/stable'
@@ -29,7 +30,6 @@ jobs:
         kubectl get no
         kubectl get pods -A -o wide
     - name: start studio
-      uses: actions/checkout@v2
       working-directory: ${{env.working-directory}}
       id: setup
       run: |
