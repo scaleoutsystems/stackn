@@ -14,6 +14,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-20.04
+    env:
+      working-directory: ./components/studio
     name: A job to install MicroK8s
     steps:
     - uses: balchua/microk8s-actions@v0.2.1
@@ -27,6 +29,7 @@ jobs:
         kubectl get no
         kubectl get pods -A -o wide
     - name: start studio
+      working-directory: ${{env.working-directory}}
       id: setup
       run: |
         set -ex
