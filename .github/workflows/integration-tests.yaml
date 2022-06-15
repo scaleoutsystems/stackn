@@ -1,4 +1,4 @@
-name: Test Microk8s
+name: Integration test
 on:
   push:
     branches:
@@ -15,8 +15,8 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     env:
-      working-directory: ./components/studio
-    name: A job to install MicroK8s
+      working-directory: /components/studio
+    name: Install MicroK8s
     steps:
     - uses: balchua/microk8s-actions@v0.2.1
       with:
