@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       working-directory: ./components/studio
-    name: Install MicroK8s
+    name: Integration test
     steps:
     - uses: actions/checkout@v2
     - uses: balchua/microk8s-actions@v0.2.1
@@ -38,3 +38,20 @@ jobs:
         ./init.sh
         echo "Deploying studio"
         docker-compose up -d
+    - name: install CLI
+      working-directory: ./cli
+      id: cli
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir .
+    - name: login studio
+      working-directory: ${{env.working-directory}}
+      id: login
+      run: |
+        export ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
+        export STUDIO_URL=`awk -F '=' '/STUDIO_URL/{print $NF}' studio/settings.py`
+        stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
+    - name: create project default
+      id: project
+      run: stackn create project -t default
+
