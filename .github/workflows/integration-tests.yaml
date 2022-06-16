@@ -48,10 +48,19 @@ jobs:
       working-directory: ${{env.working-directory}}
       id: login
       run: |
-        export ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
-        export STUDIO_URL=`awk -F '=' '/STUDIO_URL/{print $NF}' studio/settings.py`
+        export ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{gsub(/'/, '', $NF); print $NF}' docker-compose.yml`
+        export STUDIO_URL=`awk -F '=' '/STUDIO_URL/{gsub(/'/, '', $NF); print $NF}' studio/settings.py`
         stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
     - name: create project default
       id: project
       run: stackn create project -t default
+    - name: exec in lab
+      id: lab
+      run: |
+        export POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        kubectl cp ./examples $POD_NAME:./examples
+        kubectl exec $POD_NAME -- ./examples/tensorflow-serve/mnist-keras/run.sh
+    - name: check models
+      id: models
+      run: stackn get model-obj
 
