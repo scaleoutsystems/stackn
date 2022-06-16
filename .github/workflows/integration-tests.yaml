@@ -48,8 +48,8 @@ jobs:
       working-directory: ${{env.working-directory}}
       id: login
       run: |
-        export ADMIN_PASSWORD=`awk -F '=' -v replace="'" '/DJANGO_SUPERUSER_PASSWORD/{gsub(/replace/, "", $NF); print $NF}' docker-compose.yml`
-        export STUDIO_URL=`awk -F '=' -v replace="'" '/STUDIO_URL/{gsub(/replace/, "", $NF); print $NF}' studio/settings.py`
+        export ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
+        export STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
         stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
     - name: create project default
       id: project
