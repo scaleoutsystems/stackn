@@ -51,7 +51,8 @@ jobs:
         ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
         STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
         response=$(curl --write-out '%{http_code}' --silent --output /dev/null $STUDIO_URL)
-        if [[ "$response" -ne 200 ]] ; then sleep 30; else stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL; fi
+        if [[ "$response" -ne 200 ]] ; then sleep 30; else echo "studio is ready"; fi
+        stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
     - name: create project default
       id: project
       run: |
