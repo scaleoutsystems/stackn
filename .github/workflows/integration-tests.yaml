@@ -57,10 +57,12 @@ jobs:
       run: |
         stackn create project -t default test
         stackn get projects
+        kubectl get po 
     - name: exec in lab
       id: lab
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo $POD_NAME
         POD_STATUS=`kubectl get po -l app=lab --no-headers -o custom-columns=":status.phase"`
         if [[ "$POD_STATUS" -ne "Running" ]] ; then sleep 30; else echo "Lab pod is $POD_STATUS"; fi
         kubectl cp ./examples $POD_NAME:./examples
