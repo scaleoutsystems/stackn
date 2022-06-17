@@ -61,17 +61,14 @@ jobs:
         sleep 20
         docker logs celery-worker --tail 100
         kubectl get po 
-    - name: exec in lab
-      id: lab
+    - name: build and test model object
+      id: model
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         echo $POD_NAME
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
         kubectl cp ./examples/ $POD_NAME:./examples
-        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh" 
-    - name: check models
-      id: models
-      run: |
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh"
         sleep 10
-        stackn get model-obj -p test
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests model"
 
