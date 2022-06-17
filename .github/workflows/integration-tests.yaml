@@ -62,7 +62,7 @@ jobs:
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         POD_STATUS=`kubectl get po -l app=lab --no-headers -o custom-columns=":status.phase"`
-        if [[ "$POD_STATUS" -ne "Running" ]] ; then echo sleep 30; else echo "Lab pod is $POD_STATUS"; fi
+        if [[ "$POD_STATUS" -ne "Running" ]] ; then sleep 30; else echo "Lab pod is $POD_STATUS"; fi
         kubectl cp ./examples $POD_NAME:./examples
         kubectl exec $POD_NAME -- ./examples/tensorflow-serve/mnist-keras/run.sh
     - name: check models
