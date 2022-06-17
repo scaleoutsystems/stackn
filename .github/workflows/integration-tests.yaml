@@ -57,6 +57,8 @@ jobs:
       run: |
         stackn create project -t default test
         stackn get projects
+        sleep 30
+        docker logs celery-worker --tail 100
         kubectl get po 
     - name: exec in lab
       id: lab
