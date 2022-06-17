@@ -56,7 +56,9 @@ jobs:
         stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
     - name: create project default
       id: project
-      run: stackn create project -t default
+      run: |
+        stackn create project -t default test
+        stackn get projects
     - name: exec in lab
       id: lab
       run: |
