@@ -52,6 +52,7 @@ jobs:
         echo $ADMIN_PASSWORD
         export STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
         echo $STUDIO_URL
+        curl -v $STUDIO_URL
         stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
     - name: create project default
       id: project
