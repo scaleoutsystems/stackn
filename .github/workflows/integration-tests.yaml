@@ -48,12 +48,10 @@ jobs:
       working-directory: ${{env.working-directory}}
       id: login
       run: |
-        export ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
-        echo $ADMIN_PASSWORD
-        export STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
-        echo $STUDIO_URL
-        curl -v $STUDIO_URL
-        stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
+        ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
+        STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
+        response=$(curl --write-out '%{http_code}' --silent --output /dev/null $STUDIO_URL)
+        if [[ "$response" -ne 200 ]] ; then sleep 30; else stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL; fi
     - name: create project default
       id: project
       run: |
@@ -62,7 +60,9 @@ jobs:
     - name: exec in lab
       id: lab
       run: |
-        export POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        POD_STATUS=`kubectl get po -l app=lab --no-headers -o custom-columns=":status.phase"`
+        if [[ "$POD_STATUS" -ne "Running" ]] ; then echo sleep 30; else echo "Lab pod is $POD_STATUS"; fi
         kubectl cp ./examples $POD_NAME:./examples
         kubectl exec $POD_NAME -- ./examples/tensorflow-serve/mnist-keras/run.sh
     - name: check models
