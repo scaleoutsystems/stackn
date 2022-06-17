@@ -71,5 +71,7 @@ jobs:
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh" 
     - name: check models
       id: models
-      run: stackn get model-obj -p test
+      run: |
+        sleep 10
+        stackn get model-obj -p test
 
