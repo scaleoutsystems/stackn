@@ -15,6 +15,7 @@ def test_model(name='mnist-keras', type='tensorflow'):
 
     assert len(objects) != 0
     assert objects[0]['name'] == name
+    print('Model check succeded. Test passed.')
 
 if __name__ == '__main__':
   fire.Fire({"model": test_model})
