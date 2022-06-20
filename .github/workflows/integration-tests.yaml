@@ -62,8 +62,8 @@ jobs:
         sleep 20
         echo "Docker logs celery-worker"
         docker logs celery-worker --tail 100
-    - name: build and test model object
-      id: model
+    - name: build and test mnist-keras-tf
+      id: mnist
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         echo $POD_NAME
@@ -76,4 +76,13 @@ jobs:
         sleep 10
         echo "Running test model"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests model"
+    - name: build and test mlflow-elasticnet
+      id: mlflow
+      run: |
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn && mlflow run ."
+        echo "Sleeping for 20 sec"
+        sleep 20
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests"
+
 
