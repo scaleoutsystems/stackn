@@ -1,0 +1,20 @@
+#! /opt/conda/bin/python
+from stackn.auth import get_config
+from stackn.get import call_project_endpoint, _find_dict_by_value
+
+def test_model(name='ElasticNet', type='mlflow'):
+    config = get_config()
+
+    object_types = call_project_endpoint('objecttypes', conf=config)
+    obj_type = _find_dict_by_value(object_types, 'slug', type)
+
+    params = {'object_type': obj_type['id']}
+    objects = call_project_endpoint('models', conf=config, params=params)
+    print(f"Model objects: {objects}")
+
+    assert len(objects) != 0
+    assert objects[0]['name'] == name
+    print('Model check succeded. Test passed.')
+
+if __name__ == '__main__':
+    test_model()
