@@ -67,10 +67,12 @@ jobs:
       run: |
         echo "Starting Jupyter Lab instance"
         stackn create appinstance ./.ci/test.json
-        sleep 10
+        sleep 20
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo "Lab pod: $POD_NAME"
         echo "Waiting for lab pod to be ready"
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
+        stackn get app
 
     - name: build and test mnist-keras-tf
       id: mnist
