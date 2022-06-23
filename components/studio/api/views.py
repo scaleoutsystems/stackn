@@ -9,10 +9,6 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
-from portal.models import PublishedModel
-from projects.models import (S3, Environment, Flavor, MLFlow, ProjectLog,
-                             ProjectTemplate, ReleaseName)
-from projects.tasks import create_resources_from_template, delete_project_apps
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -25,6 +21,10 @@ from rest_framework.viewsets import GenericViewSet
 from apps.models import AppCategories, AppInstance, Apps
 from apps.tasks import delete_resource
 from models.models import ObjectType
+from portal.models import PublishedModel
+from projects.models import (S3, Environment, Flavor, MLFlow, ProjectLog,
+                             ProjectTemplate, ReleaseName)
+from projects.tasks import create_resources_from_template, delete_project_apps
 
 from .APIpermissions import AdminPermission, ProjectPermission
 from .serializers import (AppInstanceSerializer, AppSerializer,
