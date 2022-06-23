@@ -65,10 +65,6 @@ jobs:
     - name: start jupyter lab
       id: lab
       run: |
-        POD_NAME=`kubectl get po -l app=mlflow --no-headers -o custom-columns=":metadata.name"`
-        echo $POD_NAME
-        echo "Waiting for mlflow pod to be ready"
-        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
         echo "Starting Jupyter Lab instance"
         stackn create appinstance ./ci/test.json
         sleep 10
