@@ -67,7 +67,7 @@ jobs:
       run: |
         echo "Starting Jupyter Lab instance"
         stackn create appinstance ./.ci/test.json
-        sleep 20
+        sleep 60
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         echo "Lab pod: $POD_NAME"
         echo "Waiting for lab pod to be ready"
