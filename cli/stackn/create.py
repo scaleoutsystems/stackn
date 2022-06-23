@@ -45,6 +45,7 @@ def apps(studio_url, secure):
     create_apps(studio_url=studio_url,
                 secure_mode=secure)
 
+
 @create.command('appinstance')
 @click.option('-u', '--studio-url', required=False, default=[], help="Studio URL")
 @click.option('-p', '--project', required=False, default=[], help="Project name")
@@ -64,7 +65,7 @@ def apps(studio_url, project, secure, file):
         data = json.load(f)
     click.echo(f"READING APP PARAMETERS: {data}")
     create_appinstance(studio_url=studio_url, project=project, data=data,
-                secure_mode=secure)
+                       secure_mode=secure)
 
 
 @create.command('projecttemplate')

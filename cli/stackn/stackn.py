@@ -552,6 +552,7 @@ def create_object(model_name,
 
     return True
 
+
 def create_appinstance(studio_url=[], project=[], data={}, secure_mode=True):
     conf = {
         "STACKN_URL": studio_url,
