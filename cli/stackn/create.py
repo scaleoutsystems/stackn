@@ -1,11 +1,11 @@
-from tokenize import String
+import json
+
 import click
-from itsdangerous import json
 
 from .main import main
-from .stackn import (create_app, create_apps, create_appinstance, create_meta_resource,
-                     create_object, create_project, create_template,
-                     create_templates)
+from .stackn import (create_app, create_appinstance, create_apps,
+                     create_meta_resource, create_object, create_project,
+                     create_template, create_templates)
 
 
 class AliasedGroup(click.Group):
@@ -60,9 +60,8 @@ def apps(studio_url, project, secure, file):
                       "flavor": "Medium",\n
                       "app_action": "Create"}\n
     """
-    import json as j
     with open(file) as f:
-        data = j.load(f)
+        data = json.load(f)
     click.echo(f"READING APP PARAMETERS: {data}")
     create_appinstance(studio_url=studio_url, project=project, data=data,
                 secure_mode=secure)
