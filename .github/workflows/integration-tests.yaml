@@ -62,13 +62,24 @@ jobs:
         sleep 20
         echo "Docker logs celery-worker"
         docker logs celery-worker --tail 100
+    - name: start jupyter lab
+      id: lab
+      run: |
+        POD_NAME=`kubectl get po -l app=mlflow --no-headers -o custom-columns=":metadata.name"`
+        echo $POD_NAME
+        echo "Waiting for mlflow pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
+        echo "Starting Jupyter Lab instance"
+        stackn create appinstance ./ci/test.json
+        sleep 10
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo "Waiting for lab pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
+
     - name: build and test mnist-keras-tf
       id: mnist
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
-        echo $POD_NAME
-        echo "Waiting for lab pod to be ready"
-        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
         echo "Copying examples folder to pod"
         kubectl cp ./examples/ $POD_NAME:./examples
         echo "Running build model"
