@@ -62,12 +62,17 @@ jobs:
         sleep 20
         echo "Docker logs celery-worker"
         docker logs celery-worker --tail 100
+        POD_NAME=`kubectl get po -l app=mlflow --no-headers -o custom-columns=":metadata.name"`
+        kubectl get po
+        echo "MLFlow pod: $POD_NAME"
+        echo "Waiting for lab pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
     - name: start jupyter lab
       id: lab
       run: |
         echo "Starting Jupyter Lab instance"
         stackn create appinstance -- ./.ci/test.json
-        sleep 60
+        sleep 120
         stackn get app
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         echo "Lab pod: $POD_NAME"
