@@ -109,7 +109,7 @@ jobs:
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         endpoint=`kubectl get ingress -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.labels.host"`
-        endpoint="$endpoint/v1/models/models"
+        endpoint="https://$endpoint/v1/models/models"
         echo "Running serve test"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests serve $endpoint"
 
