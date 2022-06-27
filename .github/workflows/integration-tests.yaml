@@ -79,7 +79,6 @@ jobs:
         echo "Waiting for lab pod to be ready"
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
         stackn get app
-
     - name: build and test mnist-keras-tf
       id: mnist
       run: |
@@ -102,17 +101,17 @@ jobs:
     - name: serve mnist-keras-tf
       id: serve_tf
       run: |
-      stackn create appinstance .ci/serve_tf.json
-      echo "Sleeping for 10 sec"
-      sleep 10
-      POD_NAME=`kubectl get po -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.name"`
-      echo "Waiting for tf serve pod to be ready"
-      kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
-      POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
-      endpoint=`kubectl get ingress -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.labels.host"`
-      endpoint="$endpoint/v1/models/models"
-      echo "Running serve test"
-      kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests serve $endpoint"
+        stackn create appinstance .ci/serve_tf.json
+        echo "Sleeping for 10 sec"
+        sleep 10
+        POD_NAME=`kubectl get po -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.name"`
+        echo "Waiting for tf serve pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        endpoint=`kubectl get ingress -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.labels.host"`
+        endpoint="$endpoint/v1/models/models"
+        echo "Running serve test"
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests serve $endpoint"
 
 
 
