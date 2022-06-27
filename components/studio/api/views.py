@@ -382,7 +382,7 @@ class AppInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
         request = HttpRequest()
         request.user = user
         res = appviews.create(request, user=user.username, data=data, project=project.slug,
-                              app_slug=app_slug)
+                              app_slug=app_slug, wait=True, call=True)
         return HttpResponse("App created.", status=200)
 
     def destroy(self, request, *args, **kwargs):
