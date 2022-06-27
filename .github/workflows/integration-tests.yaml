@@ -103,7 +103,7 @@ jobs:
       run: |
         stackn create appinstance .ci/serve_tf.json
         echo "Sleeping for 10 sec"
-        sleep 10
+        sleep 20
         POD_NAME=`kubectl get po -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.name"`
         echo "Waiting for tf serve pod to be ready"
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
