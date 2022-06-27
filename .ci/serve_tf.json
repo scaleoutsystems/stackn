@@ -1,0 +1,7 @@
+{
+"app_name": "mnist-keras",
+"slug": "tensorflow-serve",
+"model": 0,
+"flavor": "Medium",
+"app_action": "Create"
+}
