@@ -28,7 +28,7 @@ def test_model(name='mnist-keras', type='tensorflow'):
   print('Model check succeded. Test passed.')
 
 def test_serve(endpoint):
-  info, pred = entrypoint._predict(entrypoint, data_path='../data/mnist.npz')
+  info, pred = entrypoint._predict(endpoint, data_path='../data/mnist.npz')
 
   expected_info = {
     "model_version_status": [
