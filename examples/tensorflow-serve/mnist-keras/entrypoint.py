@@ -85,10 +85,16 @@ def _predict(endpoint, n=2, data_path="data/mnist.npz"):
     auth_header = {"Authorization": f"Token {token}"}
 
     model_info = requests.get(endpoint, headers=auth_header, verify=False)
-    print(model_info.json())
+    info_json = model_info.json()
+    print(info_json)
 
     pred = requests.post(endpoint+':predict', json=input, headers=auth_header, verify=False)
-    print(pred.json())
+    pred_json = pred.json()
+    print(pred_json)
+
+    return info_json, pred_json
+
+
 
 if __name__ == '__main__':
   fire.Fire({"get_data": _get_data,

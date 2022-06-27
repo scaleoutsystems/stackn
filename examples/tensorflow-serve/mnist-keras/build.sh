@@ -3,5 +3,5 @@
 ./init_venv.sh
 
 #download input data and build model
-./entrypoint get_data
-./entrypoint build_model
+./entrypoint.py get_data
+./entrypoint.py build_model
