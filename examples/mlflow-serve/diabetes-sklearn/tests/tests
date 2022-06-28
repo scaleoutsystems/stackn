@@ -1,4 +1,8 @@
-#! /opt/conda/bin/python
+#! /opt/conda/envs/mlflow/bin/python
+import fire
+from sklearn import datasets
+import pandas
+import requests
 from stackn.auth import get_config
 from stackn.get import call_project_endpoint, _find_dict_by_value
 
@@ -16,5 +20,23 @@ def test_model(name='ElasticNet', type='mlflow'):
     assert objects[0]['name'] == name
     print('Model check succeded. Test passed.')
 
+def test_serve(endpoint):
+    diabetes = datasets.load_diabetes()
+    data = pandas.DataFrame(diabetes.data)
+
+    data = data.to_json(orient='split')
+
+    config, status = get_config()
+    token = config["STACKN_ACCESS_TOKEN"]
+
+    pred = requests.post(endpoint, 
+                         headers={"Content-Type": "application/json; format=pandas-split", "Authorization": f"Token {token}"}, 
+                         data=data, 
+                         verify=False)
+    #TODO: check result with expected 
+    print(pred.json())
+
 if __name__ == '__main__':
-    test_model()
+    fire.Fire({"model": test_model,
+              "serve": test_serve
+              })
