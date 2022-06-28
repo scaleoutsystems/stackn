@@ -4,6 +4,7 @@ RUN /bin/bash -c "apt update"
 RUN /bin/bash -c "apt install curl -y"
 USER $NB_UID
 COPY . /home/jovyan/stackn
+RUN chown jovyan /home/jovyan/stackn
 RUN pip install mlflow boto3
 RUN pip uninstall minio -y
 RUN pip install minio==7.0.2
