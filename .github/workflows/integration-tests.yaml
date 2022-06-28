@@ -121,7 +121,7 @@ jobs:
       run: |
         stackn create appinstance .ci/serve_mlflow.json
         echo "Sleeping for 10 sec"
-        sleep 20
+        sleep 30
         POD_NAME=`kubectl get po -l app=mlflow-serve --no-headers -o custom-columns=":metadata.name"`
         echo "Waiting for tf serve pod to be ready"
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
