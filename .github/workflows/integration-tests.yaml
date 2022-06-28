@@ -125,6 +125,7 @@ jobs:
         POD_NAME=`kubectl get po -l app=mlflow-serve --no-headers -o custom-columns=":metadata.name"`
         echo "Waiting for tf serve pod to be ready"
         kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=240s
+        sleep 60
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
         endpoint=`kubectl get ingress -l app=mlflow-serve --no-headers -o custom-columns=":metadata.labels.host"`
         endpoint="https://$endpoint/invocations"
