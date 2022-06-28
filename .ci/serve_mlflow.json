@@ -1,0 +1,7 @@
+{
+"app_name": "ElasticNet",
+"slug": "mlflow-serve",
+"model": 2,
+"flavor": "Medium",
+"app_action": "Create"
+}

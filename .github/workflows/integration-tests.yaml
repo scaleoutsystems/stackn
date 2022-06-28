@@ -83,8 +83,9 @@ jobs:
       id: mnist
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
-        echo "Copying examples folder to pod"
+        echo "Copying examples and cli folder to pod"
         kubectl cp ./examples/ $POD_NAME:./examples
+        kubectl cp ./cli/ $POD_NAME:/home/jovyan/cli
         echo "Running build model"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh"
         sleep 10
@@ -97,7 +98,10 @@ jobs:
         kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn && mlflow run ."
         echo "Sleeping for 20 sec"
         sleep 20
-        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests"
+        echo "build env for testing"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn && conda env create -f tests/env_test.yaml"
+        echo "Running test model"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests model"
     - name: serve mnist-keras-tf
       id: serve_tf
       run: |
@@ -112,6 +116,20 @@ jobs:
         endpoint="https://$endpoint/v1/models/models"
         echo "Running serve test"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests serve $endpoint"
+    - name: serve mlflow
+      id: serve_mlflow
+      run: |
+        stackn create appinstance .ci/serve_mlflow.json
+        echo "Sleeping for 10 sec"
+        sleep 20
+        POD_NAME=`kubectl get po -l app=mlflow-serve --no-headers -o custom-columns=":metadata.name"`
+        echo "Waiting for tf serve pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=180s
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        endpoint=`kubectl get ingress -l app=mlflow-serve --no-headers -o custom-columns=":metadata.labels.host"`
+        endpoint="https://$endpoint/invocations"
+        echo "Running serve test"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests serve $endpoint"
 
 
 
