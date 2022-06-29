@@ -242,7 +242,7 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
     app_sett = app.settings
 
     # Set up form
-    print("CREATING APP...")
+    print(f"CREATING APP: {app.name}")
     print("GENERATING FORM")
     form = generate_form(app_sett, project, app, user, [])
     print("FORM GENERATED: {}".format(form))
