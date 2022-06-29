@@ -2,4 +2,5 @@
 
 * [Home](/)
 * [Tutorials](/tutorial)
+* [CLI](/cli)
 * [Release Notes](/releasenotes)
