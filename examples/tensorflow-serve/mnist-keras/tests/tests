@@ -1,0 +1,55 @@
+#!../.mnist-keras/bin/python
+import fire
+from stackn.auth import get_config
+from stackn.get import call_project_endpoint, _find_dict_by_value
+
+import os
+import sys
+import inspect
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+
+import entrypoint
+
+def test_model(name='mnist-keras', type='tensorflow'):
+  config = get_config()
+
+  object_types = call_project_endpoint('objecttypes', conf=config)
+  obj_type = _find_dict_by_value(object_types, 'slug', type)
+
+  params = {'object_type': obj_type['id']}
+  objects = call_project_endpoint('models', conf=config, params=params)
+  print(f"Model objects: {objects}")
+
+  assert len(objects) != 0
+  assert objects[0]['name'] == name
+  print('Model check succeded. Test passed.')
+
+def test_serve(endpoint):
+  info, pred = entrypoint._predict(endpoint, data_path='../data/mnist.npz')
+
+  expected_info = {
+    "model_version_status": [
+      {
+      "version": "1",
+      "state": "AVAILABLE",
+      "status": {
+        "error_code": "OK",
+        "error_message": ""
+      }
+      }
+    ]
+  }
+
+  assert info == expected_info
+
+  #TODO: check pred result with expected
+    
+
+if __name__ == '__main__':
+  fire.Fire({"model": test_model,
+            "serve": test_serve
+            })
+

@@ -553,6 +553,23 @@ def create_object(model_name,
     return True
 
 
+def create_appinstance(studio_url=[], project=[], data={}, secure_mode=True):
+    conf = {
+        "STACKN_URL": studio_url,
+        "STACKN_PROJECT": project,
+        "STACKN_SECURE": secure_mode
+    }
+
+    conf, auth_header, url = setup_project_endpoint_call(conf, 'appinstances')
+
+    if not conf or not auth_header or not url:
+        print("Failed to set up project API endpoint call.")
+        return False
+    res = requests.post(url, headers=auth_header, data=data,
+                        verify=conf['STACKN_SECURE'])
+    print(res.text)
+
+
 # Delete functions
 
 def delete_app(name, studio_url=[], project=[], secure=True):
