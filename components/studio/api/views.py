@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -374,7 +374,16 @@ class AppInstanceList(GenericViewSet, CreateModelMixin, RetrieveModelMixin, Upda
         return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs['project_pk'])
 
     def create(self, request, *args, **kwargs):
-        return HttpResponse("Use 'resources' endpoint instead.", status=200)
+        project = Project.objects.get(id=self.kwargs['project_pk'])
+        app_slug = request.data['slug']
+        data = request.data
+        user = request.user
+        import apps.views as appviews
+        request = HttpRequest()
+        request.user = user
+        res = appviews.create(request, user=user.username, data=data, project=project.slug,
+                              app_slug=app_slug, wait=True, call=True)
+        return HttpResponse("App created.", status=200)
 
     def destroy(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs['project_pk'])
