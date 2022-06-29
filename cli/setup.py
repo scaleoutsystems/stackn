@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='scaleout-cli',
+    name='stackn-cli',
     version='0.2.0',
     description="""Scaleout CLI""",
     url='https://www.scaleoutsystems.com',
