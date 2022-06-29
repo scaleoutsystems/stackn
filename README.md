@@ -1,5 +1,15 @@
 ![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
 
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/integration-tests.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/integration-tests.yaml)
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/cli-code-checks.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/cli-code-checks.yaml.yaml)
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/studio-code-checks.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/studio-code-checks.yaml.yaml)
+[<img src="https://badgen.net/badge/icon/docs?icon=github&label">](https://scaleoutsystems.github.io/stackn/#/)
+
+Community<br>
+[<img src="https://badgen.net/badge/icon/discord?icon=discord&label">](https://discord.gg/KMg4VwszAd)
+
+
+
 * [What is STACKn?](#what-is-stackn)
 * [Setup a local deployment](#setup-a-local-deployment)
 * [Where is STACKn used?](#where-is-stackn-used)
@@ -8,13 +18,19 @@
 # What is STACKn?
 
 STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
+<figure>
+  <p align="center">
+    <img src="docs/images/stackn_diagram.png" width="100%" title="hover text">
+  </p>
+  <figcaption align = "center"><b>Components of Stackn. Observe that not all apps in this figure are included in this repository.</b></figcaption>
+</figure>
 
-<p align="center">
-  <img src="docs/images/stackn_diagram.png" width="100%" title="hover text">
-</p>
-<p align="center">
-  <img src="docs/images/stackn_serve_overview.png" width="100%" title="hover text">
-</p>
+<figure>
+  <p align="center">
+    <img src="docs/images/stackn_serve_overview.png" width="100%" title="hover text">
+  </p>
+  <figcaption align = "center"><b>Overview of STACKn Serve UI</b></figcaption>
+</figure>
 
 
 With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
