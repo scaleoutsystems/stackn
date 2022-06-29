@@ -37,6 +37,8 @@ def serialize_model(form_selection):
     obj = []
     if 'model' in form_selection:
         model_id = form_selection.get('model', None)
+        if type(model_id) == str:
+            model_id = int(model_id)
         obj = Model.objects.filter(pk=model_id)
         print("Fetching selected model:")
 

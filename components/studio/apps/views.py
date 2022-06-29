@@ -109,7 +109,7 @@ def filtered(request, user, project, category):
     project = Project.objects.get(slug=project)
     try:
         apps = Apps.objects.filter(pk__in=Subquery(
-            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj).order_by(
+            Apps.objects.filter((Q(access="public") | Q(projects__in=[project])), category=cat_obj, user_can_create=True).order_by(
                 'slug', '-revision').distinct('slug').values('pk')
         )).order_by('-priority')
     except Exception as err:
@@ -242,7 +242,7 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
     app_sett = app.settings
 
     # Set up form
-    print("CREATING APP...")
+    print(f"CREATING APP: {app.name}")
     print("GENERATING FORM")
     form = generate_form(app_sett, project, app, user, [])
     print("FORM GENERATED: {}".format(form))

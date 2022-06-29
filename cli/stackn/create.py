@@ -1,9 +1,11 @@
+import json
+
 import click
 
 from .main import main
-from .stackn import (create_app, create_apps, create_meta_resource,
-                     create_object, create_project, create_template,
-                     create_templates)
+from .stackn import (create_app, create_appinstance, create_apps,
+                     create_meta_resource, create_object, create_project,
+                     create_template, create_templates)
 
 
 class AliasedGroup(click.Group):
@@ -42,6 +44,28 @@ def app(settings, chart, logo, studio_url, secure):
 def apps(studio_url, secure):
     create_apps(studio_url=studio_url,
                 secure_mode=secure)
+
+
+@create.command('appinstance')
+@click.option('-u', '--studio-url', required=False, default=[], help="Studio URL")
+@click.option('-p', '--project', required=False, default=[], help="Project name")
+@click.option('--secure/--insecure', default=True)
+@click.argument('file')
+def apps(studio_url, project, secure, file):
+    """Deploy an app instance based on parameters given in FILE.\n
+       Example FILE: {"app_name": "test",\n
+                      "slug": "jupyter-lab",\n
+                      "app:volumeK8s": ["project-vol"],\n
+                      "environment": "Jupyter Lab",\n
+                      "permission": "project",\n
+                      "flavor": "Medium",\n
+                      "app_action": "Create"}\n
+    """
+    with open(file) as f:
+        data = json.load(f)
+    click.echo(f"READING APP PARAMETERS: {data}")
+    create_appinstance(studio_url=studio_url, project=project, data=data,
+                       secure_mode=secure)
 
 
 @create.command('projecttemplate')
@@ -105,7 +129,7 @@ def obj(name, object_type, file_name, release_type, version, description, model_
 @create.command('project')
 @click.argument('name')
 @click.option('-d', '--description', required=False, default="")
-@click.option('-t', '--template', required=False, default="stackn-default")
+@click.option('-t', '--template', required=False, default="default")
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def project(name, description, template, studio_url, secure):

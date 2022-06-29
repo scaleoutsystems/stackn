@@ -28,8 +28,8 @@
           }
         },
         "environments": {
-          "Jupyter Notebook": {
-            "repository": "scaleoutsystems",
+          "Jupyter Lab": {
+            "repository": "ghcr.io/scaleoutsystems/stackn",
             "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
           },
@@ -46,9 +46,9 @@
     "model": "projects.projecttemplate",
     "pk": 2,
     "fields": {
-      "name": "STACKn Default",
+      "name": "MLFlow",
       "slug": "default",
-      "description": "Default project template.",
+      "description": "Track experiments and serve models from the model registry using MLFlow. ",
       "template": {
         "flavors": {
           "Medium": {
@@ -71,8 +71,8 @@
           }
         },
         "environments": {
-          "Jupyter Notebook": {
-            "repository": "scaleoutsystems",
+          "Jupyter Lab": {
+            "repository": "ghcr.io/scaleoutsystems/stackn",
             "image": "jupyter-stackn:develop",
             "app": "jupyter-lab"
           },
