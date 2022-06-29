@@ -3,7 +3,7 @@ import logging
 import click
 import pkg_resources
 
-version = pkg_resources.require("scaleout-cli")[0].version
+version = pkg_resources.require("stackn-cli")[0].version
 
 logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')  # , level=logging.DEBUG)
