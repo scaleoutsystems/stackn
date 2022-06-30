@@ -30,12 +30,6 @@
                         Catalogs
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{% url 'portal:home' %}">
-                            <i class="align-middle" data-feather="home"></i>
-                            <span class="align-middle">Home</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
                         <a class="sidebar-link" href="{% url 'portal:index' %}">
                             <i class="align-middle" data-feather="box"></i>
                             <span class="align-middle">Apps</span>
@@ -55,12 +49,6 @@
                         </a>
                     </li>
                     {% endif %}
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="https://scaleoutsystems.github.io/stackn/#/tutorial" target="_blank">
-                            <i class="align-middle" data-feather="file-text"></i>
-                            <span class="align-middle">User Guide</span>
-                        </a>
-                    </li>
                     {% block extra_sidebar_items %} {% endblock %}
                 </ul>
             </div>
@@ -106,6 +94,18 @@
 
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav navbar-align">
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://scaleoutsystems.github.io/stackn/#/tutorial" target="_blank">
+                                <i class="align-middle" data-feather="file-text"></i>
+                                <span class="align-middle">User Guide</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'portal:home' %}">
+                                <i class="align-middle" data-feather="home"></i>
+                                <span class="align-middle">About</span>
+                            </a>
+                        </li>
                         {% if request.user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#"
@@ -137,18 +137,18 @@
                                     </a>
                                 </div>
                             </li>
-                            {% block extra_topnav_items %} {% endblock %}
-                        {% else %}
-                        <div>
-                            <a class="btn btn-info" href="{% url 'common:signup' %}">
-                                Sign up  <i class="align-middle me-1" data-feather="user-check"></i>
-                            </a>
-                            <a class="btn btn-success" href="{% url 'login' %}">
-                                Sign in  <i class="align-middle me-1" data-feather="log-in"></i>
-                            </a>
-                        </div>
-                        {% endif %}
-                    </ul>
+                        </ul>  
+                        {% else %}  
+                      <div class="btn">
+                        <a class="btn btn-info  d-sm-inline-block" href="{% url 'common:signup' %}">
+                            Sign up
+                            <i class="align-middle me-1" data-feather="user-check"></i>
+                        </a>
+                        <a class="btn btn-success d-sm-inline-block" href="{% url 'login' %}">
+                            Sign in  <i class="align-middle" data-feather="log-in"></i>
+                        </a>
+                    </div>
+                    {% endif %}        
                 </div>
             </nav>
             <main class="content">
