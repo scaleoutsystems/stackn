@@ -88,7 +88,7 @@ At this directory there are two files that need to be quickly modified before ru
   - The settings file for the Django project. Update this file by searching and replacing **all** occurrences of `<your-domain>` with your local IP or localhost domain. Obs that certain features will not work if using localhost since stackn apps depends on an external ingress controller. Therefore, it can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain>` field becomes `192.168.1.10.nip.io`.
 
 
-**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called [`init.sh`](https://github.com/scaleoutsystems/charts/blob/release/v0.6.0/scaleout/stackn/values-utility-script.sh). 
+**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called init.sh. 
 
 3. Finally, fire up STACKn with the following simple command:
 ```
@@ -106,7 +106,7 @@ The `INIT` flag tells the studio container whether the initial database migratio
 Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
 <br />
 <br />
-# Production ready deployment
+# Production deployment
 Please contact info@scaleoutsystems.com or reach out to the maintainers! 
 # Where is STACKn used?
 STACKn is used in various places, an example include [SciLifeLab Data Center](https://www.scilifelab.se/data). For a live view of their deployment visit [Scilifelab Serve](https://serve.scilifelab.se/).
