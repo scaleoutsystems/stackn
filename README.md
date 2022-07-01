@@ -15,31 +15,38 @@ Community<br>
 
 # What is STACKn?
 
-STACKn is a lightweight, cloud-native machine learning platform that lets data scientist collaborate on ML projects where they can share datasets, work in Notebook environments, use tracking (MLFlow), and register, version and serve models. STACKn also lets you deploy model and apps in public or private catalouges for sharing model endpoints and custom dashboards.   
+STACKn is a lightweight, cloud-native machine learning platform that lets data scientist collaborate on ML projects where they can share datasets, work in Notebook environments, track experiments and serve ML models. STACKn also lets you deploy models and apps in public or private catalouges for sharing model endpoints and custom dashboards.   
 
 <figure>
   <p align="center">
     <img src="docs/images/stackn_diagram.png" width="100%" title="hover text">
   </p>
-  <figcaption align = "center"><b>Components of Stackn. Observe that not all apps in this figure are included in this repository.</b></figcaption>
+  <figcaption align = "center"><b>Overview of the components and workspaces of STACKn. Observe that STACKn has a plug-in atchitecture for applications and not all apps in this figure are included in this repository.</b></figcaption>
 </figure>
+
+<br />
+<br />
 
 <figure>
   <p align="center">
     <img src="docs/images/stackn_serve_overview.png" width="100%" title="hover text">
   </p>
-  <figcaption align = "center"><b>Overview of STACKn Serve UI</b></figcaption>
+  <figcaption align = "center"><b>Overview of STACKn Serve UI. The user deploys models choosing from popular open source model serving software, exposed as easily configurable applications. The same functionality is also available from the CLI. </b></figcaption>
 </figure>
+<br />
+<br />
+
 
 STACKn is a Django framework implementing project-based multi-tenancy, autentication, authorization and object-level permissions on top of popular open source data science tools. An intuitive UI lets users create private or shared projects in which various assets are deployed: 
 
 - Storage: manage private and shared storage volumes and object storage. Control access on a project and user level. 
-- Open source data science tools: Jupyter notebooks, RStudio and MLFlow. 
-- STACKn Models: Store and version models (model registry), serve models using tools such as Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
+- Notebooks: Jupyter notebooks, RStudio 
+- Experiment tracking: MLFlow 
+- Model registry and serving: STACKn Models, MLFlow, Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
 - Environments: Configure custom Docker environments backing the applications.  
-- Deploy dashboards: Create and host custom custom Dash, Flask and RShiny UIs and apps based on served model endpoints.     
+- Dashboards / Apps: Easily deploy and host Dash, Flask and RShiny UIs and apps.     
 
-STACKn is highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
+STACKn is highly customizable and cloud agnostic. Deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
 <br />
 <br />
