@@ -15,34 +15,44 @@ Community<br>
 
 # What is STACKn?
 
-STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
+STACKn is a lightweight, cloud-native machine learning platform that lets data scientist collaborate on ML projects where they can share datasets, work in Notebook environments, track experiments and serve ML models. STACKn also lets you deploy models and apps in public or private catalouges for sharing model endpoints and custom dashboards.   
+
 <figure>
   <p align="center">
     <img src="images/stackn_diagram.png" width="100%" title="hover text">
   </p>
-  <figcaption align = "center"><b>Components of Stackn. Observe that not all apps in this figure are included in this repository.</b></figcaption>
+  <figcaption align = "center"><b>Overview of the components and workspaces of STACKn. Observe that STACKn has a plug-in atchitecture for applications and not all apps in this figure are included in this repository.</b></figcaption>
 </figure>
+
+<br />
+<br />
 
 <figure>
   <p align="center">
     <img src="images/stackn_serve_overview.png" width="100%" title="hover text">
   </p>
-  <figcaption align = "center"><b>Overview of STACKn Serve UI</b></figcaption>
+  <figcaption align = "center"><b>Overview of STACKn Serve UI. The user deploys models choosing from popular open source model serving software, exposed as easily configurable applications. The same functionality is also available from the CLI. </b></figcaption>
 </figure>
+<br />
+<br />
 
 
-With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
-- Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
-- Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
-- STACKn Models: enables trained models to be deployed and served using tools such as Tensorflow Serving, PyTorch Serve and MLFlow Serve, which in turn enables deployment of analytics apps and custom UIs using served model endpoints (Dash, Flask etc).     
+STACKn is a Django framework implementing project-based multi-tenancy, autentication, authorization and object-level permissions on top of popular open source data science tools. An intuitive UI lets users create private or shared projects in which various assets are deployed: 
 
-STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
+- Storage: manage private and shared storage volumes and object storage. Control access on a project and user level. 
+- Notebooks: Jupyter notebooks, RStudio 
+- Experiment tracking: MLFlow 
+- Model registry and serving: STACKn Models, MLFlow, Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
+- Environments: Configure custom Docker environments backing the applications.  
+- Dashboards / Apps: Easily deploy and host Dash, Flask and RShiny UIs and apps.     
+
+STACKn is highly customizable and cloud agnostic. Deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
 
 <br />
 <br />
 
 # Setup a local deployment
-This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
+This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates.
 <br />
 
 ## Setup single-node microk8s
@@ -81,7 +91,7 @@ $ git clone https://github.com/scaleoutsystems/stackn.git
 ```
 $ cd stackn/components/studio
 ```
-At this directory there are two files that need to be quickly modified before running the command `docker-compose up`:
+At this directory there are two files that need to be modified before running the command `docker-compose up`:
 - `cluster.conf`
   - update this file with your kubernetes cluster config by running: `$ microk8s config > ./cluster.conf`
 - `studio/settings.py`
@@ -97,13 +107,13 @@ $ docker-compose up
 **Note:** in the `docker-compose.yaml` file, it is important to know and be aware that there exists flag for the studio container which default value is:
 - `INIT=true`
 
-This flag is used by the studio container when starting the web server with the script [`run_web.sh`](https://github.com/scaleoutsystems/stackn/blob/release/v0.6.0-1/components/studio/scripts/run_web.sh).
+This flag is used by the studio container when starting the web server with the script run_web.sh which is located in ./components/studio/scripts/run_web.sh.
 
 The `INIT` flag tells the studio container whether the initial database migrations, fixtures and admin user should be created. This means that such flag should be set to `true` whenever a fresh instance/deployment of STACKn is needed.
 
 
 ## Start using STACKn
-Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
+Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://scaleoutsystems.github.io/stackn/#/tutorial) to get you started! Happy STACKning!  
 <br />
 <br />
 # Production deployment

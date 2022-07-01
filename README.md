@@ -52,7 +52,7 @@ STACKn is highly customizable and cloud agnostic. Deployments can be configured 
 <br />
 
 # Setup a local deployment
-This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
+This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates.
 <br />
 
 ## Setup single-node microk8s
@@ -91,14 +91,14 @@ $ git clone https://github.com/scaleoutsystems/stackn.git
 ```
 $ cd stackn/components/studio
 ```
-At this directory there are two files that need to be quickly modified before running the command `docker-compose up`:
+At this directory there are two files that need to be modified before running the command `docker-compose up`:
 - `cluster.conf`
   - update this file with your kubernetes cluster config by running: `$ microk8s config > ./cluster.conf`
 - `studio/settings.py`
   - The settings file for the Django project. Update this file by searching and replacing **all** occurrences of `<your-domain>` with your local IP or localhost domain. Obs that certain features will not work if using localhost since stackn apps depends on an external ingress controller. Therefore, it can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain>` field becomes `192.168.1.10.nip.io`.
 
 
-**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called init.sh. 
+**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called [`init.sh`](components/studio/init.sh). 
 
 3. Finally, fire up STACKn with the following simple command:
 ```
@@ -107,13 +107,13 @@ $ docker-compose up
 **Note:** in the `docker-compose.yaml` file, it is important to know and be aware that there exists flag for the studio container which default value is:
 - `INIT=true`
 
-This flag is used by the studio container when starting the web server with the script [`run_web.sh`](https://github.com/scaleoutsystems/stackn/blob/release/v0.6.0-1/components/studio/scripts/run_web.sh).
+This flag is used by the studio container when starting the web server with the script [`run_web.sh`](components/studio/scripts/run_web.sh).
 
 The `INIT` flag tells the studio container whether the initial database migrations, fixtures and admin user should be created. This means that such flag should be set to `true` whenever a fresh instance/deployment of STACKn is needed.
 
 
 ## Start using STACKn
-Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
+Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://scaleoutsystems.github.io/stackn/#/tutorial) to get you started! Happy STACKning!  
 <br />
 <br />
 # Production deployment
