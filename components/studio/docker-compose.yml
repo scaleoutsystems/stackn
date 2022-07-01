@@ -19,7 +19,7 @@ services:
   studio:
     container_name: studio
     build: .
-    image: scaleoutsystems/studio-dev:v060
+    image: scaleoutsystems/studio-dev:latest
     command: sh scripts/run_web.sh
     environment:
       - GET_HOSTS_FROM=dns
