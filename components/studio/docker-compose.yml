@@ -20,7 +20,7 @@ services:
     container_name: studio
     build: .
     image: scaleoutsystems/studio-dev:latest
-    command: sh scripts/run_web.sh
+    command: ["scripts/wait-for-it.sh", "db:5432", "--", sh, scripts/run_web.sh]
     environment:
       - GET_HOSTS_FROM=dns
       - KUBECONFIG=/root/.kube/config
