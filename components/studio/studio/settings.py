@@ -269,7 +269,7 @@ AUTH_DOMAIN = '<your-domain>'
 AUTH_PROTOCOL = 'http'
 STUDIO_URL = 'http://studio.<your-domain>:8080'
 # To enable sticky sessions for k8s ingress
-SESSION_COOKIE_DOMAIN = ".<your-domain>"
+SESSION_COOKIE_DOMAIN = '.<your-domain>'
 
 # Local dependecies Models
 PROJECTS_MODEL = 'projects.Project'
