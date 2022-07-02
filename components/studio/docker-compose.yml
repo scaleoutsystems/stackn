@@ -23,13 +23,13 @@ services:
     command: ["scripts/wait-for-it.sh", "db:5432", "--", sh, scripts/run_web.sh]
     environment:
       - GET_HOSTS_FROM=dns
-      - KUBECONFIG=/root/.kube/config
+      - KUBECONFIG=/app/cluster.conf
       - DJANGO_SUPERUSER_PASSWORD=dGhpaXNhdmVyeW5vdHNhZmVvbmx
       - DEBUG=true
       - INIT=true
     volumes:
       - .:/app:cached
-      - ${PWD}/cluster.conf:/root/.kube/config
+      - ${PWD}/cluster.conf:/app/cluster.conf
     depends_on:
       - db
     networks:
@@ -89,11 +89,11 @@ services:
     image: scaleoutsystems/studio-dev:v060
     command: sh ./scripts/run_worker.sh
     environment:
-      - KUBECONFIG=/root/.kube/config
+      - KUBECONFIG=/app/cluster.conf
       - BASE_PATH=/app
     volumes:
       - .:/app:cached
-      - ${PWD}/cluster.conf:/root/.kube/config
+      - ${PWD}/cluster.conf:/app/cluster.conf
     links:
       - db
       - studio
@@ -115,11 +115,11 @@ services:
     image: scaleoutsystems/studio-dev:v060
     command: sh ./scripts/run_beat.sh
     environment:
-      - KUBECONFIG=/root/.kube/config
+      - KUBECONFIG=/app/cluster.conf
       - BASE_PATH=/app
     volumes:
       - .:/app:cached
-      - ${PWD}/cluster.conf:/root/.kube/config
+      - ${PWD}/cluster.conf:/app/cluster.conf
     links:
       - db
       - studio
