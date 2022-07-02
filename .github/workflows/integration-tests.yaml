@@ -35,7 +35,7 @@ jobs:
       run: |
         set -ex
         echo "Running init script"
-        ./init.sh
+        ./init.sh --no-prompt
         echo "Deploying studio"
         docker-compose up -d
     - name: install CLI
