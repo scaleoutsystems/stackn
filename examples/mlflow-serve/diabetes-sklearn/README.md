@@ -14,5 +14,5 @@ From inside a Jupyter lab instance:
 - `conda env create -f env_test.yaml`
 - Once that is done: `./tests serve --endpoint https://<release>.domain/invocations`
 - Where the endpoint is the URL you copied from the browser.
-- Obs! If your domain is .127.0.0.1.nip.io the above request won't work, instead use `--endpoint http://<service-name>/invocations`
+- Obs! If your domain is .127.0.0.1.nip.io the above request won't work, instead use `--endpoint http://<release>-mlflow-svc/invocations`
 
