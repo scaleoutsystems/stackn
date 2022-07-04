@@ -18,7 +18,7 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: {{ $.Release.Name }}-{{ .Values.appname }}-svc
+            serviceName: {{ $.Release.Name }}-pytorch-svc
             servicePort: 80
   tls:
     - secretName: prod-ingress
@@ -45,7 +45,7 @@ spec:
         - path: /
           backend:
             service:
-              name: {{ $.Release.Name }}-{{ .Values.appname }}-svc
+              name: {{ $.Release.Name }}-pytorch-svc
               port:
                 number: 80
           pathType: ImplementationSpecific
