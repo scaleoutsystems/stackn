@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    image: scaleoutsystems/ingress:master
+    image: scaleoutsystems/ingress-dev:latest
     environment:
       - GET_HOSTS_FROM=dns
     container_name: ingress
