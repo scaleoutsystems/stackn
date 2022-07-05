@@ -89,6 +89,8 @@ jobs:
       id: mnist
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo "Copying examples folder to pod"
+        kubectl cp ./examples/ $POD_NAME:./examples
         echo "Running build model"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh"
         sleep 10
