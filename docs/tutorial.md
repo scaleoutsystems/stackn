@@ -62,11 +62,12 @@ From inside a Jupyter lab instance:
 - From the UI click on the link for the MLFlow server. Observe the newly created ecperiment under the "Experiment" tab. Also observe the newly created model (version 1) under the "Models" tab.
 - From the STACKn UI navigate to the "Serve" tab. Create a new MLFlow-Serve instance using the newly created model. Once the status has been updated to Running, click on the "Open" link and copy the URL (endpoint) from the browser URL field. If you get a "Bad gateway" error message the MLFlow-Serve service might not yet be ready. If so, try again later.
 
-### Inference requests
+## Inference requests
 - In ./tests/tests is an example of how to send inference request to the service. To run this tests you first need to create conda environment provided in the folder:
-- `conda create env -f env_test.yaml`
-- Once that is done: `./tests predict --endpoint https://\<release\>.domain/invocations`
+- `conda env create -f env_test.yaml`
+- Once that is done: `./tests serve --endpoint https://<release>.domain/invocations`
 - Where the endpoint is the URL you copied from the browser.
+- Obs! If your domain is .127.0.0.1.nip.io the above request won't work, instead use `--endpoint http://<release>-mlflow-svc/invocations`
 
 ## MNIST-KERAS Tensorflow Serve Example
 
@@ -74,9 +75,10 @@ based on: https://github.com/scaleoutsystems/fedn/tree/master/examples/mnist-ker
 
 From inside jupyter lab:
 
-### Instructions
+## Instructions
 - `$ ./build.sh`
 - The above script will create a neural network using Tensorflow, save the model and create a STACKn model object using the API. Navigate to the project dashboard and confirm the the model object has been created.
 - Create a Tensorflow-serve instance from STACKn UI, copy the endpoint URL: From the project dashboard navigate to the Serve tab and create a Tensorflow-Serve instance using the newly created model object. When status has been updated to "Running", click on the "open" link and copy the URL(endpoint excluding :predict) from the browser URL field.
 - From the jupyter lab instance: `$ ./entrypoint predict --endpoint https://\<release\>.domain/v1/models/models`
-- Running the above script will send an inference request to the serve endpoint using some test data. 
+- Running the above script will send an inference request to the serve endpoint using some test data.
+- Obs! If your domain is .127.0.0.1.nip.io the above request won't work, instead use `--endpoint http://<release>-tf-svc/v1/models/models`
