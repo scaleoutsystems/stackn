@@ -34,7 +34,7 @@ jobs:
       run: |
         docker build -t ghcr.io/scaleoutsystems/stackn/jupyter-stackn:develop cli/ -f components/studio/charts/apps/jupyter-lab/Dockerfile
         docker save ghcr.io/scaleoutsystems/stackn/jupyter-stackn:develop > jupyter.tar
-        microk8s ctr image import jupyter.tar
+        sudo microk8s ctr image import jupyter.tar
     - name: start studio
       working-directory: ${{env.working-directory}}
       id: setup
@@ -89,8 +89,6 @@ jobs:
       id: mnist
       run: |
         POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
-        echo "Copying examples folder to pod"
-        kubectl cp ./examples/ $POD_NAME:./examples
         echo "Running build model"
         kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh"
         sleep 10
