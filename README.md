@@ -51,8 +51,9 @@ STACKn is highly customizable and cloud agnostic. Deployments can be configured 
 <br />
 <br />
 
-# Setup a local deployment
+# Setup kubernetes cluster (single node)
 This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates.
+Below are instructions to install a local kubernetes cluster (single node) via Microk8s, however, you can use any kubernetes manager. 
 <br />
 
 ## Setup single-node microk8s
@@ -80,7 +81,29 @@ microk8s config >> ~/.kube/config
 5. Finally, install the latest version of Helm since microk8s is usually not packaged with the latest Helm version.
 **Follow the instructions** [here](https://helm.sh/docs/intro/install/#from-apt-debianubuntu)
 
-## Install STACKn for Local Development with Docker-Compose
+## (Quick start) Deploy STACKn via Helm
+
+Change `global.postgresql.storageClass` for your particular cluster.
+
+```bash
+$ helm repo add scaleout https://scaleoutsystems.github.io/charts/scaleout/stackn
+```
+Get kubernetes config, e.g:
+```bash
+$ cluster_config=$(cat ~/.kube/config | base64 | tr -d '\n')
+```
+Deploy the chart
+```bash
+$ helm install --set kubeconfig=$cluster_config --set global.postgresql.storageClass=microk8s-hostpath \
+  stackn scaleout/stackn
+```
+Once all services are up and running, navigate to http://studio.127.0.0.1.nip.io in your browser.
+
+
+
+
+## Deploy STACKn for local development with Docker Compose
+Observe that you still need a kubernetes cluster to deploy resources within STACKn. However, for local development of the Django project, we recommend deploying with docker compose.
 
 1. Clone this repository locally:
 ```
@@ -117,7 +140,7 @@ The `INIT` flag tells the studio container whether the initial database migratio
 
 
 ## Start using STACKn
-Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://scaleoutsystems.github.io/stackn/#/tutorial) to get you started! Happy STACKning!  
+Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://scaleoutsystems.github.io/stackn/#/tutorial) to get you started! Happy STACKning!
 <br />
 <br />
 # Production deployment
