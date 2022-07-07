@@ -19,26 +19,42 @@ def add_pmo_to_publish(mdl, pmodel):
     bucket = mdl.bucket
     region = mdl.s3.region
     filename = mdl.uid
+    path = mdl.path
+    #TODO: this is a quick bugfix, path for tensorflow models is "models", it should contain the model uid
+    if path == "models":
+        path = filename
     try:
         s3 = s3fs.S3FileSystem(
             key=access_key,
             secret=secret_key,
             client_kwargs={
-                'endpoint_url': 'https://'+host
+                'endpoint_url': 'http://'+host
             }
         )
     except Exception as err:
         print(err)
     print("Created S3 fs")
     try:
-        fobj = s3.open(bucket+'/'+filename, 'rb')
-    except Exception as err:
-        print(err)
-    print("Opened s3 file.")
-    try:
+        if path == filename:
+            fobj = s3.open(bucket+'/'+path, 'rb')
+        else:
+            #files = s3.ls(bucket+'/'+path)
+            #for f in files:
+            s3.get(bucket+'/'+path, './tmp/', recursive=True)
+            import tarfile
+            with tarfile.open("model.tar", "w") as tar:
+                tar.add("./tmp/")
+            
+            #TODO: delete tmp folder
+
+            fobj = open("./model.tar" ,"rb")
+
+        print("Opened s3 file.")
+
         pmo = PublicModelObject(model=mdl)
         pmo.save()
         pmo.obj.save(filename, fobj)
+        fobj.close()
     except Exception as err:
         print(err)
 
