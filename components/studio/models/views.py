@@ -713,7 +713,7 @@ def details_public(request, id):
     else:
         base_template = 'base.html'
 
-    media_url = get_download_url(id)
+    media_url = settings.MEDIA_URL
     print(media_url, flush=True)
     published_model = PublishedModel(pk=id)
     print(published_model, flush=True)
