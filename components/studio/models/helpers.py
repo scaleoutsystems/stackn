@@ -58,6 +58,9 @@ def get_download_url(model_id):
     minio_region = model.s3.region
 
     download_url = ""
+    path = ""
+    if model.object_type.slug == 'mlflow':
+        path = model.path 
     try:
         client = Minio(
             minio_host,
@@ -67,7 +70,7 @@ def get_download_url(model_id):
             secure=False
         )
 
-        download_url = client.presigned_get_object(bucket, uid)
+        download_url = client.presigned_get_object(bucket, path + uid)
     except Exception as e:
         print(e, flush=True)
 
