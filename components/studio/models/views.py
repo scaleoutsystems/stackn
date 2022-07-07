@@ -681,9 +681,10 @@ def details_private(request, user, project, id):
     # model = latest_model_obj.model
     # print(model_objs)
     # print(latest_model_obj)
-    media_url = get_download_url(id)
+    bucket = model.bucket
+    uid = model.uid
 
-    return render(request, 'models_details_public.html', locals())
+    return render(request, 'models_details_private.html', locals())
 
 
 def details_public(request, id):

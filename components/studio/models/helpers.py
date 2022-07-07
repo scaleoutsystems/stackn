@@ -35,18 +35,21 @@ def add_pmo_to_publish(mdl, pmodel):
         print(err)
     print("Created S3 fs")
     try:
+        # if e.g tensorflow model, the object is already compressed
         if path == filename:
             fobj = s3.open(bucket+'/'+path, 'rb')
+        #else if model is e.g mlflow, the model artifact is a folder and needs to be compressed
         else:
-            #files = s3.ls(bucket+'/'+path)
-            #for f in files:
+            #download files on folder inside bucket into tmp folder
             s3.get(bucket+'/'+path, './tmp/', recursive=True)
             import tarfile
+            #create tar file
             with tarfile.open("model.tar", "w") as tar:
                 tar.add("./tmp/")
-            
-            #TODO: delete tmp folder
-
+            import shutil
+            #remove tmp folder
+            shutil.rmtree("./tmp")
+            #open tar for later read 
             fobj = open("./model.tar" ,"rb")
 
         print("Opened s3 file.")
