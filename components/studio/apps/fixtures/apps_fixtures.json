@@ -253,7 +253,8 @@
         },
         "env_variables": {
           "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/invocation"
-        }
+        },
+        "publishable": "true"
       },
       "chart": "apps/mlflow-serve/chart",
       "logo": "apps/mlflow-serve/logo.png",
@@ -368,7 +369,8 @@
         },
         "env_variables": {
           "{{ app_name }}_URL": "https://{{ release }}.{{ global.domain }}/predictions/"
-        }
+        },
+        "publishable": "true"
       },
       "chart": "apps/pytorch-serve/chart",
       "logo": "apps/pytorch-serve/logo.png",
