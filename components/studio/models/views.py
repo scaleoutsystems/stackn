@@ -294,7 +294,7 @@ def list(request, user, project):
     project = Project.objects.filter(Q(owner=request.user) | Q(
         authorized=request.user), status='active', slug=project).distinct().first()
     models = Model.objects.filter(project=project).order_by(
-        'name', '-version').distinct('name')
+        'name', '-version')
 
     return render(request, template, locals())
 
@@ -334,7 +334,7 @@ def publish_model(request, user, project, id):
     model = Model.objects.get(pk=id)
     print(model)
     # Default behavior is that all versions of a model are published.
-    models = Model.objects.filter(name=model.name, project=model.project)
+    models = Model.objects.filter(id=id, name=model.name, project=model.project)
 
     img = settings.STATIC_ROOT + \
         'images/patterns/image-{}.png'.format(random.randrange(8, 13))
