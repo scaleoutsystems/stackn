@@ -386,10 +386,7 @@ def publish(request, user, project, category, ai_id):
         print(app)
         # TODO: Check that user is allowed to publish this app.
         print("setting public")
-        if app.access == "private":
-            app.access = "public"
-        else:
-            app.access = "private"
+        app.access = 'public'
         print("saving")
         app.save()
         print("done")
@@ -411,6 +408,10 @@ def delete(request, user, project, category, ai_id):
         from_page = 'filtered'
 
     delete_resource.delay(ai_id)
+    #fix: in case appinstance is public swich to private
+    app = AppInstance.objects.get(pk=ai_id)
+    app.access = 'private'
+    app.save()
 
     if 'from' in request.GET:
         from_page = request.GET.get('from')
