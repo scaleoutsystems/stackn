@@ -1,4 +1,6 @@
 import io
+import shutil
+import tarfile
 
 import s3fs
 from minio import Minio
@@ -42,11 +44,9 @@ def add_pmo_to_publish(mdl, pmodel):
         else:
             #download files on folder inside bucket into tmp folder
             s3.get(bucket+'/'+path, './tmp/', recursive=True)
-            import tarfile
             #create tar file
             with tarfile.open("model.tar", "w") as tar:
                 tar.add("./tmp/")
-            import shutil
             #remove tmp folder
             shutil.rmtree("./tmp")
             #open tar for later read 
