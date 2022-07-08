@@ -30,7 +30,7 @@
         "environments": {
           "Jupyter Lab": {
             "repository": "ghcr.io/scaleoutsystems/stackn",
-            "image": "jupyter-stackn:develop",
+            "image": "jupyter-stackn:v0.6.0-beta.1",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
@@ -73,7 +73,7 @@
         "environments": {
           "Jupyter Lab": {
             "repository": "ghcr.io/scaleoutsystems/stackn",
-            "image": "jupyter-stackn:develop",
+            "image": "jupyter-stackn:v0.6.0-beta.1",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
