@@ -32,9 +32,11 @@ jobs:
     - name: build jupyter-stackn image
       id: build_jupyter
       run: |
-        docker build -t ghcr.io/scaleoutsystems/stackn/jupyter-stackn:develop . -f components/studio/charts/apps/jupyter-lab/Dockerfile
-        docker save ghcr.io/scaleoutsystems/stackn/jupyter-stackn:develop > jupyter.tar
+        docker build -t ghcr.io/scaleoutsystems/stackn/jupyter-stackn:test . -f components/studio/charts/apps/jupyter-lab/Dockerfile
+        docker save ghcr.io/scaleoutsystems/stackn/jupyter-stackn:test > jupyter.tar
         sudo microk8s ctr image import jupyter.tar
+        echo "Changing jupyter-stackn test image in project template"
+        sed -i "s/\(\"image\": \"jupyter-stackn:.*\"\)/\"image\": \"jupyter-stackn:test\"/g" ./components/studio/projects/fixtures/projects_templates.json
     - name: start studio
       working-directory: ${{env.working-directory}}
       id: setup
