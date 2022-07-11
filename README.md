@@ -40,10 +40,11 @@ STACKn is a lightweight, cloud-native machine learning platform that lets data s
 STACKn is a Django framework implementing project-based multi-tenancy, autentication, authorization and object-level permissions on top of popular open source data science tools. An intuitive UI lets users create private or shared projects in which various assets are deployed: 
 
 - Storage: manage private and shared storage volumes and object storage. Control access on a project and user level. 
+- Environments: Configure Docker environments and project templates to create custom workspaces for ML development.   
 - Notebooks: Jupyter notebooks, RStudio 
 - Experiment tracking: MLFlow 
-- Model registry and serving: STACKn Models, MLFlow, Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
-- Environments: Configure custom Docker environments backing the applications.  
+- Model registry and serving: MLFlow, Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
+- Model catalog: Publish and organize models in a catalog, with model level access control.  
 - Dashboards / Apps: Easily deploy and host Dash, Flask and RShiny UIs and apps.     
 
 STACKn is highly customizable and cloud agnostic. Deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
