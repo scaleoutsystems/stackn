@@ -62,8 +62,11 @@ Below are instructions to install a local kubernetes cluster (single node) via M
 1. Install microk8s
 
 ```bash
-sudo snap install microk8s --classic
+sudo snap install microk8s --channel=1.20/stable --classic
 ```
+Obs: that we are using channel=1.20/stable here because it has been tested. 
+</br> 
+
 2. Add user to microk8s group and give permissions to the k8s config folder
 
 ```
