@@ -1,6 +1,0 @@
-namespace: default
-volumes: {}
-
-ingress:
-  v1beta1: false
-  secretName: prod-ingress

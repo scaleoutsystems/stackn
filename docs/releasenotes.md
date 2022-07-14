@@ -1,5 +1,24 @@
 # Release Notes
 
+## v0.6.0
+
+### New functionality
+- Major revamp removing Keycloak and instead using solely Django built-in User model.
+- OAuth2 now supported. See github and google example in studio/settings.py 
+- Deployment using docker-compose now available (still need a k8s cluster such as microk8s to deploy apps via helm charts)
+- Auth requests submodule used in nginx ingress for apps. This removes a lot of overhead since Keycloak required a reverse proxy per application.
+- A set of default apps and project templates are now loaded upon deployment. I.e you just need to modify cluster.conf and studio/settings.py to get started with docker-compose.
+- It's now possile to deploy apps using the CLI: `$ stackn create appinstance` (experimental feature).
+
+### Bug fixes
+- Several minor bug fixes and improvements
+
+
+### Other
+- Regular views permissions are now handled by django-guardian
+- Contribution.md has been updated (related to new integration and code tests) 
+
+
 ## v0.5.0
 
 ### New functionality

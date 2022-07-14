@@ -1,0 +1,6 @@
+# https://github.com/coder/code-server
+apiVersion: v1
+appVersion: "0.1"
+description: A Helm chart for VS code in the browser
+name: vscode
+version: 0.0.1

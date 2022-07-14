@@ -1,7 +1,8 @@
 version: '3'
 
 services:
-  stack-studio-db:
+  db:
+    container_name: db
     image: postgres
     environment:
       - GET_HOSTS_FROM=dns
@@ -9,35 +10,38 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - db.127.0.0.1.nip.io
+    volumes:
+      - db-data:/var/lib/postgresql/data
 
   studio:
+    container_name: studio
     build: .
-    image: scaleoutsystems/studio:master
-    command: sh scripts/run_web.sh
+    image: scaleoutsystems/studio-dev:latest
+    command: ["scripts/wait-for-it.sh", "db:5432", "--", sh, scripts/run_web.sh]
     environment:
       - GET_HOSTS_FROM=dns
+      - KUBECONFIG=/app/cluster.conf
+      - DJANGO_SUPERUSER_PASSWORD=dGhpaXNhdmVyeW5vdHNhZmVvbmx
+      - DEBUG=true
+      - INIT=true
     volumes:
       - .:/app:cached
+      - ${PWD}/cluster.conf:/app/cluster.conf
     depends_on:
-      - stack-studio-db
-    links:
-      - "stack-studio-db:stack-studio-db.default.svc.cluster.local"
+      - db
     networks:
-      - internal_network
-
-  chart-controller:
-    image: scaleoutsystems/chart-controller:master
-    ports:
-      - 80:80
-    networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - studio.127.0.0.1.nip.io
 
   ingress:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    image: scaleoutsystems/ingress:master
+    image: scaleoutsystems/ingress-dev:latest
     environment:
       - GET_HOSTS_FROM=dns
     container_name: ingress
@@ -49,18 +53,24 @@ services:
     depends_on:
       - studio
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - studio.127.0.0.1.nip.io
 
   redis:
     image: redis
+    container_name: redis
     hostname: redis
     ports:
       - "6379:6379"
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - redis.127.0.0.1.nip.io
   
   rabbit:
     image: rabbitmq
+    container_name: rabbitmq
     hostname: rabbit
     environment:
       - RABBITMQ_DEFAULT_USER=admin
@@ -69,27 +79,66 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - rabbit.127.0.0.1.nip.io
 
   celery-worker:
     build: .
-    image: scaleoutsystems/studio:master
+    container_name: celery-worker
+    image: scaleoutsystems/studio-dev:v060
     command: sh ./scripts/run_worker.sh
+    environment:
+      - KUBECONFIG=/app/cluster.conf
+      - BASE_PATH=/app
     volumes:
       - .:/app:cached
+      - ${PWD}/cluster.conf:/app/cluster.conf
     links:
-      - stack-studio-db
+      - db
       - studio
       - rabbit
       - redis
     depends_on:
-      - stack-studio-db
+      - db
       - studio
       - rabbit
       - redis
     networks:
-      - internal_network
+      internal_network:
+        aliases:
+          - celery.127.0.0.1.nip.io
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    image: scaleoutsystems/studio-dev:v060
+    command: sh ./scripts/run_beat.sh
+    environment:
+      - KUBECONFIG=/app/cluster.conf
+      - BASE_PATH=/app
+    volumes:
+      - .:/app:cached
+      - ${PWD}/cluster.conf:/app/cluster.conf
+    links:
+      - db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      internal_network:
+        aliases:
+          - celery-beat.127.0.0.1.nip.io
 
 networks:
   internal_network:
     driver: bridge
+
+volumes:
+  db-data:
+    

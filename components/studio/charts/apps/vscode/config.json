@@ -1,0 +1,24 @@
+{
+    "name": "VS Code",
+    "slug": "vscode",
+    "category": "develop",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "",
+    "settings": {
+        "apps": {
+            "Persistent Volume":"many"
+        },
+        "default_values": {
+            "port": "80",
+            "targetport": "8080"
+          },
+        "export-cli": "True",
+        "permissions": {
+            "public": {"value":"false", "option": "false"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        }
+    }
+}

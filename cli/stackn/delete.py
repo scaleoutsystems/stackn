@@ -1,6 +1,9 @@
 import click
+
 from .main import main
-from .stackn import delete_app, delete_object, delete_project, delete_meta_resource, delete_app_obj
+from .stackn import (delete_app, delete_meta_resource, delete_object,
+                     delete_project)
+
 
 class AliasedGroup(click.Group):
     def get_command(self, ctx, cmd_name):
@@ -10,16 +13,11 @@ class AliasedGroup(click.Group):
             pass
         return super().get_command(ctx, cmd_name)
 
+
 @main.group('delete')
 def delete():
-  pass
+    pass
 
-@delete.command('project')
-@click.argument('name')
-@click.option('-u', '--studio-url', required=False, default=[])
-@click.option('--secure/--insecure', default=True)
-def delete_proj(name, studio_url, secure):
-    delete_project(name, studio_url=studio_url, secure=secure)
 
 @delete.command('app')
 @click.argument('name')
@@ -29,14 +27,38 @@ def delete_proj(name, studio_url, secure):
 def app(name, studio_url, project, secure):
     delete_app(name, studio_url, project, secure)
 
-@delete.command('appobj')
-@click.argument('slug')
+
+@delete.command('environment')
+@click.argument('name')
+@click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
-def app(slug, studio_url, secure):
-    delete_app_obj(slug, studio_url=studio_url, secure=secure)
+def delete_env(name, project, studio_url, secure):
+    delete_meta_resource('environments', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
-@delete.command('object')
+
+@delete.command('flavor')
+@click.argument('name')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def delete_flavor(name, project, studio_url, secure):
+    delete_meta_resource('flavors', name, project=project,
+                         studio_url=studio_url, secure=secure)
+
+
+@delete.command('mlflow')
+@click.argument('name')
+@click.option('-p', '--project', required=False, default=[])
+@click.option('-u', '--studio-url', required=False, default=[])
+@click.option('--secure/--insecure', default=True)
+def delete_mlflow(name, project, studio_url, secure):
+    delete_meta_resource('mlflow', name, project=project,
+                         studio_url=studio_url, secure=secure)
+
+
+@delete.command('model-obj')
 @click.argument('name')
 @click.option('-v', '--version', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
@@ -49,45 +71,24 @@ def delete_obj(name, version, studio_url, project, secure):
                   project=project,
                   secure=secure)
 
-@delete.command('environment')
+
+@delete.command('project')
 @click.argument('name')
-@click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
-def delete_env(name, project, studio_url, secure):
-    delete_meta_resource('environments', name, project=project, studio_url=studio_url, secure=secure)
+def delete_proj(name, studio_url, secure):
+    delete_project(name, studio_url=studio_url, secure=secure)
 
-@delete.command('flavor')
-@click.argument('name')
-@click.option('-p', '--project', required=False, default=[])
-@click.option('-u', '--studio-url', required=False, default=[])
-@click.option('--secure/--insecure', default=True)
-def delete_flavor(name, project, studio_url, secure):
-    delete_meta_resource('flavors', name, project=project, studio_url=studio_url, secure=secure)
 
-@delete.command('MLflow')
-@click.argument('name')
-@click.option('-p', '--project', required=False, default=[])
-@click.option('-u', '--studio-url', required=False, default=[])
-@click.option('--secure/--insecure', default=True)
-def delete_mlflow(name, project, studio_url, secure):
-    delete_meta_resource('mlflow', name, project=project, studio_url=studio_url, secure=secure)
-
-@delete.command('S3')
+@delete.command('s3')
 @click.argument('name')
 @click.option('-p', '--project', required=False, default=[])
 @click.option('-u', '--studio-url', required=False, default=[])
 @click.option('--secure/--insecure', default=True)
 def delete_s3(name, project, studio_url, secure):
-    delete_meta_resource('s3', name, project=project, studio_url=studio_url, secure=secure)
+    delete_meta_resource('s3', name, project=project,
+                         studio_url=studio_url, secure=secure)
 
-@delete.command('releasename')
-@click.argument('name')
-@click.option('-p', '--project', required=False, default=[])
-@click.option('-u', '--studio-url', required=False, default=[])
-@click.option('--secure/--insecure', default=True)
-def delete_s3(name, project, studio_url, secure):
-    delete_meta_resource('releasenames', name, project=project, studio_url=studio_url, secure=secure)
 
 ALIASES = {
     "projects": delete_proj,

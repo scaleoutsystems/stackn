@@ -1,0 +1,10 @@
+namespace: default
+volumes: {}
+
+credentials:
+  username: admin
+  password: password
+
+ingress:
+  v1beta1: false
+  secretName: prod-ingress

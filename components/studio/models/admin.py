@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Model, ModelLog, Metadata, ObjectType
+from .models import Metadata, Model, ModelLog, ObjectType
 
 admin.site.register(Model)
 admin.site.register(ObjectType)

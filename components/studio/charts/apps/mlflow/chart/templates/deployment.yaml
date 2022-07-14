@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: mlflow
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: mlflow
+  template:
+    metadata:
+      labels:
+        release: {{ .Release.Name }}
+        app: mlflow
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: mlflow
+    spec:
+      initContainers:
+      - image: alpine:latest
+        name: init-auth
+        command: ["/bin/sh"]
+        args: ["-c", "apk add apache2-utils && htpasswd -Bbn {{ .Values.credentials.username }} {{ .Values.credentials.password }} > /auth/htpasswd"]
+        volumeMounts:
+        - name: auth-vol
+          mountPath: /auth
+      - name: create-bucket
+        image: minio/mc
+        env:
+        - name: S3_ACCESS_KEY_ID
+          value: {{ .Values.s3.access_key }}
+        - name: S3_SECRET_ACCESS_KEY
+          value: {{ .Values.s3.secret_key }}
+        - name: AWS_REGION
+          value: us-east-1
+        - name: S3_ENDPOINT
+          value: "http://{{ .Values.s3.service }}:{{ .Values.s3.port }}"
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        args: ["-c", "mc alias set projminio $S3_ENDPOINT $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY;mc mb projminio/mlflow || echo 'Bucket mlflow already exists'"]
+      containers:
+      - name: api-reverse-proxy
+        image: nginx:alpine
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: rp-conf
+          mountPath: /etc/nginx
+        - name: auth-vol
+          mountPath: /auth
+      - image: scaleoutsystems/mlflow-server:latest
+        imagePullPolicy: IfNotPresent
+        name: mlflow
+        env:
+        - name: BACKEND_STORE_URI
+          value: sqlite:///mlruns/mydb.sqlite
+        - name: MLFLOW_BUCKET
+          value: mlflow
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: "http://{{ .Values.s3.service }}:{{ .Values.s3.port }}"
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.s3.access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.s3.secret_key }}
+        ports:
+        - containerPort: 5000
+        # command: ["/bin/sh"]
+        # args: ["-c", "mlflow server --host 0.0.0.0:5000"]
+        resources: {}
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volumeK8s }}
+        - name: {{ $key }}
+          mountPath: /mlruns
+        {{- end }}
+      hostname: {{ .Release.Name }}
+      restartPolicy: Always
+      volumes:
+      - name: auth-vol
+        emptyDir: {}
+      - name: rp-conf
+        configMap:
+          name: {{ .Release.Name }}-rp-config
+      {{- range $key, $value := .Values.apps.volumeK8s }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

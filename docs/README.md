@@ -1,5 +1,13 @@
 ![alt text](https://thumb.tildacdn.com/tild3162-6435-4365-a230-656137616436/-/resize/560x/-/format/webp/stacknlogo3.png)
 
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/integration-tests.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/integration-tests.yaml)
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/cli-code-checks.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/cli-code-checks.yaml.yaml)
+[<img src="https://github.com/scaleoutsystems/stackn/actions/workflows/studio-code-checks.yaml/badge.svg">](https://github.com/scaleoutsystems/stackn/actions/workflows/studio-code-checks.yaml.yaml)
+[<img src="https://badgen.net/badge/icon/docs?icon=github&label">](https://scaleoutsystems.github.io/stackn/#/)
+
+Community<br>
+[<img src="https://badgen.net/badge/icon/discord?icon=discord&label">](https://discord.gg/KMg4VwszAd)
+
 * [What is STACKn?](#what-is-stackn)
 * [Setup a local deployment](#setup-a-local-deployment)
 * [Where is STACKn used?](#where-is-stackn-used)
@@ -7,29 +15,44 @@
 
 # What is STACKn?
 
-STACKn is a machine learning platform that lets data scientist collaborate on projects where they can share datasets, work in various development environments, and deploy and serve trained models and analytics apps without worrying about DevOps.
+STACKn is a lightweight, cloud-native machine learning platform that lets data scientist collaborate on ML projects where they can share datasets, work in Notebook environments, track experiments and serve ML models. STACKn also lets you deploy models and apps in public or private catalouges for sharing model endpoints and custom dashboards.   
 
-<p align="center">
-  <img src="images/STACKn_overview.svg" width="100%" title="STACKn overview">
-</p>
-<p align="center">
-  <img src="images/stackn_serve_overview.png" width="100%" title="STACKn serve overview">
-</p>
+<figure>
+  <p align="center">
+    <img src="images/stackn_diagram.png" width="100%" title="hover text">
+  </p>
+  <figcaption align = "center"><b>Overview of the components and workspaces of STACKn. Observe that STACKn has a plug-in atchitecture for applications and not all apps in this figure are included in this repository.</b></figcaption>
+</figure>
 
-
-
-With an intuitive web UI, users can create private or shared projects in which various data science applications can be deployed, such as
-- Dataset: project storage volumes, object stores, and databases for storing and sharing datasets.
-- Environments and apps: Jupyter notebooks, VSCode, MLFlow etc. for experimentation and training models with pre-configured data science environments.
-- STACKn Models: enables trained models to be deployed and served using tools such as Tensorflow Serving, PyTorch Serve and MLFlow Serve, which in turn enables deployment of analytics apps and custom UIs using served model endpoints (Dash, Flask etc).     
-
-STACKn has been designed to be highly customizable (but comes packaged with the most widely used applications) and cloud agnostic.  STACKn deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
-
-STACKn also integrates [FEDn](https://github.com/scaleoutsystems/fedn), a framework for federated machine learning which enables collaborative projects between stakeholders where data cannot be shared due to private, regulatory or practical reasons.   
 <br />
 <br />
+
+<figure>
+  <p align="center">
+    <img src="images/stackn_serve_overview.png" width="100%" title="hover text">
+  </p>
+  <figcaption align = "center"><b>Overview of STACKn Serve UI. The user deploys models choosing from popular open source model serving software, exposed as easily configurable applications. The same functionality is also available from the CLI. </b></figcaption>
+</figure>
+<br />
+<br />
+
+
+STACKn is a Django framework implementing project-based multi-tenancy, autentication, authorization and object-level permissions on top of popular open source data science tools. An intuitive UI lets users create private or shared projects in which various assets are deployed: 
+
+- Storage: manage private and shared storage volumes and object storage. Control access on a project and user level. 
+- Notebooks: Jupyter notebooks, RStudio 
+- Experiment tracking: MLFlow 
+- Model registry and serving: STACKn Models, MLFlow, Tensorflow Serving, PyTorch Serve and MLFlow Serve. 
+- Environments: Configure custom Docker environments backing the applications.  
+- Dashboards / Apps: Easily deploy and host Dash, Flask and RShiny UIs and apps.     
+
+STACKn is highly customizable and cloud agnostic. Deployments can be configured on any infrastructure that implements the Kubernetes API, and is packaged using Helm charts.
+
+<br />
+<br />
+
 # Setup a local deployment
-This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates. For a production deployment, please see the [documentation](https://scaleoutsystems.github.io/stackn/#/?id=setup).
+This deployment is for quick testing on Debian/Ubuntu and will not require any TLS certificates.
 <br />
 
 ## Setup single-node microk8s
@@ -57,98 +80,56 @@ microk8s config >> ~/.kube/config
 5. Finally, install the latest version of Helm since microk8s is usually not packaged with the latest Helm version.
 **Follow the instructions** [here](https://helm.sh/docs/intro/install/#from-apt-debianubuntu)
 
-## Install STACKn
+## Install STACKn for Local Development with Docker-Compose
 
-1. Clone  Helm chart repo for STACKn
+1. Clone this repository locally:
 ```
-git clone https://github.com/scaleoutsystems/charts.git
-```
-2. A template file for values.yaml can be found in “charts/scaleout/stackn”
-Please make sure to follow the instructions that you will find **at the beginning of this file** in order to set some required values, such as:
-
-- StorageClass for microk8s is “microk8s-hostpath”
-
-- Search and replace **all** occurrences of `<your-domain.com>` with your local IP domain. It can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain.com>` field becomes `192.168.1.10.nip.io`
-
-- Set  `oidc.verify_ssl = false`, this will enable insecure options (without certificates)
-
-- Setting passwords are optional, but we recommend setting  `global.studio.superUser` and `global.studio.superUserPassword` since these are required in step 6.,   if these are left blank passwords will be auto generated.
-
-- Copy your kubernetes cluster config and paste it in the values.yaml under the `cluster_config` field. Your kubernetes config file should be locate under the path `$HOME/.kube`; otherwise if you have followed this tutorial and used microk8s, then run the command:
-
-```
-microk8s config
+$ git clone https://github.com/scaleoutsystems/stackn.git
 ```
 
-3. After the `values.yaml` is set, install STACKn via helm. This will take several minutes:
+2. Navigate to the directory “components/studio“:
 ```
-helm install stackn charts/scaleout/stackn -f values.yaml
+$ cd stackn/components/studio
 ```
-**Note:** Instead of directly using the `values.yaml` file, one could make a copy out of it and use that. For instance:
+At this directory there are two files that need to be modified before running the command `docker-compose up`:
+- `cluster.conf`
+  - update this file with your kubernetes cluster config by running: `$ microk8s config > ./cluster.conf`
+- `studio/settings.py`
+  - The settings file for the Django project. Update this file by searching and replacing **all** occurrences of `<your-domain>` with your local IP or localhost domain. Obs that certain features will not work if using localhost since stackn apps depends on an external ingress controller. Therefore, it can be useful to use a wildcard dns such as [nip.io](http://nip.io). For example, if your local IP is 192.168.1.10 then the `<your-domain>` field becomes `192.168.1.10.nip.io`.
+
+
+**Note:** We have created a quite basic shell utility script that takes care of the above manual changes. You can find it under the same directory (i.e. `stackn/components/studio`) and it is called init.sh. Follow the instruction in the prompt.
+
 ```bash
-cp values.yaml my-values.yaml
-vim my-values.yaml # perform all the necessary changes
-helm install stackn charts/scaleout/stackn -f my-values.yaml
+./init.sh
 ```
 
-4. Go to studio in your browser: (for example `studio.stackn.192.168.1.10.nip.io`)
+3. Finally, fire up STACKn with the following simple command:
 ```
-https://studio.<your-domain.com>
+$ docker-compose up
 ```
-5. Register a new user. Press "sign in"  
+**Note:** in the `docker-compose.yaml` file, it is important to know and be aware that there exists flag for the studio container which default value is:
+- `INIT=true`
 
-6. Go to django admin page:
-```
-https://studio.<your-domain.com>/admin
-```
-- Sign in with the superuser which was set in helm values (\<global\>.studio.superUser and \<global\>.studio.superUserPassword). If these values were omitted, the password can be found in the Secret "stackn" and superUser is by default "admin".
+This flag is used by the studio container when starting the web server with the script run_web.sh which is located in ./components/studio/scripts/run_web.sh.
 
-- Go to "Users" tab and click on the user you created earlier.
+The `INIT` flag tells the studio container whether the initial database migrations, fixtures and admin user should be created. This means that such flag should be set to `true` whenever a fresh instance/deployment of STACKn is needed.
 
-- Give the user all permission (superuser, staff), then “save”.
 
- ## Install default apps and project templates
-
-1.  Clone this repository
-```
-git clone https://github.com/scaleoutsystems/stackn.git
-```
-2. Install STACKn CLI
-```
-cd stackn/cli
-sudo python3 setup.py install
-```
-3. Login with the user (which you created in studio)
-```
-stackn login -u <user-email> -p <password> --insecure --url studio.<your-domain.com>
-```
-
-4. Install the project templates.
-
-```
-cd ../../projecttemplates/default
-stackn create projecttemplate --insecure
-cd ../fedn-mnist/
-stackn create projecttemplate --insecure
-```
-5 . Install apps
-```
-cd ../../apps
-stackn create apps --insecure
-```
 ## Start using STACKn
-Open studio in your browser and create a new project. Here are [tutorials](https://github.com/scaleoutsystems/examples/tree/main/tutorials/studio) to get you started! Happy STACKning!  
+Open studio in your browser (for example `studio.192.168.1.10.nip.io:8080`), register a new user with the "Sign up" button and create a new project. Here are [tutorials](https://scaleoutsystems.github.io/stackn/#/tutorial) to get you started! Happy STACKning!  
 <br />
 <br />
+# Production deployment
+Please contact info@scaleoutsystems.com or reach out to the maintainers! 
 # Where is STACKn used?
-STACKn is used in various places, examples include [SciLifeLab Data Center](https://www.scilifelab.se/data) and within the EU-funded project [EOSC-Nordics](https://www.eosc-nordic.eu/).
+STACKn is used in various places, an example include [SciLifeLab Data Center](https://www.scilifelab.se/data). For a live view of their deployment visit [Scilifelab Serve](https://serve.scilifelab.se/).
 <br />
 <br />
 # Maintainers
 **Scaleout Systems AB** is the main contributing organization behind this project.
 - Morgan Ekmefjord
 - Fredrik Wrede
-- Matteo Carone
 
 ## Software provided "as is"
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

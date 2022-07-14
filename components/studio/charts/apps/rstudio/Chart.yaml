@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "0.1"
-description: A Helm chart for Scaleout Labs
-name: lab
-version: 0.0.1

@@ -1,0 +1,25 @@
+{
+    "name": "Persistent Volume",
+    "slug": "volumeK8s",
+    "category": "store",
+    "table_field": {},
+    "description": "",
+    "priority": "600",
+    "settings": {
+        "volume": {
+            "size": {"type":"string", "default":"1Gi", "title":"Size"},
+            "storageClass": {"type":"string", "default":"", "title":"StorageClass"},
+            "accessModes": {"type": "string", "default":"ReadWriteMany", "title": "AccessModes"}
+        },
+        "default_values": {
+            "port": "port",
+            "targetport": "targetport"
+        },
+        "permissions": {
+            "public": {"value":"false", "option": "false"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        }
+    }
+}
+

@@ -1,101 +1,75 @@
+
+import json
 import os
 import subprocess
-import json
 import time
+from datetime import datetime
+from unittest import skip
+
 import requests
 from celery import shared_task
-# from celery.decorators import periodic_task
-from django.template import engines
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.db import transaction
 from django.db.models import Q
-from datetime import datetime
-import time
-from modules import keycloak_lib as keylib
+
 import chartcontroller.controller as controller
-from .models import AppInstance, ResourceData, AppStatus, Apps
 from models.models import Model, ObjectType
-from projects.models import S3, Environment, MLFlow, BasicAuth, Project
+from projects.models import S3, BasicAuth, Environment, MLFlow, Project
 from studio.celery import app
 
+from .models import AppInstance, Apps, AppStatus, ResourceData
+
+
 def get_URI(parameters):
-    URI =  'https://'+parameters['release']+'.'+parameters['global']['domain']
+    URI = 'https://'+parameters['release']+'.'+parameters['global']['domain']
 
     URI = URI.strip('/')
     return URI
 
-def add_valid_redirect_uri(instance):
-    print("Adding valid redirect.")
-    URI = get_URI(instance.parameters)
-    parameters = instance.parameters
-
-    
-    project_slug = parameters['project']['slug']
-
-
-    kc = keylib.keycloak_init()
-    res = keylib.keycloak_add_client_valid_redirect(kc, project_slug, URI+'/*')
-
-    instance.info.update({
-        "keycloak": {
-            "add_valid_redirect": res
-        }
-    })
-    instance.save()
-
-    return res['success']
 
 def process_helm_result(results):
     stdout = results.stdout.decode('utf-8')
     stderr = results.stderr.decode('utf-8')
-    # stdout = stdout.split('\n')
-    # res_json = dict()
-    # print("PROCESSING STDOUT")
-    # for line in stdout:
-    #     if line != '':
-    #         print(line)
-    #         tmp = line.split(':')
-    #         if len(tmp) == 2:
-    #             res_json[tmp[0]] = tmp[1]
     return stdout, stderr
 
+
 def post_create_hooks(instance):
+    print("TASK - POST CREATE HOOK...")
     # hard coded hooks for now, we can make this dynamic and loaded from the app specs
     if instance.app.slug == 'minio':
-        # Create a user role mapper for SSO (mapping readwrite role to 'minio_policy' claim.):
-        kc = keylib.keycloak_init()
         client_id = instance.parameters['release']
-        scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, client_id+'-scope')
-        res_json = keylib.keycloak_create_scope_mapper_roles(kc, scope_id, client_id, client_id+'-role-mapper', 'minio-policy')
-        
-        if not res_json['success']:
-            print("Failed to create user role mapper for Minio instance: {}".format(instance.parameters['release']))
-            # TODO: Update instance to reflect failure (User can still log in with root credentials)
-
-        # Allow implicit flow for client:
-        res_json = keylib.keycloak_client_allow_implicit_flow(kc, client_id)
-        if not res_json['success']:
-            print("Failed to allow implicit flow for Minio instance client: {}".format(instance.parameters['release']))
-            # TODO: Update instance to reflect failure (User can still log in with root credentials)
-
         # Create project S3 object
         # TODO: If the instance is being updated, update the existing S3 object.
         access_key = instance.parameters['credentials']['access_key']
         secret_key = instance.parameters['credentials']['secret_key']
-        host = '{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain'])
+        #host = '{}-{}'.format(instance.parameters['release'], instance.parameters['global']['domain'])
+
+        # OBS!! TEMP WORKAROUND to be able to connect to minio
+        minio_svc = '{}-minio'.format(instance.parameters['release'])
+        cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get svc ' + minio_svc + \
+            ' -o jsonpath="{.spec.clusterIP"}'
+        minio_host_url = ''
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True)
+            minio_host_url = result.stdout.decode('utf-8')
+            minio_host_url += ':9000'
+        except subprocess.CalledProcessError:
+            print('Oops, something went wrong running the command: {}'.format(cmd))
+
         try:
             s3obj = instance.s3obj
             s3obj.access_key = access_key
             s3obj.secret_key = secret_key
-            s3obj.host = host
+            s3obj.host = minio_host_url
         except:
             s3obj = S3(name=instance.name,
-                        project=instance.project,
-                        host=host,
-                        access_key=access_key,
-                        secret_key=secret_key,
-                        app=instance,
-                        owner=instance.owner)
+                       project=instance.project,
+                       host=minio_host_url,
+                       access_key=access_key,
+                       secret_key=secret_key,
+                       app=instance,
+                       owner=instance.owner)
         s3obj.save()
 
     if instance.app.slug == 'environment':
@@ -107,10 +81,11 @@ def post_create_hooks(instance):
             reg_domain = params['apps']['docker_registry'][reg_key]['global']['domain']
         repository = reg_release+'.'+reg_domain
         registry = AppInstance.objects.get(parameters__contains={
-                                                        'release':reg_release
-                                                    })
+            'release': reg_release
+        })
 
-        target_environment = Environment.objects.get(pk=params['environment']['pk'])
+        target_environment = Environment.objects.get(
+            pk=params['environment']['pk'])
         target_app = target_environment.app
 
         env_obj = Environment(name=instance.name,
@@ -124,6 +99,21 @@ def post_create_hooks(instance):
 
     if instance.app.slug == 'mlflow':
         params = instance.parameters
+
+        # OBS!! TEMP WORKAROUND to be able to connect to mlflow (internal dns between docker and k8s does not work currently)
+        # Sure one could use FQDN but lets avoid going via the internet
+        mlflow_svc = instance.parameters['service']["name"]
+        cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get svc ' + mlflow_svc + \
+            ' -o jsonpath="{.spec.clusterIP"}'
+        mlflow_host_ip = ''
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True)
+            mlflow_host_ip = result.stdout.decode('utf-8')
+            mlflow_host_ip += ':{}'.format(
+                instance.parameters['service']["port"])
+        except subprocess.CalledProcessError:
+            print('Oops, something went wrong running the command: {}'.format(cmd))
+
         s3 = S3.objects.get(pk=instance.parameters['s3']['pk'])
         basic_auth = BasicAuth(owner=instance.owner,
                                name=instance.name,
@@ -133,8 +123,10 @@ def post_create_hooks(instance):
         basic_auth.save()
         obj = MLFlow(name=instance.name,
                      project=instance.project,
-                     mlflow_url='https://{}.{}'.format(instance.parameters['release'], instance.parameters['global']['domain']),
+                     mlflow_url='https://{}.{}'.format(
+                         instance.parameters['release'], instance.parameters['global']['domain']),
                      s3=s3,
+                     host=mlflow_host_ip,
                      basic_auth=basic_auth,
                      app=instance,
                      owner=instance.owner)
@@ -142,206 +134,105 @@ def post_create_hooks(instance):
 
 
 def post_delete_hooks(instance):
-
-    # print("Nothing to do in post_delete_hooks.")
     # Free up release name (if reserved)
-    print("IN POST DELETE HOOK")
+    print("TASK - POST DELETE HOOK...")
     rel_names = instance.releasename_set.all()
+    project = instance.project
     for rel_name in rel_names:
         rel_name.status = 'active'
         rel_name.app = None
         rel_name.save()
+    if project.s3storage and project.s3storage.app == instance:
+        project.s3storage.delete()
+    elif project.mlflow and project.mlflow.app == instance:
+        project.mlflow.delete()
 
-
-
-    # NOTE: WE SHOULDN'T DELETE THESE META OBJECTS, NO NEED TO DO THAT. ENOUGH TO ARCHIVE PROJECT.
-    # if instance.app.slug == 'minio':
-    #     try:
-    #         s3obj = instance.s3obj
-    #         s3obj.delete()
-    #     except:
-    #         print("S3 object not connected to a Minio App")
-    
-    # if instance.app.slug == 'environment':
-    #     print("POST DELETE ENVIRONMENT APP")
-    #     try:
-    #         env_obj = instance.envobj.all().delete()
-    #     except:
-    #         print("Didn't find any associated environment to delete.")
-    
-    # if instance.app.slug == 'mlflow':
-    #     try:
-    #         mlflow_obj = instance.mlflowobj
-    #         mlflow_obj.delete()
-    #     except:
-    #         print("MLFlow instance has no project MLFlow meta object.")
 
 @shared_task
 @transaction.atomic
 def deploy_resource(instance_pk, action='create'):
+    print("TASK - DEPLOY RESOURCE...")
+    app_instance = AppInstance.objects.select_for_update().get(pk=instance_pk)
+    status = AppStatus(appinstance=app_instance)
 
-    instance = AppInstance.objects.select_for_update().get(pk=instance_pk)
-    username = str(instance.owner)
-    status = AppStatus(appinstance=instance)
-    # If app is new, we need to create a Keycloak client.
-    keycloak_success = True
     if action == "create":
 
-        parameters = instance.parameters
-        
-        
-        status.status_type = 'Failed'
+        parameters = app_instance.parameters
+        status.status_type = 'Created'
         status.info = parameters['release']
-
         URI = get_URI(parameters)
-        # Set up Keycloak:
-        # Add valid redirect URI to project client (for permission: project to work)
-        # Create client for new resource
-        
- 
-        if not add_valid_redirect_uri(instance):
-            keycloak_success = False
-
-        print(parameters)
-        print("IN DEPLOY_RESOURCE: RELEASE:")
-        print(parameters['release'])
-
-        # Default keycloak roles if none specified in config:
-        keycloak_roles = ['owner']
-        keycloak_default_roles = ['owner']
-        # Check if app defines custom Keycloak roles and default roles:
-        if 'keycloak-config' in instance.app.settings:
-            keycloak_roles = instance.app.settings['keycloak-config']['roles']
-            keycloak_default_roles = instance.app.settings['keycloak-config']['default-roles']
-
-
-        client_id, client_secret, res_json = keylib.keycloak_setup_base_client(URI,
-                                                                               parameters['release'],
-                                                                               username,
-                                                                               keycloak_roles,
-                                                                               keycloak_default_roles)
-        
-        if not res_json['success']:
-            keycloak_success = False
-        instance.info['keycloak'].update({"keycloak_setup_base_client": res_json})
-        instance.save()
-
-        if not keycloak_success:
-            print("Failed to setup Keycloak client for resource.")
-            print(instance.info['keycloak'])
-            status.status_type = "Failed"
-        # else:
-        #     instance.state = "Installing"
-
-        gatekeeper = {
-            "gatekeeper": {
-                "realm": settings.KC_REALM,
-                "host": settings.KC_URL,
-                "client_secret": client_secret,
-                "client_id": client_id,
-                "auth_endpoint": settings.OIDC_OP_REALM_AUTH,
-            }
-        }
-        if settings.OIDC_VERIFY_SSL == False:
-            gatekeeper['gatekeeper']['skip_tls'] = True
-        parameters.update(gatekeeper)
-
 
         # For backwards-compatibility with old ingress spec:
-        print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
         if 'ingress' not in parameters:
             parameters['ingress'] = dict()
+        try:
+            print("Ingress v1beta1: {}".format(settings.INGRESS_V1BETA1))
+            parameters['ingress']['v1beta1'] = settings.INGRESS_V1BETA1
+        except:
+            pass
 
-        parameters['ingress']['v1beta1'] = settings.INGRESS_V1BETA1
-        # ingress = {
-        #     "ingress": {
-        #         "v1beta1": settings.INGRESS_V1BETA1
-        #     }
-        # }
+        app_instance.parameters = parameters
+        print("App Instance paramenters: {}".format(app_instance))
+        app_instance.save()
 
+    results = controller.deploy(app_instance.parameters)
+    stdout, stderr = process_helm_result(results)
 
-        instance.parameters = parameters
-        instance.save()
-        # Keycloak DONE.
-
-
-    # Deploy resource.
-    if keycloak_success:
-        instance.info['keycloak'].update({"success": True})
-        print("Deploying resource")
-
-        results = controller.deploy(instance.parameters)
-        stdout, stderr = process_helm_result(results)
-        if results.returncode == 0:
-            print("Helm install succeeded")
-            status.status_type = "Installed"
-            helm_info = {
-                "success": True,
-                "info": {
-                    "stdout": stdout,
-                    "stderr": stderr
-                }
+    if results.returncode == 0:
+        print("Helm install succeeded")
+        status.status_type = "Installed"
+        app_instance.state = "Running"
+        helm_info = {
+            "success": True,
+            "info": {
+                "stdout": stdout,
+                "stderr": stderr
             }
-        else:
-            print("Helm install failed")
-            status.status_type = "Failed"
-            helm_info = {
-                "success": False,
-                "info": {
-                    "stdout": stdout,
-                    "stderr": stderr
-                }
+        }
+    else:
+        print("Helm install failed")
+        status.status_type = "Failed"
+        app_instance.state = "Failed"
+        helm_info = {
+            "success": False,
+            "info": {
+                "stdout": stdout,
+                "stderr": stderr
             }
+        }
 
-        instance.info["helm"] = helm_info
-        instance.save()
-        status.save()
-        post_create_hooks(instance)
+    app_instance.info["helm"] = helm_info
+    app_instance.save()
+    status.save()
+
+    if results.returncode != 0:
+        print(app_instance.info["helm"])
+    else:
+        post_create_hooks(app_instance)
 
 
 @shared_task
 @transaction.atomic
 def delete_resource(pk):
     appinstance = AppInstance.objects.select_for_update().get(pk=pk)
-    
 
     if appinstance and appinstance.state != "Deleted":
         # The instance does exist.
         parameters = appinstance.parameters
         # TODO: Check that the user has the permission required to delete it.
 
-        # Clean up in Keycloak.
-        kc = keylib.keycloak_init()
         # TODO: Fix for multicluster setup
         # TODO: We are assuming this URI here, but we should allow for other forms.
         # The instance should store information about this.
-        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
-        
-        try:
-            keylib.keycloak_remove_client_valid_redirect(kc, appinstance.project.slug, URI.strip('/')+'/*')
-        except:
-            print("Failed to remove valid redirect URL from project client.")
-            print("Project client might already be deleted.")
-            pass
-        try:
-            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-            if not res_json['success']:
-                print("Failed to get client scope.")
-            else:
-                keylib.keycloak_delete_client_scope(kc, scope_id)
-        except:
-            print("Failed to clean up in Keycloak.")
-        
-        
-        
+        URI = 'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+
         # Delete installed resources on the cluster.
         release = appinstance.parameters['release']
         namespace = appinstance.parameters['namespace']
 
-
-
+        # Invoke chart controller
         results = controller.delete(parameters)
+
         if results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8'):
             status = AppStatus(appinstance=appinstance)
             status.status_type = "Terminated"
@@ -352,7 +243,7 @@ def delete_resource(pk):
             status = AppStatus(appinstance=appinstance)
             status.status_type = "FailedToDelete"
             status.save()
-            # appinstance.state = "FailedToDelete"
+            appinstance.state = "FailedToDelete"
 
     # print("NEW STATE:")
     # print(appinstance.state)
@@ -364,16 +255,13 @@ def delete_resource(pk):
     #     appinstance.save()
     # return results.returncode, results.stdout.decode('utf-8')
 
+
 @app.task
 @transaction.atomic
 def check_status():
-    volume_root = "/"
-    if "TELEPRESENCE_ROOT" in os.environ:
-        volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
-
     # TODO: Fix for multicluster setup.
-    args = ['kubectl', '--kubeconfig', kubeconfig, '-n', settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
+    args = ['kubectl', '--kubeconfig', settings.KUBECONFIG, '-n',
+            settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
     # print(args)
     results = subprocess.run(args, capture_output=True)
     # print(results)
@@ -384,7 +272,7 @@ def check_status():
     for item in res_json['items']:
         release = item['metadata']['labels']['release']
         phase = item['status']['phase']
-        
+
         deletion_timestamp = []
         if 'deletionTimestamp' in item['metadata']:
             deletion_timestamp = item['metadata']['deletionTimestamp']
@@ -400,7 +288,7 @@ def check_status():
             for container in item['status']['containerStatuses']:
                 if container['ready']:
                     num_cont_ready += 1
-        if phase=="Running" and num_cont_ready != num_containers:
+        if phase == "Running" and num_cont_ready != num_containers:
             phase = "Waiting"
         app_statuses[release] = {
             "phase": phase,
@@ -409,14 +297,16 @@ def check_status():
             "deletion_status": deletion_timestamp
         }
 
-
+    # Fetch all app instances whose state is not "Deleted"
     instances = AppInstance.objects.filter(~Q(state="Deleted"))
+
     for instance in instances:
         release = instance.parameters['release']
         if release in app_statuses:
             current_status = app_statuses[release]['phase']
             try:
-                latest_status = AppStatus.objects.filter(appinstance=instance).latest('time').status_type
+                latest_status = AppStatus.objects.filter(
+                    appinstance=instance).latest('time').status_type
             except:
                 latest_status = "Unknown"
             if current_status != latest_status:
@@ -433,117 +323,163 @@ def check_status():
             # else:
             #     print("No update for release: {}".format(release))
         else:
-            delete_exists = AppStatus.objects.filter(appinstance=instance, status_type="Terminated").exists()
+            delete_exists = AppStatus.objects.filter(
+                appinstance=instance, status_type="Terminated").exists()
             if delete_exists:
                 status = AppStatus(appinstance=instance)
                 status.status_type = "Deleted"
-                status.save()                
+                status.save()
                 instance.state = "Deleted"
                 instance.deleted_on = datetime.now()
                 instance.save()
-        # if instance.state != "Deleted":
-        #     try:
-        #         release = instance.parameters['release']
-        #         instance.state = app_statuses[release]['phase']
-        #         instance.save()
-        #     except:
-        #         if instance.app.slug != 'volume':
-        #             instance.state = "Deleted"
-        #             instance.save()
-            # print("Release {} not in namespace.".format(release))
-    # instances.save()
-    # print(app_statuses)
+
+    # Fetch all app instances whose state is "Deleted" and check whether there are related pods which are still running
+    pod_status = 'None'
+    instances = AppInstance.objects.filter(state="Deleted")
+    for instance in instances:
+        if 'url' in instance.table_field:
+            # Find the app instance release name
+            app_release = instance.parameters['release']     # e.g 'rfc058c6f'
+            # Now check if there exists a pod with that release
+            cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get po -l release=' + app_release
+            try:
+                # returns a byte-like object
+                result = subprocess.run(cmd, shell=True, capture_output=True)
+                result_stdout = result.stdout.decode('utf-8')
+                result_stderr = result.stderr.decode('utf-8')
+            except subprocess.CalledProcessError:
+                print('Oops, something went wrong running the command: {}'.format(cmd))
+
+            if result_stdout != '' and 'No resources found in default namespace.' not in result_stderr:
+                # Extract the the status of the related release pod
+                cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get po -l release=' + app_release + \
+                    ' -o jsonpath="{.items[0].status.phase}"'
+                try:
+                    result = subprocess.run(
+                        cmd, shell=True, capture_output=True)
+                    pod_status = result.stdout.decode('utf-8')
+                    print(pod_status)
+                except subprocess.CalledProcessError:
+                    print(
+                        'Oops, something went wrong running the command: {}'.format(cmd))
+
+                if pod_status == 'Running' and instance.state == 'Deleted':
+                    print(
+                        "INFO: Found Running pod associated to an app instance marked as Deleted")
+                    print("INFO: DELETE RESOURCE with release: {}".format(app_release))
+                    cmd = 'helm --kubeconfig ' + settings.KUBECONFIG + ' delete ' + app_release
+                    try:
+                        result = subprocess.run(
+                            cmd, shell=True, capture_output=True)
+                        print(result)
+                    except subprocess.CalledProcessError:
+                        print(
+                            'Oops, something went wrong running the command: {}'.format(cmd))
+
 
 @app.task
 def get_resource_usage():
 
-    volume_root = "/"
-    if "TELEPRESENCE_ROOT" in os.environ:
-        volume_root = os.environ["TELEPRESENCE_ROOT"]
-    kubeconfig = os.path.join(volume_root, 'app/chartcontroller/config/config')
-
     timestamp = time.time()
 
-    args = ['kubectl', '--kubeconfig', kubeconfig, 'get', '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
+    args = ['kubectl', '--kubeconfig', settings.KUBECONFIG, 'get',
+            '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
     results = subprocess.run(args, capture_output=True)
-    res_json = json.loads(results.stdout.decode('utf-8'))
-    pods = res_json['items']
+
+    pods = []
+    try:
+        res_json = json.loads(results.stdout.decode('utf-8'))
+        pods = res_json['items']
+    except:
+        pass
 
     resources = dict()
 
-    args_pod = ['kubectl', '--kubeconfig', kubeconfig, 'get', 'po', '-o', 'json']
+    args_pod = ['kubectl', '--kubeconfig',
+                settings.KUBECONFIG, 'get', 'po', '-o', 'json']
     results_pod = subprocess.run(args_pod, capture_output=True)
     results_pod_json = json.loads(results_pod.stdout.decode('utf-8'))
-    for pod in results_pod_json['items']:
-        if 'metadata' in pod and 'labels' in pod['metadata'] and 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
-    #         pod_release = pod['metadata']['labels']['release']
-    #         for label in pod['metadata']['labels']:
-    #             resources[label] = pod['metadata']['labels'][label]
-            pod_name = pod['metadata']['name']
-            resources[pod_name] = dict()
-            resources[pod_name]['labels'] = pod['metadata']['labels']
-            resources[pod_name]['cpu'] = 0.0
-            resources[pod_name]['memory'] = 0.0
-            resources[pod_name]['gpu'] = 0
+    try:
+        for pod in results_pod_json['items']:
+            if 'metadata' in pod and 'labels' in pod['metadata'] and 'release' in pod['metadata']['labels'] and 'project' in pod['metadata']['labels']:
+                #         pod_release = pod['metadata']['labels']['release']
+                #         for label in pod['metadata']['labels']:
+                #             resources[label] = pod['metadata']['labels'][label]
+                pod_name = pod['metadata']['name']
+                resources[pod_name] = dict()
+                resources[pod_name]['labels'] = pod['metadata']['labels']
+                resources[pod_name]['cpu'] = 0.0
+                resources[pod_name]['memory'] = 0.0
+                resources[pod_name]['gpu'] = 0
+    except:
+        pass
 
-    for pod in pods:
-        
-        podname = pod['metadata']['name']
-        if podname in resources:
-            containers = pod['containers']
-            cpu = 0
-            mem = 0
-            for container in containers:
-                cpun = container['usage']['cpu']
-                memki = container['usage']['memory']
-                try:
-                    cpu += int(cpun.replace('n', ''))/1e6
-                except:
-                    print("Failed to parse CPU usage:")
-                    print(cpun)
-                if 'Ki' in memki:
-                    mem += int(memki.replace('Ki', ''))/1000
-                elif 'Mi' in memki:
-                    mem += int(memki.replace('Mi', ''))
-                elif 'Gi' in memki:
-                    mem += int(memki.replace('Mi', ''))*1000
+    try:
+        for pod in pods:
 
-            resources[podname]['cpu'] = cpu
-            resources[podname]['memory'] = mem
-            
+            podname = pod['metadata']['name']
+            if podname in resources:
+                containers = pod['containers']
+                cpu = 0
+                mem = 0
+                for container in containers:
+                    cpun = container['usage']['cpu']
+                    memki = container['usage']['memory']
+                    try:
+                        cpu += int(cpun.replace('n', ''))/1e6
+                    except:
+                        print("Failed to parse CPU usage:")
+                        print(cpun)
+                    if 'Ki' in memki:
+                        mem += int(memki.replace('Ki', ''))/1000
+                    elif 'Mi' in memki:
+                        mem += int(memki.replace('Mi', ''))
+                    elif 'Gi' in memki:
+                        mem += int(memki.replace('Mi', ''))*1000
+
+                resources[podname]['cpu'] = cpu
+                resources[podname]['memory'] = mem
+    except:
+        pass
     # print(json.dumps(resources, indent=2))
 
     for key in resources.keys():
         entry = resources[key]
         # print(entry['labels']['release'])
         try:
-            appinstance = AppInstance.objects.get(parameters__contains={"release": entry['labels']['release']})
+            appinstance = AppInstance.objects.get(
+                parameters__contains={"release": entry['labels']['release']})
             # print(timestamp)
             # print(appinstance)
             # print(entry)
-            datapoint = ResourceData(appinstance=appinstance, cpu=entry['cpu'], mem=entry['memory'], gpu=entry['gpu'], time=timestamp)
+            datapoint = ResourceData(
+                appinstance=appinstance, cpu=entry['cpu'], mem=entry['memory'], gpu=entry['gpu'], time=timestamp)
             datapoint.save()
         except:
             print("Didn't find corresponding AppInstance: {}".format(key))
 
     # print(timestamp)
-    # print(json.dumps(resources, indent=2))  
+    # print(json.dumps(resources, indent=2))
 
 
 @app.task
 def sync_mlflow_models():
-    mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), project__status="active", app__slug="mlflow")
+    mlflow_apps = AppInstance.objects.filter(
+        ~Q(state="Deleted"), project__status="active", app__slug="mlflow")
     for mlflow_app in mlflow_apps:
 
         current_time = time.time()-600
-        url = 'http://{}:5000/{}'.format(mlflow_app.parameters['release'], 'api/2.0/preview/mlflow/model-versions/search')
+        url = 'http://{}/{}'.format(
+            mlflow_app.project.mlflow.host,
+            'api/2.0/preview/mlflow/model-versions/search'
+        )
         res = False
         try:
             res = requests.get(url)
         except Exception as err:
             print("Call to MLFlow Server failed.")
             print(err, flush=True)
-        
+
         if res:
             models = res.json()
             print(models)
@@ -567,10 +503,14 @@ def sync_mlflow_models():
                     except:
                         model_found = False
                     if not model_found:
-                        model = Model(version=version, project=project, name=name, uid=uid, release_type=release, s3=s3, bucket="mlflow", path=path)
-                        model.save()
-                        obj_type = ObjectType.objects.filter(slug='mlflow-model')
-                        model.object_type.set(obj_type)
+                        obj_type = ObjectType.objects.filter(slug='mlflow')
+                        if obj_type.exists():
+                            model = Model(version=version, project=project, name=name, uid=uid,
+                                          release_type=release, s3=s3, bucket="mlflow", path=path)
+                            model.save()
+                            model.object_type.set(obj_type)
+                        else:
+                            raise EmptyResultSet
                     else:
                         if item['current_stage'] == 'Archived' and stackn_model.status != "AR":
                             stackn_model.status = "AR"
@@ -581,11 +521,13 @@ def sync_mlflow_models():
         else:
             print("WARNING: Failed to fetch info from MLflow Server: {}".format(url))
 
+
 @app.task
 def clean_resource_usage():
 
     curr_timestamp = time.time()
     ResourceData.objects.filter(time__lte=curr_timestamp-48*3600).delete()
+
 
 @app.task
 def remove_deleted_app_instances():
@@ -603,6 +545,7 @@ def remove_deleted_app_instances():
             print("Failed to delete app instances.")
             print(err)
 
+
 @app.task
 def clear_table_field():
     all_apps = AppInstance.objects.all()
@@ -615,38 +558,41 @@ def clear_table_field():
         app.table_field = "{}"
         app.save()
 
+
 @app.task
 def delete_old_clients():
     deleted_apps = AppInstance.objects.filter(state="Deleted")
     for appinstance in deleted_apps:
-        kc = keylib.keycloak_init()
-        URI =  'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
-        
-        try:
-            keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
-            if not res_json['success']:
-                print("Failed to get client scope.")
-            else:
-                keylib.keycloak_delete_client_scope(kc, scope_id)
-        except:
-            print("Failed to clean up in Keycloak.")
+        #kc = keylib.keycloak_init()
+        URI = 'https://'+appinstance.parameters['release']+'.'+settings.DOMAIN
+
+        # try:
+        #    keylib.keycloak_delete_client(kc, appinstance.parameters['gatekeeper']['client_id'])
+        #    scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, appinstance.parameters['gatekeeper']['client_id']+'-scope')
+        #    if not res_json['success']:
+        #        print("Failed to get client scope.")
+        #    else:
+        #        keylib.keycloak_delete_client_scope(kc, scope_id)
+        # except:
+        #    print("Failed to clean up in Keycloak.")
+
 
 @app.task
 def delete_old_clients_proj():
     deleted_projects = Project.objects.filter(status="archived")
-    kc = keylib.keycloak_init()
-    for proj in deleted_projects:
-        try:
-            keylib.keycloak_delete_client(kc, proj.slug)
-        except:
-            print("Project client already deleted")
-            pass
-        try:
-            print("SCOPE: {}".format(proj.slug+'-scope'))
-            scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
-            keylib.keycloak_delete_client_scope(kc, scope_id)
-            print("DELETED SCOPE: {}".format(proj.slug+'-scope'))
-        except:
-            print("Project client scope already deleted.")
-            pass
+
+    #kc = keylib.keycloak_init()
+    # for proj in deleted_projects:
+    # try:
+    #    keylib.keycloak_delete_client(kc, proj.slug)
+    # except:
+    #    print("Project client already deleted")
+    #    pass
+    # try:
+    ##    print("SCOPE: {}".format(proj.slug+'-scope'))
+    #   scope_id, res_json = keylib.keycloak_get_client_scope_id(kc, proj.slug+'-scope')
+    #   keylib.keycloak_delete_client_scope(kc, scope_id)
+    #   print("DELETED SCOPE: {}".format(proj.slug+'-scope'))
+    # except:
+    #    print("Project client scope already deleted.")
+    #   pass

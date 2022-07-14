@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "0.1"
-description: A Helm chart for a mocked Pebble Client
-name: pebble-client-deployment
-version: 0.0.1

@@ -1,0 +1,144 @@
+name: Integration test
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    env:
+      working-directory: ./components/studio
+    name: Integration test
+    steps:
+    - uses: actions/checkout@v2
+    - uses: balchua/microk8s-actions@v0.2.1
+      with:
+        channel: '1.20/stable'
+        addons: '["dns", "rbac", "storage", "ingress"]'
+    - name: Check k8s
+      id: myactions
+      run: |
+        echo "Checking k8s cluster"
+        kubectl get no
+        kubectl get pods -A -o wide
+    - name: build jupyter-stackn image
+      id: build_jupyter
+      run: |
+        docker build -t ghcr.io/scaleoutsystems/stackn/jupyter-stackn:test . -f components/studio/charts/apps/jupyter-lab/Dockerfile
+        docker save ghcr.io/scaleoutsystems/stackn/jupyter-stackn:test > jupyter.tar
+        sudo microk8s ctr image import jupyter.tar
+        echo "Changing jupyter-stackn test image in project template"
+        sed -i "s/\(\"image\": \"jupyter-stackn:.*\"\)/\"image\": \"jupyter-stackn:test\"/g" ./components/studio/projects/fixtures/projects_templates.json
+    - name: start studio
+      working-directory: ${{env.working-directory}}
+      id: setup
+      run: |
+        set -ex
+        echo "Running init script"
+        ./init.sh --no-prompt
+        echo "Deploying studio"
+        docker-compose up -d
+    - name: install CLI
+      working-directory: ./cli
+      id: cli
+      run: |
+        python -m pip install --upgrade pip
+        pip install --no-cache-dir .
+    - name: login studio
+      working-directory: ${{env.working-directory}}
+      id: login
+      run: |
+        ADMIN_PASSWORD=`awk -F '=' '/DJANGO_SUPERUSER_PASSWORD/{print $NF}' docker-compose.yml`
+        STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
+        response=$(curl --write-out '%{http_code}' --silent --output /dev/null $STUDIO_URL)
+        if [[ "$response" -ne 200 ]] ; then sleep 30; else echo "studio is ready"; fi
+        stackn login -u admin -p $ADMIN_PASSWORD --url $STUDIO_URL
+    - name: create project default
+      id: project
+      run: |
+        echo "Creating stackn project"
+        stackn create project -t default test
+        stackn get projects
+        sleep 20
+        echo "Docker logs celery-worker"
+        docker logs celery-worker --tail 100
+        POD_NAME=`kubectl get po -l app=mlflow --no-headers -o custom-columns=":metadata.name"`
+        kubectl get po
+        echo "MLFlow pod: $POD_NAME"
+        echo "Waiting for lab pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=240s
+    - name: start jupyter lab
+      id: lab
+      run: |
+        echo "Starting Jupyter Lab instance"
+        stackn create appinstance -- ./.ci/test.json
+        sleep 120
+        stackn get app
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo "Lab pod: $POD_NAME"
+        echo "Waiting for lab pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=240s
+        stackn get app
+    - name: build and test mnist-keras-tf
+      id: mnist
+      run: |
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        echo "Running build model"
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras && ./build.sh"
+        sleep 10
+        echo "Running test model"
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests model"
+    - name: build and test mlflow-elasticnet
+      id: mlflow
+      run: |
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn && mlflow run ."
+        echo "Sleeping for 20 sec"
+        sleep 20
+        echo "build env for testing"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn && conda env create -f tests/env_test.yaml"
+        echo "Running test model"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests model"
+    - name: serve mnist-keras-tf
+      id: serve_tf
+      run: |
+        stackn create appinstance .ci/serve_tf.json
+        echo "Sleeping for 10 sec"
+        sleep 20
+        POD_NAME=`kubectl get po -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.name"`
+        echo "Waiting for tf serve pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=240s
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        endpoint=`kubectl get ingress -l app=tensorflow-serving --no-headers -o custom-columns=":metadata.labels.host"`
+        endpoint="https://$endpoint/v1/models/models"
+        echo "Running serve test"
+        kubectl exec $POD_NAME -- bash -c "cd examples/tensorflow-serve/mnist-keras/tests && ./tests serve $endpoint"
+    - name: serve mlflow
+      id: serve_mlflow
+      run: |
+        stackn create appinstance .ci/serve_mlflow.json
+        echo "Sleeping for 10 sec"
+        sleep 30
+        POD_NAME=`kubectl get po -l app=mlflow-serve --no-headers -o custom-columns=":metadata.name"`
+        echo "Waiting for tf serve pod to be ready"
+        kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=240s
+        sleep 120
+        POD_NAME=`kubectl get po -l app=lab --no-headers -o custom-columns=":metadata.name"`
+        endpoint=`kubectl get ingress -l app=mlflow-serve --no-headers -o custom-columns=":metadata.labels.host"`
+        endpoint="https://$endpoint/invocations"
+        echo "Running serve test"
+        kubectl exec $POD_NAME -- bash -c "cd examples/mlflow-serve/diabetes-sklearn/tests && ./tests serve $endpoint"
+
+
+
+    
+
+

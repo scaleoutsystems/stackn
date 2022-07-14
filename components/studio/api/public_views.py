@@ -13,12 +13,6 @@ def get_studio_settings(request):
         "name": "studio_host",
         "value": settings.STUDIO_HOST
     }
-    kc_url = {
-        "name": "keycloak_host",
-        "value": settings.KC_URL
-    }
-
     studio_settings.append(studio_url)
-    studio_settings.append(kc_url)
 
     return JsonResponse({'data': studio_settings})

@@ -1,0 +1,32 @@
+{
+  "name": "Jupyter Lab",
+  "slug": "jupyter-lab",
+  "category": "compute",
+  "table_field": {
+    "url": "https://{{ release }}.{{ global.domain }}"
+  },
+  "description": "",
+  "priority": "500",
+  "settings": {
+    "apps": {
+        "Persistent Volume":"many"
+    },
+    "default_values": {
+      "port": "80",
+      "targetport": "8888"
+    },
+    "flavor": "one",
+    "environment": {
+        "name": "from",
+        "title": "Image",
+        "quantity": "one",
+        "type": "match"
+    },
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+    },
+    "export-cli": "False"
+  }
+}
