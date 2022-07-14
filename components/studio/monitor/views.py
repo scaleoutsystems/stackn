@@ -1,24 +1,25 @@
-from django.shortcuts import render, reverse
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.contrib.auth.models import User
-from django.conf import settings as sett
-import logging
-
-from datetime import datetime
-import time
-from django.db.models import Count, Sum, F
 import itertools
+import logging
+import time
+from datetime import datetime
 
-from projects.models import Project
-from .helpers import get_total_labs_cpu_usage_60s, get_total_labs_memory_usage_60s
-from .helpers import get_labs_cpu_requests, get_labs_memory_requests
-from .helpers import get_total_cpu_usage_60s_ts
-from .helpers import get_resource, get_all
+from django.conf import settings as sett
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Count, F, Sum
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, reverse
+
+from apps.models import AppInstance, ResourceData
 # from deployments.models import DeploymentInstance
 from models.models import Model
-from apps.models import AppInstance, ResourceData
-from modules.project_auth import get_permissions
+from projects.models import Project
+
+from .helpers import (get_all, get_labs_cpu_requests, get_labs_memory_requests,
+                      get_resource, get_total_cpu_usage_60s_ts,
+                      get_total_labs_cpu_usage_60s,
+                      get_total_labs_memory_usage_60s)
+
 
 def get_cpu_mem(resources, project_slug, resource_type):
     res_list = list()
@@ -70,7 +71,7 @@ def get_cpu_mem(resources, project_slug, resource_type):
 def liveout(request, user, project):
     is_authorized = True
     user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
-    
+
     if not user_permissions['view']:
         request.session['oidc_id_token_expiration'] = -1
         request.session.save()
@@ -79,13 +80,14 @@ def liveout(request, user, project):
     template = 'monitor2.html'
     project = Project.objects.filter(slug=project).first()
 
-
     return render(request, template, locals())
+
 
 @login_required
 def overview(request, user, project):
     try:
-        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status='active').distinct('pk')
+        projects = Project.objects.filter(Q(owner=request.user) | Q(
+            authorized=request.user), status='active').distinct('pk')
     except TypeError as err:
         projects = []
         print(err)
@@ -97,7 +99,7 @@ def overview(request, user, project):
         request.session.save()
         # return HttpResponse('Not authorized', status=401)
         is_authorized = False
-    
+
     request.session['current_project'] = project
     template = 'monitor_new.html'
     project = Project.objects.filter(slug=project).first()
@@ -113,7 +115,7 @@ def overview(request, user, project):
     #         resource_status[resource_type][q_type] = dict()
     #         for r_type in r_types:
     #             tmp = get_resource(project.slug, resource_type, q_type, r_type)
-                
+
     #             if r_type == 'memory_bytes':
     #                 tmp ="{:.2f}".format(float(tmp)/1e9*0.931323)
     #             elif tmp:
@@ -128,12 +130,12 @@ def overview(request, user, project):
 
     # labs = Session.objects.filter(project=project)
     # lab_list = get_cpu_mem(labs, project.slug, 'lab')
-    
+
     # deps = DeploymentInstance.objects.filter(model__project=project)
     # dep_list = get_cpu_mem(deps, project.slug, 'deployment')
 
-
     return render(request, template, locals())
+
 
 def delete_lab(request, user, project, uid):
     # project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first()
@@ -151,6 +153,7 @@ def delete_lab(request, user, project, uid):
     return HttpResponseRedirect(
         reverse('monitor:overview', kwargs={'user': request.user, 'project': str(project.slug)}))
 
+
 def delete_deployment(request, user, project, model_id):
     user_permissions = get_permissions(request, project, sett.MONITOR_PERM)
     if not user_permissions['view']:
@@ -161,6 +164,7 @@ def delete_deployment(request, user, project, model_id):
     instance = DeploymentInstance.objects.get(model=model)
     instance.helmchart.delete()
     return HttpResponseRedirect(reverse('monitor:overview', kwargs={'user': request.user, 'project': project}))
+
 
 def cpuchart(request, user, project, resource_type):
     # labels = ['a', 'b', 'c']
@@ -178,12 +182,11 @@ def cpuchart(request, user, project, resource_type):
     })
 
 
-
 def usage(request, user, project):
-    
 
     curr_timestamp = time.time()
-    points = ResourceData.objects.filter(time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
+    points = ResourceData.objects.filter(
+        time__gte=curr_timestamp-2*3600, appinstance__project__slug=project).order_by('time')
     all_cpus = list()
     for point in points:
         all_cpus.append(point.cpu)
@@ -192,7 +195,8 @@ def usage(request, user, project):
     # print("MAX:")
     # print(max(all_cpus))
     # print(all_cpus)
-    total = points.annotate(timeP=F('time')).values('timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
+    total = points.annotate(timeP=F('time')).values(
+        'timeP').annotate(total_cpu=Sum('cpu'), total_mem=Sum('mem'))
     # print(total)
 
     labels = list(total.values_list('timeP'))
@@ -208,14 +212,14 @@ def usage(request, user, project):
 
     total_mem = list(total.values_list('total_mem'))
     total_mem = list(itertools.chain.from_iterable(total_mem))[::step]
-    
-    total_cpu= list(total.values_list('total_cpu'))
+
+    total_cpu = list(total.values_list('total_cpu'))
     # print("MAX CPU")
     # print(max(total_cpu))
     total_cpu = list(itertools.chain.from_iterable(total_cpu))[::step]
     # print("MAX CPU")
     # print(max(total_cpu))
-    
+
     # print(len(total_cpu))
 
     return JsonResponse(data={
