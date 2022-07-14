@@ -82,5 +82,33 @@
       "date_changed": "2021-02-26T14:03:40.168Z",
       "description": ""
     }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 4,
+    "fields": {
+      "name": "sync_mlflow_models",
+      "task": "apps.tasks.sync_mlflow_models",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "clocked": null,
+      "args": "[]",
+      "kwargs": "{}",
+      "queue": null,
+      "exchange": null,
+      "routing_key": null,
+      "headers": "{}",
+      "priority": null,
+      "expires": null,
+      "expire_seconds": null,
+      "one_off": false,
+      "start_time": null,
+      "enabled": true,
+      "last_run_at": "2021-02-26T14:03:37.169Z",
+      "total_run_count": 174,
+      "date_changed": "2021-02-26T14:03:40.168Z",
+      "description": ""
+    }
   }
-  ]
+]
