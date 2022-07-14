@@ -1,4 +1,4 @@
-{% extends 'baseproject.html' %}
+{% extends 'projects/base.html' %}
 
 {% block projects_dropdown %}
 <ul class="navbar-nav">
@@ -43,11 +43,9 @@
                     role="tab">
                     Image
                 </a>
-                {% if user_permissions.add_member %}
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
                     Access
                 </a>
-                {% endif %}
                 <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
                     Publish
                 </a> -->
@@ -162,9 +160,19 @@
                         </form>
                         {% endif %}
                         {% if project.authorized.all %}
-                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" method="post" style="margin-top: 24px;">
+                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" onsubmit="confirm(displayResult());" method="post" style="margin-top: 24px;">
                             {% csrf_token %}
-
+                            <script>
+                                function displayResult() {
+                                    var x = document.getElementById("id_selected_users");
+                                    var txt = "Revoke access to the following users: ";
+                                    var i;
+                                    for (i = 0; i < x.length; i++) {
+                                        txt = txt + "\n" + x.options[i].text;
+                                    }
+                                    return txt;
+                                }
+                            </script>
                             <div class="mb-3">
                                 <label class="form-label" for="id_selected_users">Authorized users</label>
                                 <select name="selected_users" id="id_selected_users" class="form-control" multiple
@@ -294,6 +302,14 @@
                                     <input type="text" name="environment_name" id="environment_name" value="" class="form-control" />
                                 </div>
                                 <div class="mb-3">
+                                    <label for="environment_name">Registry</label>
+                                    <select type="text" class="form-control" id="environment_registry" name="environment_registry" maxlength="256">
+                                        {% for registry in registries %}
+                                            <option value="{{ registry.pk }}">{{ registry.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
                                     <label for="environment_name">Repository</label>
                                     <input type="text" name="environment_repository" id="environment_repository" value="" class="form-control" />
                                 </div>
@@ -376,7 +392,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Transfer project ownership</h5>
 
-                        <form method="post">
+                        <form action="{% url 'projects:transfer_owner' request.user project.slug %}" method="post">
                             {% csrf_token %}
 
                             <div class="mb-3">

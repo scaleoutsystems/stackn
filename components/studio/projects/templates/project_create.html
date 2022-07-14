@@ -47,6 +47,9 @@
                     <div class="mb-3 row">
                         <div class="col-sm-10 ml-sm-auto">
                             <button type="submit" class="btn btn-primary">Create project</button>
+                            <button class="btn btn-secondary" type="submit" onclick="window.location='{{ request.headers.referer }}' ; return false;">
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </form>
