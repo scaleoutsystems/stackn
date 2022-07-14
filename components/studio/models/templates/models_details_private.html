@@ -87,7 +87,16 @@
                 </dl>
                 {% endif%}
                 <hr>
-                <a href="{{ media_url }}{{ latest_model_obj.obj }}">Download</a>
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3">Bucket</dt>
+                    <dd class="col-8 col-xxl-9">
+                        {{ model.bucket }}
+                    </dd>
+                    <dt class="col-4 col-xxl-3 mb-0">UID</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        {{ model.uid }}
+                    </dd>
+                </dl>
             </div>
         </div>
 
