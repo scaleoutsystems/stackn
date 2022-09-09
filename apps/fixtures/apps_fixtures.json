@@ -1,5 +1,147 @@
 [
   {
+  "model": "apps.apps",
+  "pk": 5,
+  "fields": {
+    "name": "Mongo Express",
+    "slug": "mongo-express",
+    "category": "store",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "",
+    "settings": {
+      "apps":{
+          "MongoDB":"one"
+      },
+      "default_values": {
+          "port": "80",
+          "targetport": "8081"
+        },
+      "permissions": {
+          "public": {"value":"false", "option": "false"},
+          "project": {"value":"true", "option": "true"},
+          "private": {"value":"false", "option": "true"}
+      }
+  },
+  "chart": "apps/mongo-express/chart",
+  "logo": "apps/mongo-express/logo.png",
+  "updated_on": "2021-03-10T19:45:03.927Z",
+  "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+  {
+  "model": "apps.apps",
+  "pk": 1,
+  "fields": {
+    "name": "MongoDB",
+    "slug": "mongodb",
+    "category": "store",
+    "table_field": {
+        "info": "mongodb://{{ release }}:27017"
+      },
+    "description": "",
+    "settings": {
+      "apps":{
+          "Persistent Volume":"one"
+      },
+      "default_values": {
+          "port": "27017",
+          "targetport": "27017"
+        },
+      "credentials": {
+          "username": {"type": "string", "default":"admin","title":"Username"},
+          "password": {"type": "string", "default":"password","title":"Password"}
+      },
+      "permissions": {
+          "public": {"value":"false", "option": "false"},
+          "project": {"value":"true", "option": "true"},
+          "private": {"value":"false", "option": "true"}
+      }
+    },
+    "chart": "apps/mongodb/chart",
+    "logo": "apps/mongodb/logo.png",
+    "updated_on": "2021-03-10T19:45:03.927Z",
+    "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+  {
+  "model": "apps.apps",
+  "pk": 2,
+  "fields": {
+    "name": "FEDn Combiner",
+    "slug": "combiner",
+    "category": "compute",
+    "table_field": {},
+    "description": "",
+    "settings": {  
+    "apps":{
+      "FEDn Reducer":"one",
+      "Persistent Volume": "one"
+    },
+    "default_values": {
+      "port": "443",
+      "targetport": "443"
+    },
+    "environment": {
+      "name": "from",
+      "title": "Image",
+      "quantity": "one",
+      "type": "match"
+    },
+    "logs": ["combiner"],
+    "permissions": {
+        "public": {"value":"false", "option": "false"},
+        "project": {"value":"true", "option": "true"},
+        "private": {"value":"false", "option": "true"}
+      }
+  },
+  "chart": "apps/fedn-combiner/chart",
+  "logo": "apps/fedn-combiner/logo.png",
+  "updated_on": "2021-03-10T19:45:03.927Z",
+  "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+  {
+  "model": "apps.apps",
+  "pk": 4,
+  "fields": {
+    "name": "FEDn Reducer",
+    "slug": "reducer",
+    "category": "compute",
+    "table_field": {
+      "url": "https://{{ release }}.{{ global.domain }}"
+      },
+    "description": "",
+    "settings": {
+      "S3": "one",
+      "apps":{
+        "MongoDB":"one"
+      },
+      "default_values": {
+        "port": "8090",
+        "targetport": "8090"
+      },	
+      "environment": {
+        "name": "from",
+        "title": "Image",
+        "quantity": "one",
+        "type": "match"
+      },
+      "logs": ["reducer"],
+      "permissions": {
+          "public": {"value":"false", "option": "false"},
+          "project": {"value":"true", "option": "true"},
+          "private": {"value":"false", "option": "true"}
+      }
+    },
+    "chart": "apps/fedn-reducer/chart",
+    "logo": "apps/fedn-reducer/logo.png",
+    "updated_on": "2021-03-10T19:45:03.927Z",
+    "created_on": "2021-02-19T21:34:37.815Z"
+  }
+},
+  {
     "model": "apps.apps",
     "pk": 3,
     "fields": {
