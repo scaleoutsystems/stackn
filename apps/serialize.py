@@ -3,7 +3,7 @@ import json
 import flatten_json
 import requests
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.template import engines
 from django.utils.text import slugify
@@ -14,6 +14,8 @@ from projects.helpers import get_minio_keys
 from projects.models import S3, Environment, Flavor, Project
 
 from .models import AppCategories, AppInstance, AppPermission, Apps
+
+User = get_user_model()
 
 key_words = ['appobj',
              'model',

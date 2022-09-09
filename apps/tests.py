@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from guardian.shortcuts import assign_perm, remove_perm
@@ -8,6 +8,7 @@ from projects.models import Project
 
 from .models import AppInstance, Apps
 
+User = get_user_model()
 
 class AppsViewForbidden(TestCase):
     def setUp(self):

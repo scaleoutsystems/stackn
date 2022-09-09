@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
 from tagulous.models import TagField
 
@@ -12,7 +12,7 @@ class AppPermission(models.Model):
     name = models.CharField(max_length=512, default="permission_name")
     projects = models.ManyToManyField('projects.Project')
     public = models.BooleanField(default=False)
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(get_user_model())
 
     def __str__(self):
         return str(self.name)
@@ -68,7 +68,7 @@ class AppInstance(models.Model):
     model_dependencies = models.ManyToManyField('models.Model', blank=True)
     name = models.CharField(max_length=512, default="app_name")
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='app_owner', null=True)
+        get_user_model(), on_delete=models.CASCADE, related_name='app_owner', null=True)
     parameters = models.JSONField(blank=True, null=True)
     project = models.ForeignKey(
         'projects.Project', on_delete=models.CASCADE, related_name='appinstance')
@@ -76,6 +76,11 @@ class AppInstance(models.Model):
     table_field = models.JSONField(blank=True, null=True)
     tags = TagField()
     updated_on = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = [
+            ('can_access_app', 'Can access app service')
+        ]
 
     def __str__(self):
         return str(self.name)+' ({})-{}-{}-{}'.format(self.state, self.owner, self.app.name, self.project)

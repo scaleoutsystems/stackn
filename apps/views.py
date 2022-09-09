@@ -2,8 +2,9 @@ import time
 from datetime import datetime, timedelta
 
 import requests
+from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import Q, Subquery
 from django.http import JsonResponse
 from django.shortcuts import HttpResponseRedirect, redirect, render, reverse
@@ -12,7 +13,6 @@ from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from guardian.decorators import permission_required_or_403
 
-from projects.models import Environment, Flavor, Project, ReleaseName
 
 from .generate_form import generate_form
 from .helpers import create_instance_params
@@ -20,6 +20,11 @@ from .models import AppCategories, AppInstance, AppPermission, Apps, AppStatus
 from .serialize import serialize_app
 from .tasks import delete_resource, deploy_resource
 
+
+Project = apps.get_model(app_label=settings.PROJECTS_MODEL)
+ReleaseName = apps.get_model(app_label=settings.RELEASENAME_MODEL)
+
+User = get_user_model()
 
 def get_status_defs():
     status_success = settings.APPS_STATUS_SUCCESS
