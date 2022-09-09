@@ -4,7 +4,6 @@ import os
 import subprocess
 import time
 from datetime import datetime
-from unittest import skip
 
 import requests
 from celery import shared_task
@@ -13,7 +12,7 @@ from django.core.exceptions import EmptyResultSet
 from django.db import transaction
 from django.db.models import Q
 
-import chartcontroller.controller as controller
+from . import controller
 from models.models import Model, ObjectType
 from projects.models import S3, BasicAuth, Environment, MLFlow, Project
 from studio.celery import app
