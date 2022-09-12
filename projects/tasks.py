@@ -5,16 +5,22 @@ import string
 from logging import raiseExceptions
 
 from celery import shared_task
+from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 
 import apps.tasks as apptasks
 import apps.views as appviews
-from apps.models import AppInstance, Apps
+
 
 from .exceptions import ProjectCreationException
 from .models import S3, Environment, Flavor, MLFlow, Project
+
+Apps = apps.get_model(app_label=settings.APPS_MODEL)
+AppInstance = apps.get_model(app_label=settings.APPINSTANCE_MODEL)
+
+User = get_user_model()
 
 
 @shared_task

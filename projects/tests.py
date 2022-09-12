@@ -2,7 +2,7 @@ import os
 
 import yaml
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from guardian.shortcuts import assign_perm, remove_perm
@@ -10,6 +10,7 @@ from guardian.shortcuts import assign_perm, remove_perm
 from .helpers import decrypt_key
 from .models import Environment, Project
 
+User = get_user_model()
 
 class ProjectTestCase(TestCase):
     def setUp(self):
