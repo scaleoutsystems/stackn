@@ -2,13 +2,16 @@ import io
 import shutil
 import tarfile
 
+from django.apps import apps
+from django.conf import settings
+
 import s3fs
 from minio import Minio
-from rsa import verify
 
-from portal.models import PublicModelObject, PublishedModel
 
 from .models import Model
+
+ublicModelObject = apps.get_model(app_label=settings.PUBLICMODELOBJECT_MODEL)
 
 
 def add_pmo_to_publish(mdl, pmodel):

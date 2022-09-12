@@ -8,6 +8,7 @@ from importlib.resources import path
 from unicodedata import decimal
 
 import markdown
+from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,9 +22,6 @@ from django.views.generic import View
 from guardian.decorators import permission_required_or_403
 from guardian.mixins import PermissionRequiredMixin
 
-from apps.models import AppInstance, Apps
-from portal.models import PublicModelObject, PublishedModel
-from projects.models import Environment, Project, ProjectLog
 
 from .forms import EnvironmentForm, ModelForm, UploadModelCardHeadlineForm
 from .helpers import get_download_url, set_artifact
@@ -31,6 +29,15 @@ from .models import Metadata, Model, ModelLog, ObjectType
 
 new_data = defaultdict(list)
 logger = logging.getLogger(__name__)
+
+Apps = apps.get_model(app_label=settings.APPS_MODEL)
+AppInstance = apps.get_model(app_label=settings.APPINSTANCE_MODEL)
+
+Project = apps.get_model(app_label=settings.PROJECTS_MODEL)
+ProjectLog = apps.get_model(app_label=settings.PROJECTLOG_MODEL)
+Environment = apps.get_model(app_label=settings.ENVIRONMENT_MODEL)
+
+PublishedModel = apps.get_model(app_label=settings.PUBLISHEDMODEL_MODEL)
 
 
 class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
