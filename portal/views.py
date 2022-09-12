@@ -2,8 +2,8 @@ import time
 import uuid
 
 import requests
+from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import HttpResponseRedirect, redirect, render, reverse
@@ -12,8 +12,8 @@ from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-from apps.models import AppInstance, Apps
-from projects.models import Project
+AppInstance = apps.get_model(app_label=settings.APPINSTANCE_MODEL)
+Project = apps.get_model(app_label=settings.PROJECTS_MODEL)
 
 
 def index(request, id=0):
