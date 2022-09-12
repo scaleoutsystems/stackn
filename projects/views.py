@@ -387,8 +387,9 @@ def create(request):
 
         # Try to create database project object.
         try:
-            img = django_settings.STATIC_ROOT + \
-                'images/patterns/image-{}.png'.format(random.randrange(8, 13))
+            static_files, = django_settings.STATICFILES_DIRS
+            img = static_files + \
+                '/images/patterns/image-{}.png'.format(random.randrange(8, 13))
             print(img)
             img_file = open(img, 'rb')
             project = Project.objects.create_project(name=name,
