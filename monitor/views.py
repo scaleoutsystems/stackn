@@ -3,14 +3,12 @@ import logging
 import time
 from datetime import datetime
 
+from apps.models import AppInstance, ResourceData
 from django.conf import settings as sett
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models import Count, F, Sum
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, reverse
-
-from apps.models import AppInstance, ResourceData
 # from deployments.models import DeploymentInstance
 from models.models import Model
 from projects.models import Project
