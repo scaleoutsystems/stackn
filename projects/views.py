@@ -387,10 +387,11 @@ def create(request):
 
         # Try to create database project object.
         try:
-            if hasattr(settings, 'STATICFILES_DIRS'):
-                static_files, = django_settings.STATICFILES_DIRS
+            if hasattr(django_settings, 'STATICFILES_DIRS'):
+                static_files, = django_settings.STATICFILES_DIRS 
             else:
                 static_files = django_settings.STATIC_ROOT
+            print(f'STATIC FILES DIR: {static_files}', flush=True)
             img = static_files + \
                 '/images/patterns/image-{}.png'.format(random.randrange(8, 13))
             print(img)
