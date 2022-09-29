@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.files import File
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, reverse
@@ -77,11 +78,21 @@ def settings(request, user, project_slug):
     project = Project.objects.filter(Q(owner=request.user) | Q(
         authorized=request.user), Q(slug=project_slug)).first()
     url_domain = django_settings.DOMAIN
-    platform_users = User.objects.filter(
-        ~Q(pk=project.owner.pk),
-        ~Q(username='AnonymousUser'),
-        ~Q(username='admin')
-    )
+    try:
+        User._meta.get_field('is_user')
+        platform_users = User.objects.filter(
+            ~Q(pk=project.owner.pk),
+            ~Q(username='AnonymousUser'),
+            ~Q(username='admin'),
+            is_user=True
+        )
+    except FieldDoesNotExist:
+        platform_users = User.objects.filter(
+            ~Q(pk=project.owner.pk),
+            ~Q(username='AnonymousUser'),
+            ~Q(username='admin')
+        )
+
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by('slug', '-revision').distinct('slug')
 
