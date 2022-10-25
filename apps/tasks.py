@@ -595,3 +595,10 @@ def delete_old_clients_proj():
     # except:
     #    print("Project client scope already deleted.")
     #   pass
+
+@app.task
+def purge_tasks():
+    """
+    Remove tasks from queue to avoid overflow
+    """
+    app.control.purge()
