@@ -1,1 +1,1 @@
-# studio-models
+# studio-api
