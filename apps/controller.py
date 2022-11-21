@@ -14,8 +14,7 @@ KUBEPATH = settings.KUBECONFIG
 def delete(options):
     print("DELETE FROM CONTROLLER")
     # building args for the equivalent of helm uninstall command
-    args = ['helm', '--kubeconfig',
-            str(KUBEPATH), '-n', options['namespace'], 'delete', options['release']]
+    args = ['helm', '-n', options['namespace'], 'delete', options['release']]
     result = subprocess.run(args, capture_output=True)
     return result
 
@@ -52,8 +51,7 @@ def deploy(options):
     f.close()
 
     # building args for the equivalent of helm install command
-    args = ['helm', 'upgrade', '--install', '--kubeconfig',
-            str(KUBEPATH), '-n', options['namespace'], options['release'], chart, '-f', unique_filename]
+    args = ['helm', 'upgrade', '--install', '-n', options['namespace'], options['release'], chart, '-f', unique_filename]
     print("CONTROLLER: RUNNING HELM COMMAND... ")
     result = subprocess.run(args, capture_output=True)
     return result
