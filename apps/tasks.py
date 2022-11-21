@@ -46,7 +46,7 @@ def post_create_hooks(instance):
 
         # OBS!! TEMP WORKAROUND to be able to connect to minio
         minio_svc = '{}-minio'.format(instance.parameters['release'])
-        cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get svc ' + minio_svc + \
+        cmd = 'kubectl' + ' get svc ' + minio_svc + \
             ' -o jsonpath="{.spec.clusterIP"}'
         minio_host_url = ''
         try:
@@ -102,7 +102,7 @@ def post_create_hooks(instance):
         # OBS!! TEMP WORKAROUND to be able to connect to mlflow (internal dns between docker and k8s does not work currently)
         # Sure one could use FQDN but lets avoid going via the internet
         mlflow_svc = instance.parameters['service']["name"]
-        cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get svc ' + mlflow_svc + \
+        cmd = 'kubectl' + ' get svc ' + mlflow_svc + \
             ' -o jsonpath="{.spec.clusterIP"}'
         mlflow_host_ip = ''
         try:
@@ -259,8 +259,7 @@ def delete_resource(pk):
 @transaction.atomic
 def check_status():
     # TODO: Fix for multicluster setup.
-    args = ['kubectl', '--kubeconfig', settings.KUBECONFIG, '-n',
-            settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
+    args = ['kubectl', '-n', settings.NAMESPACE, 'get', 'po', '-l', 'type=app', '-o', 'json']
     # print(args)
     results = subprocess.run(args, capture_output=True)
     # print(results)
@@ -340,7 +339,7 @@ def check_status():
             # Find the app instance release name
             app_release = instance.parameters['release']     # e.g 'rfc058c6f'
             # Now check if there exists a pod with that release
-            cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get po -l release=' + app_release
+            cmd = 'kubectl' + ' get po -l release=' + app_release
             try:
                 # returns a byte-like object
                 result = subprocess.run(cmd, shell=True, capture_output=True)
@@ -351,7 +350,7 @@ def check_status():
 
             if result_stdout != '' and 'No resources found in default namespace.' not in result_stderr:
                 # Extract the the status of the related release pod
-                cmd = 'kubectl --kubeconfig ' + settings.KUBECONFIG + ' get po -l release=' + app_release + \
+                cmd = 'kubectl' + ' get po -l release=' + app_release + \
                     ' -o jsonpath="{.items[0].status.phase}"'
                 try:
                     result = subprocess.run(
@@ -366,7 +365,7 @@ def check_status():
                     print(
                         "INFO: Found Running pod associated to an app instance marked as Deleted")
                     print("INFO: DELETE RESOURCE with release: {}".format(app_release))
-                    cmd = 'helm --kubeconfig ' + settings.KUBECONFIG + ' delete ' + app_release
+                    cmd = 'helm' + ' delete ' + app_release
                     try:
                         result = subprocess.run(
                             cmd, shell=True, capture_output=True)
@@ -381,7 +380,7 @@ def get_resource_usage():
 
     timestamp = time.time()
 
-    args = ['kubectl', '--kubeconfig', settings.KUBECONFIG, 'get',
+    args = ['kubectl', 'get',
             '--raw', '/apis/metrics.k8s.io/v1beta1/pods']
     results = subprocess.run(args, capture_output=True)
 
@@ -394,8 +393,7 @@ def get_resource_usage():
 
     resources = dict()
 
-    args_pod = ['kubectl', '--kubeconfig',
-                settings.KUBECONFIG, 'get', 'po', '-o', 'json']
+    args_pod = ['kubectl', 'get', 'po', '-o', 'json']
     results_pod = subprocess.run(args_pod, capture_output=True)
     results_pod_json = json.loads(results_pod.stdout.decode('utf-8'))
     try:
