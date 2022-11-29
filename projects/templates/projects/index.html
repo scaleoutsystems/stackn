@@ -7,7 +7,7 @@
 <a href="{% url 'projects:project_templates' %}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> New project</a>
 {% endif %}
 
-<h1 class="h3 mb-3">Projects</h1>
+<h3 class="mb-3">Projects</h3>
 
 <div class="row">
 
@@ -16,15 +16,14 @@
         <p>You don't have any projects yet.</p>
         {% else %}
         {% for project in projects %}
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
-            <div class="card h-100">
-                <img class="card-img-top" src="{{ media_url }}{{ project.project_image }}" alt="Card image cap">
+        <div class="col-xs-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="card">
+                <img class="card-img-top img-cover h-r-30" src="{{ media_url }}{{ project.project_image }}" alt="Card image cap">
                 <div class="card-header px-4 pt-4">
 
                     <h3>
                         {{ project.name }}
                     </h3>
-                    <!-- <div class="my-2">Started {{ project.created_at }}</div> -->
                 </div>
                 <div class="card-body px-4 pt-2">
                     <p>{{ project.description }}</p>
@@ -35,7 +34,7 @@
                             {% endif %}
                         </h4>
                     </div>
-                </div>
+                 </div>
             <div class="card-body px-4 pt-2">
 
                     <div style="position:absolute;bottom:0.5em;right:1.5em;">
