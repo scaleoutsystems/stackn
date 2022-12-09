@@ -22,7 +22,7 @@ django-guardian==2.4.0
 amqp==5.0.9
 argh==0.26.2
 celery==5.2.3
-certifi==2021.10.8
+certifi==2022.12.7
 channels==3.0.4
 channels-redis==3.3.1
 chardet==4.0.0
