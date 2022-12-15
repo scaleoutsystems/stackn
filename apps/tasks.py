@@ -132,15 +132,20 @@ def post_create_hooks(instance):
         obj.save()
 
 
-def post_delete_hooks(instance):
+def release_name(instance):
     # Free up release name (if reserved)
-    print("TASK - POST DELETE HOOK...")
     rel_names = instance.releasename_set.all()
-    project = instance.project
+    
     for rel_name in rel_names:
         rel_name.status = 'active'
         rel_name.app = None
         rel_name.save()
+
+
+def post_delete_hooks(instance):
+    print("TASK - POST DELETE HOOK...")
+    release_name(instance)
+    project = instance.project
     if project.s3storage and project.s3storage.app == instance:
         project.s3storage.delete()
     elif project.mlflow and project.mlflow.app == instance:
@@ -244,16 +249,24 @@ def delete_resource(pk):
             status.save()
             appinstance.state = "FailedToDelete"
 
-    # print("NEW STATE:")
-    # print(appinstance.state)
-    # appinstance.save()
-    # for i in range(0,15):
-    #     appinstance =  AppInstance.objects.get(pk=pk)
-    #     print("FETCHED STATE:")
-    #     print(appinstance.state)
-    #     appinstance.save()
-    # return results.returncode, results.stdout.decode('utf-8')
+@shared_task
+@transaction.atomic
+def delete_resource_permanently(appinstance):
 
+    parameters = appinstance.parameters
+    
+    # Invoke chart controller
+    results = controller.delete(parameters)
+
+    if not (results.returncode == 0 or 'release: not found' in results.stderr.decode('utf-8')):
+        status = AppStatus(appinstance=appinstance)
+        status.status_type = "FailedToDelete"
+        status.save()
+        appinstance.state = "FailedToDelete"
+
+    release_name(appinstance)
+
+    appinstance.delete()
 
 @app.task
 @transaction.atomic
