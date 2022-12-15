@@ -527,18 +527,10 @@ def delete(request, user, project_slug):
     else:
         project = Project.objects.filter(slug=project_slug).first()
 
+
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
-    from .tasks import delete_project_apps
-    delete_project_apps(project.slug)
-
-    print("ARCHIVING PROJECT MODELS")
-    models = Model.objects.filter(project=project)
-    for model in models:
-        model.status = 'AR'
-        model.save()
-
-    project.status = 'archived'
-    project.save()
+    from .tasks import delete_project
+    delete_project(project)
 
     return HttpResponseRedirect(next_page, {'message': 'Deleted project successfully.'})
 

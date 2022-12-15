@@ -3,10 +3,11 @@ import random
 import secrets
 import string
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
@@ -134,6 +135,7 @@ class ProjectManager(models.Manager):
         return password
 
 
+
 class Project(models.Model):
     authorized = models.ManyToManyField(get_user_model(), blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -172,6 +174,17 @@ class Project(models.Model):
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
 
+
+@receiver(pre_delete, sender=Project)
+def on_project_delete(sender, instance, **kwargs):
+    
+    Model = apps.get_model(app_label=settings.MODELS_MODEL)
+    print("ARCHIVING PROJECT MODELS")
+    models = Model.objects.filter(project=instance)
+
+    for model in models:
+        model.status = 'AR'
+        model.save()    
 
 class ProjectLog(models.Model):
     MODULE_CHOICES = [
