@@ -9,10 +9,7 @@ def get_studio_settings(request):
     """
     studio_settings = []
 
-    studio_url = {
-        "name": "studio_host",
-        "value": settings.STUDIO_HOST
-    }
+    studio_url = {"name": "studio_host", "value": settings.STUDIO_HOST}
     studio_settings.append(studio_url)
 
-    return JsonResponse({'data': studio_settings})
+    return JsonResponse({"data": studio_settings})

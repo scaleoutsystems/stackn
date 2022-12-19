@@ -4,31 +4,23 @@ from .serializers import Project
 
 
 class ProjectPermission(BasePermission):
-
     def has_permission(self, request, view):
         """
         Should simply return, or raise a 403 response.
         """
         is_authorized = False
-        project = Project.objects.get(pk=view.kwargs['project_pk'])
+        project = Project.objects.get(pk=view.kwargs["project_pk"])
 
-        project_rules = {
-            'GET': ['guest', 'member', 'admin'],
-            'POST': ['member', 'admin'],
-            'PUT': ['member', 'admin'],
-            'DELETE': ['admin']
-        }
         # TODO: Check users project roles.
         if request.user == project.owner:
             is_authorized = True
         elif request.user in project.authorized.all():
             is_authorized = True
-        print('Is authorized: {}'.format(is_authorized))
+        print("Is authorized: {}".format(is_authorized))
         return is_authorized
 
 
 class AdminPermission(BasePermission):
-
     def has_permission(self, request, view):
         """
         Should simply return, or raise a 403 response.
@@ -37,5 +29,5 @@ class AdminPermission(BasePermission):
 
         if request.user.is_superuser:
             is_authorized = True
-        print('Is authorized: {}'.format(is_authorized))
+        print("Is authorized: {}".format(is_authorized))
         return is_authorized

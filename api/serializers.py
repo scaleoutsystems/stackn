@@ -1,44 +1,80 @@
-from django.contrib.auth.models import User
-from rest_framework.serializers import ModelSerializer
-
 from apps.models import AppCategories, AppInstance, Apps, AppStatus
+from django.contrib.auth.models import User
 from models.models import Metadata, Model, ModelLog, ObjectType
-from projects.models import (S3, Environment, Flavor, MLFlow, Project,
-                             ProjectTemplate, ReleaseName)
+from projects.models import (
+    S3,
+    Environment,
+    Flavor,
+    MLFlow,
+    Project,
+    ProjectTemplate,
+    ReleaseName,
+)
+from rest_framework.serializers import ModelSerializer
 
 
 class MLModelSerializer(ModelSerializer):
     class Meta:
         model = Model
         fields = (
-            'id', 'uid', 'name', 'description', 'model_card', 'resource', 'url', 'uploaded_at', 'project', 'status', 'version', 'object_type')
+            "id",
+            "uid",
+            "name",
+            "description",
+            "model_card",
+            "resource",
+            "url",
+            "uploaded_at",
+            "project",
+            "status",
+            "version",
+            "object_type",
+        )
 
 
 class ObjectTypeSerializer(ModelSerializer):
     class Meta:
         model = ObjectType
-        fields = ('id', 'name', 'slug')
+        fields = ("id", "name", "slug")
 
 
 class ModelLogSerializer(ModelSerializer):
     class Meta:
         model = ModelLog
         fields = (
-            'id', 'run_id', 'trained_model', 'project', 'training_started_at', 'execution_time', 'code_version',
-            'current_git_repo', 'latest_git_commit', 'system_details', 'cpu_details', 'training_status')
+            "id",
+            "run_id",
+            "trained_model",
+            "project",
+            "training_started_at",
+            "execution_time",
+            "code_version",
+            "current_git_repo",
+            "latest_git_commit",
+            "system_details",
+            "cpu_details",
+            "training_status",
+        )
 
 
 class MetadataSerializer(ModelSerializer):
     class Meta:
         model = Metadata
         fields = (
-            'id', 'run_id', 'trained_model', 'project', 'model_details', 'parameters', 'metrics')
+            "id",
+            "run_id",
+            "trained_model",
+            "project",
+            "model_details",
+            "parameters",
+            "metrics",
+        )
 
 
 class S3serializer(ModelSerializer):
     class Meta:
         model = S3
-        fields = ('name', 'access_key', 'secret_key', 'host', 'region')
+        fields = ("name", "access_key", "secret_key", "host", "region")
 
 
 class MLflowSerializer(ModelSerializer):
@@ -46,7 +82,7 @@ class MLflowSerializer(ModelSerializer):
 
     class Meta:
         model = MLFlow
-        fields = ('name', 'mlflow_url', 's3')
+        fields = ("name", "mlflow_url", "s3")
 
 
 class ProjectSerializer(ModelSerializer):
@@ -56,14 +92,25 @@ class ProjectSerializer(ModelSerializer):
         model = Project
 
         fields = (
-            'id', 'name', 'description', 'slug', 'owner', 'authorized', 'image', 's3storage', 'updated_at',
-            'created_at', 'repository', 'repository_imported')
+            "id",
+            "name",
+            "description",
+            "slug",
+            "owner",
+            "authorized",
+            "image",
+            "s3storage",
+            "updated_at",
+            "created_at",
+            "repository",
+            "repository_imported",
+        )
 
 
 class AppCategorySerializer(ModelSerializer):
     class Meta:
         model = AppCategories
-        fields = ('name', )
+        fields = ("name",)
 
 
 class AppSerializer(ModelSerializer):
@@ -71,13 +118,13 @@ class AppSerializer(ModelSerializer):
 
     class Meta:
         model = Apps
-        fields = ('id', 'revision', 'name', 'category')
+        fields = ("id", "revision", "name", "category")
 
 
 class AppStatusSerializer(ModelSerializer):
     class Meta:
         model = AppStatus
-        fields = ('id', 'status_type')
+        fields = ("id", "status_type")
 
 
 class AppInstanceSerializer(ModelSerializer):
@@ -86,19 +133,19 @@ class AppInstanceSerializer(ModelSerializer):
 
     class Meta:
         model = AppInstance
-        fields = ('id', 'name', 'app', 'table_field', 'state', 'status')
+        fields = ("id", "name", "app", "table_field", "state", "status")
 
 
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ["id", "username"]
 
 
 class FlavorsSerializer(ModelSerializer):
     class Meta:
         model = Flavor
-        fields = '__all__'
+        fields = "__all__"
 
 
 class EnvironmentSerializer(ModelSerializer):
@@ -106,7 +153,7 @@ class EnvironmentSerializer(ModelSerializer):
 
     class Meta:
         model = Environment
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ReleaseNameSerializer(ModelSerializer):
@@ -114,10 +161,10 @@ class ReleaseNameSerializer(ModelSerializer):
 
     class Meta:
         model = ReleaseName
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProjectTemplateSerializer(ModelSerializer):
     class Meta:
         model = ProjectTemplate
-        fields = '__all__'
+        fields = "__all__"
