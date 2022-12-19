@@ -1,5 +1,3 @@
-
-
 class ProjectCreationException(Exception):
     pass
 
