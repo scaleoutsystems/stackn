@@ -93,8 +93,8 @@
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
-                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs
+                                                <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
+                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
                                                 </a>
                                                 <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
                                                     <i class="align-middle me-1" data-feather="sliders"></i> Settings
@@ -174,7 +174,7 @@
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
                                                 <a class="dropdown-item" href="{% url 'models:details_private' request.user project.slug model.pk %}">
-                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs
+                                                    <i class="align-middle me-1" data-feather="align-center"></i> Details
                                                 </a>
                                                 <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="sliders"></i> Settings
