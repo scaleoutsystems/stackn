@@ -300,6 +300,7 @@ def serialize_cli(username, project, aset):
             "project": project.name,
             "user": username,
             "token": token.key,
+            "secure": "False",
         }
     return parameters
 
