@@ -3,50 +3,24 @@
 
 {% block content %}
 
-<h1 class="h3 mb-3">Overview</h1>
-
-<div class="row">
-    <div class="col-12 col-lg-6 col-xl-6 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title">CPU</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                    <canvas id="totalCPUChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block;" class="chartjs-render-monitor"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-lg-6 col-xl-6 d-flex">
-        <div class="card flex-fill w-100">
-            <div class="card-header">
-                <h5 class="card-title">Memory</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                    <canvas id="totalMEMChart" data-url="{% url 'monitor:usage' user project.slug %}" style="display: block; width: 464px; height: 300px;" width="464" height="300" class="chartjs-render-monitor"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-</div>
+<h3 class="mb-3">Overview</h3>
 
 <div class="row">
     {% for objs in resources %}
-    <div class="col-6 d-flex">
+    <div class="col-12 col-xl-6 d-flex">
         <div class="card flex-fill w-100">
             <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <button class="btn btn-outline-secondary">New</button>
+                            <button class="btn btn-outline-secondary">New</button>
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-right">
                             {% for app in objs.apps %}
-                            <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">{{ app.name }}</a>
+                            <a class="dropdown-item"
+                                href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">{{ app.name }}
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
@@ -54,113 +28,113 @@
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
             </div>
             {% if objs.objs %}
-            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <table id="datatables-dashboard-projects-{{ forloop.counter }}" class="table table-striped my-0 dataTable no-footer"
-                            role="grid">
-                            <thead>
-                                <tr>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1"></th> 
-                                    <th class="sorting_asc" tabindex="0" 
-                                        rowspan="1" colspan="1">App</th>
-                                    <th class="sorting_asc" tabindex="0" rowspan="1" colspan="1">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Created</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for obj in objs.objs %}
-                                <tr class="odd">
-                                    <td><img src="{{ media_url}}{{ obj.app.logo_file }}" class="img-fluid " alt="App Logo" style="max-height:25px;"></td>
-                                    <td class="d-none d-xl-table-cell">{{ obj.app.name }}</td>
-                                    {% if obj.table_field.url %}
-                                    <td class="sorting_1"><a href="{{ obj.table_field.url }}" target="_blank">{{ obj.name }}</a></td>
-                                    {% else %}
-                                    <td class="sorting_1">{{ obj.name }}</td>
-                                    {% endif %}
-                                    <!-- <td class="d-none d-xl-table-cell">{{ obj.owner }}</td> -->
-                                    <td class="d-none d-xl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
-                                    <td id="status-{{ obj.pk }}"><span class="badge 
+            <div class="no-footer">
+
+                <table id="datatables-dashboard-projects-{{ forloop.counter }}"
+                    class="table table-striped my-0 no-footer" role="grid">
+                    <thead>
+                        <tr>
+                            <th class="d-none d-xxl-table-cell " tabindex="0" rowspan="1" colspan="1"></th>
+                            <th tabindex="0" rowspan="1" colspan="1">App</th>
+                            <th tabindex="0" rowspan="1" colspan="1">Name</th>
+                            <th class="d-none d-xxl-table-cell " tabindex="0" rowspan="1" colspan="1">Created</th>
+                            <th class="" tabindex="0" rowspan="1" colspan="1">Status</th>
+                            <th class="d-none d-md-table-cell " tabindex="0" rowspan="1" colspan="1">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obj in objs.objs %}
+                        <tr class="odd">
+                            <td><img src="{{ media_url}}{{ obj.app.logo_file }}" class="img-fluid " alt="App Logo"
+                                    style="max-height:25px;"></td>
+                            <td class="d-none d-xxl-table-cell">{{ obj.app.name }}</td>
+                            {% if obj.table_field.url %}
+                            <td class="sorting_1"><a href="{{ obj.table_field.url }}" target="_blank">{{ obj.name }}</a>
+                            </td>
+                            {% else %}
+                            <td class="sorting_1">{{ obj.name }}</td>
+                            {% endif %}
+                            <!-- <td class="d-none d-xxl-table-cell">{{ obj.owner }}</td> -->
+                            <td class="d-none d-xxl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
+                            <td id="status-{{ obj.pk }}"><span class="badge 
                                         {% if obj.status.latest.status_type in status_success %}bg-success
                                         {% elif obj.status.latest.status_type in status_warning %}bg-warning
                                         {% else %}bg-danger
                                         {% endif %}">{{ obj.status.latest.status_type }}</span></td>
-                                    <td class="table-action text-center">
-                                        <div class="dropdown show">
-                                            <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
-                                                    <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
-                                                </a>
-                                                <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
-                                                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
-                                                </a>
-                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
-                                                    <i class="align-middle me-1" data-feather="trash"></i> Delete
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            <td class="table-action text-center">
+                                <div class="dropdown show">
+                                    <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
+                                            <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
+                                        </a>
+                                        <a class="dropdown-item"
+                                            href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
+                                            <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                        </a>
+                                        <a class="dropdown-item bg-danger text-white confirm-delete"
+                                            href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
+                                            <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             {% else %}
-                <script>
-                    swal ( "Oops" ,  "Something went wrong!" ,  "error" )
-                </script>
+            <script>
+                swal("Oops", "Something went wrong!", "error")
+            </script>
             {% endif %}
         </div>
     </div>
     {% endfor %}
-    <div class="col-6 d-flex">
+    <div class="col-12 col-xl-6 d-flex">
         <div class="card flex-fill">
             <div class="card-header">
                 <div class="card-actions float-end">
                     <div class="dropdown show">
                         <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <button class="btn btn-outline-secondary">New</button>
+                            <button class="btn btn-outline-secondary">New</button>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Create Model Object</a>
+                            <a class="dropdown-item" href="{% url 'models:create' request.user project.slug %}">Create
+                                Model Object</a>
                         </div>
                     </div>
                 </div>
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
-            <div class="dataTables_wrapper dt-bootstrap4 no-footer">
-                <div class="row">
-                    <div class="col-sm-12 col-md-6"></div>
-                    <div class="col-sm-12 col-md-6"></div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <table id="datatables-dashboard-projects" class="table table-striped my-0 dataTable no-footer"
+            <div class="no-footer">
+        
+                        <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer"
                             role="grid">
                             <thead>
                                 <tr>
-                                    <th class="sorting_asc" tabindex="0" rowspan="1" colspan="1">Name</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Version</th>
-                                    <th class="d-none d-xl-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Created</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Accessability</th>
-                                    <th class="d-none d-md-table-cell sorting" tabindex="0" rowspan="1" colspan="1">Actions</th>
+                                    <th scope="col">Name</th>
+                                    <th class="d-none d-xxl-table-cell" scope="col">
+                                        Version</th>
+                                    <th class="d-none d-xxl-table-cell" scope="col">
+                                        Created</th>
+                                    <th scope="col">Status</th>
+                                    <th class="d-none d-md-table-cell" scope="col">
+                                        Accessability</th>
+                                    <th class="d-none d-md-table-cell" scope="col">
+                                        Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for model in models %}
                                 <tr class="odd">
                                     <td class="sorting_1">{{ model.name }}</td>
-                                    <td class="d-none d-xl-table-cell">{{ model.version }}</td>
-                                    <td class="d-none d-xl-table-cell">{{ model.uploaded_at }}</td>
+                                    <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
+                                    <td class="d-none d-xxl-table-cell">{{ model.uploaded_at }}</td>
                                     <td><span class="badge 
                                         {% if model.status == 'CR' %}bg-warning
                                         {% elif model.status == 'DP' %}bg-success
@@ -173,16 +147,20 @@
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="{% url 'models:details_private' request.user project.slug model.pk %}">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'models:details_private' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="align-center"></i> Details
                                                 </a>
-                                                <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.pk %}">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'models:publish_model' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="sliders"></i> Settings
                                                 </a>
-                                                <a class="dropdown-item" href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                                <a class="dropdown-item"
+                                                    href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
                                                     <i class="align-middle me-1" data-feather="check-circle"></i> Serve
                                                 </a>
-                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
+                                                <a class="dropdown-item bg-danger text-white confirm-delete"
+                                                    href="{% url 'models:delete' request.user project.slug model.pk %}">
                                                     <i class="align-middle me-1" data-feather="trash"></i> Delete
                                                 </a>
                                             </div>
@@ -192,11 +170,11 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
             {% else %}
-            <p style="margin-left: 25px;">No models have been uploaded to this project yet.</p>
+
+            <div class="px-4">
+                <p>No models have been uploaded to this project yet.</p>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -215,7 +193,7 @@
                     backgroundColor: 'transparent',
                     borderColor: window.theme.primary,
                     data: y_data
-                }]          
+                }]
             },
             options: {
                 elements: {
@@ -235,7 +213,7 @@
                 },
                 plugins: {
                     filler: {
-                    propagate: false
+                        propagate: false
                     }
                 },
                 scales: {
@@ -277,31 +255,32 @@
             success: function (data) {
                 newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
                 newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
-    
+
             }
         });
-  
+
     };
     resourceCharts('#totalCPUChart', '#totalMEMChart');  
 </script>
 
 <script>
     function update_status() {
-        var apps = {{ pk_list | safe }}
-        $.ajax({
-            type: "POST",
-            url: "{% url 'apps:get_status' request.user project.slug %}",
-            data: {'pk': apps},
-            success: function (data) {
-                console.log(data)
-                apps.split(',').forEach(function (item, index) {
-                    document.getElementById("status-"+item).innerHTML = data['status-'+item];
-                });
-            },
-            complete: function() {
-                setTimeout(update_status, 5000);
-            }
-        });
+        var apps = {{ pk_list | safe
+    }}
+    $.ajax({
+        type: "POST",
+        url: "{% url 'apps:get_status' request.user project.slug %}",
+        data: { 'pk': apps },
+        success: function (data) {
+            console.log(data)
+            apps.split(',').forEach(function (item, index) {
+                document.getElementById("status-" + item).innerHTML = data['status-' + item];
+            });
+        },
+        complete: function () {
+            setTimeout(update_status, 5000);
+        }
+    });
     };
     setTimeout(update_status, 5000);
 </script>
