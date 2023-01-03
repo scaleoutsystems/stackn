@@ -8,7 +8,11 @@ setup(
     include_package_data=True,
     py_modules=["studio_portal"],
     python_requires=">=3.6,<4",
-    install_requires=["django==4.0.6", "requests==2.27.1", "Pillow==9.0.0"],
+    install_requires=[
+        "django==4.1.5",
+        "requests==2.28.1",
+        "Pillow==9.4.0",
+    ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
     keywords="",
