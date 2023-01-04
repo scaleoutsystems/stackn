@@ -149,8 +149,9 @@ def delete_project_apps(project_slug):
 
 
 @shared_task
-def delete_project(project):
+def delete_project(project_pk):
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
+    project = Project.objects.get(pk=project_pk)
     delete_project_apps_permanently(project)
 
     project.delete()

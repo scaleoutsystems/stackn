@@ -660,7 +660,9 @@ def delete(request, user, project_slug):
         project = Project.objects.filter(slug=project_slug).first()
 
     print("SCHEDULING DELETION OF ALL INSTALLED APPS")
-    delete_project(project)
+    project.status = "deleted"
+    project.save()
+    delete_project.delay(project.pk)
 
     return HttpResponseRedirect(
         next_page, {"message": "Deleted project successfully."}
