@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
     name="studio-api",
@@ -6,7 +6,8 @@ setup(
     description="""Django app for handling REST-API in Studio""",
     url="https://www.scaleoutsystems.com",
     include_package_data=True,
-    py_modules=["api"],
+    package=["api"],
+    package_dir={"api": "."},
     python_requires=">=3.6,<4",
     install_requires=[
         "django==4.1.5",
@@ -21,7 +22,6 @@ setup(
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,
     keywords="",
-    packages=find_packages(exclude=["tests", "tests.*"]),
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
