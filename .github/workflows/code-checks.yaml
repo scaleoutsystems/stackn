@@ -43,7 +43,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
       - name: Check Python imports
         run: |
-          isort . --check --diff --skip migrations --profile black -p studio --line-length 79
+          isort . --check --diff --skip migrations --skip .venv --profile black -p studio -p projects -p models -p apps -p portal --line-length 79
       - name: Check Python formatting
         run: |
           black . --check --diff --line-length 79 --exclude migrations

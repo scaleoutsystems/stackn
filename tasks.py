@@ -3,14 +3,15 @@ import json
 import secrets
 import string
 
-import apps.tasks as apptasks
-import apps.views as appviews
-from apps.controller import delete
 from celery import shared_task
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
+
+import apps.tasks as apptasks
+import apps.views as appviews
+from apps.controller import delete
 
 from .exceptions import ProjectCreationException
 from .models import S3, Environment, Flavor, MLFlow, Project
