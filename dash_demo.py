@@ -2,10 +2,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import requests
-from apps.models import AppInstance, Apps
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from django_plotly_dash import DjangoDash
+
+from apps.models import AppInstance, Apps
 from projects.models import Project
 
 app = DjangoDash("FEDnDashboard")

@@ -2,12 +2,13 @@ import itertools
 import time
 from datetime import datetime
 
-from apps.models import ResourceData
 from django.conf import settings as sett
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, reverse
+
+from apps.models import ResourceData
 from models.models import Model
 from projects.models import Project
 
