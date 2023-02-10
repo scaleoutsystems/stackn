@@ -1,5 +1,7 @@
-from apps.models import AppCategories, AppInstance, Apps, AppStatus
 from django.contrib.auth.models import User
+from rest_framework.serializers import ModelSerializer
+
+from apps.models import AppCategories, AppInstance, Apps, AppStatus
 from models.models import Metadata, Model, ModelLog, ObjectType
 from projects.models import (
     S3,
@@ -10,7 +12,6 @@ from projects.models import (
     ProjectTemplate,
     ReleaseName,
 )
-from rest_framework.serializers import ModelSerializer
 
 
 class MLModelSerializer(ModelSerializer):
