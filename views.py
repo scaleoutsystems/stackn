@@ -16,7 +16,11 @@ from guardian.decorators import permission_required_or_403
 from guardian.shortcuts import assign_perm, remove_perm
 
 from .exceptions import ProjectCreationException
-from .forms import PublishProjectToGitHub, TransferProjectOwnershipForm
+from .forms import (
+    ImageUpdateForm,
+    PublishProjectToGitHub,
+    TransferProjectOwnershipForm,
+)
 from .models import (
     S3,
     Environment,
@@ -150,10 +154,15 @@ def update_image(request, user, project_slug):
         Q(owner=request.user) | Q(authorized=request.user),
         Q(slug=project_slug),
     ).first()
+
     if request.method == "POST" and request.FILES["image"]:
-        image = request.FILES["image"]
-        project.project_image = image
-        project.save()
+        form = ImageUpdateForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            image = request.FILES["image"]
+
+            project.project_image = image
+            project.save()
 
     return HttpResponseRedirect(
         reverse(
@@ -373,11 +382,9 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
     "can_view_project", (Project, "slug", "project_slug")
 )
 def grant_access_to_project(request, user, project_slug):
-
     project = Project.objects.get(slug=project_slug)
 
     if request.method == "POST":
-
         selected_users = request.POST.getlist("selected_users")
 
         log = ProjectLog(
@@ -415,11 +422,9 @@ def grant_access_to_project(request, user, project_slug):
     "can_view_project", (Project, "slug", "project_slug")
 )
 def revoke_access_to_project(request, user, project_slug):
-
     project = Project.objects.get(slug=project_slug)
 
     if request.method == "POST":
-
         selected_users = request.POST.getlist("selected_users")
 
         log = ProjectLog(
@@ -487,7 +492,6 @@ def create(request):
         template_selected = request.GET.get("template")
 
     if request.method == "POST":
-
         success = True
 
         name = request.POST.get("name", "default")
@@ -567,7 +571,6 @@ def create(request):
     "can_view_project", (Project, "slug", "project_slug")
 )
 def details(request, user, project_slug):
-
     is_authorized = False
     try:
         projects = Project.objects.filter(
@@ -580,7 +583,6 @@ def details(request, user, project_slug):
         is_authorized = True
     else:
         if request.user.is_authenticated:
-
             is_authorized = True
             request.session["project"] = project_slug
 

@@ -11,7 +11,6 @@ User = get_user_model()
 
 class ProjectTestCase(TestCase):
     def setUp(self):
-
         user = User.objects.create_user("admin")
         Project.objects.create(
             name="test-secret",

@@ -3,8 +3,8 @@
 {% block projects_dropdown %}
 <ul class="navbar-nav">
     <li class="nav-item px-2 dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button"
-           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
             Go to...
         </a>
         <div class="dropdown-menu dropdown-menu-start dropdown-mega" aria-labelledby="projectsDropdown">
@@ -34,13 +34,12 @@
             </div>
 
             <div class="list-group list-group-flush" role="tablist">
-                
+
                 <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#projdesc"
                     role="tab">
                     Description
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#image"
-                    role="tab">
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#image" role="tab">
                     Image
                 </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
@@ -107,10 +106,13 @@
                     <div class="card-body">
                         <h5 class="card-title">Change project image</h5>
 
-                        <form action="{% url 'projects:update_image' request.user project.slug %}" method="post" enctype="multipart/form-data">
+                        <form action="{% url 'projects:update_image' request.user project.slug %}" method="post"
+                            enctype="multipart/form-data">
                             {% csrf_token %}
+                            
                             <div class="mb-3">
-                                <input type="file" class="form-control" id="image" name="image">
+                                <input type="file" class="form-control" id="image" name="image"
+                                    accept="image/png, image/jpeg">
                             </div>
 
                             <button type="submit" class="btn btn-square btn-primary">Save</button>
@@ -160,7 +162,8 @@
                         </form>
                         {% endif %}
                         {% if project.authorized.all %}
-                        <form action="{% url 'projects:revoke_access' request.user project.slug %}" onsubmit="confirm(displayResult());" method="post" style="margin-top: 24px;">
+                        <form action="{% url 'projects:revoke_access' request.user project.slug %}"
+                            onsubmit="confirm(displayResult());" method="post" style="margin-top: 24px;">
                             {% csrf_token %}
                             <script>
                                 function displayResult() {
@@ -234,21 +237,24 @@
                             {% csrf_token %}
 
                             <div class="mb-3">
-                                <select type="text" class="form-control" id="flavor_pk" name="flavor_pk" maxlength="256" required>
-                                {% for flavor in flavors %}
+                                <select type="text" class="form-control" id="flavor_pk" name="flavor_pk" maxlength="256"
+                                    required>
+                                    {% for flavor in flavors %}
                                     <option value="{{ flavor.pk }}">{{ flavor.name }}</option>
-                                {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-square btn-danger">Delete</button>
                         </form>
                         <div class="mt-2">
                             or create new flavor:
-                            <form action="{% url 'projects:create_flavor' request.user project.slug %}" method="post" class="mt-2">
+                            <form action="{% url 'projects:create_flavor' request.user project.slug %}" method="post"
+                                class="mt-2">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="flavor_name">Name</label>
-                                    <input type="text" name="flavor_name" id="flavor_name" value="" class="form-control" />
+                                    <input type="text" name="flavor_name" id="flavor_name" value=""
+                                        class="form-control" />
                                 </div>
                                 <div class="mb-3">
                                     <label for="cpu_req">CPU requests</label>
@@ -285,47 +291,54 @@
                             {% csrf_token %}
 
                             <div class="mb-3">
-                                <select type="text" class="form-control" id="environment_pk" name="environment_pk" maxlength="256" required>
-                                {% for environment in environments %}
+                                <select type="text" class="form-control" id="environment_pk" name="environment_pk"
+                                    maxlength="256" required>
+                                    {% for environment in environments %}
                                     <option value="{{ environment.pk }}">{{ environment.name }}</option>
-                                {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-square btn-danger">Delete</button>
                         </form>
                         <div class="mt-2">
                             or create new Environment:
-                            <form action="{% url 'projects:create_environment' request.user project.slug %}" method="post" class="mt-2">
+                            <form action="{% url 'projects:create_environment' request.user project.slug %}"
+                                method="post" class="mt-2">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="environment_name">Name</label>
-                                    <input type="text" name="environment_name" id="environment_name" value="" class="form-control" />
+                                    <input type="text" name="environment_name" id="environment_name" value=""
+                                        class="form-control" />
                                 </div>
                                 <div class="mb-3">
                                     <label for="environment_name">Registry</label>
-                                    <select type="text" class="form-control" id="environment_registry" name="environment_registry" maxlength="256">
+                                    <select type="text" class="form-control" id="environment_registry"
+                                        name="environment_registry" maxlength="256">
                                         {% for registry in registries %}
-                                            <option value="{{ registry.pk }}">{{ registry.name }}</option>
+                                        <option value="{{ registry.pk }}">{{ registry.name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="environment_name">Repository</label>
-                                    <input type="text" name="environment_repository" id="environment_repository" value="" class="form-control" />
+                                    <input type="text" name="environment_repository" id="environment_repository"
+                                        value="" class="form-control" />
                                 </div>
                                 <div class="mb-3">
                                     <label for="environment_image">Image</label>
-                                    <input type="text" name="environment_image" id="environment_image" value="" class="form-control" />
+                                    <input type="text" name="environment_image" id="environment_image" value=""
+                                        class="form-control" />
                                 </div>
                                 <div class="mb-3">
                                     <label for="environment_app">Applies to app:</label>
-                                    <select type="text" class="form-control" id="environment_app" name="environment_app" maxlength="256" required>
+                                    <select type="text" class="form-control" id="environment_app" name="environment_app"
+                                        maxlength="256" required>
                                         {% for app in apps %}
-                                            <option value="{{ app.pk }}">{{ app.name }}</option>
+                                        <option value="{{ app.pk }}">{{ app.name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
-                                
+
                                 <button type="submit" class="btn btn-square btn-primary">Create</button>
                             </form>
                         </div>
@@ -342,15 +355,16 @@
 
                             <div class="mb-3">
                                 <label for="id_user_name" class="form-label">S3 instance</label>
-                                <select type="text" class="form-control" id="id_s3storage" name="s3storage" maxlength="256" required>
+                                <select type="text" class="form-control" id="id_s3storage" name="s3storage"
+                                    maxlength="256" required>
                                     <option value="blank" selected>--------</option>
-                                {% for s3 in s3instances %}
+                                    {% for s3 in s3instances %}
                                     {% if s3 == project.s3storage %}
                                     <option value="{{ s3.pk }}" selected>{{ s3.name }}</option>
                                     {% else %}
                                     <option value="{{ s3.pk }}">{{ s3.name }}</option>
                                     {% endif %}
-                                {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
 
@@ -369,15 +383,16 @@
 
                             <div class="mb-3">
                                 <label for="id_user_name" class="form-label">MLFlow Servers</label>
-                                <select type="text" class="form-control" id="id_mlflow" name="mlflow" maxlength="256" required>
-                                {% for mlflow in mlflows %}
+                                <select type="text" class="form-control" id="id_mlflow" name="mlflow" maxlength="256"
+                                    required>
+                                    {% for mlflow in mlflows %}
                                     <option value="blank" selected>--------</option>
                                     {% if mlflow == project.mlflow %}
                                     <option value="{{ mlflow.pk }}" selected>{{ mlflow.name }}</option>
                                     {% else %}
                                     <option value="{{ mlflow.pk }}">{{ mlflow.name }}</option>
                                     {% endif %}
-                                {% endfor %}
+                                    {% endfor %}
                                 </select>
                             </div>
 

@@ -159,7 +159,6 @@ def delete_project(project_pk):
 
 @shared_task
 def delete_project_apps_permanently(project):
-
     apps = AppInstance.objects.filter(project=project)
 
     for app in apps:
