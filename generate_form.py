@@ -1,5 +1,6 @@
 import flatten_json
 from django.db.models import Q
+
 from models.models import Model
 from projects.models import S3, Environment, Flavor, ReleaseName
 

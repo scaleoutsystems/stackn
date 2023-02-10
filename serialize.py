@@ -6,9 +6,10 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.template import engines
 from django.utils.text import slugify
+from rest_framework.authtoken.models import Token
+
 from models.models import Model
 from projects.models import S3, Environment, Flavor
-from rest_framework.authtoken.models import Token
 
 from .models import AppInstance, Apps
 
