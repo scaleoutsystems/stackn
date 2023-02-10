@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
+from .validators import validate_image_content_type
+
 User = get_user_model()
 
 
@@ -40,3 +42,7 @@ class FlavorForm(forms.Form):
 
     cpu_lim = forms.CharField(label="CPU limit", max_length=10)
     mem_lim = forms.CharField(label="Memory limit", max_length=15)
+
+
+class ImageUpdateForm(forms.Form):
+    image = forms.ImageField(validators=[validate_image_content_type])

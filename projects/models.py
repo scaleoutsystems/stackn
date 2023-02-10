@@ -221,7 +221,6 @@ class Project(models.Model):
 
 @receiver(pre_delete, sender=Project)
 def on_project_delete(sender, instance, **kwargs):
-
     Model = apps.get_model(app_label=settings.MODELS_MODEL)
     print("ARCHIVING PROJECT MODELS")
     models = Model.objects.filter(project=instance)
