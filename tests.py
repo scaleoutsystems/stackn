@@ -28,7 +28,7 @@ class ModelViewForbidden(TestCase):
         )
         new_model.save()
 
-        user = User.objects.create_user("member", "foo@test.com", "bar")
+        user = User.objects.create_user("member", "bar@test.com", "bar")
         self.client.login(username="member", password="bar")
 
     def test_forbidden_models_list(self):
