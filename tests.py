@@ -15,7 +15,7 @@ class AppsViewForbidden(TestCase):
             name="test-perm", owner=user, description="", repository=""
         )
 
-        user = User.objects.create_user("member", "foo@test.com", "bar")
+        user = User.objects.create_user("member", "bar@test.com", "bar")
         self.client.login(username="member", password="bar")
 
     def test_forbidden_apps_compute(self):
