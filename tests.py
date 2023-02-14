@@ -52,7 +52,7 @@ class ProjectViewTestCase(TestCase):
         _ = Project.objects.create_project(
             name="test-perm", owner=user, description="", repository=""
         )
-        user = User.objects.create_user("member", "foo@test.com", "bar")
+        user = User.objects.create_user("member", "bar@test.com", "bar")
         self.client.login(username="foo", password="bar")
 
     def test_create_project_post(self):
