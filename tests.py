@@ -11,7 +11,7 @@ User = get_user_model()
 
 class ProjectTestCase(TestCase):
     def setUp(self):
-        user = User.objects.create_user("admin")
+        user = User.objects.create_user("admin", "foo@test.com")
         Project.objects.create(
             name="test-secret",
             slug="test-secret",
@@ -22,7 +22,7 @@ class ProjectTestCase(TestCase):
         _ = Project.objects.create_project(
             name="test-perm", owner=user, description="", repository=""
         )
-        user = User.objects.create_user("member")
+        user = User.objects.create_user("member", "bar@test.com")
 
     def test_decrypt_key(self):
         project = Project.objects.filter(name="test-secret").first()
