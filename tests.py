@@ -68,7 +68,7 @@ class ProjectViewTestCase(TestCase):
         TODO: Make sure this render the /create page
         for default project template
         """
-        response = self.client.get("/create", follow=True)
+        response = self.client.get("projects:create", follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_grant_access_to_project(self):
