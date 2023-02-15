@@ -5,19 +5,25 @@
 {% block content %}
 
 <div style="display: inline-flex;">
-<h1 class="h3 mb-3" style="margin-right: 5px;">Apps</h1>
-<h1 class="h3 mb-3 ghost-number">{% if published_apps|length > 0  %}{{ published_apps|length }}{% endif %}</h1>
-<div>
-    {% for tf in request.session.app_tag_filters %}
-    <div class="tag tag-list"><a class="tag-list-ico fas fa-times" style="color: #fffafa;" href="{% url 'portal:index' %}?tf_remove={{ tf | urlencode }}"></a><span style="font-weight: 500;">{{ tf }}</span></div>
-    {% endfor %}
-</div>
+    <h1 class="h3 mb-3" style="margin-right: 5px;">Apps</h1>
+    <h1 class="h3 mb-3 ghost-number">{% if published_apps|length > 0 %}{{ published_apps|length }}{% endif %}</h1>
+    <div>
+        {% for tf in request.session.app_tag_filters %}
+        <div class="tag tag-list"><a class="tag-list-ico fas fa-times" style="color: #fffafa;"
+                href="{% url 'portal:index' %}?tf_remove={{ tf | urlencode }}"></a><span style="font-weight: 500;">{{ tf
+                }}</span></div>
+        {% endfor %}
+    </div>
 </div>
 <div class="row">
-      {% for app in published_apps %}
-      <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
+    {% for app in published_apps %}
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
         <div class="card h-100">
-            <img class="card-img-top" src="{{ media_url }}{{ app.app.logo_file }}" alt="Card image cap" style="height:350px">
+
+            <div style="height:350px;" class="align-items-center d-flex justify-content-center p-2">
+                <img width="200" class="img-fluid img-cover" src="{{ media_url }}{{ app.app.logo_file }}"
+                    alt="Card image cap">
+            </div>
             <div class="card-header px-4 pt-4">
                 <h3>
                     {{ app.name }}
@@ -54,7 +60,8 @@
                     <a href="{% url 'portal:index' %}?app_id_add={{ app.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
                         style="display: inline-flex;">
                         {% csrf_token %}
-                        <button style="font-weight: 600;" type="submit" class="btn btn-light tag-count">+{{ tags.count|subtract:tag_limit }}</button>
+                        <button style="font-weight: 600;" type="submit" class="btn btn-light tag-count">+{{
+                            tags.count|subtract:tag_limit }}</button>
                     </a>
                     {% endif %}
                     {% endwith %}
@@ -70,6 +77,6 @@
             </div>
         </div>
     </div>
-      {% endfor %}
+    {% endfor %}
 </div>
 {% endblock %}

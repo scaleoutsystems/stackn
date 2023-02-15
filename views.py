@@ -83,5 +83,4 @@ class HomeView(View):
     template = "portal/home.html"
 
     def get(self, request):
-
         return render(request, self.template, locals())
