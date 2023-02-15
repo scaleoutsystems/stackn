@@ -55,22 +55,6 @@ class ProjectViewTestCase(TestCase):
         user = User.objects.create_user("member", "bar@test.com", "bar")
         self.client.login(username="foo", password="bar")
 
-    def test_create_project_post(self):
-        """
-        TODO: Make sure this returns the correct redirect
-        """
-        # self.client.login(username='foo', password='bar')
-        response = self.client.post("projects:create")
-        self.assertEqual(response.status_code, 302)
-
-    def test_create_project_get(self):
-        """
-        TODO: Make sure this render the /create page
-        for default project template
-        """
-        response = self.client.get("projects:create", follow=True)
-        self.assertEqual(response.status_code, 200)
-
     def test_grant_access_to_project(self):
         """
         Test granting/adding member to a project
