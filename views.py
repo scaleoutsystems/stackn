@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta
+from json import load
 
 import django.core.exceptions as ex
 import requests
@@ -7,10 +8,9 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Subquery
-from django.http import JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import HttpResponseRedirect, render, reverse
 from django.template import engines
-from django.views.decorators.csrf import csrf_exempt
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
@@ -160,38 +160,42 @@ def filtered(request, user, project, category):
     return render(request, template, locals())
 
 
-@csrf_exempt
+@permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def get_status(request, user, project):
-    status_success, status_warning = get_status_defs()
-    print("GET_STATUS")
-    print(request.POST)
-    pk = request.POST.get("pk")
-    # print(pk)
-    pk = pk.split(",")
-    print(pk)
-    res = {}
-    if len(pk) > 0 and not (len(pk) == 1 and pk[0] == ""):
-        appinstances = AppInstance.objects.filter(pk__in=pk)
-        print(appinstances)
-        res = dict()
-        for instance in appinstances:
-            try:
-                status = instance.status.latest().status_type
+    if request.method == "POST":
+        status_success, status_warning = get_status_defs()
+        app_pks = load(request)
+        arr = app_pks.split(",")
 
-            except:  # noqa E722 TODO: Add exception
-                status = instance.state
-            if status in status_success:
-                span_class = "bg-success"
-            elif status in status_warning:
-                span_class = "bg-warning"
-            else:
-                span_class = "bg-danger"
-            res[
-                "status-{}".format(instance.pk)
-            ] = '<span class="badge {}">{}</span>'.format(span_class, status)
-            print(status)
-        print(pk)
-    return JsonResponse(res)
+        if len(arr) > 0 and not (len(arr) == 1 and arr[0] == ""):
+            app_instances = AppInstance.objects.filter(pk__in=arr)
+
+            result = {}
+
+            for instance in app_instances:
+                try:
+                    status = instance.status.latest().status_type
+                except:  # noqa E722 TODO: Add exception
+                    status = instance.state
+
+                status_group = (
+                    "success"
+                    if status in status_success
+                    else "warning"
+                    if status in status_warning
+                    else "danger"
+                )
+
+                obj = {
+                    "status": status,
+                    "statusGroup": status_group,
+                }
+
+                result[f"{instance.pk}"] = obj
+
+            return JsonResponse(result)
+
+    return HttpResponseNotFound("<h1>Page not found</h1>")
 
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
