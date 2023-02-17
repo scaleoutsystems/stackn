@@ -10,7 +10,7 @@ setup(
     package_dir={"apps": "."},
     python_requires=">=3.6,<4",
     install_requires=[
-        "django==4.1.5",
+        "django==4.1.7",
         "requests==2.28.1",
         "django-guardian==2.4.0",
         "celery==5.2.7",
