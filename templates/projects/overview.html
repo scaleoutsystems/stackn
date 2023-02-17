@@ -19,7 +19,8 @@
                         <div class="dropdown-menu dropdown-menu-right">
                             {% for app in objs.apps %}
                             <a class="dropdown-item"
-                                href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">{{ app.name }}
+                                href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">
+                                {{ app.name }}
                             </a>
                             {% endfor %}
                         </div>
@@ -67,7 +68,8 @@
                                         <i class="fas fa-ellipsis-v"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug obj.pk %}">
+                                        <a class="dropdown-item disabled"
+                                            href="{% url 'apps:logs' request.user project.slug obj.pk %}">
                                             <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
                                         </a>
                                         <a class="dropdown-item"
@@ -112,177 +114,108 @@
             </div>
             {% if models %}
             <div class="no-footer">
-        
-                        <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer"
-                            role="grid">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th class="d-none d-xxl-table-cell" scope="col">
-                                        Version</th>
-                                    <th class="d-none d-xxl-table-cell" scope="col">
-                                        Created</th>
-                                    <th scope="col">Status</th>
-                                    <th class="d-none d-md-table-cell" scope="col">
-                                        Accessability</th>
-                                    <th class="d-none d-md-table-cell" scope="col">
-                                        Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for model in models %}
-                                <tr class="odd">
-                                    <td class="sorting_1">{{ model.name }}</td>
-                                    <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
-                                    <td class="d-none d-xxl-table-cell">{{ model.uploaded_at }}</td>
-                                    <td><span class="badge 
+
+                <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer" role="grid">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th class="d-none d-xxl-table-cell" scope="col">
+                                Version</th>
+                            <th class="d-none d-xxl-table-cell" scope="col">
+                                Created</th>
+                            <th scope="col">Status</th>
+                            <th class="d-none d-md-table-cell" scope="col">
+                                Accessability</th>
+                            <th class="d-none d-md-table-cell" scope="col">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model in models %}
+                        <tr class="odd">
+                            <td class="sorting_1">{{ model.name }}</td>
+                            <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
+                            <td class="d-none d-xxl-table-cell">{{ model.uploaded_at }}</td>
+                            <td><span class="badge 
                                         {% if model.status == 'CR' %}bg-warning
                                         {% elif model.status == 'DP' %}bg-success
                                         {% elif model.status == 'AR' %}bg-danger
                                         {% endif %}">{{ model.get_status_display }}</span></td>
-                                    <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
-                                    <td class="table-action text-center">
-                                        <div class="dropdown show">
-                                            <a href="#" data-bs-toggle="dropdown" data-display="static">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item"
-                                                    href="{% url 'models:details_private' request.user project.slug model.pk %}">
-                                                    <i class="align-middle me-1" data-feather="align-center"></i> Details
-                                                </a>
-                                                <a class="dropdown-item"
-                                                    href="{% url 'models:publish_model' request.user project.slug model.pk %}">
-                                                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
-                                                </a>
-                                                <a class="dropdown-item"
-                                                    href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
-                                                    <i class="align-middle me-1" data-feather="check-circle"></i> Serve
-                                                </a>
-                                                <a class="dropdown-item bg-danger text-white confirm-delete"
-                                                    href="{% url 'models:delete' request.user project.slug model.pk %}">
-                                                    <i class="align-middle me-1" data-feather="trash"></i> Delete
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-            {% else %}
+                            <td class="d-none d-md-table-cell">{{ model.get_access_display }}</td>
+                            <td class="table-action text-center">
+                                <div class="dropdown show">
+                                    <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a class="dropdown-item"
+                                            href="{% url 'models:details_private' request.user project.slug model.pk %}">
+                                            <i class="align-middle me-1" data-feather="align-center"></i> Details
+                                        </a>
+                                        <a class="dropdown-item"
+                                            href="{% url 'models:publish_model' request.user project.slug model.pk %}">
+                                            <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                                        </a>
+                                        <a class="dropdown-item"
+                                            href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                            <i class="align-middle me-1" data-feather="check-circle"></i> Serve
+                                        </a>
+                                        <a class="dropdown-item bg-danger text-white confirm-delete"
+                                            href="{% url 'models:delete' request.user project.slug model.pk %}">
+                                            <i class="align-middle me-1" data-feather="trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
 
-            <div class="px-4">
-                <p>No models have been uploaded to this project yet.</p>
+                <div class="px-4">
+                    <p>No models have been uploaded to this project yet.</p>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
-</div>
 
+    <script>
 
-<script>
-    function newChart(chart, labels, y_data, ylabel, dataset_label) {
-        new Chart(chart, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: dataset_label,
-                    fill: true,
-                    backgroundColor: 'transparent',
-                    borderColor: window.theme.primary,
-                    data: y_data
-                }]
-            },
-            options: {
-                elements: {
-                    point: {
-                        radius: 0
-                    }
+        const apps = {{ pk_list | safe }}
+        const url = "{% url 'apps:get_status' request.user project.slug %}"
+        const csrftoken = getCookie('csrftoken');
+
+        const updateStatus = async () => {
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
                 },
-                maintainAspectRatio: false,
-                legend: {
-                    display: false
-                },
-                tooltips: {
-                    intersect: false
-                },
-                hover: {
-                    intersect: true
-                },
-                plugins: {
-                    filler: {
-                        propagate: false
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        ticks: {
-                            maxTicksLimit: 10
-                        },
-                        reverse: true,
-                        gridLines: {
-                            color: "rgba(0,0,0,0.05)"
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            stepSize: 100,
-                            maxTicksLimit: 10
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: ylabel
-                        },
-                        display: true,
-                        borderDash: [5, 5],
-                        gridLines: {
-                            color: "rgba(0,0,0,0)",
-                            fontColor: "#fff"
-                        }
-                    }]
+                body: JSON.stringify(apps),
+            })
+
+            const json = await response.json()
+
+            for (const key in json) {
+                if (Object.hasOwnProperty.call(json, key)) {
+
+                    const { status, statusGroup } = json[key]
+                    const querySelector = `#status-${key} > span`
+                    const element = document.querySelector(querySelector)
+                    const className = `badge bg-${statusGroup}`
+
+                    element.className = className
+                    element.innerText = status
                 }
             }
-        });
-    }
-
-    function resourceCharts(chart_id1, chart_id2) {
-        var $labsCPUChart = $(chart_id1);
-        var $labsMEMChart = $(chart_id2);
-        $.ajax({
-            url: "{% url 'monitor:usage' user project.slug %}",
-            success: function (data) {
-                newChart($(chart_id1), data.labels, data.data_cpu, 'CPU usage (millicores)', 'Total CPU usage')
-                newChart($(chart_id2), data.labels, data.data_mem, 'Memory usage (Mi)', 'Total memory usage')
-
-            }
-        });
-
-    };
-    resourceCharts('#totalCPUChart', '#totalMEMChart');  
-</script>
-
-<script>
-    function update_status() {
-        var apps = {{ pk_list | safe
-    }}
-    $.ajax({
-        type: "POST",
-        url: "{% url 'apps:get_status' request.user project.slug %}",
-        data: { 'pk': apps },
-        success: function (data) {
-            console.log(data)
-            apps.split(',').forEach(function (item, index) {
-                document.getElementById("status-" + item).innerHTML = data['status-' + item];
-            });
-        },
-        complete: function () {
-            setTimeout(update_status, 5000);
         }
-    });
-    };
-    setTimeout(update_status, 5000);
-</script>
 
-{% endblock %}
+        setInterval(updateStatus, 5000);
+
+    </script>
+
+    {% endblock %}
