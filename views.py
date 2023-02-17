@@ -489,6 +489,27 @@ def publish(request, user, project, category, ai_id):
 
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
+def unpublish(request, user, project, category, ai_id):
+    try:
+        app = AppInstance.objects.get(pk=ai_id)
+        app.access = "project"
+        app.save()
+    except Exception as err:
+        print(err)
+
+    return HttpResponseRedirect(
+        reverse(
+            "apps:filtered",
+            kwargs={
+                "user": request.user,
+                "project": str(project),
+                "category": category,
+            },
+        )
+    )
+
+
+@permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def delete(request, user, project, category, ai_id):
     print("PK=" + str(ai_id))
 

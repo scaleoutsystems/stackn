@@ -43,7 +43,7 @@
 
                   {% if appinstance.app.settings.publishable == "true" %}
                     {% if appinstance.access == "public" %}
-                    <a class="dropdown-item" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
+                    <a class="dropdown-item" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
                       <i class="align-middle me-1" data-feather="slash"></i> Unpublish
                     </a>
                     {% else %}

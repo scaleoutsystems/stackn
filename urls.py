@@ -15,4 +15,5 @@ urlpatterns = [
     path("settings/<ai_id>/remove_tag", views.remove_tag, name="remove_tag"),
     path("delete/<category>/<ai_id>", views.delete, name="delete"),
     path("publish/<category>/<ai_id>", views.publish, name="publish"),
+    path("unpublish/<category>/<ai_id>", views.unpublish, name="unpublish"),
 ]
