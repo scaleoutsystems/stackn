@@ -205,7 +205,6 @@ class ModelLogList(
 
     # Not sure if this kind of function is needed for ModelLog?
     def get_queryset(self):
-
         return ModelLog.objects.filter(project__pk=self.kwargs["project_pk"])
 
     def create(self, request, *args, **kwargs):
@@ -513,7 +512,8 @@ class AppInstanceList(
 
         request = HttpRequest()
         request.user = user
-        _ = appviews.create(
+        create_view = appviews.CreateView()
+        _ = create_view.post(
             request,
             user=user.username,
             data=data,
