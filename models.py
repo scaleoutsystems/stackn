@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from guardian.shortcuts import assign_perm, remove_perm
 from tagulous.models import TagField
 
 
@@ -103,6 +106,23 @@ class AppInstance(models.Model):
         return str(self.name) + " ({})-{}-{}-{}".format(
             self.state, self.owner, self.app.name, self.project
         )
+
+
+@receiver(
+    post_save,
+    sender=AppInstance,
+    dispatch_uid="app_instance_update_permission",
+)
+def update_permission(sender, instance, created, **kwargs):
+    owner = instance.owner
+
+    if instance.access == "private":
+        if created or not owner.has_perm("can_access_app", instance):
+            assign_perm("can_access_app", owner, instance)
+
+    else:
+        if owner.has_perm("can_access_app", instance):
+            remove_perm("can_access_app", owner, instance)
 
 
 class AppStatus(models.Model):

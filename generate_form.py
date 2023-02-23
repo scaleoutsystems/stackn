@@ -65,11 +65,10 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             print(app_obj)
             print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
+
             app_instances = AppInstance.objects.filter(
-                Q(owner=user)
-                | Q(permission__projects__slug=project.slug)
-                | Q(permission__public=True),
                 ~Q(state="Deleted"),
+                Q(owner=user) | Q(access__in=["project", "public"]),
                 project=project,
                 app__name=app_name,
             )
@@ -78,10 +77,8 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             # '"appobj.app_slug":"true"'
             if app_name == "Environment":
                 app_instances = AppInstance.objects.filter(
-                    Q(owner=user)
-                    | Q(permission__projects__slug=project.slug)
-                    | Q(permission__public=True),
                     ~Q(state="Deleted"),
+                    Q(owner=user) | Q(access__in=["project", "public"]),
                     project=project,
                     app__name=app_name,
                     parameters__contains={"appobj": {myapp.slug: True}},

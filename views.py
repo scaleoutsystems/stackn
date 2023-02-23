@@ -11,11 +11,17 @@ from django.db.models import Q, Subquery
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import HttpResponseRedirect, render, reverse
 from django.template import engines
+from django.utils.decorators import method_decorator
+from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers import create_instance_params
-from .models import AppCategories, AppInstance, AppPermission, Apps, AppStatus
+from .helpers import (
+    can_access_app_instances,
+    create_instance_params,
+    handle_permissions,
+)
+from .models import AppCategories, AppInstance, Apps, AppStatus
 from .serialize import serialize_app
 from .tasks import delete_resource, deploy_resource
 
@@ -141,9 +147,7 @@ def filtered(request, user, project, category):
     time_threshold = datetime.now() - timedelta(minutes=5)
     print(time_threshold)
     appinstances = AppInstance.objects.filter(
-        Q(owner=request.user)
-        | Q(permission__projects__slug=project.slug)
-        | Q(permission__public=True),
+        Q(owner=request.user) | Q(access__in=["project", "public"]),
         ~Q(state="Deleted") | Q(deleted_on__gte=time_threshold),
         app__category=cat_obj,
         project=project,
@@ -198,25 +202,74 @@ def get_status(request, user, project):
     return HttpResponseNotFound("<h1>Page not found</h1>")
 
 
-@permission_required_or_403("can_view_project", (Project, "slug", "project"))
-def appsettings(request, user, project, ai_id):
-    all_tags = AppInstance.tags.tag_model.objects.all()
-    template = "create.html"
-    app_action = "Settings"
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project")
+    ),
+    name="dispatch",
+)
+class AppSettingsView(View):
+    def get_shared_data(self, project_slug, ai_id):
+        project = Project.objects.get(slug=project_slug)
+        appinstance = AppInstance.objects.get(pk=ai_id)
 
-    if "from" in request.GET:
-        from_page = request.GET.get("from")
-    else:
-        from_page = "filtered"
+        return [project, appinstance]
 
-    project = Project.objects.get(slug=project)
-    appinstance = AppInstance.objects.get(pk=ai_id)
-    existing_app_name = appinstance.name
-    app = appinstance.app
+    def get(self, request, user, project, ai_id):
+        project, appinstance = self.get_shared_data(project, ai_id)
 
-    aset = appinstance.app.settings
-    form = generate_form(aset, project, app, request.user, appinstance)
-    return render(request, template, locals())
+        all_tags = AppInstance.tags.tag_model.objects.all()
+        template = "update.html"
+        show_permissions = True
+        from_page = (
+            request.GET.get("from") if "from" in request.GET else "filtered"
+        )
+        existing_app_name = appinstance.name
+        app = appinstance.app
+        app_settings = appinstance.app.settings
+        form = generate_form(
+            app_settings, project, app, request.user, appinstance
+        )
+
+        if request.user.id != appinstance.owner.id:
+            show_permissions = False
+
+        return render(request, template, locals())
+
+    def post(self, request, user, project, ai_id):
+        project, appinstance = self.get_shared_data(project, ai_id)
+
+        app = appinstance.app
+        app_settings = app.settings
+        body = request.POST.copy()
+
+        if not body.get("permission", None):
+            body.update({"permission": appinstance.access})
+
+        parameters, app_deps, model_deps = serialize_app(
+            body, project, app_settings, request.user.username
+        )
+
+        access = handle_permissions(parameters, project)
+
+        appinstance.name = request.POST.get("app_name")
+        appinstance.parameters.update(parameters)
+        appinstance.access = access
+        appinstance.save()
+        appinstance.app_dependencies.set(app_deps)
+        appinstance.model_dependencies.set(model_deps)
+        # Attempting to deploy apps settings
+        _ = deploy_resource.delay(appinstance.pk, "update")
+
+        return HttpResponseRedirect(
+            reverse(
+                "projects:details",
+                kwargs={
+                    "user": request.user,
+                    "project_slug": str(project.slug),
+                },
+            )
+        )
 
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
@@ -254,169 +307,131 @@ def remove_tag(request, user, project, ai_id):
     )
 
 
-@permission_required_or_403("can_view_project", (Project, "slug", "project"))
-def create(request, user, project, app_slug, data=[], wait=False, call=False):
-    template = "create.html"
-    app_action = "Create"
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project")
+    ),
+    name="dispatch",
+)
+class CreateView(View):
+    def get_shared_data(self, project_slug, app_slug):
+        project = Project.objects.get(slug=project_slug)
+        app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
+        app_settings = app.settings
 
-    if not call:
-        user = request.user
-        if "from" in request.GET:
-            from_page = request.GET.get("from")
+        return [project, app, app_settings]
+
+    def get(
+        self, request, user, project, app_slug, data=[], wait=False, call=False
+    ):
+        template = "create.html"
+        project, app, app_settings = self.get_shared_data(project, app_slug)
+
+        if not call:
+            user = request.user
+            if "from" in request.GET:
+                from_page = request.GET.get("from")
+            else:
+                from_page = "filtered"
         else:
-            from_page = "filtered"
-    else:
-        from_page = ""
-        user = User.objects.get(username=user)
+            from_page = ""
+            user = User.objects.get(username=user)
 
-    project = Project.objects.get(slug=project)
-    app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
-    app_sett = app.settings
+        form = generate_form(app_settings, project, app, user, [])
 
-    # Set up form
-    print(f"CREATING APP: {app.name}")
-    print("GENERATING FORM")
-    form = generate_form(app_sett, project, app, user, [])
-    print("FORM GENERATED: {}".format(form))
-    if data or request.method == "POST":
+        return render(request, template, locals())
+
+    def post(
+        self, request, user, project, app_slug, data=[], wait=False, call=False
+    ):
+        project, app, app_settings = self.get_shared_data(project, app_slug)
         if not data:
             data = request.POST
+
         app_name = data.get("app_name")
+        user = request.user if not call else User.objects.get(username=user)
+
         parameters_out, app_deps, model_deps = serialize_app(
-            data, project, app_sett, user.username
+            data, project, app_settings, user.username
         )
 
-        if data.get("app_action") == "Create":
-            permission = AppPermission(name=app_name)
-            permission.save()
-        elif data.get("app_action") == "Settings":
-            app_instance = AppInstance.objects.get(pk=data.get("app_id"))
-            permission = app_instance.permission
-        else:
-            print("No action set, aborting...")
-            print(data.get("app_action"))
-            return JsonResponse(
-                {"status": "failed", "reason": "app_action not set."}
-            )
-        permission.public = False
-        permission.projects.set([])
-        permission.users.set([])
+        authorized = can_access_app_instances(app_deps, user, project)
 
-        access = ""
+        if not authorized:
+            raise Exception("Not authorized to use specified app dependency")
 
-        if parameters_out["permissions"]["public"]:
-            permission.public = True
-            access = "public"
-        elif parameters_out["permissions"]["project"]:
-            print("PROJECT PERMISSIONS")
-            client_id = project.slug
-            access = "project"
+        access = handle_permissions(parameters_out, project)
 
-            if "project" not in parameters_out:
-                parameters_out["project"] = dict()
+        app_instance = AppInstance(
+            name=app_name,
+            access=access,
+            app=app,
+            project=project,
+            info={},
+            parameters=parameters_out,
+            owner=user,
+        )
 
-            parameters_out["project"]["client_id"] = client_id
-            parameters_out["project"]["client_secret"] = client_id
-            parameters_out["project"]["slug"] = project.slug
-            parameters_out["project"]["name"] = project.name
-            permission.projects.set([project])
-        elif parameters_out["permissions"]["private"]:
-            access = "private"
-            permission.users.set([user])
-        permission.save()
+        create_instance_params(app_instance, "create")
 
-        if data.get("app_action") == "Create":
-            app_instance = AppInstance(
-                name=app_name,
-                access=access,
-                app=app,
-                project=project,
-                info={},
-                parameters=parameters_out,
-                owner=user,
-            )
-
-            create_instance_params(app_instance, "create")
-
-            # Attempt to create a ReleaseName model object
-            rel_name_obj = []
-            if (
-                "app_release_name" in data
-                and data.get("app_release_name") != ""
-            ):
-                submitted_rn = data.get("app_release_name")
-                try:
-                    rel_name_obj = ReleaseName.objects.get(
-                        name=submitted_rn, project=project, status="active"
-                    )
-                    rel_name_obj.status = "in-use"
-                    rel_name_obj.save()
-                    app_instance.parameters["release"] = submitted_rn
-                except Exception as e:
-                    print(
-                        "Error: Submitted release name not owned by project."
-                    )
-                    print(e)
-                    return HttpResponseRedirect(
-                        reverse(
-                            "projects:details",
-                            kwargs={
-                                "user": request.user,
-                                "project_slug": str(project.slug),
-                            },
-                        )
-                    )
-
-            # Add fields for apps table:
-            # to be displayed as app details in views
-            if (
-                app_instance.app.table_field
-                and app_instance.app.table_field != ""
-            ):
-                django_engine = engines["django"]
-                info_field = django_engine.from_string(
-                    app_instance.app.table_field
-                ).render(app_instance.parameters)
-                app_instance.table_field = eval(info_field)
-            else:
-                app_instance.table_field = {}
-
-            # Setting status fields before saving app instance
-            status = AppStatus(appinstance=app_instance)
-            status.status_type = "Created"
-            status.info = app_instance.parameters["release"]
-            app_instance.save()
-            # Saving ReleaseName, permissions, status and
-            # setting up dependencies
-            if rel_name_obj:
-                rel_name_obj.app = app_instance
+        # Attempt to create a ReleaseName model object
+        rel_name_obj = []
+        if "app_release_name" in data and data.get("app_release_name") != "":
+            submitted_rn = data.get("app_release_name")
+            try:
+                rel_name_obj = ReleaseName.objects.get(
+                    name=submitted_rn, project=project, status="active"
+                )
+                rel_name_obj.status = "in-use"
                 rel_name_obj.save()
-            status.save()
-            permission.appinstance = app_instance
-            permission.save()
-            app_instance.app_dependencies.set(app_deps)
-            app_instance.model_dependencies.set(model_deps)
+                app_instance.parameters["release"] = submitted_rn
+            except Exception as e:
+                print("Error: Submitted release name not owned by project.")
+                print(e)
+                return HttpResponseRedirect(
+                    reverse(
+                        "projects:details",
+                        kwargs={
+                            "user": request.user,
+                            "project_slug": str(project.slug),
+                        },
+                    )
+                )
 
-            # Finally, attempting to create apps resources
-            res = deploy_resource.delay(app_instance.pk, "create")
-
-            # wait is passed as a function parameter
-            if wait:
-                while not res.ready():
-                    time.sleep(0.1)
-
-            # End of Create action
-        elif data.get("app_action") == "Settings":
-            print("UPDATING APP DEPLOYMENT")
-            app_instance.name = app_name
-            app_instance.parameters.update(parameters_out)
-            app_instance.save()
-            app_instance.app_dependencies.set(app_deps)
-            app_instance.model_dependencies.set(model_deps)
-            # Attempting to deploy apps settings
-            res = deploy_resource.delay(app_instance.pk, "update")
+        # Add fields for apps table:
+        # to be displayed as app details in views
+        if app_instance.app.table_field and app_instance.app.table_field != "":
+            django_engine = engines["django"]
+            info_field = django_engine.from_string(
+                app_instance.app.table_field
+            ).render(app_instance.parameters)
+            app_instance.table_field = eval(info_field)
         else:
-            raise Exception("Incorrect action on app.")
+            app_instance.table_field = {}
+
+        # Setting status fields before saving app instance
+        status = AppStatus(appinstance=app_instance)
+        status.status_type = "Created"
+        status.info = app_instance.parameters["release"]
+        app_instance.save()
+        # Saving ReleaseName, permissions, status and
+        # setting up dependencies
+        if rel_name_obj:
+            rel_name_obj.app = app_instance
+            rel_name_obj.save()
+        status.save()
+        app_instance.app_dependencies.set(app_deps)
+        app_instance.model_dependencies.set(model_deps)
+
+        # Finally, attempting to create apps resources
+        res = deploy_resource.delay(app_instance.pk, "create")
+
+        # wait is passed as a function parameter
+        if wait:
+            while not res.ready():
+                time.sleep(0.1)
+
+        # End of Create action
 
         # Forming a final response
         if request:
@@ -432,32 +447,19 @@ def create(request, user, project, app_slug, data=[], wait=False, call=False):
                             },
                         )
                     )
-                elif from_page == "filtered":
-                    return HttpResponseRedirect(
-                        reverse(
-                            "apps:filtered",
-                            kwargs={
-                                "user": request.user,
-                                "project": str(project.slug),
-                                "category": app_instance.app.category.slug,
-                            },
-                        )
-                    )
-            else:
-                return HttpResponseRedirect(
-                    reverse(
-                        "apps:filtered",
-                        kwargs={
-                            "user": request.user,
-                            "project": str(project.slug),
-                            "category": app_instance.app.category.slug,
-                        },
-                    )
+
+            return HttpResponseRedirect(
+                reverse(
+                    "apps:filtered",
+                    kwargs={
+                        "user": request.user,
+                        "project": str(project.slug),
+                        "category": app_instance.app.category.slug,
+                    },
                 )
+            )
         else:
             return JsonResponse({"status": "ok"})
-    # If not POST, thus GET...
-    return render(request, template, locals())
 
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))

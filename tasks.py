@@ -194,7 +194,6 @@ def deploy_resource(instance_pk, action="create"):
     status = AppStatus(appinstance=app_instance)
 
     if action == "create":
-
         parameters = app_instance.parameters
         status.status_type = "Created"
         status.info = parameters["release"]
@@ -279,7 +278,6 @@ def delete_resource(pk):
 @shared_task
 @transaction.atomic
 def delete_resource_permanently(appinstance):
-
     parameters = appinstance.parameters
 
     # Invoke chart controller
@@ -448,7 +446,6 @@ def check_status():
 
 @app.task
 def get_resource_usage():
-
     timestamp = time.time()
 
     args = ["kubectl", "get", "--raw", "/apis/metrics.k8s.io/v1beta1/pods"]
@@ -485,7 +482,6 @@ def get_resource_usage():
 
     try:
         for pod in pods:
-
             podname = pod["metadata"]["name"]
             if podname in resources:
                 containers = pod["containers"]
@@ -543,7 +539,6 @@ def sync_mlflow_models():
         ~Q(state="Deleted"), project__status="active", app__slug="mlflow"
     )
     for mlflow_app in mlflow_apps:
-
         url = "http://{}/{}".format(
             mlflow_app.project.mlflow.host,
             "api/2.0/preview/mlflow/model-versions/search",
@@ -615,7 +610,6 @@ def sync_mlflow_models():
 
 @app.task
 def clean_resource_usage():
-
     curr_timestamp = time.time()
     ResourceData.objects.filter(time__lte=curr_timestamp - 48 * 3600).delete()
 

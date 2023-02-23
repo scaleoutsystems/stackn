@@ -78,7 +78,6 @@ def serialize_S3(form_selection, project):
     print("SERIALIZING S3")
     s3_json = dict()
     if "S3" in form_selection:
-
         s3_id = form_selection.get("S3", None)
         try:
             obj = S3.objects.filter(pk=s3_id)
@@ -164,7 +163,6 @@ def serialize_apps(form_selection, project):
     app_deps = []
     for key in form_selection.keys():
         if "app:" in key and key[0:4] == "app:":
-
             app_name = key[4:]
             try:
                 app = (

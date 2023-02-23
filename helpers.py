@@ -45,3 +45,71 @@ def create_instance_params(instance, action="create"):
     instance.parameters["project"].update(
         {"name": instance.project.name, "slug": instance.project.slug}
     )
+
+
+def can_access_app_instance(app_instance, user, project):
+    """Checks if a user has access to an app instance
+
+    Args:
+        app_instance (AppInstance): app instance object
+        user (User): user object
+        project (Project): project object
+
+    Returns:
+        Boolean: returns False if user lack permission to provided app instance
+    """
+    authorized = False
+
+    if app_instance.access == "public":
+        authorized = True
+    elif app_instance.access == "project":
+        if user.has_perm("can_view_project", project):
+            authorized = True
+    else:
+        if user.has_perm("can_access_app", app_instance):
+            authorized = True
+
+    return authorized
+
+
+def can_access_app_instances(app_instances, user, project):
+    """Checks if user has access to all app instances provided
+
+    Args:
+        app_instances (Queryset<AppInstace>): list of app instances
+        user (User): user object
+        project (Project): project object
+
+    Returns:
+        Boolean: returns False if user lacks
+        permission to any of the app instances provided
+    """
+    for app_instance in app_instances:
+        authorized = can_access_app_instance(app_instance, user, project)
+
+        if not authorized:
+            return False
+
+    return True
+
+
+def handle_permissions(parameters, project):
+    access = ""
+
+    if parameters["permissions"]["public"]:
+        access = "public"
+    elif parameters["permissions"]["project"]:
+        access = "project"
+
+        if "project" not in parameters:
+            parameters["project"] = dict()
+
+        parameters["project"]["client_id"] = project.slug
+        parameters["project"]["client_secret"] = project.slug
+        parameters["project"]["slug"] = project.slug
+        parameters["project"]["name"] = project.name
+
+    elif parameters["permissions"]["private"]:
+        access = "private"
+
+    return access

@@ -41,7 +41,7 @@
                     <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
                   </a>
 
-                  {% if appinstance.app.settings.publishable == "true" %}
+                  {% if appinstance.app.settings.publishable == "true" and appinstance.owner.id == request.user.id %}
                     {% if appinstance.access == "public" %}
                     <a class="dropdown-item" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
                       <i class="align-middle me-1" data-feather="slash"></i> Unpublish
