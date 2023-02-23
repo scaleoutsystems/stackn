@@ -63,9 +63,6 @@
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#environments" role="tab">
                     Environments
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#transfer" role="tab">
-                    Transfer
-                </a>
                 <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#delete" role="tab"
                     style="color: red;">
                     Delete
@@ -402,52 +399,6 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="transfer" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Transfer project ownership</h5>
-
-                        <form action="{% url 'projects:transfer_owner' request.user project.slug %}" method="post">
-                            {% csrf_token %}
-
-                            <div class="mb-3">
-                                <label for="id_transfer_to" class="form-label">Transfer to</label>
-                                <select class="form-control" type="text" name="transfer_to" maxlength="256"
-                                    id="id_transfer_to" required>
-                                    {% for user in platform_users %}
-                                    <option value="{{ user.pk }}">{{ user.username }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <button type="button" class="btn btn-square btn-warning" data-bs-toggle="modal"
-                                data-bs-target="#transferModal">
-                                Transfer
-                            </button>
-                            <div class="modal fade" id="transferModal" tabindex="-1" style="display: none;"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Transfer project ownership</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body m-3">
-                                            <p class="mb-0">Are you sure that you want to transfer this project's
-                                                ownership to the selected user?</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-square btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-square btn-warning">Confirm</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
             <div class="tab-pane fade" id="delete" role="tabpanel">
                 <div class="card">
                     <div class="card-body">

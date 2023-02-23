@@ -17,11 +17,6 @@ urlpatterns = [
         name="create_environment",
     ),
     path("<user>/<project_slug>/settings", views.settings, name="settings"),
-    path(
-        "<user>/<project_slug>/transfer",
-        views.transfer_owner,
-        name="transfer_owner",
-    ),
     path("<user>/<project_slug>/delete", views.delete, name="delete"),
     path(
         "<user>/<project_slug>/setS3storage",

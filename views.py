@@ -16,11 +16,7 @@ from guardian.decorators import permission_required_or_403
 from guardian.shortcuts import assign_perm, remove_perm
 
 from .exceptions import ProjectCreationException
-from .forms import (
-    ImageUpdateForm,
-    PublishProjectToGitHub,
-    TransferProjectOwnershipForm,
-)
+from .forms import ImageUpdateForm, PublishProjectToGitHub
 from .models import (
     S3,
     Environment,
@@ -111,38 +107,6 @@ def settings(request, user, project_slug):
     )
 
     return render(request, template, locals())
-
-
-@login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
-def transfer_owner(request, user, project_slug):
-    project = Project.objects.get(slug=project_slug)
-    if request.method == "POST":
-        form = TransferProjectOwnershipForm(request.POST)
-        if form.is_valid():
-            new_owner_id = int(form.cleaned_data["transfer_to"])
-            new_owner = User.objects.filter(pk=new_owner_id).first()
-            project.authorized.add(project.owner)
-            project.owner = new_owner
-            if not new_owner.has_perm("can_view_project", project):
-                assign_perm("can_view_project", new_owner, project)
-            project.save()
-
-            log = ProjectLog(
-                project=project,
-                module="PR",
-                headline="Project owner",
-                description="Transferred Project ownership to {owner}".format(
-                    owner=project.owner.username
-                ),
-            )
-            log.save()
-
-            return HttpResponseRedirect("/projects/")
-    else:
-        form = TransferProjectOwnershipForm()
 
 
 @login_required
@@ -619,9 +583,7 @@ def details(request, user, project_slug):
         for rslug in rslugs:
             tmp = AppInstance.objects.filter(
                 ~Q(state="Deleted"),
-                Q(owner=request.user)
-                | Q(permission__projects__slug=project.slug)
-                | Q(permission__public=True),
+                Q(owner=request.user) | Q(access="project"),
                 project=project,
                 app__category__slug=rslug["slug"],
             ).order_by("-created_on")[:5]

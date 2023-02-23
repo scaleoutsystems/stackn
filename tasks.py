@@ -108,7 +108,9 @@ def create_resources_from_template(user, project_slug, template):
                 print(data)
                 request = HttpRequest()
                 request.user = User.objects.get(username=user)
-                _ = appviews.create(
+
+                create_view = appviews.CreateView()
+                _ = create_view.post(
                     request=request,
                     user=user,
                     project=project.slug,
