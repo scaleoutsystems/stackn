@@ -53,13 +53,11 @@ INSTALLED_APPS = [
     "tagulous",
     "guardian",
     "crispy_forms",
-    "user",
     "portal",
     "projects",
     "models",
     "monitor",
     "apps",
-    "control",
     "api",
     "customtags",
 ]
@@ -138,9 +136,6 @@ else:
             "PORT": "5432",
         }
     }
-
-# Substituting custom User model
-AUTH_USER_MODEL = "user.User"
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
