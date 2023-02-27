@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      app: lab
+      project: {{ .Values.project.slug }}
+      type: app
+      pod: lab
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        release: {{ .Release.Name }}
+        app: lab
+        project: {{ .Values.project.slug }}
+        type: app
+        pod: lab
+    spec:
+    {{ if .Values.flavor.gpu.enabled }}
+      affinity:
+        {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{ if .Values.environment.registry }}
+      imagePullSecrets:
+        - name: {{ .Release.Name }}-pull-secret
+    {{ end }}
+      hostname: lab
+      subdomain: default-subdomain
+      containers:
+      - name: labs
+        image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_ENABLE_LAB
+          value: "yes"
+        - name: NOTEBOOK_PASSWD_SHA1
+          value: ""
+        - name: NOTEBOOK_TOKEN
+          value: ""
+        - name: MLFLOW_TRACKING_URI
+          value: "http://{{ .Values.mlflow.service }}:{{ .Values.mlflow.port }}"
+        - name: MLFLOW_TRACKING_USERNAME
+          value: {{ .Values.mlflow.username }}
+        - name: MLFLOW_TRACKING_PASSWORD
+          value: {{ .Values.mlflow.password }}
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: "http://{{ .Values.mlflow.s3service }}:{{ .Values.mlflow.s3port }}"
+        - name: AWS_ACCESS_KEY_ID
+          value: {{ .Values.mlflow.access_key }}
+        - name: AWS_SECRET_ACCESS_KEY
+          value: {{ .Values.mlflow.secret_key }}
+        {{- range $key, $value := .Values.app_env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        resources:
+          requests:
+            memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.requests.cpu | default "200m" }}
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
+            {{ end }}
+          limits:
+            memory: {{ .Values.flavor.limits.memory | default "256Mi" }}
+            cpu: {{ .Values.flavor.limits.cpu | default "200m" }}
+            {{ if .Values.flavor.gpu.enabled }}
+            nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
+            {{ end }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - mkdir -p /home/jovyan/.scaleout && cp -n /stackn.json /home/jovyan/.scaleout/stackn.json
+        workingDir: /home/jovyan/work
+        volumeMounts:
+        - name: cli-config-vol
+          mountPath: /home/jovyan/.scaleout
+        - name: cli-config
+          mountPath: /stackn.json
+          subPath: stackn.json
+        - name: jupyterconf
+          mountPath: /etc/jupyter/jupyter_notebook_config.py
+          subPath: jupyter_notebook_config.py
+
+        {{- range $key, $value := .Values.apps.volumeK8s }}
+        - name: {{ $key }}
+          mountPath: /home/jovyan/work/{{ $key }}
+        {{- end }}
+      imagePullSecrets:
+        - name: ghcrsecret
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      volumes:
+      - name: cli-config-vol
+        emptyDir: {}
+      - name: cli-config
+        configMap:
+          name: {{ .Release.Name }}-cli-config
+      - name: jupyterconf
+        configMap:
+          name: {{ .Release.Name }}-jupyter-configmap
+      {{- range $key, $value := .Values.apps.volumeK8s }}
+      - name: {{ $key }}
+        persistentVolumeClaim:
+          claimName: {{ $value.release }}
+      {{- end }}

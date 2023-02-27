@@ -1,0 +1,136 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    image: postgres
+    environment:
+      - GET_HOSTS_FROM=dns
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    networks:
+      internal_network:
+        aliases:
+          - db.127.0.0.1.nip.io
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  studio:
+    container_name: studio
+    build: 
+      context: .
+    image: studio:develop
+    command: ["scripts/wait-for-it.sh", "db:5432", "--", sh, scripts/run_web.sh]
+    environment:
+      - GET_HOSTS_FROM=dns
+      - KUBECONFIG=/app/cluster.conf
+      - STUDIO_STORAGECLASS=microk8s-hostpath
+      - STUDIO_ACCESSMODE=ReadWriteMany
+      - DJANGO_SUPERUSER_PASSWORD=dGhpaXNhdmVyeW5vdHNhZmVvbmx
+      - DEBUG=true
+      - INIT=true
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app:cached
+     # - ${PWD}/cluster.conf:/app/cluster.conf
+    depends_on:
+      - db
+    networks:
+      internal_network:
+        aliases:
+          - studio.127.0.0.1.nip.io
+
+  redis:
+    image: redis
+    container_name: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
+     internal_network:
+       aliases:
+         - redis.127.0.0.1.nip.io
+  
+  rabbit:
+    image: rabbitmq
+    container_name: rabbitmq
+    hostname: rabbit
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=LJqEG9RE4FdZbVWoJzZIOQEI
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      internal_network:
+        aliases:
+          - rabbit.127.0.0.1.nip.io
+
+  celery-worker:
+    build: .
+    container_name: celery-worker
+    image: studio:develop
+    command: sh ./scripts/run_worker.sh
+    environment:
+      - KUBECONFIG=/app/cluster.conf
+      - BASE_PATH=/app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - STUDIO_STORAGECLASS=microk8s-hostpath
+      - POSTGRES_DB=postgres
+    volumes:
+      - .:/app:cached
+      - ${PWD}/cluster.conf:/app/cluster.conf
+    links:
+      - db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      internal_network:
+        aliases:
+          - celery.127.0.0.1.nip.io
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    image: studio:develop
+    command: sh ./scripts/run_beat.sh
+    environment:
+      - KUBECONFIG=/app/cluster.conf
+      - BASE_PATH=/app
+      - POSTGRES_USER=postgres
+      - STUDIO_STORAGECLASS=microk8s-hostpath
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - .:/app:cached
+      - ${PWD}/cluster.conf:/app/cluster.conf
+    links:
+      - db
+      - studio
+      - rabbit
+      - redis
+    depends_on:
+      - db
+      - studio
+      - rabbit
+      - redis
+    networks:
+      internal_network:
+        aliases:
+          - celery-beat.127.0.0.1.nip.io
+
+networks:
+  internal_network:
+    driver: bridge
+
+volumes:
+  db-data:

@@ -17,4 +17,4 @@ dependencies:
     - scikit-learn==0.19.1
     - cloudpickle==0.6.1
     - boto3
-    - "/home/jovyan/cli"
+    - "git+https://github.com/scaleoutsystems/studio-cli.git@195f860d5f8bf9c1e06897f9d4eadba4fc72d651"

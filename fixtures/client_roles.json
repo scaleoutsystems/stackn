@@ -1,0 +1,17 @@
+[
+    {
+      "model": "user.clientrole",
+      "pk": "1",
+      "fields": {
+        "name": "trainer"
+      }
+    },
+    {
+        "model": "user.clientrole",
+        "pk": "2",
+        "fields": {
+          "name": "validator"
+        }
+    }
+]
+    

@@ -1,34 +1,37 @@
-#
 # train_diabetes.py
 #
-#   MLflow model using ElasticNet (sklearn) and Plots ElasticNet Descent Paths
+# MLflow model using ElasticNet (sklearn) and Plots ElasticNet Descent Paths
 #
-#   Uses the sklearn Diabetes dataset to predict diabetes progression using ElasticNet
-#       The predicted "progression" column is a quantitative measure of disease progression one year after baseline
-#       http://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_diabetes.html
-#   Combines the above with the Lasso Coordinate Descent Path Plot
-#       http://scikit-learn.org/stable/auto_examples/linear_model/plot_lasso_coordinate_descent_path.html
-#       Original author: Alexandre Gramfort <alexandre.gramfort@inria.fr>; License: BSD 3 clause
+# Uses the sklearn Diabetes dataset to predict diabetes progression using
+# ElasticNet
+#   The predicted "progression" column is a quantitative measure of disease
+#   progression one year after baseline
+#   http://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_diabetes.html
+#
+# Combines the above with the Lasso Coordinate Descent Path Plot
+#   http://scikit-learn.org/stable/auto_examples/linear_model/plot_lasso_coordinate_descent_path.html
+#   Original author of this example:
+#       Alexandre Gramfort <alexandre.gramfort@inria.fr>;
+#   License: BSD 3 clause
 #
 #  Usage:
 #    python train_diabetes.py 0.01 0.01
 #    python train_diabetes.py 0.01 0.75
 #    python train_diabetes.py 0.01 1.0
 #
-
-import os
-import warnings
 import sys
-
-import pandas as pd
-import numpy as np
+import warnings
 from itertools import cycle
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import lasso_path, enet_path
+import mlflow
+import mlflow.sklearn
+import numpy as np
+import pandas as pd
 from sklearn import datasets
+from sklearn.linear_model import ElasticNet, enet_path
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
 
 # Load Diabetes datasets
 diabetes = datasets.load_diabetes()
@@ -40,11 +43,6 @@ Y = np.array([y]).transpose()
 d = np.concatenate((X, Y), axis=1)
 cols = diabetes.feature_names + ["progression"]
 data = pd.DataFrame(d, columns=cols)
-
-
-# Import mlflow
-import mlflow
-import mlflow.sklearn
 
 
 # Evaluate metrics
@@ -62,7 +60,8 @@ if __name__ == "__main__":
     # Split the data into training and test sets. (0.75, 0.25) split.
     train, test = train_test_split(data)
 
-    # The predicted column is "progression" which is a quantitative measure of disease progression one year after baseline
+    # The predicted column is "progression" which is a quantitative measure
+    # of disease progression one year after baseline
     train_x = train.drop(["progression"], axis=1)
     test_x = test.drop(["progression"], axis=1)
     train_y = train[["progression"]]
@@ -95,7 +94,9 @@ if __name__ == "__main__":
     eps = 5e-3  # the smaller it is the longer is the path
 
     print("Computing regularization path using the elastic net.")
-    alphas_enet, coefs_enet, _ = enet_path(X, y, eps=eps, l1_ratio=l1_ratio, fit_intercept=False)
+    alphas_enet, coefs_enet, _ = enet_path(
+        X, y, eps=eps, l1_ratio=l1_ratio, fit_intercept=False
+    )
 
     # Display results
     fig = plt.figure(1)

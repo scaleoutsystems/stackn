@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_sidebar_items %}
+
+
+<ul class="sidebar-nav border-top">
+
+    <li class="sidebar-header">
+
+        <span class="fw-bolder opacity-75">{{ project.name }}</span>
+    </li>
+    
+    {% url 'projects:details' request.user project.slug as dashboard_url %}
+    
+    <li class="sidebar-item {% if request.path == dashboard_url %}active{% endif %}">
+        <a class="sidebar-link" href="{{dashboard_url}}">
+            <i class="align-middle" data-feather="home"></i>
+            <span class="align-middle">Dashboard</span>
+        </a>
+    </li>
+
+    <li class="sidebar-item">
+        <div class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#fed-collapse" aria-expanded="true">
+            <span class="fw-bolder opacity-75">Federated Learning</span>
+        </div>
+
+        <div class="collapse ps-2 show" id="fed-collapse">
+            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+
+                {% url 'apps:filtered' request.user project.slug 'network' as network_url %}
+
+                <li class="sidebar-item {% if request.path == network_url %}active{% endif %}">
+                    <a class="sidebar-link" href="{{network_url}}">
+                        <i class="align-middle" data-feather="globe"></i>
+                        <span class="align-middle">Network</span>
+                    </a>
+                </li>
+
+                {% url 'control:graph' request.user project.slug as graph_url %}
+
+                <li class="sidebar-item {% if request.path == graph_url %}active{% endif %}">
+                    <a class="sidebar-link" href="{{graph_url}}">
+                        <i class="align-middle" data-feather="share-2"></i>
+                        <span class="align-middle">Graph</span>
+                    </a>
+                </li>
+
+                {% url 'user:client_list' request.user project.slug as client_url %}
+
+                <li class="sidebar-item {% if request.path == client_url %}active{% endif %}">
+                    <a class="sidebar-link" href="{{client_url}}">
+                        <i class="align-middle" data-feather="user"></i>
+                        <span class="align-middle">Clients</span>
+                    </a>
+                </li>
+
+                {% url 'control:compute' request.user project.slug as package_url %}
+
+                <li class="sidebar-item {% if request.path == package_url %}active{% endif %}">
+                    <a class="sidebar-link" href="{{package_url}}">
+                        <i class="align-middle" data-feather="package"></i>
+                        <span class="align-middle">Package</span>
+                    </a>
+                </li>
+
+                {% url 'control:control' request.user project.slug as control_url %}
+
+                <li class="sidebar-item {% if request.path == control_url %}active{% endif %}">
+                    <a class="sidebar-link" href="{{control_url}}">
+                        <i class="align-middle" data-feather="sliders"></i>
+                        <span class="align-middle">Control</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </li>
+
+
+    <!-- TODO: Active links below displayed using a menu-object... Leaving it when I do not know the reasons behind this but would like to change to solution seen above...-->
+
+    <li class="sidebar-item">
+        <div class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#ml-collapse" aria-expanded="true">
+            <span class="fw-bolder opacity-75">MLOps</span>
+        </div>
+
+        <div class="collapse ps-2 show" id="ml-collapse">
+            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+
+                <li class="sidebar-item {{ menu.objects }}">
+                    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
+                        <i class="align-middle" data-feather="layers"></i>
+                        <span class="align-middle">Models</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item {{ menu.compute }}">
+                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'compute' %}">
+                        <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Notebooks</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ menu.serve }}">
+                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'serve' %}">
+                        <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ menu.store }}">
+                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'store' %}">
+                        <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ menu.develop }}">
+                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'develop' %}">
+                        <i class="align-middle" data-feather="code"></i><span class="align-middle">Develop</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </li>
+
+    {% url 'projects:settings' request.user project.slug as settings_url %}
+
+    <li class="sidebar-item {% if request.path == settings_url %}active{% endif %}">
+        <a class="sidebar-link" href="{{settings_url}}">
+            <i class="align-middle" data-feather="settings"></i>
+            <span class="align-middle">Settings</span>
+        </a>
+    </li>
+    
+    <li class="sidebar-item px-4">
+        <div class="border-top"></div>
+    </li>
+</ul>
+
+{% endblock %}
+
+{% block extra_topnav_items %}
+{% endblock %}

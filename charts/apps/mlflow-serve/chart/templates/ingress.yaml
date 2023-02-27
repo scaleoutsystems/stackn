@@ -1,0 +1,63 @@
+{{ if .Values.ingress.v1beta1 }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: mlflow-serve
+    host: {{ .Release.Name }}.{{ .Values.global.domain }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?release={{ .Values.release }}"
+    nginx.ingress.kubernetes.io/auth-signin: "https://{{ .Values.global.domain }}/accounts/login/?next=$scheme%3A%2F%2F$host"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}-mlflow-svc
+            servicePort: 80
+  tls:
+    - secretName: prod-ingress
+      hosts:
+        - {{ .Release.Name }}.{{ .Values.global.domain }}
+{{ else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: mlflow-serve
+    host: {{ .Release.Name }}.{{ .Values.global.domain }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/auth-url: "{{ .Values.global.protocol }}://{{ .Values.global.auth_domain }}:8080/auth/?release={{ .Values.release }}"
+    nginx.ingress.kubernetes.io/auth-signin: "https://{{ .Values.global.domain }}/accounts/login/?next=$scheme%3A%2F%2F$host"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+    - host: {{ .Release.Name }}.{{ .Values.global.domain }}
+      http:
+        paths:
+        - path: /
+          backend:
+            service:
+              name: {{ .Release.Name }}-mlflow-svc
+              port:
+                number: 80
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: prod-ingress
+      hosts:
+        - {{ .Release.Name }}.{{ .Values.global.domain }}
+
+{{- end }}

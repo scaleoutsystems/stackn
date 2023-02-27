@@ -1,0 +1,301 @@
+[
+  {
+    "model": "projects.projecttemplate",
+    "pk": 1,
+    "fields": {
+      "name": "Blank Project",
+      "slug": "blank",
+      "description": "A project template, with no apps launched at creation.",
+      "template": {
+        "flavors": {
+          "Medium": {
+            "cpu": {
+              "requirement": "100m",
+              "limit": "1000m"
+            },
+            "mem": {
+              "requirement": "1Gi",
+              "limit": "8Gi"
+            },
+            "gpu": {
+              "requirement": "0",
+              "limit": "0"
+            },
+            "ephmem": {
+              "requirement": "50Mi",
+              "limit": "100Mi"
+            }
+          }
+        },
+        "environments": {
+          "Jupyter Lab": {
+            "repository": "ghcr.io/scaleoutsystems",
+            "image": "studio-notebook:sha-73a304f",
+            "app": "jupyter-lab"
+          },
+          "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "projects.projecttemplate",
+    "pk": 2,
+    "fields": {
+      "name": "MLFlow",
+      "slug": "default",
+      "description": "Track experiments and serve models from the model registry using MLFlow. ",
+      "template": {
+        "flavors": {
+          "Medium": {
+            "cpu": {
+              "requirement": "100m",
+              "limit": "1000m"
+            },
+            "mem": {
+              "requirement": "1Gi",
+              "limit": "8Gi"
+            },
+            "gpu": {
+              "requirement": "0",
+              "limit": "0"
+            },
+            "ephmem": {
+              "requirement": "50Mi",
+              "limit": "100Mi"
+            }
+          }
+        },
+        "environments": {
+          "Jupyter Lab": {
+            "repository": "ghcr.io/scaleoutsystems",
+            "image": "studio-notebook:sha-73a304f",
+            "app": "jupyter-lab"
+          },
+          "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+          }
+        },
+        "apps": {
+          "minio-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+          },
+          "mlflow-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+        },
+          "reg-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+          },
+          "project-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+          },
+          "project-minio": {
+            "slug": "minio",
+            "app:volumeK8s": [
+              "minio-vol"
+            ],
+            "credentials.access_key": "accesskey2",
+            "credentials.secret_key": "secretkey193",
+            "permission": "project"
+          },
+          "mlflow-server": {
+            "slug": "mlflow",
+            "app:volumeK8s": ["mlflow-vol"],
+            "S3": "project-minio",
+            "credentials.username": "username",
+            "credentials.password": "password",
+            "permission": "project"
+        },
+          "project-registry": {
+            "slug": "docker-registry",
+            "app:volumeK8s": [
+              "reg-vol"
+            ],
+            "credentials.username": "username123",
+            "credentials.password": "pass999111222",
+            "permission": "project"
+          }
+        },
+        "settings": {
+          "project-S3": "project-minio",
+          "project-MLflow": "mlflow-server"
+        }
+      }
+    }
+  },
+  {
+    "model": "projects.projecttemplate",
+    "pk": 3,
+    "fields": {
+      "name": "FEDn",
+      "slug": "fedn",
+      "description": "Federated learning using FEDn. Connect distributed clients to a federated network. Publish and serve trained FL models",
+      "template": {
+        "flavors": {
+          "Medium": {
+            "cpu": {
+              "requirement": "100m",
+              "limit": "1000m"
+            },
+            "mem": {
+              "requirement": "1Gi",
+              "limit": "8Gi"
+            },
+            "gpu": {
+              "requirement": "0",
+              "limit": "0"
+            },
+            "ephmem": {
+              "requirement": "50Mi",
+              "limit": "100Mi"
+            }
+          }
+        },
+        "environments": {
+          "Jupyter Lab": {
+            "repository": "ghcr.io/scaleoutsystems",
+            "image": "studio-notebook:sha-73a304f",
+            "app": "jupyter-lab"
+          },
+          "MLflow Serving": {
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
+            "app": "mlflow-serve"
+          },
+          "FEDn Reducer": {
+            "repository": "ghcr.io/scaleoutsystems/fedn",
+            "image": "fedn:0.4.0-beta.2",
+            "app": "reducer"
+          },
+          "FEDn Combiner": {
+            "repository": "ghcr.io/scaleoutsystems/fedn",
+            "image": "fedn:0.4.0-beta.2",
+            "app": "combiner"
+          }
+        },
+        "apps": {
+          "minio-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+          },
+          "project-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath",
+            "app_id": "",
+            "app_release_name": ""
+          },
+          "mongodb-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath"
+          },
+          "combiner-vol": {
+            "slug": "volumeK8s",
+            "volume.size": "5Gi",
+            "permission": "project",
+            "volume.accessModes": "ReadWriteMany",
+            "volume.storageClass": "microk8s-hostpath",
+            "storageClass": "microk8s-hostpath"
+          },
+          "project-minio": {
+            "slug": "minio",
+            "app:volumeK8s": [
+              "minio-vol"
+            ],
+            "credentials.access_key": "fednaccesskey2",
+            "credentials.secret_key": "fednsecretkey193",
+            "permission": "project"
+          },
+          "FEDn MongoDB": {
+            "slug": "mongodb",
+            "app:volumeK8s": [
+              "mongodb-vol"
+            ],
+            "credentials.username": "admin",
+            "credentials.password": "password",
+            "permission": "project"
+          },
+          "FEDn MongoExpress": {
+            "slug": "mongo-express",
+            "app:mongodb": [
+              "FEDn MongoDB"
+            ],
+            "permission": "project"
+          },
+          "Reducer": {
+            "slug": "reducer",
+            "S3": "project-minio",
+            "environment": "FEDn Reducer",
+            "app:mongodb": [
+              "FEDn MongoDB"
+            ],
+            "reducer.pullPolicy": "IfNotPresent",
+            "permission": "project"
+          },
+          "Combiner": {
+            "slug": "combiner",
+            "app:volumeK8s": [
+              "combiner-vol"
+            ],
+            "app:reducer": [
+              "Reducer"
+            ],
+            "environment": "FEDn Combiner",
+            "combiner.pullPolicy": "IfNotPresent",
+            "permission": "project"
+          }
+        },
+        "settings": {
+          "project-S3": "project-minio"
+        }
+      }
+    }
+  }
+]

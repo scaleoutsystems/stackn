@@ -1,2 +1,0 @@
-class ModelDeploymentException(Exception):
-    pass

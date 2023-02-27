@@ -1,0 +1,37 @@
+[
+  {
+    "model": "apps.appcategories",
+    "pk": "network",
+    "fields": {
+      "name": "Network"
+    }
+  },
+{
+  "model": "apps.appcategories",
+  "pk": "compute",
+  "fields": {
+    "name": "Notebooks"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "develop",
+  "fields": {
+    "name": "Develop"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "serve",
+  "fields": {
+    "name": "Serve"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "store",
+  "fields": {
+    "name": "Store"
+  }
+}
+]
