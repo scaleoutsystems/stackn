@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="h3 mb-3">New project</h1>
+
+<div class="row">
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <form action="{% url 'projects:create' %}" method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3 row">
+                        <label for="name" class="col-form-label col-sm-2 text-sm-right">Project name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Project name" id="name" name="name"
+                                required>
+                            <div class="invalid-feedback">
+                                Valid project name is required.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="template" class="col-form-label col-sm-2 text-sm-right">Project template</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="project-template" name="project-template">
+                                {% for template in templates %}
+                                  {% if template_selected == template.name %}
+                                  <option value="{{ template.pk }}" selected>{{ template.name }}</option>
+                                  {% else %}
+                                  <option value="{{ template.pk }}">{{ template.name }}</option>
+                                  {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="description" class="col-form-label col-sm-2 text-sm-right">Project
+                            description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" placeholder="Project description" rows="3" id="description"
+                                name="description"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-10 ml-sm-auto">
+                            <button type="submit" class="btn btn-primary">Create project</button>
+                            <button class="btn btn-secondary" type="submit" onclick="window.location='{{ request.headers.referer }}' ; return false;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
