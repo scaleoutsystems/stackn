@@ -1,0 +1,33 @@
+{% extends 'baseproject.html' %}
+{% load static %}
+
+{% load plotly_dash %}
+
+{% block projects_dropdown %}
+<ul class="navbar-nav">
+    <li class="nav-item px-2 dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button"
+           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Go to...
+        </a>
+        <div class="dropdown-menu dropdown-menu-start dropdown-mega" aria-labelledby="projectsDropdown">
+            <div class="d-md-flex align-items-start justify-content-start">
+                <div class="dropdown-mega-list">
+                    <div class="dropdown-header">Projects</div>
+                    {% for p in projects %}
+                    <a class="dropdown-item" href="{% url 'projects:details' request.user p.slug %}">{{ p.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="h3 mb-3">FEDn Dashboard</h1>
+
+{% plotly_direct name="FEDnDashboard" %}
+
+{% endblock %}
