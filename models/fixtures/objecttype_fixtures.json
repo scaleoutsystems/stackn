@@ -1,0 +1,47 @@
+[
+  {
+    "model": "models.objecttype",
+    "pk": 1,
+    "fields": {
+      "name": "Default Model",
+      "slug": "default",
+      "app_slug": "default-serve"
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 2,
+    "fields": {
+      "name": "Tensorflow Model",
+      "slug": "tensorflow",
+      "app_slug": "tensorflow-serve"
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 3,
+    "fields": {
+      "name": "PyTorch Model",
+      "slug": "pytorch",
+      "app_slug": "pytorch-serve"
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 4,
+    "fields": {
+      "name": "MLflow Model",
+      "slug": "mlflow",
+      "app_slug": "mlflow-serve"
+    }
+  },
+  {
+    "model": "models.objecttype",
+    "pk": 5,
+    "fields": {
+      "name": "Python Model Deployment",
+      "slug": "python",
+      "app_slug": "fastapi-serve"
+    }
+  }
+]
