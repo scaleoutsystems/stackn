@@ -22,11 +22,9 @@ from django.urls import include, path
 urlpatterns = (
     [
         path("admin/", admin.site.urls),
-        path("", include("user.urls", namespace="common")),
         path("", include("models.urls", namespace="models")),
         path("", include("portal.urls", namespace="portal")),
         path("", include("projects.urls", namespace="projects")),
-        path("", include("control.urls", namespace="control")),
         path("accounts/", include("django.contrib.auth.urls")),
         path(
             "<user>/<project>/monitor/",
