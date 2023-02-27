@@ -1,0 +1,33 @@
+{% extends 'projects/base.html' %}
+{% load static %}
+{% block content %}
+<div class="col-md-9">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Logs {{ app.name }}</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-9">  
+            <form action="{% url 'apps:logs' request.user project.slug app.pk %}" method="get">
+                {% csrf_token %}
+                <div class="form-group">
+                    <select name="container" id="container" class="form-control" style="height: 40px;" onchange="this.form.submit()">
+                        {% for ctr in containers %}
+                        {% if ctr == container %}
+                        <option value="{{ ctr }}" selected>{{ ctr }}</option> 
+                        {% else %}
+                        <option value="{{ ctr }}">{{ ctr }}</option> 
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-9"> 
+            {% for line in logs %}
+            {{ line }}<br>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

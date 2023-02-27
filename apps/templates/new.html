@@ -1,0 +1,82 @@
+{% extends 'projects/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card flex-fill">
+    <div class="card-header">
+        <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+    </div>
+
+    {% include 'app_table.html' %}
+
+</div>
+
+<div class="row">
+    {% for app in apps %}
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="row g-0 w-100 h-100">
+                    <div class="col-8  d-flex align-items-bottom flex-column">
+                        <div class="pt-2">
+                            <h3>{{ app.name }}</h3>
+                        </div>
+                        <div class="h-100">
+                            <p>{{ app.description }}</p>
+                            <div style="position:absolute;bottom:0.5em;">
+                                <h4>
+                                    <a class="btn btn-primary"
+                                        href="{% url 'apps:create' request.user project.slug app.slug  %}">Create</a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <img src="{{ media_url }}{{ app.logo_file }}" class="img-fluid float-end" style="height:100px;"
+                            alt="App Logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+
+    const apps = {{ pk_list | safe }}
+    const url = "{% url 'apps:get_status' request.user project.slug %}"
+    const csrftoken = getCookie('csrftoken');
+
+    const updateStatus = async () => {
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify(apps),
+        })
+
+        const json = await response.json()
+
+        for (const key in json) {
+            if (Object.hasOwnProperty.call(json, key)) {
+
+                const { status, statusGroup } = json[key]
+                const querySelector = `#status-${key} > span`
+                const element = document.querySelector(querySelector)
+                const className = `badge bg-${statusGroup}`
+
+                element.className = className
+                element.innerText = status
+            }
+        }
+    }
+
+    setInterval(updateStatus, 5000);
+
+</script>
+
+{% endblock %}

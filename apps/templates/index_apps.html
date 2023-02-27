@@ -1,0 +1,32 @@
+{% extends 'projects/base.html' %}
+{% load static %}
+{% block content %}
+<div class="row">
+  <div class="col-12 col-xl-6">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+        </div>
+            {% include 'half_table.html' %}
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+        </div>
+            {% include 'half_table.html' %}
+    </div>
+  </div>
+</row>
+
+<div class="col-12 col-xl-6">
+  <div class="card">
+      <div class="card-header">
+          <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
+      </div>
+          {% include 'half_table.html' %}
+  </div>
+</div>
+{% endblock %}

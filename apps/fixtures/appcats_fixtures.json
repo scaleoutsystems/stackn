@@ -1,0 +1,30 @@
+[
+{
+  "model": "apps.appcategories",
+  "pk": "compute",
+  "fields": {
+    "name": "Compute"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "develop",
+  "fields": {
+    "name": "Develop"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "serve",
+  "fields": {
+    "name": "Serve"
+  }
+},
+{
+  "model": "apps.appcategories",
+  "pk": "store",
+  "fields": {
+    "name": "Store"
+  }
+}
+]

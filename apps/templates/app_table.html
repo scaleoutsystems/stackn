@@ -1,0 +1,69 @@
+{% load static %}
+<table id="{{ cat_obj.slug }}" class="table">
+  <thead>
+      <tr> 
+          <th></th>
+          <th>App</th>
+          <th>Name</th>
+          <th></th>
+          <th>State</th>
+          <th>Created</th>
+          <th>Actions</th>
+          <th></th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for appinstance in appinstances %}
+    <tr>
+        <td><img src="{{ media_url }}{{ appinstance.app.logo_file }}" class="img-fluid " style="max-height:25px;"></td>
+        <td>{{ appinstance.app.name }}</td>
+        <td>{{ appinstance.name }}</td>
+        {% if appinstance.table_field.url %}
+        <td><a href="{{ appinstance.table_field.url }}" target="_blank">Open</a></td>
+        {% else %}
+        <td></td>
+        {% endif %}
+        {% if appinstance.status.latest.status_type in status_success %}
+        <td id="status-{{ appinstance.pk }}"><span class="badge bg-success">{{ appinstance.status.latest.status_type }}</span></td>
+        {% elif appinstance.status.latest.status_type in status_warning %}
+        <td id="status-{{ appinstance.pk }}"><span class="badge bg-warning">{{ appinstance.status.latest.status_type }}</span></td>
+        {% else %}
+        <td id="status-{{ appinstance.pk }}"><span class="badge bg-danger">{{ appinstance.status.latest.status_type }}</span></td>
+        {% endif %}
+        <td>{{ appinstance.created_on }}</td>
+        <td class="table-action">
+          <div class="dropdown show">
+              <a href="#" data-bs-toggle="dropdown" data-display="static">
+                  <i class="fas fa-ellipsis-v"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end">
+                  <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
+                    <i class="align-middle me-1" data-feather="activity"></i> Logs (disabled)
+                  </a>
+
+                  {% if appinstance.app.settings.publishable == "true" and appinstance.owner.id == request.user.id %}
+                    {% if appinstance.access == "public" %}
+                    <a class="dropdown-item" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
+                      <i class="align-middle me-1" data-feather="slash"></i> Unpublish
+                    </a>
+                    {% else %}
+                    <a class="dropdown-item" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
+                      <i class="align-middle me-1" data-feather="share-2"></i> Publish
+                    </a>
+                    {% endif %}
+                  {% endif %}
+
+                  <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
+                    <i class="align-middle me-1" data-feather="sliders"></i> Settings
+                  </a>
+
+                  <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
+                    <i class="align-middle me-1" data-feather="trash"></i> Delete
+                  </a>
+              </div>
+          </div>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
