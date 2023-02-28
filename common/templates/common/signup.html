@@ -20,13 +20,88 @@
                                 <div class="text-center">
                                     <h1 class="h2 text-dark mb-4">Create an Account</h1>
                                 </div>
-                                <form method="POST">
+                                <form method="post">
+
+                                    {% if form.errors|length > 0 %}
+                                    <p>Form invalid</p>
+                                    {% endif %}
+    
                                     {% csrf_token %}
-                                    {{form | crispy}}
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-secondary" onclick="window.location='{% url 'common:welcome' %}' ; return false;" value="Cancel">
-                                        Cancel
-                                    </button>
+                                    <div class="row pb-3">
+                                        <div class="col-12">
+                                            {{form.username}}
+                                        </div>
+                                    </div>
+                                    <div class="row pb-3">
+                                        <div class="col-12">
+                                            {{form.email}}
+                                        </div>
+                                        {% if form.email.errors %}
+    
+                                        {% for key, key_errors in form.errors.as_data.items %}
+                                        {% if key == 'email' %}
+                                        {% for error in key_errors %}
+                                        {% if error.code != 'unique'%}
+                                        <div class="pt-1">
+                                            {{error.message}}
+                                        </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+    
+                                    <div class="row pb-3">
+                                        <div class="col-12 col-md-6 pb-3 pb-md-0">
+                                            {{form.first_name}}
+                                        </div>
+                                        <div class="col-12 col-md-6 pb-3 pb-md-0">
+                                            {{form.last_name}}
+                                        </div>
+    
+                                        {% if form.first_name.errors %}
+                                        <div class="pt-1">
+                                            {% for error in form.first_name.errors %}
+                                            <p class="m-0">{{error|escape}}</p>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+    
+                                        {% if form.last_name.errors %}
+                                        <div class="pt-1">
+                                            {% for error in form.last_name.errors %}
+                                            <p class="m-0">{{error|escape}}</p>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+    
+                                    <div class="row pb-3">
+                                        <div class="col-12 col-md-6 pb-3 pb-md-0">
+                                            {{form.password1}}
+                                        </div>
+                                        <div class="col-12 col-md-6 pb-3 pb-md-0">
+                                            {{form.password2}}
+                                        </div>
+    
+                                        {% if form.password2.errors %}
+                                        <div class="pt-1">
+                                            {% for error in form.password2.errors %}
+                                            <p class="m-0">{{error|escape}}</p>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+    
+                                    <div class="row">
+                                        <div class="d-flex justify-content-end">
+    
+                                            <a href="/" class="btn me-2">Cancel</a>
+                                            <input type="submit" name="save" value="Submit" class="btn btn-primary ms-2"
+                                                id="submit-id-save">
+                                        </div>
+                                    </div>
                                 </form>
                                 <hr>
                                 <div class="text-center">
