@@ -1,0 +1,34 @@
+{% extends 'common/common_base.html' %}
+
+{% block title %}Logout - STACKn{% endblock %}
+
+{% block extra_head %}
+    <meta http-equiv="refresh" content="5;url={% url 'common:welcome' %}" />
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="card border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-2 d-none d-lg-block"></div>
+                        <div class="col-lg-8">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h2 text-dark mb-4">You are logged out.</h1>
+                                </div>
+                                <div class="text-center">
+                                    <a class="btn btn-primary" href="{% url 'login' %}">Login again?</a><br >
+                                    <hr >
+                                    <p>(You will be automatically redirected to the welcome page.)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

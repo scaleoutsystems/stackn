@@ -19,13 +19,17 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
+from . import views
+
 urlpatterns = (
     [
         path("admin/", admin.site.urls),
+        path('', include('common.urls', namespace='common')),
         path("", include("models.urls", namespace="models")),
         path("", include("portal.urls", namespace="portal")),
         path("", include("projects.urls", namespace="projects")),
         path("accounts/", include("django.contrib.auth.urls")),
+        path('auth/', views.AuthView.as_view()),
         path(
             "<user>/<project>/monitor/",
             include("monitor.urls", namespace="monitor"),

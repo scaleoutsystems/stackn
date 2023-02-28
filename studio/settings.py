@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "tagulous",
     "guardian",
     "crispy_forms",
+    "common",
     "portal",
     "projects",
     "models",
