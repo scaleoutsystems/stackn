@@ -71,7 +71,7 @@ services:
   celery-worker:
     build: .
     container_name: celery-worker
-    image: studio:develop
+    image: stackn:develop
     command: sh ./scripts/run_worker.sh
     environment:
       - KUBECONFIG=/app/cluster.conf
@@ -101,7 +101,7 @@ services:
   celery-beat:
     build: .
     container_name: celery-beat
-    image: studio:develop
+    image: stackn:develop
     command: sh ./scripts/run_beat.sh
     environment:
       - KUBECONFIG=/app/cluster.conf
