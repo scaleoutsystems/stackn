@@ -1,14 +1,20 @@
 # About Studio (Django)
-components/studio/chartcontroller/values/*
-components/studio/cluster.conf
-components/studio/media
+charts/values/*
+certs
+cluster.conf
+media
+tmp
 
 # Byte-compiled / optimized / DLL files
-.idea/
-.DS_Store
 __pycache__/
 *.py[cod]
 *$py.class
+
+#Dev related deploy
+Dockerfile.dev
+docker-compose-override-dev.yaml
+requirements-dev.txt
+dependencies_license.txt
 
 # C extensions
 *.so
@@ -17,7 +23,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+#dist/
 downloads/
 eggs/
 .eggs/
@@ -33,8 +39,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-Pipfile
-Pipfile.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -56,6 +60,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
 
@@ -82,7 +87,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter labs
+# Jupyter Notebook
 .ipynb_checkpoints
 
 # IPython
@@ -99,8 +104,12 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# celery beat schedule file
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
 celerybeat-schedule
+celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
@@ -131,17 +140,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-repos/
-media/datasets/
-media/generators/
-media/visualisers/
-
-tele_settings.py
-tele_settings_worker.py
-
-.vscode/
-
-bin/
-pyvenv.cfg
-share/
