@@ -34,8 +34,8 @@
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
-            "repository": "ghcr.io/scilifelabdatacentre",
-            "image": "serve-mlflow:230216-0853",
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
             "app": "mlflow-serve"
           }
         }
@@ -77,8 +77,8 @@
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
-            "repository": "ghcr.io/scilifelabdatacentre",
-            "image": "serve-mlflow:230216-0853",
+            "repository": "scaleoutsystems",
+            "image": "mlflow-serve:latest",
             "app": "mlflow-serve"
           }
         },
