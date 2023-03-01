@@ -26,9 +26,11 @@ spec:
         release: {{ .Release.Name }}
         app: mlflow-serve
         project: {{ .Values.project.slug }}
+        networking/allow-internet-egress: "false"
         type: app
         pod: mlflow-serve
     spec:
+      automountServiceAccountToken: false
       volumes:
       - name: rp-conf
         configMap:

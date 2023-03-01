@@ -22,6 +22,7 @@ spec:
         release: {{ $.Release.Name }}
         app: vscode
         project: {{ $.Values.project.slug }}
+        networking/allow-internet-egress: "false"
         type: app
         pod: vscode
     spec:
@@ -33,6 +34,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      automountServiceAccountToken: false
       containers:
       - name: vscode
         image: codercom/code-server:latest #3.12.0

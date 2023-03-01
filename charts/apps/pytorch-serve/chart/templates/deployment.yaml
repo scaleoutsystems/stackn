@@ -24,9 +24,12 @@ spec:
         release: {{ $.Release.Name }}
         app: pytorch-serve
         project: {{ $.Values.project.slug }}
+        networking/allow-internet-egress: "true"
+        networking/allow-internet-ingress: "true"
         type: app
         pod: pytorch-serve
     spec:
+      automountServiceAccountToken: false
       volumes:
       - name: torch-conf
         configMap:

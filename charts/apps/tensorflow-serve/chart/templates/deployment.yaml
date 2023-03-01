@@ -24,6 +24,8 @@ spec:
         release: {{ $.Release.Name }}
         app: tensorflow-serving
         project: {{ $.Values.project.slug }}
+        networking/allow-internet-egress: "true"
+        networking/allow-internet-ingress: "true"
         type: app
         pod: tensorflow-serving
     spec:
@@ -31,6 +33,7 @@ spec:
       affinity:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}
+      automountServiceAccountToken: false
       volumes:
       - name: rp-conf
         configMap:

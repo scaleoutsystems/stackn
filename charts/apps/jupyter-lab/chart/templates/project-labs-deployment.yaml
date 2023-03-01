@@ -24,6 +24,7 @@ spec:
         release: {{ .Release.Name }}
         app: lab
         project: {{ .Values.project.slug }}
+        networking/allow-internet-egress: "true"
         type: app
         pod: lab
     spec:
@@ -35,6 +36,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Release.Name }}-pull-secret
     {{ end }}
+      automountServiceAccountToken: false
       hostname: lab
       subdomain: default-subdomain
       containers:

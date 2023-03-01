@@ -22,9 +22,11 @@ spec:
         release: {{ .Release.Name }}
         app: minio
         project: {{ .Values.project.slug }}
+        networking/allow-internet-egress: "false"
         type: app
         pod: minio
     spec:
+      automountServiceAccountToken: false
       containers:
       - args:
         {{- range $key, $value := .Values.apps.volumeK8s }}

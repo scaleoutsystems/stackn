@@ -83,6 +83,9 @@
           }
         },
         "apps": {
+          "Project Network Policy": {
+            "slug": "netpolicy"
+          },
           "minio-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",

@@ -22,9 +22,12 @@ spec:
         app: docker-registry
         release: {{ .Release.Name }}
         project: {{ .Values.project.slug }}
+        networking/allow-internet-egress: "false"
+        networking/allow-internet-ingress: "true"
         type: app
         pod: docker-registry
     spec:
+      automountServiceAccountToken: false
       initContainers:
       - image: alpine:latest
         imagePullPolicy: IfNotPresent

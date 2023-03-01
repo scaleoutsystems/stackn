@@ -22,9 +22,11 @@ spec:
         release: {{ .Release.Name }}
         app: mlflow
         project: {{ .Values.project.slug }}
+        networking/allow-internet-egress: "false"
         type: app
         pod: mlflow
     spec:
+      automountServiceAccountToken: false
       initContainers:
       - image: alpine:latest
         name: init-auth
