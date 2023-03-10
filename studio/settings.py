@@ -292,3 +292,11 @@ EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
 VERSION = "dev"
+
+MIGRATION_MODULES = {
+    'apps': 'studio.migrations.apps',
+    'models': 'studio.migrations.models',
+    'monitor': 'studio.migrations.monitor',
+    'portal': 'studio.migrations.portal',
+    'projects': 'studio.migrations.projects'
+}
