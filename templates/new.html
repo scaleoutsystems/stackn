@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
-<div class="card flex-fill">
-    <div class="card-header">
+<div class="card shadow border-0">
+    <div class="card-header bg-white py-3">
         <h5 class="card-title mb-0">{{ cat_obj.name }}</h5>
     </div>
 
@@ -11,10 +11,10 @@
 
 </div>
 
-<div class="row">
+<div class="row g-4 py-5">
     {% for app in apps %}
-    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 col-xxl-4 mb-4">
-        <div class="card h-100">
+    <div class="col-12 col-lg-6 col-xl-4">
+        <div class="card shadow border-0 h-100">
             <div class="card-body">
                 <div class="row g-0 w-100 h-100">
                     <div class="col-8  d-flex align-items-bottom flex-column">
