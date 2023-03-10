@@ -4,12 +4,16 @@
 
 {% block content %}
 
-<h1 class="h3 mb-3">Model Details</h1>
+<div class="row">
+    <div class="col">
+        <h3>Model Details</h3>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-12 col-lg-12">
-        <div class="card">
-            <div class="card-header">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-white p-3">
                 <h5 class="card-title mb-0">{{ model.name }}</h5>
                 <p>{{ model.description }}</p>
             </div>
@@ -37,54 +41,65 @@
                 </dl>
                 {% if request.user and request.user.is_authenticated and request.user == model.project.owner or request.user.is_superuser %}
                 <hr>
-                <form method="POST" autocomplete="off" action="{% if private  %}{% url 'models:add_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:add_tag' published_model.id model.id %}{% endif %}">
-                    {% csrf_token %}
 
-                    <div class="mb-3 row">
-                        <dt class="col-4 col-xxl-3 mb-0">Add Tag</dt>
-                        <dd class="col-4 col-xxl-9 mb-0">
-                            {% if user.is_superuser %}
-                            <input id="id_access" placeholder="Add Tag ..." type="text" name="tag" required class="form-control tag-form" list="add_tags" />
-                            <datalist id="add_tags">
-                                {% for tag in all_tags %}
-                                <option value="{{ tag }}">{{ tag }}</option>
-                                {% endfor %}
-                            </datalist>
-                            {% else %}
-                            <select id="id_access_add" type="text" name="tag" required class="search-select-tag form-select tag-form">
-                                <option></option>
-                                {% for tag in all_tags %}
-                                <option value="{{ tag }}">{{ tag }}</option>
-                                {% endfor %}
-                            </select>
-                            {% endif %}
-                            <button type="submit" class="btn btn-info btn-sm">
-                                <i class="fas fa-save"></i>
-                                Add
-                            </button>
-                        </dd>
-                    </div>
-                </form>
-                <dl class="row">
-                    <dt class="col-4 col-xxl-3 mb-0">Tags</dt>
-                    <dd class="col-8 col-xxl-9 mb-0">
-                        <div>
-                        {% with model.tags|split:"," as tags %}
-                        {% for tag in tags %}
-                        <!-- <span class="tag tag-model-details">{{ tag }}</span> -->
-                        <form  style="display: inline-flex;" method="POST" action="{% if private  %}{% url 'models:remove_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:remove_tag' published_model.id model.id %}{% endif %}">
-                            {% csrf_token %}
-                        <div  class="tag tag-list tag-model-details"><button class="tag-list-ico fas fa-times" style="color: #fffafa;" type="submit" name="tag" value="{{ tag }}"></button><span style="font-weight: 500;">{{ tag }}</span></div>
-                        </form>
-                        {% endfor %}
-                        {% endwith %}
+                <div class="row">
 
-                        {% if model.tags.count == 0 %}
-                        <span>None</span>
-                        {% endif %}
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-12 col-lg-4">
+                                <p><strong>Add tag</strong></p>
+                            </div>
+                            <div class="col-12 col-lg-8">
+                                <form method="POST" action="{% if private  %}{% url 'models:add_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:add_tag' published_model.id model.id %}{% endif %}">
+
+                                    {% csrf_token %}
+    
+                                    <div class="row">
+                                        <div class="col-12 col-md-6">
+    
+                                            {% include './common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" %}
+                                        </div>
+                                        <div class="col-12 col-md-6 pt-3 pt-md-0">
+    
+                                            <div class="row">
+                                                <div class="col">
+                                                    <input type="submit" class="btn btn-primary" value="Add">
+                                                </div>
+                                            </div>
+                                        </div>
+    
+                                    </div>
+    
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row pt-3">
+                            <div class="col-12 col-lg-4">
+                                <p><strong>Tags</strong></p>
+                            </div>
+                            <div class="col-12 col-lg-8 d-flex">
+                                {% with model.tags|split:"," as tags  %}
+                                
+                                {% for tag in tags %}
+                                    
+                                    <form method="post" action="{% if private  %}{% url 'models:remove_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:remove_tag' published_model.id model.id %}{% endif %}">
+                    
+                                        {% csrf_token %}
+
+                                        <div class="align-items-center d-flex m-1 p-2 rounded shadow">
+                                            {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}" aria-label="Close"></button>
+                                        </div>
+                                    </form>
+                                    
+                                {% endfor %}
+
+                                {% endwith %}
+                            </div>
+                        </div>
                     </div>
-                    </dd>
-                </dl>
+                </div>
+
                 {% endif%}
                 <hr>
                 <dl class="row">
@@ -100,19 +115,23 @@
             </div>
         </div>
 
-        <div class="card">
-            {% if model.model_card %}
-            <div class="card-header">
-                <h5 class="card-title mb-0">Model Card</h5>
+        <div class="row pt-3">
+            <div class="col">
+                <div class="card border-0 shadow">
+                    {% if model.model_card %}
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Model Card</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ model.model_card | safe }}
+                    </div>
+                    {% else %}
+                    <div class="card-body">
+                        <p>No model card available.</p>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-            <div class="card-body">
-                {{ model.model_card | safe }}
-            </div>
-            {% else %}
-            <div class="card-body">
-                <p>No model card available.</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
