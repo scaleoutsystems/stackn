@@ -30,24 +30,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              web: studio-web
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: {{ .Release.Name }}-allow-egress-to-studio
-  namespace: default
-spec:
-  podSelector:
-    matchLabels:
-      project: {{ .Values.project.slug }}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              web: studio-web
+              app: stackn-studio
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -61,29 +44,6 @@ spec:
   policyTypes:
   - Egress
   egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          project: {{ .Values.project.slug }}
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: {{ .Release.Name }}-allow-ingress-egress-studio-web-apps
-  namespace: {{ .Values.namespace | default "default" }}
-spec:
-  podSelector:
-    matchLabels:
-      web: studio-web
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress: 
-  - from:
-    - podSelector:
-        matchLabels:
-          project: {{ .Values.project.slug }}
-  egress: 
   - to:
     - podSelector:
         matchLabels:
