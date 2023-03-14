@@ -1,0 +1,32 @@
+
+<ul class="nav flex-column pt-5">
+    <li class="nav-item">
+        <h6 class="opacity-75 mb-3"><strong>Catalogs</strong></h6>
+    </li>
+    {% url 'portal:index' as index_portal_url %}
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == index_portal_url %}active{% endif %}"
+            href="{{index_portal_url}}">
+            <i class="bi bi-box fs-4 me-3"></i>
+            Apps
+        </a>
+    </li>
+    {% url 'models:index' as index_models_url %}
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == index_models_url %}active{% endif %}"
+            href="{{index_models_url}}">
+            <i class="bi bi-layers fs-4 me-3"></i>
+            Models
+        </a>
+    </li>
+    {% if request.user.is_authenticated %}
+    {% url 'projects:index' as index_projects_url %}
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == index_projects_url %}active{% endif %}"
+            href="{{index_projects_url}}">
+            <i class="bi bi-folder fs-4 me-3"></i>
+            Projects
+        </a>
+    </li>
+    {% endif %}
+</ul>

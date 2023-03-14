@@ -1,0 +1,65 @@
+/* buttons */
+
+.btn{
+    opacity: 1;
+}
+
+.btn:focus, .btn:hover {
+
+    box-shadow: 0 0.5rem 1rem rgba(var(--bs-body-color-rgb),.15)!important;
+    text-decoration: none;   
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--scaleout-black);
+    --bs-btn-border-color: var(--scaleout-black);
+    --bs-btn-hover-bg: var(--scaleout-black);
+    --bs-btn-hover-border-color: var(--scaleout-black);
+    --bs-btn-focus-shadow-rgb: 49,132,253;
+    --bs-btn-active-bg: var(--scaleout-black);
+    --bs-btn-active-border-color: var(--scaleout-black);
+    --bs-btn-disabled-bg: var(--scaleout-black);
+    --bs-btn-disabled-border-color: var(--scaleout-black);
+}
+
+/* forms */
+
+.form-control{
+    border-color: var(--scaleout-grey-6);
+}
+
+.form-control:focus{
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    border-color: var(--scaleout-grey-6);
+}
+
+.form-check-input:focus{
+    border-color: var(--scaleout-grey-6  );
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.form-check-input:checked {
+    background-color: var(--scaleout-green);
+    border-color: var(--scaleout-green);
+}
+
+/* links */
+
+a{
+    text-decoration: none;
+}
+
+a:hover, a:focus, a.active{
+    opacity: 1;
+    text-shadow: .2px .2px .2px var(--scaleout-black);
+}
+
+.navbar-nav{
+    --bs-nav-link-color: var(--scaleout-black-rgb)
+}
+
+/* text */
+
+p, h1, h2, h3, h4, h5, h6, a{
+    opacity: .8;
+}

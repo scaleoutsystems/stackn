@@ -1,0 +1,176 @@
+{% comment %} 
+Autocomplete
+
+params:
+    - str_list: comma seperated string values for autocomplete
+    - id_suffix: use to ensure unique ids on page (if multiple autocompletes are included) 
+    - name: name of input
+    - required: if True input will be required
+{% endcomment %}
+
+<div class="position-relative">
+    <input 
+    {% if required %}
+    required
+    {% endif %}
+    autocomplete="off" 
+    id="autocomplete-input-{{id_suffix}}" 
+    name="{{name}}" 
+    class="form-control" 
+    type="text"
+    >
+    <ul id="autocomplete-ul-{{id_suffix}}" class="position-absolute bg-white shadow rounded d-none m-0 p-0 w-100 list-group" style="z-index: 300;"></ul>
+</div>
+
+<script>
+    {
+        const strList = "{{ str_list }}"
+        const arr = strList.split(",")
+
+        const inputElement = document.getElementById("autocomplete-input-{{id_suffix}}")
+        const ulElement = document.getElementById("autocomplete-ul-{{id_suffix}}")
+        let btnElements = []
+
+        const updateList = () => {
+
+            removeAllChildNodes(ulElement)
+
+            const createBtnElement = (tag) => {
+
+                tag = tag.trim()
+
+                const element = document.createElement("button")
+                element.className = "btn p-3 autocomplete-btn w-100 d-flex justify-content-start"
+                element.setAttribute("data-val", tag)
+                element.innerText = tag
+
+                element.addEventListener("click", (e) => {
+
+                    const { target } = e
+                    const value = target.getAttribute("data-val")
+                    inputElement.value = value
+                    ulElement.classList.add("d-none")
+                    
+                    e.preventDefault()
+                })
+
+                return element
+            }
+
+            const tmpArr = []
+
+            for (const tag of arr) {
+
+                const value = inputElement.value ?? ""
+
+                if (value === "" || tag.toLowerCase().includes(value.toLowerCase())) {
+
+                    const liElement = document.createElement("li")
+                    liElement.className = "list-group-item p-0"
+                    const btnElement = createBtnElement(tag)
+
+                    tmpArr.push(btnElement)
+
+                    liElement.appendChild(btnElement)
+                    ulElement.appendChild(liElement)
+                }
+            }
+
+            btnElements = tmpArr
+
+            for (let i = 0; i < btnElements.length; i++) {
+                const element = btnElements[i];
+
+                element.addEventListener("keydown", (e) => {
+
+                    const btnElements = document.querySelectorAll(".autocomplete-btn")
+
+                    if (event.isComposing || event.keyCode === 229) {
+                        return;
+                    }
+
+                    if (e.code === "Space") {
+
+                        const value = element.getAttribute("data-val")
+                        inputElement.value = value
+                        ulElement.classList.add("d-none")
+                    }
+
+                    else if (e.code === "ArrowUp") {
+
+                        const nextIndex = i !== 0 ? i - 1 : btnElements.length - 1
+                        const element = btnElements[nextIndex]
+                        element.focus()
+                    }
+                    else if (e.code === "ArrowDown") {
+
+                        const nextIndex = i !== btnElements.length - 1 ? i + 1 : 0
+                        const element = btnElements[nextIndex]
+                        element.focus()
+                    }
+                })
+            }
+        }
+
+        const inputOnBlur = (e) => {
+
+            const { relatedTarget } = e
+
+            if (!relatedTarget?.classList.contains("autocomplete-btn")) {
+
+                if (!ulElement.classList.contains("d-none")) {
+
+                    ulElement.classList.add("d-none")
+                }
+            }
+        }
+
+        const inputOnKeydown = (e) => {
+
+            const btnElements = document.querySelectorAll(".autocomplete-btn")
+
+            if (event.isComposing || event.keyCode === 229) {
+                return;
+            }
+
+            switch (e.code) {
+                case "ArrowUp":
+                    {
+                        const element = btnElements[btnElements.length - 1]
+                        element.focus()
+                    }
+                    break;
+                case "ArrowDown":
+                    {
+                        const element = btnElements[0]
+                        element.focus()
+                    }
+                    break
+                case "Escape":
+                    {
+                        if (!ulElement.classList.contains("d-none")) {
+
+                            ulElement.classList.add("d-none")
+                        }
+                    }
+                    break
+            }
+        }
+
+        const inputOnChange = () => {
+
+            if (ulElement.classList.contains("d-none")) {
+
+                ulElement.classList.remove("d-none")
+            }
+
+            updateList()
+        }
+
+
+        inputElement.addEventListener("click", inputOnChange)
+        inputElement.addEventListener("blur", inputOnBlur)
+        inputElement.addEventListener("keydown", inputOnKeydown)
+        inputElement.addEventListener("input", inputOnChange)
+    }
+</script>
