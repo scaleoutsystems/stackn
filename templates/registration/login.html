@@ -1,29 +1,26 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Log in - STACKn{% endblock %}
+{% block title %}Login | STACKn{% endblock %}
 
 {% block content %}
+
 <div class="container">
   <!-- Outer Row -->
   <div class="row justify-content-center">
     <div class="col-12 col-md-9">
       {% include 'common/flash_messages.html' %}
-      <div class="card border-0 shadow-lg my-5">
+      <div class="card border-0 shadow-lg my-5 py-5">
         <div class="card-body">
           <!-- Nested Row within Card Body -->
           <div class="col-lg-6 offset-lg-3">
             <div class="d-flex justify-content-center mb-1">
-              <img src="{% static 'images/scaleout.png' %}" alt="STACKn Logo" width="200">
-            </div>
-
-            <div class="text-center">
-              <h4>Welcome Back!</h4>
+              <img src="{% static 'images/scaleout_black.png' %}" alt="Studio Logo" width="200">
             </div>
 
             <div class="py-4 d-flex justify-content-center">
 
-              <div class="w-100 mw-20">
+              <div class="w-100">
                 <form method="post" action="{% url 'login' %}">
                   {% csrf_token %}
                   <div class="form-group pb-2">
@@ -36,26 +33,26 @@
                   </div>
                   <div class="form-group d-flex justify-content-center"><button type="submit"
                       class="btn btn-primary w-xs-100 px-5">Login</button></div>
-        
-                      {% if form.errors %}
-                      <div class="row pt-2">
-                        <div class="col">
-                          <p>Your username and password didn't match. Please try again.</p>
-                          {% endif %}
-                          {% if next %}
-                          {% if user.is_authenticated %}
-                          <p>Your account doesn't have access to this page. To proceed,
-                            please login with an account that has access.</p>
-                          {% else %}
-                          <p>Please login to see this page.</p>
-                          {% endif %}
-                        </div>
-                      </div>
+
+                  {% if form.errors %}
+                  <div class="row pt-2">
+                    <div class="col">
+                      <p>Your username and password didn't match. Please try again.</p>
                       {% endif %}
-                    </form>
+                      {% if next %}
+                      {% if user.is_authenticated %}
+                      <p>Your account doesn't have access to this page. To proceed,
+                        please login with an account that has access.</p>
+                      {% else %}
+                      <p>Please login to see this page.</p>
+                      {% endif %}
+                    </div>
                   </div>
-                  
-                </div>
+                  {% endif %}
+                </form>
+              </div>
+
+            </div>
             <div class="text-center">
               <a href="{% url 'password_reset' %}">Forgot Password?</a>
             </div>
