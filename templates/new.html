@@ -75,7 +75,19 @@
         }
     }
 
-    setInterval(updateStatus, 5000);
+    const loop = async () => {
+
+        if (apps) {
+
+            await updateStatus()
+
+            setTimeout(() => {
+                loop()
+            }, 5000)
+        }
+    }
+
+    loop()
 
 </script>
 
