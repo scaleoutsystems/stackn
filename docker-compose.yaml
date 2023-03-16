@@ -80,6 +80,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - STUDIO_STORAGECLASS=microk8s-hostpath
       - POSTGRES_DB=postgres
+      - DEBUG=true
     volumes:
       - .:/app:cached
       - ${PWD}/cluster.conf:/app/cluster.conf
@@ -110,6 +111,7 @@ services:
       - STUDIO_STORAGECLASS=microk8s-hostpath
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
+      - DEBUG=true
     volumes:
       - .:/app:cached
       - ${PWD}/cluster.conf:/app/cluster.conf
