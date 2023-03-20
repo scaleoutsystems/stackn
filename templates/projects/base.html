@@ -3,82 +3,81 @@
 {% block extra_sidebar_items %}
 
 
-<ul class="sidebar-nav border-top">
+<ul class="nav flex-column border-top my-3 py-4">
 
-    <li class="sidebar-header">
-
-        <span class="fw-bolder opacity-75">{{ project.name }}</span>
+    <li class="nav-item">
+        <h6 class="opacity-75 mb-3"><strong>{{ project.name }}</strong></h6>
     </li>
-    
+
     {% url 'projects:details' request.user project.slug as dashboard_url %}
-    
-    <li class="sidebar-item {% if request.path == dashboard_url %}active{% endif %}">
-        <a class="sidebar-link" href="{{dashboard_url}}">
-            <i class="align-middle" data-feather="home"></i>
-            <span class="align-middle">Dashboard</span>
+
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == dashboard_url %}active{% endif %}" href="{{dashboard_url}}">
+            <i class="bi bi-house me-3 fs-4"></i>
+            Dashboard
         </a>
     </li>
 
-    <!-- TODO: Active links below displayed using a menu-object... Leaving it when I do not know the reasons behind this but would like to change to solution seen above...-->
+    {% url 'models:list' request.user project.slug as models_url %}
 
-    <li class="sidebar-item">
-        <div class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#ml-collapse" aria-expanded="true">
-            <span class="fw-bolder opacity-75">MLOps</span>
-        </div>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == models_url %}active{% endif %}"
+            href="{{models_url}}">
+            <i class="bi bi-layers fs-4 me-3"></i>
+            Models
+        </a>
+    </li>
 
-        <div class="collapse ps-2 show" id="ml-collapse">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+    {% url 'apps:filtered' request.user project.slug 'compute' as notebooks_url %}
+    
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == notebooks_url %}active{% endif %}"
+            href="{{notebooks_url}}">
+            <i class="bi bi-cpu fs-4 me-3"></i>
+            Notebooks
+        </a>
+    </li>
 
-                {% url 'apps:filtered' request.user project.slug 'network' as network_url %}
+    {% url 'apps:filtered' request.user project.slug 'serve' as serve_url %}
 
-                <li class="sidebar-item {% if request.path == network_url %}active{% endif %}">
-                    <a class="sidebar-link" href="{{network_url}}">
-                        <i class="align-middle" data-feather="globe"></i>
-                        <span class="align-middle">Network</span>
-                    </a>
-                </li>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == serve_url %}active{% endif %}"
+            href="{{serve_url}}">
+            <i class="bi bi-check2-circle fs-4 me-3"></i>
+            Serve
+        </a>
+    </li>
 
-                <li class="sidebar-item {{ menu.objects }}">
-                    <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
-                        <i class="align-middle" data-feather="layers"></i>
-                        <span class="align-middle">Models</span>
-                    </a>
-                </li>
+    {% url 'apps:filtered' request.user project.slug 'store' as store_url %}
 
-                <li class="sidebar-item {{ menu.compute }}">
-                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'compute' %}">
-                        <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Notebooks</span>
-                    </a>
-                </li>
-                <li class="sidebar-item {{ menu.serve }}">
-                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'serve' %}">
-                        <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
-                    </a>
-                </li>
-                <li class="sidebar-item {{ menu.store }}">
-                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'store' %}">
-                        <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
-                    </a>
-                </li>
-                <li class="sidebar-item {{ menu.develop }}">
-                    <a class="sidebar-link" href="{% url 'apps:filtered' request.user project.slug 'develop' %}">
-                        <i class="align-middle" data-feather="code"></i><span class="align-middle">Develop</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == store_url %}active{% endif %}"
+            href="{{store_url}}">
+            <i class="bi bi-database fs-4 me-3"></i>
+            Store
+        </a>
+    </li>
+
+    {% url 'apps:filtered' request.user project.slug 'develop' as develop_url %}
+
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% if request.path == develop_url %}active{% endif %}"
+            href="{{develop_url}}">
+            <i class="bi bi-code fs-4 me-3"></i>
+            Develop
+        </a>
     </li>
 
     {% url 'projects:settings' request.user project.slug as settings_url %}
 
-    <li class="sidebar-item {% if request.path == settings_url %}active{% endif %}">
-        <a class="sidebar-link" href="{{settings_url}}">
-            <i class="align-middle" data-feather="settings"></i>
-            <span class="align-middle">Settings</span>
+    <li class="nav-item py-3">
+        <a class="nav-link d-flex align-items-center {% if request.path == settings_url %}active{% endif %}" href="{{settings_url}}">
+            <i class="bi bi-gear fs-4 me-3"></i>
+            Settings
         </a>
     </li>
-    
-    <li class="sidebar-item px-4">
+
+    <li class="nav-item px-4">
         <div class="border-top"></div>
     </li>
 </ul>

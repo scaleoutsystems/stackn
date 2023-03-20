@@ -1,0 +1,27 @@
+
+.rounded-100{
+    border-radius: 100%;
+}
+
+.h-r-30{
+    height: 30rem !important
+}
+
+.img-cover{
+    object-fit: cover;
+}
+
+.vh-75 {
+    height: 75vh!important;
+}
+
+.vh-50 {
+    height: 50vh!important;
+}
+
+@media (max-width:576px) {
+    
+    .w-xs-100{
+        width: 100% !important
+    }
+}
