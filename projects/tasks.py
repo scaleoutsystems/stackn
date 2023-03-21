@@ -7,11 +7,10 @@ from celery import shared_task
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import HttpRequest
 
 import apps.tasks as apptasks
-import apps.views as appviews
 from apps.controller import delete
+from apps.helpers.helpers import create_app_instance
 
 from .exceptions import ProjectCreationException
 from .models import S3, Environment, Flavor, MLFlow, Project
@@ -106,19 +105,25 @@ def create_resources_from_template(user, project_slug, template):
                 data = {**data, **item}
                 print("DATA TEMPLATE")
                 print(data)
-                request = HttpRequest()
-                request.user = User.objects.get(username=user)
 
-                create_view = appviews.CreateView()
-                _ = create_view.post(
-                    request=request,
-                    user=user,
-                    project=project.slug,
-                    app_slug=item["slug"],
+                user_obj = User.objects.get(username=user)
+
+                app = Apps.objects.filter(slug=item["slug"]).order_by(
+                    "-revision"
+                )[0]
+
+                (successful, _, _,) = create_app_instance(
+                    user=user_obj,
+                    project=project,
+                    app=app,
+                    app_settings=app.settings,
                     data=data,
                     wait=True,
-                    call=True,
                 )
+
+                if not successful:
+                    print("create_app_instance failed")
+                    raise (ProjectCreationException)
 
         elif "settings" == key:
             print("PARSING SETTINGS")

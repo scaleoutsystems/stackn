@@ -28,42 +28,36 @@
 <div class="row">
     <div class="col-md-3 col-xl-2">
 
-        <div class="card">
-            <div class="card-header">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white py-3">
                 <h5 class="card-title mb-0">Project Settings</h5>
             </div>
 
             <div class="list-group list-group-flush" role="tablist">
 
-                <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#projdesc"
+                <a class="list-group-item list-group-item-action active p-3" data-bs-toggle="list" href="#projdesc"
                     role="tab">
                     Description
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#image" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#image" role="tab">
                     Image
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#access" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access" role="tab">
                     Access
                 </a>
-                <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#publish" role="tab">
-                    Publish
-                </a> -->
-                <!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-                    Labs
-                </a> -->
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#s3storage" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage" role="tab">
                     S3 storage
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#mlflow" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow" role="tab">
                     MLFlow
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#flavors" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors" role="tab">
                     Flavors
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#environments" role="tab">
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments" role="tab">
                     Environments
                 </a>
-                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#delete" role="tab"
+                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#delete" role="tab"
                     style="color: red;">
                     Delete
                 </a>
@@ -74,9 +68,13 @@
     <div class="col-md-9 col-xl-10">
         <div class="tab-content">
             <div class="tab-pane fade show active" id="projdesc" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Change project description</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Change project description</h5>
 
                         <form action="{% url 'projects:change_description' request.user project.slug %}" method="post">
                             {% csrf_token %}
@@ -99,14 +97,17 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="image" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Change project image</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Change project image</h5>
 
                         <form action="{% url 'projects:update_image' request.user project.slug %}" method="post"
                             enctype="multipart/form-data">
                             {% csrf_token %}
-                            
+
                             <div class="mb-3">
                                 <input type="file" class="form-control" id="image" name="image"
                                     accept="image/png, image/jpeg">
@@ -119,9 +120,12 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="access" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Grant or revoke access</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Grant or revoke access</h5>
 
                         <p>For granting/revoking access to this project,
                             select one or more users from the list below.</p>
@@ -191,9 +195,13 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="publish" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Publish project on GitHub</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Publish project on GitHub</h5>
 
                         {% if not project.clone_url %}
                         <form action="{% url 'projects:publish_project' request.user project.slug %}" method="post">
@@ -227,9 +235,13 @@
             </div>
 
             <div class="tab-pane fade" id="flavors" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Flavors</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Flavors</h5>
                         <form action="{% url 'projects:delete_flavor' request.user project.slug %}" method="post">
                             {% csrf_token %}
 
@@ -281,9 +293,13 @@
             </div>
 
             <div class="tab-pane fade" id="environments" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Environments</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Environments</h5>
                         <form action="{% url 'projects:delete_environment' request.user project.slug %}" method="post">
                             {% csrf_token %}
 
@@ -344,9 +360,13 @@
             </div>
 
             <div class="tab-pane fade" id="s3storage" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Default S3 storage</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Default S3 storage</h5>
                         <form action="{% url 'projects:set_s3storage' request.user project.slug %}" method="post">
                             {% csrf_token %}
 
@@ -372,9 +392,13 @@
             </div>
 
             <div class="tab-pane fade" id="mlflow" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Default MLFlow Server</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Default MLFlow Server</h5>
                         <form action="{% url 'projects:set_mlflow' request.user project.slug %}" method="post">
                             {% csrf_token %}
 
@@ -400,18 +424,18 @@
             </div>
 
             <div class="tab-pane fade" id="delete" role="tabpanel">
-                <div class="card">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Delete project</h5>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title">Delete project</h5>
 
                         <div class="alert alert-danger alert-outline alert-dismissible" role="alert">
-                            <div class="alert-icon">
-                                <i class="far fa-fw fa-bell"></i>
-                            </div>
-                            <div class="alert-message">
-                                <strong>Please be certain!</strong> Once you delete this project, there is no going
-                                back.
-                            </div>
+                            <i class="far fa-fw fa-bell"></i>
+                            <strong>Please be certain!</strong> Once you delete this project, there is no going
+                            back.
                         </div>
                         <form class="row row-cols-md-auto align-items-center"
                             action="{% url 'projects:delete' request.user project.slug %}" method="post">

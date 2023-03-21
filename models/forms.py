@@ -2,8 +2,52 @@ from django import forms
 
 from .models import Metadata, Model, ModelLog
 
+RELEASE_TYPE_CHOICES = (("M", "Major"), ("m", "Minor"))
+ACCESS_CHOICES = (
+    ("PR", "Private"),
+    ("LI", "Limited"),
+    ("PU", "Public"),
+)
+
 
 class ModelForm(forms.ModelForm):
+    release_type = forms.ChoiceField(
+        label="Release type",
+        choices=RELEASE_TYPE_CHOICES,
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+    )
+
+    access = forms.ChoiceField(
+        label="Access",
+        choices=ACCESS_CHOICES,
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+    )
+
+    path_field = Model._meta.get_field("path")
+    path_default = path_field.default
+
+    path = forms.CharField(
+        label="Path",
+        help_text="Current folder name of your trained model*",
+        required=True,
+        initial=path_default,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+    )
+
     class Meta:
         model = Model
         fields = (
@@ -14,9 +58,6 @@ class ModelForm(forms.ModelForm):
             "access",
             "path",
         )
-        labels = {
-            "path": ("Current folder name of your trained model*"),
-        }
 
 
 class ModelLogForm(forms.ModelForm):

@@ -4,7 +4,7 @@ import time
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -508,43 +508,36 @@ class AppInstanceList(
         app_slug = request.data["slug"]
         data = request.data
         user = request.user
-        import apps.views as appviews
+        import apps.helpers as helpers
 
-        request = HttpRequest()
-        request.user = user
-        create_view = appviews.CreateView()
-        _ = create_view.post(
-            request,
-            user=user.username,
+        app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
+
+        (successful, _, _,) = helpers.create_app_instance(
+            user=user,
+            project=project,
+            app=app,
+            app_settings=app.settings,
             data=data,
-            project=project.slug,
-            app_slug=app_slug,
             wait=True,
-            call=True,
         )
+
+        if not successful:
+            print("create_app_instance failed")
+            return HttpResponse("App creation faild", status=400)
+
         return HttpResponse("App created.", status=200)
 
     def destroy(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs["project_pk"])
         appinstance = self.get_object()
         # Check that user is allowed to delete app:
         # Either user owns the app, or is a member of the project
         # (Checked by project permission above)
         # and the app is set to project level permission.
         access = False
-        if appinstance.owner == request.user:
-            print("User owns app, can delete.")
+
+        if appinstance.access == "public":
             access = True
-        elif appinstance.permission.projects.filter(
-            slug=project.slug
-        ).exists():
-            print("Project has permission")
-            access = True
-        elif appinstance.permission.public:
-            print(
-                "Public app and user has project permission, delete granted."
-            )
-            access = True
+
         if access:
             delete_resource.delay(appinstance.pk)
         else:
