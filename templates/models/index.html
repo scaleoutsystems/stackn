@@ -5,31 +5,36 @@
 {% load custom_tags %}
 
 {% block content %}
-<div style="display: inline-flex;">
-    <h1 class="h3 mb-3" style="margin-right: 5px;">Models</h1>
-    <h1 class="h3 mb-3 ghost-number">{% if published_models|length > 0  %}{{ published_models|length }}{% endif %}</h1>
-    <div>
-        {% for tf in request.session.tag_filters %}
-        <div class="tag tag-list"><a class="tag-list-ico fas fa-times" style="color: #fffafa;" href="{% url 'models:index' %}?tf_remove={{ tf | urlencode }}"></a><span style="font-weight: 500;">{{ tf }}</span></div>
-        {% endfor %}
+<div class="row">
+    <div class="col">
+        <h3>
+            Models
+            {% if published_models|length > 0  %}<small>{{ published_models|length }}</small>{% endif %}
+        </h3>
+    
+        <div>
+            {% for tf in request.session.tag_filters %}
+            <div class="tag tag-list"><a class="tag-list-ico fas fa-times" style="color: #fffafa;" href="{% url 'models:index' %}?tf_remove={{ tf | urlencode }}"></a><span style="font-weight: 500;">{{ tf }}</span></div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row pt-3 g-4">
 
     {% if not published_models %}
     <p>No publicly published services available.</p>
     {% endif %}
 
     {% for model in published_models %}
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-        <div class="card h-100">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow">
             <img class="card-img-top" src="{{ media_url }}{{ model.img }}" alt="pattern">
 
-            <div class="card-header">
-                <h5 class="card-title mb-0">{{ model.name }}</h5>
-            </div>
             <div class="card-body">
+
+                <h5 class="card-title">{{ model.name }}</h5>
+                
                 <div>
                     {% if request.session.model_tags|exists:model.id %}
                     {% for model_objs in model.model_obj|sort_by:'-model__version' %}
@@ -43,8 +48,9 @@
                     <a href="{% url 'models:index' %}?model_id_remove={{ model.id | urlencode }}&tag_count={{ tags.count | urlencode }}"
                         style="display: inline-flex;">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-circle tag-count"><span
-                                class="fas fa-minus"></span></button>
+                        <button type="submit" class="btn btn-danger btn-circle tag-count">
+                            -
+                        </button>
                     </a>
                     {% endwith %}
                     {% endfor %}
@@ -71,7 +77,7 @@
                     {% endif %}
                 </div>
                 <p></p>
-                <a href="{% url 'models:details_public' model.pk %}" class="card-link">Open</a>
+                <a href="{% url 'models:details_public' model.pk %}" class="btn btn-primary">Open</a>
             </div>
         </div>
     </div>
