@@ -4,7 +4,7 @@ from .models import AppCategories, AppInstance, Apps, AppStatus, ResourceData
 
 
 class AppsAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "user_can_create")
+    list_display = ("name", "user_can_create", "slug", "revision")
     list_filter = ("user_can_create",)
 
 

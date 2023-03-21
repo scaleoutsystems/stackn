@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from guardian.shortcuts import assign_perm, remove_perm
 from tagulous.models import TagField
+
+from apps.helpers.get_apps_limit_per_user import get_apps_limit_per_user
 
 
 class AppCategories(models.Model):
@@ -53,7 +56,22 @@ class Apps(models.Model):
         return str(self.name) + "({})".format(self.revision)
 
 
+class AppInstanceManager(models.Manager):
+    def user_can_create(self, user, project, app_slug):
+        limit = get_apps_limit_per_user(app_slug)
+
+        num_of_app_instances = self.filter(
+            Q(owner=user), app__slug=app_slug, project=project
+        ).count()
+
+        has_perm = user.has_perm("apps.add_appinstance")
+
+        return limit is None or limit > num_of_app_instances or has_perm
+
+
 class AppInstance(models.Model):
+    objects = AppInstanceManager()
+
     access = models.CharField(
         max_length=20, default="private", null=True, blank=True
     )

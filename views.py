@@ -7,14 +7,18 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Subquery
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    JsonResponse,
+)
 from django.shortcuts import HttpResponseRedirect, render, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers import (
+from .helpers.helpers import (
     can_access_app_instances,
     create_app_instance,
     handle_permissions,
@@ -312,7 +316,8 @@ def remove_tag(request, user, project, ai_id):
 
 @method_decorator(
     permission_required_or_403(
-        "can_view_project", (Project, "slug", "project")
+        "can_view_project",
+        (Project, "slug", "project"),
     ),
     name="dispatch",
 )
@@ -373,6 +378,13 @@ class CreateView(View):
             from_page = ""
             user = User.objects.get(username=user)
 
+        user_can_create = AppInstance.objects.user_can_create(
+            user, project, app_slug
+        )
+
+        if not user_can_create:
+            return HttpResponseForbidden()
+
         form = generate_form(app_settings, project, app, user, [])
 
         return render(request, template, locals())
@@ -381,6 +393,13 @@ class CreateView(View):
         project, app, app_settings = self.get_shared_data(project, app_slug)
         data = request.POST
         user = request.user
+
+        user_can_create = AppInstance.objects.user_can_create(
+            user, project, app_slug
+        )
+
+        if not user_can_create:
+            return HttpResponseForbidden()
 
         if not app.user_can_create:
             raise Exception("User not allowed to create app")
