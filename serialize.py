@@ -311,10 +311,8 @@ def serialize_env_variables(username, project, aset):
     print("fetching apps")
     try:
         apps = AppInstance.objects.filter(
-            Q(owner__username=username)
-            | Q(permission__projects__slug=project.slug)
-            | Q(permission__public=True),
             ~Q(state="Deleted"),
+            Q(owner__username=username) | Q(access__in=["project", "public"]),
             project=project,
         )
     except Exception as err:

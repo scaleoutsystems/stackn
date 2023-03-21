@@ -1,6 +1,15 @@
+import time
 import uuid
 
+from django.apps import apps
 from django.conf import settings
+from django.template import engines
+
+from ..models import AppInstance, AppStatus
+from ..serialize import serialize_app
+from ..tasks import deploy_resource
+
+ReleaseName = apps.get_model(app_label=settings.RELEASENAME_MODEL)
 
 
 def create_instance_params(instance, action="create"):
@@ -113,3 +122,81 @@ def handle_permissions(parameters, project):
         access = "private"
 
     return access
+
+
+def create_app_instance(user, project, app, app_settings, data=[], wait=False):
+    app_name = data.get("app_name")
+
+    parameters_out, app_deps, model_deps = serialize_app(
+        data, project, app_settings, user.username
+    )
+
+    authorized = can_access_app_instances(app_deps, user, project)
+
+    if not authorized:
+        raise Exception("Not authorized to use specified app dependency")
+
+    access = handle_permissions(parameters_out, project)
+
+    app_instance = AppInstance(
+        name=app_name,
+        access=access,
+        app=app,
+        project=project,
+        info={},
+        parameters=parameters_out,
+        owner=user,
+    )
+
+    create_instance_params(app_instance, "create")
+
+    # Attempt to create a ReleaseName model object
+    rel_name_obj = []
+    if "app_release_name" in data and data.get("app_release_name") != "":
+        submitted_rn = data.get("app_release_name")
+        try:
+            rel_name_obj = ReleaseName.objects.get(
+                name=submitted_rn, project=project, status="active"
+            )
+            rel_name_obj.status = "in-use"
+            rel_name_obj.save()
+            app_instance.parameters["release"] = submitted_rn
+        except Exception as e:
+            print("Error: Submitted release name not owned by project.")
+            print(e)
+            return [False, None, None]
+
+    # Add fields for apps table:
+    # to be displayed as app details in views
+    if app_instance.app.table_field and app_instance.app.table_field != "":
+        django_engine = engines["django"]
+        info_field = django_engine.from_string(
+            app_instance.app.table_field
+        ).render(app_instance.parameters)
+        app_instance.table_field = eval(info_field)
+    else:
+        app_instance.table_field = {}
+
+    # Setting status fields before saving app instance
+    status = AppStatus(appinstance=app_instance)
+    status.status_type = "Created"
+    status.info = app_instance.parameters["release"]
+    app_instance.save()
+    # Saving ReleaseName, permissions, status and
+    # setting up dependencies
+    if rel_name_obj:
+        rel_name_obj.app = app_instance
+        rel_name_obj.save()
+    status.save()
+    app_instance.app_dependencies.set(app_deps)
+    app_instance.model_dependencies.set(model_deps)
+
+    # Finally, attempting to create apps resources
+    res = deploy_resource.delay(app_instance.pk, "create")
+
+    # wait is passed as a function parameter
+    if wait:
+        while not res.ready():
+            time.sleep(0.1)
+
+    return [True, project.slug, app_instance.app.category.slug]

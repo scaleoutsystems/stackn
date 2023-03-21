@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.views import AppSettingsView, CreateView
+from apps.views import AppSettingsView, CreateServeView, CreateView
 
 from . import views
 
@@ -11,6 +11,9 @@ urlpatterns = [
     path("status", views.get_status, name="get_status"),
     path("<category>", views.filtered, name="filtered"),
     path("create/<app_slug>", CreateView.as_view(), name="create"),
+    path(
+        "serve/<app_slug>/<version>", CreateServeView.as_view(), name="serve"
+    ),
     path("logs/<ai_id>", views.logs, name="logs"),
     path("settings/<ai_id>", AppSettingsView.as_view(), name="appsettings"),
     path("settings/<ai_id>/add_tag", views.add_tag, name="add_tag"),

@@ -541,7 +541,7 @@ def sync_mlflow_models():
     for mlflow_app in mlflow_apps:
         url = "http://{}/{}".format(
             mlflow_app.project.mlflow.host,
-            "api/2.0/preview/mlflow/model-versions/search",
+            "api/2.0/mlflow/model-versions/search",
         )
         res = False
         try:
