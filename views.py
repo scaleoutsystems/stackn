@@ -307,6 +307,39 @@ def remove_tag(request, user, project, ai_id):
     ),
     name="dispatch",
 )
+class CreateServeView(View):
+    def get_shared_data(self, project_slug, app_slug):
+        project = Project.objects.get(slug=project_slug)
+        app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
+        app_settings = app.settings
+
+        return [project, app, app_settings]
+
+    def get(self, request, user, project, app_slug, version):
+        template = "create.html"
+        project, app, app_settings = self.get_shared_data(project, app_slug)
+
+        user = request.user
+        if "from" in request.GET:
+            from_page = request.GET.get("from")
+        else:
+            from_page = "filtered"
+
+        form = generate_form(app_settings, project, app, user, [])
+
+        for model in form["models"]:
+            if model.version == version:
+                model.selected = "selected"
+
+        return render(request, template, locals())
+
+
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project")
+    ),
+    name="dispatch",
+)
 class CreateView(View):
     def get_shared_data(self, project_slug, app_slug):
         project = Project.objects.get(slug=project_slug)
