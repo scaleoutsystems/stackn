@@ -6,4 +6,7 @@ User = get_user_model()
 
 def run(*args):
     admin = User.objects.get(username="admin")
-    _ = Token.objects.create(user=admin)
+    try:
+        _ = Token.objects.get(user=admin)
+    except Token.DoesNotExist:
+        _ = Token.objects.create(user=admin)
