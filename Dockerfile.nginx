@@ -1,4 +1,4 @@
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:latest
 
 RUN mkdir -p /etc/nginx/html
 COPY static /etc/nginx/html/static

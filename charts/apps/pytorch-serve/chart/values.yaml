@@ -21,18 +21,20 @@ project:
   slug: project-slug
 
 deployment:
-  image: scaleoutsystems/torchserve:latest
+  image: pytorch/torchserve:latest
   version: version
   name: deployment-name
   endpoint: deployment-endpoint
   path: deployment-path
-  port: 8080
+  inference_port: 8080
+  management_port: 8081
+  metrics_port: 8082
 
 context:
   image: context-image
 
 hpa:
-  enabled: true
+  enabled: false
   min_pods: 1
   max_pods: 3
   cpu_target: 60
@@ -58,6 +60,10 @@ model_card:
 ingress:
   v1beta1: false
 
-# extraEnv: |
-#   - name: LICENSE_FILE
-#     value: SOMESTRING
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  privileged: false

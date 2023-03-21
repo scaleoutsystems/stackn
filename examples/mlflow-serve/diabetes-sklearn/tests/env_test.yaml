@@ -4,17 +4,16 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.6
-  - pip
-  - ipykernel=5.3.4
+  - python=3.10
+  - pip=23.0.1
   - pip:
     - fire
-    - mlflow
-    - numpy==1.14.3
-    - matplotlib==3.0.2
-    - pandas==0.22.0
-    - scipy
-    - scikit-learn==0.19.1
-    - cloudpickle==0.6.1
-    - boto3
-    - "git+https://github.com/scaleoutsystems/studio-cli.git@195f860d5f8bf9c1e06897f9d4eadba4fc72d651"
+    - mlflow==2.2.1
+    - numpy==1.23.5
+    - matplotlib==3.7.1
+    - pandas==1.5.3
+    - scipy==1.10.1
+    - scikit-learn==1.2.1
+    - cloudpickle==2.2.1
+    - boto3==1.26.89
+    - "git+https://github.com/scaleoutsystems/studio-cli.git@develop"

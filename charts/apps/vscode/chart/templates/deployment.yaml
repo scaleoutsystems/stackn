@@ -22,7 +22,8 @@ spec:
         release: {{ $.Release.Name }}
         app: vscode
         project: {{ $.Values.project.slug }}
-        networking/allow-internet-egress: "false"
+        networking/allow-internet-egress: "true"
+        networking/allow-egress-to-studio-web: "true"
         type: app
         pod: vscode
     spec:
@@ -35,10 +36,24 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       automountServiceAccountToken: false
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       containers:
       - name: vscode
         image: codercom/code-server:latest #3.12.0
         imagePullPolicy: IfNotPresent
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
         command:
           - /bin/bash
           - -c 
@@ -47,13 +62,13 @@ spec:
           - containerPort: 8080
         volumeMounts:
         - name: cli-config-vol
-          mountPath: /home/stackn/.scaleout
+          mountPath: /home/coder/.scaleout
         - name: cli-config
           mountPath: /stackn.json
           subPath: stackn.json
         {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
-          mountPath: /home/stackn/{{ $key }}
+          mountPath: /home/coder/{{ $key }}
         {{- end }}
         lifecycle:
           postStart:
@@ -61,7 +76,7 @@ spec:
               command:
                 - /bin/bash
                 - -c
-                - mkdir -p /home/stackn/.scaleout && cp -n /stackn.json /home/stackn/.scaleout/stackn.json
+                - mkdir -p /home/coder/.scaleout && cp -n /stackn.json /home/coder/.scaleout/stackn.json
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       volumes:

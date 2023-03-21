@@ -5,8 +5,15 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8080
+  - name: preds
+    port: {{ .Values.deployment.inference_port }}
+    targetPort: ts 
+  - name: mdl
+    port: {{ .Values.deployment.management_port }}
+    targetPort: ts-management
+  - name: metrics
+    port: {{ .Values.deployment.metrics_port }}
+    targetPort: ts-metrics
   selector:
     release: {{ $.Release.Name }}
+  

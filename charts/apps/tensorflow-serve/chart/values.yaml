@@ -21,7 +21,7 @@ project:
   slug: project-slug
 
 deployment:
-  image: tensorflow/serving
+  image: ghcr.io/scilifelabdatacentre/serve-tensorflow:230214-0820
   version: version
   name: deployment-name
   endpoint: deployment-endpoint
@@ -32,7 +32,7 @@ context:
   image: context-image
 
 hpa:
-  enabled: true
+  enabled: false
   min_pods: 1
   max_pods: 3
   cpu_target: 60
@@ -58,6 +58,10 @@ model_card:
 ingress:
   v1beta1: false
 
-# extraEnv: |
-#   - name: LICENSE_FILE
-#     value: SOMESTRING
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  privileged: false

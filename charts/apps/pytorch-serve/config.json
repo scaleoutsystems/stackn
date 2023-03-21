@@ -18,9 +18,6 @@
             "private": {"value":"false", "option": "true"}
         },
         "flavor": "one",
-        "apps": {
-            "Persistent Volume":"one"
-        },
         "default_values": {
             "port": "80",
             "targetport": "8080"
@@ -31,13 +28,8 @@
             },
             "path": {
                 "type": "string",
-                "default": "model-store",
-                "title": "Path to Model Store"
-            },
-            "models": {
-                "type": "string",
-                "default": "",
-                "title": "Comma-separeted list of models (model1,model2,model3)" 
+                "default": "models",
+                "title": "S3 bucket"
             }
         },
         "env_variables": {

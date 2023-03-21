@@ -34,6 +34,10 @@ spec:
         {{ .Values.labs.affinity | toYaml | nindent 8 | trim }}
     {{ end }}
       automountServiceAccountToken: false
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       volumes:
       - name: rp-conf
         configMap:
@@ -81,11 +85,28 @@ spec:
           mountPath: /models
       containers:
       - name: reverse-proxy
-        image: nginx:alpine
-        imagePullPolicy: IfNotPresent
+        image: nginxinc/nginx-unprivileged:latest
+        imagePullPolicy: Always
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 101
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
         volumeMounts:
         - name: rp-conf
           mountPath: /etc/nginx
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
 
       {{ if .Values.model_card.enabled }}
       - name: model-card
@@ -98,6 +119,16 @@ spec:
           mountPath: /etc/nginx
       {{ end }}
       - name: serve
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
         resources:
           requests:
             memory: {{ .Values.flavor.requests.memory | default "256Mi" }}
@@ -116,7 +147,7 @@ spec:
           mountPath: /models
         env:
         - name: MODEL_NAME
-          value: models 
+          value: models
         image: {{ .Values.deployment.image }}
         imagePullPolicy: IfNotPresent
         ports:

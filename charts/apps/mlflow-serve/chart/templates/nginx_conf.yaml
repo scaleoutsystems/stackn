@@ -4,8 +4,8 @@ metadata:
   name: {{ .Release.Name }}-rp-config
   namespace: {{ .Values.namespace }}
 data:
-  # Configuration values can be set as key-value properties
   nginx.conf: |-
+    pid /tmp/nginx.pid;
     worker_processes 1;
     events { worker_connections 1024; }
     http {

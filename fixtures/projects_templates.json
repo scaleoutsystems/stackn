@@ -29,13 +29,13 @@
         },
         "environments": {
           "Jupyter Lab": {
-            "repository": "ghcr.io/scilifelabdatacentre",
-            "image": "serve-jupyterlab:230213-1643",
+            "repository": "scaleoutsystems",
+            "image": "jupyter-stackn:v0.2.0",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
-            "repository": "scaleoutsystems",
-            "image": "mlflow-serve:latest",
+            "repository": "ghcr.io/scilifelabdatacentre",
+            "image": "serve-mlflow:230216-0853",
             "app": "mlflow-serve"
           }
         }
@@ -72,13 +72,13 @@
         },
         "environments": {
           "Jupyter Lab": {
-            "repository": "ghcr.io/scilifelabdatacentre",
-            "image": "serve-jupyterlab:230213-1643",
+            "repository": "scaleoutsystems",
+            "image": "jupyter-stackn:v0.2.0",
             "app": "jupyter-lab"
           },
           "MLflow Serving": {
-            "repository": "scaleoutsystems",
-            "image": "mlflow-serve:latest",
+            "repository": "ghcr.io/scilifelabdatacentre",
+            "image": "serve-mlflow:230216-0853",
             "app": "mlflow-serve"
           }
         },
@@ -106,16 +106,6 @@
             "app_id": "",
             "app_release_name": ""
         },
-          "reg-vol": {
-            "slug": "volumeK8s",
-            "volume.size": "5Gi",
-            "permission": "project",
-            "volume.accessModes": "ReadWriteMany",
-            "volume.storageClass": "microk8s-hostpath",
-            "storageClass": "microk8s-hostpath",
-            "app_id": "",
-            "app_release_name": ""
-          },
           "project-vol": {
             "slug": "volumeK8s",
             "volume.size": "5Gi",
@@ -141,15 +131,6 @@
             "S3": "project-minio",
             "credentials.username": "username",
             "credentials.password": "password",
-            "permission": "project"
-        },
-          "project-registry": {
-            "slug": "docker-registry",
-            "app:volumeK8s": [
-              "reg-vol"
-            ],
-            "credentials.username": "username123",
-            "credentials.password": "pass999111222",
             "permission": "project"
           }
         },

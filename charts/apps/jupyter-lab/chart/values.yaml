@@ -59,3 +59,11 @@ mlflow:
   region: ""
   username: ""
   password: ""
+
+securityContext:
+  enabled: true
+  runAsUser: 1000
+  runAsGroup: 100
+  fsGroup: 100
+  allowPrivilegeEscalation: false
+  privileged: false

@@ -30,6 +30,10 @@ spec:
         pod: pytorch-serve
     spec:
       automountServiceAccountToken: false
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       volumes:
       - name: torch-conf
         configMap:
@@ -37,11 +41,6 @@ spec:
       - name: rp-conf
         configMap:
           name: {{ .Release.Name }}-rp-config
-      {{- range $key, $value := .Values.apps.volumeK8s }}
-      - name: {{ $key }}
-        persistentVolumeClaim:
-          claimName: {{ $value.release }}
-      {{- end }}
       {{ if .Values.model_card.enabled }}
       - name: mc-conf
         configMap:
@@ -79,7 +78,7 @@ spec:
         image: busybox
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
-        args: ["-c", "cd /home/model-server/model-store/ && tar xvf $STACKN_MODEL_FILE && rm -v $STACKN_MODEL_FILE"]
+        args: ["-c", "cd /home/model-server/model-store && tar xvf $STACKN_MODEL_FILE && rm -v $STACKN_MODEL_FILE"]
         volumeMounts:
         - name: model-vol
           mountPath: /home/model-server/model-store/
@@ -89,13 +88,6 @@ spec:
         - name: STACKN_MODEL_FILE
           value: {{ .Values.model.obj }}
       containers:
-      - name: reverse-proxy
-        image: nginx:alpine
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: rp-conf
-          mountPath: /etc/nginx
-
       {{ if .Values.model_card.enabled }}
       - name: model-card
         image: nginx:alpine
@@ -108,10 +100,30 @@ spec:
       {{ end }}
       - name: serve
         image: {{ .Values.deployment.image }}
-        workingDir: /home/model-server
-        env:
-        - name: MODEL_STORE
-          value: {{ .Values.modelstore.path }}
+        # lifecycle:
+        #   postStart:
+        #     exec:
+        #       command: ["/bin/sh", "-c", 'curl -X POST "http://localhost:8081/models?model_name=mnist&url=model.mar&initial_workers=2"']
+        # readinessProbe:
+        #   tcpSocket:
+        #     port: 8081
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        #args: ["curl", "-X", "POST", "http://localhost:8081/models?url=model.mar"]
+        args: ["torchserve", "--start", "--model-store", "/home/model-server/model-store", "--models", "all", "--ncs"]
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
+        # env:
+        # - name: MODEL_STORE
+        #   value: {{ .Values.modelstore.path }}
         resources:
           limits:
             cpu: {{ .Values.flavor.limits.cpu }}
@@ -120,10 +132,13 @@ spec:
             cpu: {{ .Values.flavor.requests.cpu }}
             memory: {{ .Values.flavor.requests.memory }}
         volumeMounts:
-        # - name: torch-conf
-        #   mountPath: /home/model-server/
         - name: model-vol
           mountPath: /home/model-server/model-store/
         imagePullPolicy: Always
         ports:
-        - containerPort: {{ .Values.deployment.port }}
+        - name: ts
+          containerPort: {{ .Values.deployment.inference_port }}
+        - name: ts-management
+          containerPort: {{ .Values.deployment.management_port }}
+        - name: ts-metrics
+          containerPort: {{ .Values.deployment.metrics_port }}

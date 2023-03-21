@@ -25,6 +25,7 @@ spec:
         app: lab
         project: {{ .Values.project.slug }}
         networking/allow-internet-egress: "true"
+        networking/allow-egress-to-studio-web: "true"
         type: app
         pod: lab
     spec:
@@ -39,10 +40,24 @@ spec:
       automountServiceAccountToken: false
       hostname: lab
       subdomain: default-subdomain
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       containers:
       - name: labs
         image: {{ .Values.environment.repository }}/{{ .Values.environment.image }}
         imagePullPolicy: IfNotPresent
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
         ports:
         - containerPort: 8888
         env:
@@ -81,19 +96,10 @@ spec:
             {{ if .Values.flavor.gpu.enabled }}
             nvidia.com/gpu: {{ .Values.flavor.requests.gpu }}
             {{ end }}
-        lifecycle:
-          postStart:
-            exec:
-              command:
-                - /bin/bash
-                - -c
-                - mkdir -p /home/jovyan/.scaleout && cp -n /stackn.json /home/jovyan/.scaleout/stackn.json
         workingDir: /home/jovyan/work
         volumeMounts:
-        - name: cli-config-vol
-          mountPath: /home/jovyan/.scaleout
         - name: cli-config
-          mountPath: /stackn.json
+          mountPath: /home/jovyan/.scaleout/stackn.json
           subPath: stackn.json
         - name: jupyterconf
           mountPath: /etc/jupyter/jupyter_notebook_config.py
@@ -108,8 +114,6 @@ spec:
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       volumes:
-      - name: cli-config-vol
-        emptyDir: {}
       - name: cli-config
         configMap:
           name: {{ .Release.Name }}-cli-config

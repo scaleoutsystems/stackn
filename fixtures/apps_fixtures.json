@@ -349,22 +349,14 @@
           }
         },
         "flavor": "one",
-        "apps": {
-          "Persistent Volume": "one"
-        },
         "modelstore": {
           "meta": {
             "title": "Models"
           },
           "path": {
             "type": "string",
-            "default": "model-store",
-            "title": "Path to Model Store"
-          },
-          "models": {
-            "type": "string",
-            "default": "",
-            "title": "Comma-separeted list of models (model1,model2,model3)"
+            "default": "models",
+            "title": "S3 bucket"
           }
         },
         "env_variables": {

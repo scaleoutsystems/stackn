@@ -27,16 +27,18 @@ def test_serve(endpoint):
     data = pandas.DataFrame(diabetes.data)
 
     data = data.to_json(orient="split")
+    data = '{"dataframe_split":' + data + '}'
 
     config, status = get_config()
     token = config["STACKN_ACCESS_TOKEN"]
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": f"Token {token}"
+    }
 
     pred = requests.post(
         endpoint,
-        headers={
-            "Content-Type": "application/json; format=pandas-split",
-            "Authorization": f"Token {token}",
-        },
+        headers=headers,
         data=data,
         verify=False,
     )

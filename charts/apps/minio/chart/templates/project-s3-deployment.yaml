@@ -27,6 +27,10 @@ spec:
         pod: minio
     spec:
       automountServiceAccountToken: false
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       containers:
       - args:
         {{- range $key, $value := .Values.apps.volumeK8s }}
@@ -35,9 +39,25 @@ spec:
         {{- end }}
         env:
         - name: MINIO_ROOT_USER
-          value: {{ .Values.credentials.access_key }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-minio
+              key: accesskey
         - name: MINIO_ROOT_PASSWORD
-          value: {{ .Values.credentials.secret_key }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-minio
+              key: secretkey
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
         ports:
           - containerPort: 9000
             name: api-server
