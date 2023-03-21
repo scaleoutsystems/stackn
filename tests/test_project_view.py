@@ -3,47 +3,9 @@ from django.test import TestCase
 from django.urls import reverse
 from guardian.shortcuts import assign_perm
 
-from .helpers import decrypt_key
-from .models import Project
+from ..models import Project
 
 User = get_user_model()
-
-
-class ProjectTestCase(TestCase):
-    def setUp(self):
-        user = User.objects.create_user("admin", "foo@test.com")
-        Project.objects.create(
-            name="test-secret",
-            slug="test-secret",
-            owner=user,
-            project_key="a2V5",
-            project_secret="c2VjcmV0",
-        )
-        _ = Project.objects.create_project(
-            name="test-perm", owner=user, description="", repository=""
-        )
-        user = User.objects.create_user("member", "bar@test.com")
-
-    def test_decrypt_key(self):
-        project = Project.objects.filter(name="test-secret").first()
-
-        self.assertEqual(decrypt_key(project.project_key), "key")
-        self.assertEqual(decrypt_key(project.project_secret), "secret")
-
-    def test_owner_can_view_permission(self):
-        """
-        Ensure that project owner has 'can_view_project' permission
-        """
-        project = Project.objects.get(name="test-perm")
-        self.assertTrue(project.owner.has_perm("can_view_project", project))
-
-    def test_member_can_view_permission(self):
-        """
-        Ensure that non-project member don't have 'can_view_project' permission
-        """
-        user = User.objects.get(username="member")
-        project = Project.objects.get(name="test-perm")
-        self.assertFalse(user.has_perm("can_view_project", project))
 
 
 class ProjectViewTestCase(TestCase):
