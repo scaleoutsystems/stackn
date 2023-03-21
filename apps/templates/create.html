@@ -6,7 +6,7 @@
 <h1 class="h3 mb-3">Create {{ app.name }}</h1>
 <div class="row">
     <div class="col-12 col-xl-6">
-        <div class="card">
+        <div class="card shadow border-0">
             <div class="card-body">
                 <form action="{% url 'apps:create' request.user project.slug app.slug %}?from={{ from_page }}" method="post">
                     {% csrf_token %}
@@ -16,16 +16,6 @@
                     <div class="mb-3">
                         <label class="form-label">Name</label>
                         <input type="text" id="app_name" name="app_name" value="{{ existing_app_name }}" class="form-control" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Subdomain</label>
-                        <select name="app_release_name" id="app_release_name" class="form-control">
-                            <option value="" selected>---- Generated ----</option>
-                            {% for item in form.release_names %}
-                                <option value="{{ item.name }}">{{ item.name }}</option>
-                            {% endfor %}
-                        </select>
                     </div>
                     
                     {% if form.dep_permissions %}
