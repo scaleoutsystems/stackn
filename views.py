@@ -14,7 +14,11 @@ from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers import create_app_instance, handle_permissions
+from .helpers import (
+    can_access_app_instances,
+    create_app_instance,
+    handle_permissions,
+)
 from .models import AppCategories, AppInstance, Apps
 from .serialize import serialize_app
 from .tasks import delete_resource, deploy_resource
@@ -243,6 +247,11 @@ class AppSettingsView(View):
         parameters, app_deps, model_deps = serialize_app(
             body, project, app_settings, request.user.username
         )
+
+        authorized = can_access_app_instances(app_deps, request.user, project)
+
+        if not authorized:
+            raise Exception("Not authorized to use specified app dependency")
 
         access = handle_permissions(parameters, project)
 

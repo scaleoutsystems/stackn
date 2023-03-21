@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    AppCategories,
-    AppInstance,
-    AppPermission,
-    Apps,
-    AppStatus,
-    ResourceData,
-)
+from .models import AppCategories, AppInstance, Apps, AppStatus, ResourceData
 
 
 class AppsAdmin(admin.ModelAdmin):
@@ -18,6 +11,5 @@ class AppsAdmin(admin.ModelAdmin):
 admin.site.register(Apps, AppsAdmin)
 admin.site.register(AppInstance)
 admin.site.register(AppCategories)
-admin.site.register(AppPermission)
 admin.site.register(ResourceData)
 admin.site.register(AppStatus)

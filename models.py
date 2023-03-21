@@ -6,22 +6,6 @@ from guardian.shortcuts import assign_perm, remove_perm
 from tagulous.models import TagField
 
 
-class AppPermission(models.Model):
-    appinstance = models.OneToOneField(
-        "apps.AppInstance",
-        on_delete=models.CASCADE,
-        null=True,
-        related_name="permission",
-    )
-    name = models.CharField(max_length=512, default="permission_name")
-    projects = models.ManyToManyField("projects.Project")
-    public = models.BooleanField(default=False)
-    users = models.ManyToManyField(get_user_model())
-
-    def __str__(self):
-        return str(self.name)
-
-
 class AppCategories(models.Model):
     name = models.CharField(max_length=512)
     priority = models.IntegerField(default=100)
