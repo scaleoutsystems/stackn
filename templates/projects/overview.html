@@ -20,10 +20,7 @@
 
                     <div class="dropdown-menu dropdown-menu-right">
                         {% for app in objs.apps %}
-                        <a class="dropdown-item"
-                            href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">
-                            {{ app.name }}
-                        </a>
+                            {% include './create_app_link.html' with app=app %}
                         {% endfor %}
                     </div>
                 </div>
