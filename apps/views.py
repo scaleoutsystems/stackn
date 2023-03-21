@@ -1,4 +1,3 @@
-import time
 from datetime import datetime, timedelta
 from json import load
 
@@ -8,20 +7,23 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Subquery
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import (
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    JsonResponse,
+)
 from django.shortcuts import HttpResponseRedirect, render, reverse
-from django.template import engines
 from django.utils.decorators import method_decorator
 from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers import (
+from .helpers.helpers import (
     can_access_app_instances,
-    create_instance_params,
+    create_app_instance,
     handle_permissions,
 )
-from .models import AppCategories, AppInstance, Apps, AppStatus
+from .models import AppCategories, AppInstance, Apps
 from .serialize import serialize_app
 from .tasks import delete_resource, deploy_resource
 
@@ -250,6 +252,11 @@ class AppSettingsView(View):
             body, project, app_settings, request.user.username
         )
 
+        authorized = can_access_app_instances(app_deps, request.user, project)
+
+        if not authorized:
+            raise Exception("Not authorized to use specified app dependency")
+
         access = handle_permissions(parameters, project)
 
         appinstance.name = request.POST.get("app_name")
@@ -309,6 +316,40 @@ def remove_tag(request, user, project, ai_id):
 
 @method_decorator(
     permission_required_or_403(
+        "can_view_project",
+        (Project, "slug", "project"),
+    ),
+    name="dispatch",
+)
+class CreateServeView(View):
+    def get_shared_data(self, project_slug, app_slug):
+        project = Project.objects.get(slug=project_slug)
+        app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
+        app_settings = app.settings
+
+        return [project, app, app_settings]
+
+    def get(self, request, user, project, app_slug, version):
+        template = "create.html"
+        project, app, app_settings = self.get_shared_data(project, app_slug)
+
+        user = request.user
+        if "from" in request.GET:
+            from_page = request.GET.get("from")
+        else:
+            from_page = "filtered"
+
+        form = generate_form(app_settings, project, app, user, [])
+
+        for model in form["models"]:
+            if model.version == version:
+                model.selected = "selected"
+
+        return render(request, template, locals())
+
+
+@method_decorator(
+    permission_required_or_403(
         "can_view_project", (Project, "slug", "project")
     ),
     name="dispatch",
@@ -337,129 +378,70 @@ class CreateView(View):
             from_page = ""
             user = User.objects.get(username=user)
 
+        user_can_create = AppInstance.objects.user_can_create(
+            user, project, app_slug
+        )
+
+        if not user_can_create:
+            return HttpResponseForbidden()
+
         form = generate_form(app_settings, project, app, user, [])
 
         return render(request, template, locals())
 
-    def post(
-        self, request, user, project, app_slug, data=[], wait=False, call=False
-    ):
+    def post(self, request, user, project, app_slug, data=[], wait=False):
         project, app, app_settings = self.get_shared_data(project, app_slug)
-        if not data:
-            data = request.POST
+        data = request.POST
+        user = request.user
 
-        app_name = data.get("app_name")
-        user = request.user if not call else User.objects.get(username=user)
-
-        parameters_out, app_deps, model_deps = serialize_app(
-            data, project, app_settings, user.username
+        user_can_create = AppInstance.objects.user_can_create(
+            user, project, app_slug
         )
 
-        authorized = can_access_app_instances(app_deps, user, project)
+        if not user_can_create:
+            return HttpResponseForbidden()
 
-        if not authorized:
-            raise Exception("Not authorized to use specified app dependency")
+        if not app.user_can_create:
+            raise Exception("User not allowed to create app")
 
-        access = handle_permissions(parameters_out, project)
-
-        app_instance = AppInstance(
-            name=app_name,
-            access=access,
-            app=app,
-            project=project,
-            info={},
-            parameters=parameters_out,
-            owner=user,
+        successful, project_slug, app_category_slug = create_app_instance(
+            user, project, app, app_settings, data, wait
         )
 
-        create_instance_params(app_instance, "create")
-
-        # Attempt to create a ReleaseName model object
-        rel_name_obj = []
-        if "app_release_name" in data and data.get("app_release_name") != "":
-            submitted_rn = data.get("app_release_name")
-            try:
-                rel_name_obj = ReleaseName.objects.get(
-                    name=submitted_rn, project=project, status="active"
+        if not successful:
+            return HttpResponseRedirect(
+                reverse(
+                    "projects:details",
+                    kwargs={
+                        "user": request.user,
+                        "project_slug": str(project.slug),
+                    },
                 )
-                rel_name_obj.status = "in-use"
-                rel_name_obj.save()
-                app_instance.parameters["release"] = submitted_rn
-            except Exception as e:
-                print("Error: Submitted release name not owned by project.")
-                print(e)
+            )
+
+        if "from" in request.GET:
+            from_page = request.GET.get("from")
+            if from_page == "overview":
                 return HttpResponseRedirect(
                     reverse(
                         "projects:details",
                         kwargs={
                             "user": request.user,
-                            "project_slug": str(project.slug),
+                            "project_slug": str(project_slug),
                         },
                     )
                 )
 
-        # Add fields for apps table:
-        # to be displayed as app details in views
-        if app_instance.app.table_field and app_instance.app.table_field != "":
-            django_engine = engines["django"]
-            info_field = django_engine.from_string(
-                app_instance.app.table_field
-            ).render(app_instance.parameters)
-            app_instance.table_field = eval(info_field)
-        else:
-            app_instance.table_field = {}
-
-        # Setting status fields before saving app instance
-        status = AppStatus(appinstance=app_instance)
-        status.status_type = "Created"
-        status.info = app_instance.parameters["release"]
-        app_instance.save()
-        # Saving ReleaseName, permissions, status and
-        # setting up dependencies
-        if rel_name_obj:
-            rel_name_obj.app = app_instance
-            rel_name_obj.save()
-        status.save()
-        app_instance.app_dependencies.set(app_deps)
-        app_instance.model_dependencies.set(model_deps)
-
-        # Finally, attempting to create apps resources
-        res = deploy_resource.delay(app_instance.pk, "create")
-
-        # wait is passed as a function parameter
-        if wait:
-            while not res.ready():
-                time.sleep(0.1)
-
-        # End of Create action
-
-        # Forming a final response
-        if request:
-            if "from" in request.GET:
-                from_page = request.GET.get("from")
-                if from_page == "overview":
-                    return HttpResponseRedirect(
-                        reverse(
-                            "projects:details",
-                            kwargs={
-                                "user": request.user,
-                                "project_slug": str(project.slug),
-                            },
-                        )
-                    )
-
-            return HttpResponseRedirect(
-                reverse(
-                    "apps:filtered",
-                    kwargs={
-                        "user": request.user,
-                        "project": str(project.slug),
-                        "category": app_instance.app.category.slug,
-                    },
-                )
+        return HttpResponseRedirect(
+            reverse(
+                "apps:filtered",
+                kwargs={
+                    "user": request.user,
+                    "project": str(project_slug),
+                    "category": app_category_slug,
+                },
             )
-        else:
-            return JsonResponse({"status": "ok"})
+        )
 
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
