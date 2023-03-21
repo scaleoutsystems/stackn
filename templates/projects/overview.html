@@ -152,7 +152,7 @@
                                             Settings
                                         </a>
                                         <a class="dropdown-item"
-                                            href="{% url 'apps:create' request.user project.slug model.object_type.all.first.app_slug  %}">
+                                            href="{% url 'apps:serve' request.user project.slug model.object_type.all.first.app_slug model.version  %}">
                                             <i class="bi bi-check2-circle me-1"></i>
                                             Serve
                                         </a>
