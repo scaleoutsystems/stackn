@@ -300,3 +300,22 @@ MIGRATION_MODULES = {
     'portal': 'studio.migrations.portal',
     'projects': 'studio.migrations.projects'
 }
+
+# Defines how many apps a user is allowed to create within one project
+APPS_PER_USER_LIMIT = {
+    "vscode": 1,
+    "volumeK8s": 1,
+    "pytorch-serve": 1,
+    "tensorflow-serve": 1,
+    "mlflow-serve": 1,
+    "mlflow": 1,
+    "minio": 1,
+    "jupyter-lab": 1,
+    "mongo-express": 1,
+    "reducer": 2,
+    "docker-registry": 1,
+    "combiner": 2,
+    "mongodb": 1,
+}
+
+PROJECTS_PER_USER_LIMIT = 3
