@@ -7,40 +7,44 @@
 </li>
 <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:details' request.user project.slug %}">
-        <i class="align-middle" data-feather="home"></i>
-        <span class="align-middle">Dashboard</span>
+        <i class="bi bi-house fs-4 me-3"></i>
+        Dashboard
     </a>
 </li>
 <li class="sidebar-item {{ menu.objects }}">
     <a class="sidebar-link" href="{% url 'models:list' request.user project.slug %}">
-        <i class="align-middle" data-feather="layers"></i>
-        <span class="align-middle">Models</span>
+        <i class="bi bi-layers fs-4 me-3"></i>
+        Models
     </a>
 </li>
 <li class="sidebar-item {{ menu.compute }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'compute' %}" class="sidebar-link">
-        <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Compute</span>
+        <i class="bi bi-cpu fs-4 me-3"></i>
+        Compute
     </a>
 </li>
 <li class="sidebar-item {{ menu.serve }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'serve' %}" class="sidebar-link">
-        <i class="align-middle" data-feather="check-circle"></i> <span class="align-middle">Serve</span>
+        <i class="bi bi-check2-circle fs-4 me-3"></i>
+        Serve
     </a>
 </li>
 <li class="sidebar-item {{ menu.store }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'store' %}" class="sidebar-link">
-        <i class="align-middle" data-feather="database"></i> <span class="align-middle">Store</span>
+        <i class="bi bi-database fs-4 me-3"></i>
+        Store
     </a>
 </li>
 <li class="sidebar-item {{ menu.develop }}">
     <a href="{% url 'apps:filtered' request.user project.slug 'develop' %}" class="sidebar-link">
-       <i class="align-middle"  data-feather="code"></i><span class="align-middle">Develop</span>
+       <i class="bi bi-code fs-4 me-3"></i>
+       Develop
     </a>
 </li>
 <li class="sidebar-item">
     <a class="sidebar-link" href="{% url 'projects:settings' request.user project.slug %}">
-        <i class="align-middle" data-feather="settings"></i>
-        <span class="align-middle">Settings</span>
+        <i class="bi bi-gear fs-4 me-3"></i>
+        Settings
     </a>
 </li>
 {% endblock %}
