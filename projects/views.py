@@ -12,6 +12,7 @@ from django.core.files import File
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, reverse
+from django.views import View
 from guardian.decorators import permission_required_or_403
 from guardian.shortcuts import assign_perm, remove_perm
 
@@ -36,24 +37,35 @@ Model = apps.get_model(app_label=django_settings.MODELS_MODEL)
 User = get_user_model()
 
 
-def index(request):
-    template = "projects/index.html"
-    try:
-        if request.user.is_superuser:
-            projects = Project.objects.filter(status="active").distinct("pk")
-        else:
-            projects = Project.objects.filter(
-                Q(owner=request.user) | Q(authorized=request.user),
-                status="active",
-            ).distinct("pk")
-        media_url = django_settings.MEDIA_URL
-        print(django_settings.STATIC_ROOT)
-    except TypeError as err:
-        projects = []
-        print(err)
+class IndexView(View):
+    def get(self, request):
+        template = "projects/index.html"
+        try:
+            if request.user.is_superuser:
+                projects = Project.objects.filter(status="active").distinct(
+                    "pk"
+                )
+            else:
+                projects = Project.objects.filter(
+                    Q(owner=request.user) | Q(authorized=request.user),
+                    status="active",
+                ).distinct("pk")
+            media_url = django_settings.MEDIA_URL
+        except TypeError as err:
+            projects = []
+            print(err)
 
-    request.session["next"] = "/projects/"
-    return render(request, template, locals())
+        request.session["next"] = "/projects/"
+
+        user_can_create = Project.objects.user_can_create(request.user)
+
+        context = {
+            "projects": projects,
+            "media_url": media_url,
+            "user_can_create": user_can_create,
+        }
+
+        return render(request, template, context)
 
 
 @login_required

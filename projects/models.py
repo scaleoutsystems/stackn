@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
@@ -137,6 +138,11 @@ class MLFlow(models.Model):
 # it will become the default objects attribute for a Project model
 class ProjectManager(models.Manager):
     def create_project(self, name, owner, description, repository):
+        user_can_create = self.user_can_create(owner)
+
+        if not user_can_create:
+            raise Exception("User not allowed to create project")
+
         key = self.generate_passkey()
         letters = string.ascii_lowercase
         secret = self.generate_passkey(40)
@@ -167,6 +173,22 @@ class ProjectManager(models.Manager):
         password = base64_bytes.decode("ascii")
 
         return password
+
+    def user_can_create(self, user):
+        num_of_projects = self.filter(Q(owner=user), status="active").count()
+
+        try:
+            project_per_user_limit = settings.PROJECTS_PER_USER_LIMIT
+        except Exception:
+            project_per_user_limit = None
+
+        has_perm = user.has_perm("projects.add_project")
+
+        return (
+            project_per_user_limit is None
+            or project_per_user_limit > num_of_projects
+            or has_perm
+        )
 
 
 class Project(models.Model):
