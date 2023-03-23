@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from .views import UpdatePatternView
 
 app_name = "projects"
 
@@ -52,9 +53,9 @@ urlpatterns = [
         name="change_description",
     ),
     path(
-        "<user>/<project_slug>/image/update",
-        views.update_image,
-        name="update_image",
+        "<user>/<project_slug>/pattern/update",
+        UpdatePatternView.as_view(),
+        name="update_pattern",
     ),
     path(
         "<user>/<project_slug>/project/publish",

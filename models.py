@@ -191,6 +191,12 @@ class ProjectManager(models.Manager):
         )
 
 
+def get_random_pattern_class():
+    randint = random.randint(1, 12)
+
+    return f"pattern-{randint}"
+
+
 class Project(models.Model):
     authorized = models.ManyToManyField(get_user_model(), blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -208,9 +214,11 @@ class Project(models.Model):
     owner = models.ForeignKey(
         get_user_model(), on_delete=models.DO_NOTHING, related_name="owner"
     )
-    project_image = models.ImageField(
-        upload_to="projects/images/", null=True, blank=True, default=None
+
+    pattern = models.CharField(
+        max_length=255, default=get_random_pattern_class
     )
+
     s3storage = models.OneToOneField(
         S3,
         on_delete=models.SET_NULL,

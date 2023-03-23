@@ -1,6 +1,5 @@
 import base64
 import logging
-import random
 
 import requests as r
 from django.apps import apps
@@ -8,16 +7,21 @@ from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import FieldDoesNotExist
-from django.core.files import File
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import render, reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 from guardian.decorators import permission_required_or_403
 from guardian.shortcuts import assign_perm, remove_perm
 
 from .exceptions import ProjectCreationException
-from .forms import ImageUpdateForm, PublishProjectToGitHub
+from .forms import PublishProjectToGitHub
 from .models import (
     S3,
     Environment,
@@ -121,31 +125,33 @@ def settings(request, user, project_slug):
     return render(request, template, locals())
 
 
-@login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
 )
-def update_image(request, user, project_slug):
-    project = Project.objects.filter(
-        Q(owner=request.user) | Q(authorized=request.user),
-        Q(slug=project_slug),
-    ).first()
+class UpdatePatternView(View):
+    def validate(self, pattern):
+        valid_patterns = [f"pattern-{x}" for x in range(1, 13)]
 
-    if request.method == "POST" and request.FILES["image"]:
-        form = ImageUpdateForm(request.POST, request.FILES)
+        return pattern in valid_patterns
 
-        if form.is_valid():
-            image = request.FILES["image"]
+    def post(self, request, user, project_slug, *args, **kwargs):
+        pattern = request.POST["pattern"]
 
-            project.project_image = image
+        valid = self.validate(pattern)
+
+        if valid:
+            project = Project.objects.get(slug=project_slug)
+
+            project.pattern = pattern
+
             project.save()
 
-    return HttpResponseRedirect(
-        reverse(
-            "projects:settings",
-            kwargs={"user": request.user, "project_slug": project.slug},
-        )
-    )
+            return HttpResponse()
+
+        return HttpResponseBadRequest()
 
 
 @login_required
@@ -477,24 +483,12 @@ def create(request):
 
         # Try to create database project object.
         try:
-            if django_settings.STATICFILES_DIRS:
-                (static_files,) = django_settings.STATICFILES_DIRS
-            else:
-                static_files = django_settings.STATIC_ROOT
-            print(f"STATIC FILES DIR: {static_files}", flush=True)
-            img = static_files + "/images/patterns/image-{}.png".format(
-                random.randrange(8, 13)
-            )
-            print(img)
-            img_file = open(img, "rb")
             project = Project.objects.create_project(
                 name=name,
                 owner=request.user,
                 description=description,
                 repository=repository,
             )
-            project.project_image.save("default.png", File(img_file))
-            img_file.close()
         except ProjectCreationException:
             print("ERROR: Failed to create project database object.")
             success = False

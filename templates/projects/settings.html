@@ -39,9 +39,6 @@
                     role="tab">
                     Description
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#image" role="tab">
-                    Image
-                </a>
                 <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access" role="tab">
                     Access
                 </a>
@@ -88,29 +85,6 @@
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" rows="5" id="description" name="description"
                                     contenteditable="true">{{ project.description }}</textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-square btn-primary">Save</button>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="image" role="tabpanel">
-                <div class="card shadow border-0">
-
-                    <div class="card-header bg-white py-3">
-                        <h5 class="card-title mb-0">Change project image</h5>
-                    </div>
-                    <div class="card-body">
-
-                        <form action="{% url 'projects:update_image' request.user project.slug %}" method="post"
-                            enctype="multipart/form-data">
-                            {% csrf_token %}
-
-                            <div class="mb-3">
-                                <input type="file" class="form-control" id="image" name="image"
-                                    accept="image/png, image/jpeg">
                             </div>
 
                             <button type="submit" class="btn btn-square btn-primary">Save</button>
