@@ -61,7 +61,10 @@ class AppInstanceManager(models.Manager):
         limit = get_apps_limit_per_user(app_slug)
 
         num_of_app_instances = self.filter(
-            Q(owner=user), app__slug=app_slug, project=project
+            Q(owner=user),
+            ~Q(state="Deleted"),
+            app__slug=app_slug,
+            project=project,
         ).count()
 
         has_perm = user.has_perm("apps.add_appinstance")
