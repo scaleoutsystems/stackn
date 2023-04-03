@@ -54,7 +54,6 @@ class IndexView(View):
                     Q(owner=request.user) | Q(authorized=request.user),
                     status="active",
                 ).distinct("pk")
-            media_url = django_settings.MEDIA_URL
         except TypeError as err:
             projects = []
             print(err)
@@ -65,7 +64,6 @@ class IndexView(View):
 
         context = {
             "projects": projects,
-            "media_url": media_url,
             "user_can_create": user_can_create,
         }
 

@@ -175,6 +175,9 @@ class ProjectManager(models.Manager):
         return password
 
     def user_can_create(self, user):
+        if not user.is_authenticated:
+            return False
+
         num_of_projects = self.filter(Q(owner=user), status="active").count()
 
         try:
