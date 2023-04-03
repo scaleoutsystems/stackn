@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from guardian.shortcuts import assign_perm, remove_perm
 from tagulous.models import TagField
 
-from apps.helpers.get_apps_limit_per_user import get_apps_limit_per_user
+from apps.helpers.get_apps_per_project_limit import get_apps_per_project_limit
 
 
 class AppCategories(models.Model):
@@ -58,10 +58,9 @@ class Apps(models.Model):
 
 class AppInstanceManager(models.Manager):
     def user_can_create(self, user, project, app_slug):
-        limit = get_apps_limit_per_user(app_slug)
+        limit = get_apps_per_project_limit(app_slug)
 
         num_of_app_instances = self.filter(
-            Q(owner=user),
             ~Q(state="Deleted"),
             app__slug=app_slug,
             project=project,
