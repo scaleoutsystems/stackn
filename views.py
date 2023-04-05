@@ -357,93 +357,92 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
     )
 
 
-@login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
 )
-def grant_access_to_project(request, user, project_slug):
-    project = Project.objects.get(slug=project_slug)
+class GrantAccessToProjectView(View):
+    def post(self, request, user, project_slug):
+        selected_username = request.POST["selected_user"]
+        qs = User.objects.filter(username=selected_username, is_client=False)
 
-    if request.method == "POST":
-        selected_users = request.POST.getlist("selected_users")
+        if len(qs) == 1:
+            selected_user = qs[0]
+            project = Project.objects.get(slug=project_slug)
 
-        log = ProjectLog(
-            project=project,
-            module="PR",
-            headline="New members",
-            description=(
-                "{number} new members have been added to the Project"
-            ).format(number=len(selected_users)),
-        )
-        log.save()
+            project.authorized.add(selected_user)
+            assign_perm("can_view_project", selected_user, project)
 
-        if len(selected_users) == 1:
-            selected_users = list(selected_users)
-
-        for _user in selected_users:
-            user_tmp = User.objects.get(pk=_user)
-            project.authorized.add(user_tmp)
-            assign_perm("can_view_project", user_tmp, project)
-            username_tmp = user_tmp.username
-            logger.info(
-                "Trying to add user {} to project.".format(username_tmp)
+            log = ProjectLog(
+                project=project,
+                module="PR",
+                headline="New members",
+                description="1 new members have been added to the Project",
             )
 
-    return HttpResponseRedirect(
-        reverse(
-            "projects:settings",
-            kwargs={"user": user, "project_slug": project.slug},
+            log.save()
+
+        return HttpResponseRedirect(
+            f"/{user}/{project_slug}/settings?template=access"
         )
-    )
 
 
-@login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
 )
-def revoke_access_to_project(request, user, project_slug):
-    project = Project.objects.get(slug=project_slug)
+class RevokeAccessToProjectView(View):
+    def valid_request(self, selected_username, user, project):
+        if project.owner.id != user.id:
+            return [False, None]
 
-    if request.method == "POST":
-        selected_users = request.POST.getlist("selected_users")
+        qs = User.objects.filter(username=selected_username)
+
+        if len(qs) != 1:
+            return [False, None]
+
+        selected_user = qs[0]
+
+        if selected_user not in project.authorized.all():
+            return [False, None]
+
+        return [True, selected_user]
+
+    def post(self, request, user, project_slug):
+        selected_username = request.POST["selected_user"]
+        project = Project.objects.get(slug=project_slug)
+
+        valid_request, selected_user = self.valid_request(
+            selected_username,
+            request.user,
+            project,
+        )
+
+        if not valid_request:
+            return HttpResponseBadRequest()
+
+        project.authorized.remove(selected_user)
+        remove_perm("can_view_project", selected_user, project)
 
         log = ProjectLog(
             project=project,
             module="PR",
             headline="Removed Project members",
-            description=(
-                "{number} of members have been removed from the Project"
-            ).format(number=len(selected_users)),
+            description="1 of members have been removed from the Project",
         )
+
         log.save()
 
-        if len(selected_users) == 1:
-            selected_users = list(selected_users)
-
-        for selected_user in selected_users:
-            user_tmp = User.objects.get(pk=selected_user)
-            project.authorized.remove(user_tmp)
-            remove_perm("can_view_project", user_tmp, project)
-            username_tmp = user_tmp.username
-            logger.info(
-                "Trying to remove user access {} to project.".format(
-                    username_tmp
-                )
+        return HttpResponseRedirect(
+            reverse(
+                "projects:settings",
+                kwargs={"user": user, "project_slug": project_slug},
             )
-
-    # TODO: Currently all project members with 'can_view_projects'
-    # can revoke access
-    # this handles when the user "remove" herself from the project
-    _user = User.objects.get(username=user)
-    if str(_user.pk) in selected_users:
-        return HttpResponseRedirect("/")
-
-    return HttpResponseRedirect(
-        reverse(
-            "projects:settings",
-            kwargs={"user": user, "project_slug": project.slug},
         )
-    )
 
 
 @login_required

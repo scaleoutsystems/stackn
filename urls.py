@@ -1,7 +1,11 @@
 from django.urls import path
 
 from . import views
-from .views import UpdatePatternView
+from .views import (
+    GrantAccessToProjectView,
+    RevokeAccessToProjectView,
+    UpdatePatternView,
+)
 
 app_name = "projects"
 
@@ -64,12 +68,12 @@ urlpatterns = [
     ),
     path(
         "<user>/<project_slug>/project/access/grant",
-        views.grant_access_to_project,
+        GrantAccessToProjectView.as_view(),
         name="grant_access",
     ),
     path(
         "<user>/<project_slug>/project/access/revoke",
-        views.revoke_access_to_project,
+        RevokeAccessToProjectView.as_view(),
         name="revoke_access",
     ),
 ]
