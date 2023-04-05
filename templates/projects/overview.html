@@ -43,7 +43,9 @@
                     <tbody>
                         {% for obj in objs.objs %}
                         <tr class="odd">
-                            <td><img src="{{ media_url}}{{ obj.app.logo_file }}" class="img-fluid " alt="App Logo"
+                            
+                            {% static 'images/logos/apps/' as static_url %}
+                            <td><img src="{{static_url}}{{obj.app.logo|default:'default-logo.png'}}" class="img-fluid " alt="App Logo"
                                     style="max-height:25px;"></td>
                             <td class="d-none d-xxl-table-cell">{{ obj.app.name }}</td>
                             {% if obj.table_field.url %}
