@@ -15,7 +15,8 @@
   <tbody>
     {% for appinstance in appinstances %}
     <tr>
-        <td><img src="{{ media_url }}{{ appinstance.app.logo_file }}" class="img-fluid " style="max-height:25px;"></td>
+        {% static 'images/logos/apps/' as static_url %}
+        <td><img src="{{static_url}}{{appinstance.app.logo|default:'default-logo.png'}}" class="img-fluid " style="max-height:25px;"></td>
         <td>{{ appinstance.app.name }}</td>
         <td>{{ appinstance.name }}</td>
         {% if appinstance.table_field.url %}

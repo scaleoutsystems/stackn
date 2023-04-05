@@ -33,10 +33,7 @@ class Apps(models.Model):
     chart_archive = models.FileField(upload_to="apps/", null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True, default="")
-    logo = models.CharField(max_length=512, default="")
-    logo_file = models.ImageField(
-        upload_to="apps/logos", null=True, blank=True
-    )
+    logo = models.CharField(max_length=512, null=True, blank=True)
     name = models.CharField(max_length=512)
     priority = models.IntegerField(default=100)
     projects = models.ManyToManyField("projects.Project")

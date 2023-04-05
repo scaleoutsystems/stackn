@@ -53,7 +53,9 @@
                         </div>
                     </div>
                     <div class="col-4">
-                        <img src="{{ media_url }}{{ app.logo_file }}" class="img-fluid float-end" style="height:100px;"
+
+                        {% static 'images/logos/apps/' as static_url %}
+                        <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end" style="height:100px;"
                             alt="App Logo">
                     </div>
                 </div>
