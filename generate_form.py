@@ -66,11 +66,8 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
 
-            app_instances = AppInstance.objects.filter(
-                ~Q(state="Deleted"),
-                Q(owner=user) | Q(access__in=["project", "public"]),
-                project=project,
-                app__name=app_name,
+            app_instances = AppInstance.objects.get_available_app_dependencies(
+                user=user, project=project, app_name=app_name
             )
             # TODO: Special case here for "environment" app.
             # Could be solved by supporting "condition":

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
@@ -54,6 +55,30 @@ class Apps(models.Model):
 
 
 class AppInstanceManager(models.Manager):
+    def get_available_app_dependencies(self, user, project, app_name):
+        result = self.filter(
+            ~Q(state="Deleted"),
+            Q(owner=user) | Q(access__in=["project", "public"]),
+            project=project,
+            app__name=app_name,
+        )
+
+        if (
+            settings.STUDIO_ACCESSMODE == "ReadWriteOnce"
+            and app_name == "Persistent Volume"
+        ):
+            for instance in result:
+                exists = self.filter(
+                    ~Q(state="Deleted"),
+                    project=project,
+                    app_dependencies=instance,
+                ).exists()
+
+                if exists:
+                    result = result.exclude(id=instance.id)
+
+        return result
+
     def user_can_create(self, user, project, app_slug):
         limit = get_apps_per_project_limit(app_slug)
 
