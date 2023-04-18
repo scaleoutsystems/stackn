@@ -21,6 +21,8 @@ class AppCategories(models.Model):
 
 class Apps(models.Model):
     user_can_create = models.BooleanField(default=True)
+    user_can_edit = models.BooleanField(default=True)
+    user_can_delete = models.BooleanField(default=True)
     access = models.CharField(
         max_length=20, blank=True, null=True, default="public"
     )
@@ -81,6 +83,11 @@ class AppInstanceManager(models.Manager):
 
     def user_can_create(self, user, project, app_slug):
         limit = get_apps_per_project_limit(app_slug)
+
+        app = Apps.objects.get(slug=app_slug)
+
+        if not app.user_can_create:
+            return False
 
         num_of_app_instances = self.filter(
             ~Q(state="Deleted"),

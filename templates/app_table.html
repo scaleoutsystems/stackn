@@ -34,38 +34,57 @@
         <td>{{ appinstance.created_on }}</td>
         <td class="table-action">
           <div class="dropdown show">
-              <a href="#" data-bs-toggle="dropdown" data-display="static">
+              <a href="#" class="default" data-bs-toggle="dropdown" data-display="static">
                   <i class="bi bi-three-dots-vertical"></i>
               </a>
               <div class="dropdown-menu dropdown-menu-end">
-                  <a class="dropdown-item disabled" href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
+                  <a class="dropdown-item default disabled" href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
                     <i class="bi bi-activity me-1"></i>
                     Logs (disabled)
                   </a>
 
                   {% if appinstance.app.settings.publishable == "true" and appinstance.owner.id == request.user.id %}
                     {% if appinstance.access == "public" %}
-                    <a class="dropdown-item" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
+                    <a class="dropdown-item default" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
                       <i class="bi bi-slash-circle me-1"></i>
                       Unpublish
                     </a>
                     {% else %}
-                    <a class="dropdown-item" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
+                    <a class="dropdown-item default" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
                       <i class="bi bi-share me-1"></i>
                       Publish
                     </a>
                     {% endif %}
                   {% endif %}
 
-                  <a class="dropdown-item" href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
-                    <i class="bi bi-sliders2-vertical me-1"></i>
-                    Settings
-                  </a>
+                  {% if appinstance.app.user_can_edit %}
 
-                  <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
-                    <i class="bi bi-trash me-1"></i>
-                    Delete
-                  </a>
+                    <a class="dropdown-item default" href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
+                      <i class="bi bi-sliders2-vertical me-1"></i>
+                      Settings
+                    </a>
+                  {% else %}
+                    
+                    <a class="dropdown-item default disabled">
+                      <i class="bi bi-sliders2-vertical me-1"></i>
+                      Settings
+                    </a>
+                  {% endif %}
+                    
+                  {% if appinstance.app.user_can_delete %}
+                  
+                    <a class="dropdown-item default bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
+                      <i class="bi bi-trash me-1"></i>
+                      Delete
+                    </a>
+                  {% else %}
+                    
+                    <a class="dropdown-item default bg-danger text-white confirm-delete disabled">
+                      <i class="bi bi-trash me-1"></i>
+                      Delete
+                    </a>
+                  {% endif %}
+
               </div>
           </div>
         </td>

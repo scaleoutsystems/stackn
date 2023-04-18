@@ -228,6 +228,10 @@ class AppSettingsView(View):
         )
         existing_app_name = appinstance.name
         app = appinstance.app
+
+        if not app.user_can_edit:
+            return HttpResponseForbidden()
+
         app_settings = appinstance.app.settings
         form = generate_form(
             app_settings, project, app, request.user, appinstance
@@ -244,6 +248,9 @@ class AppSettingsView(View):
         app = appinstance.app
         app_settings = app.settings
         body = request.POST.copy()
+
+        if not app.user_can_edit:
+            return HttpResponseForbidden()
 
         if not body.get("permission", None):
             body.update({"permission": appinstance.access})
@@ -495,18 +502,20 @@ def unpublish(request, user, project, category, ai_id):
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def delete(request, user, project, category, ai_id):
-    print("PK=" + str(ai_id))
-
     if "from" in request.GET:
         from_page = request.GET.get("from")
     else:
         from_page = "filtered"
 
+    app_instance = AppInstance.objects.get(pk=ai_id)
+
+    if not app_instance.app.user_can_delete:
+        return HttpResponseForbidden()
+
     delete_resource.delay(ai_id)
     # fix: in case appinstance is public swich to private
-    app = AppInstance.objects.get(pk=ai_id)
-    app.access = "private"
-    app.save()
+    app_instance.access = "private"
+    app_instance.save()
 
     if "from" in request.GET:
         from_page = request.GET.get("from")
