@@ -14,13 +14,14 @@
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
 
                 <div class="dropdown show">
-                    <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <button class="btn shadow-sm">New</button>
+                    <a href="#" class="btn shadow-sm" data-bs-toggle="dropdown" data-display="static"
+                        aria-expanded="false">
+                        New
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right">
                         {% for app in objs.apps %}
-                            {% include './create_app_link.html' with app=app %}
+                        {% include './create_app_link.html' with app=app %}
                         {% endfor %}
                     </div>
                 </div>
@@ -65,25 +66,44 @@
                                         {% endif %}">{{ obj.status.latest.status_type }}</span></td>
                             <td class="table-action text-center">
                                 <div class="dropdown show">
-                                    <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                    <a href="#" class="default" data-bs-toggle="dropdown" data-display="static">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item disabled"
+                                        <a class="dropdown-item disabled default"
                                             href="{% url 'apps:logs' request.user project.slug obj.pk %}">
                                             <i class="bi bi-activity me-1"></i>
                                             Logs (disabled)
                                         </a>
-                                        <a class="dropdown-item"
-                                            href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
-                                            <i class="bi bi-sliders2-vertical me-1"></i>
-                                            Settings
-                                        </a>
-                                        <a class="dropdown-item bg-danger text-white confirm-delete"
-                                            href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
-                                            <i class="bi bi-trash me-1"></i>
-                                            Delete
-                                        </a>
+
+                                            {% if obj.app.user_can_edit %}
+                                            
+                                                <a class="dropdown-item default" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
+                                                    <i class="bi bi-sliders2-vertical me-1"></i>
+                                                    Settings
+                                                </a>
+                                            {% else %}
+
+                                                <a class="dropdown-item default disabled">
+                                                    <i class="bi bi-sliders2-vertical me-1"></i>
+                                                    Settings
+                                                </a>
+                                            {% endif %}
+                                            
+                                            {% if obj.app.user_can_delete %}
+                                                
+                                                <a class="dropdown-item bg-danger text-white confirm-delete default"
+                                                    href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
+                                                    <i class="bi bi-trash me-1"></i>
+                                                    Delete
+                                                </a>
+                                            {% else %}
+
+                                                <a class="dropdown-item bg-danger text-white confirm-delete default disabled">
+                                                    <i class="bi bi-trash me-1"></i>
+                                                    Delete
+                                                </a>
+                                            {% endif %}
                                     </div>
                                 </div>
                             </td>
