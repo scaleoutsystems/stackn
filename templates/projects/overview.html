@@ -44,10 +44,10 @@
                     <tbody>
                         {% for obj in objs.objs %}
                         <tr class="odd">
-                            
+
                             {% static 'images/logos/apps/' as static_url %}
-                            <td><img src="{{static_url}}{{obj.app.logo|default:'default-logo.png'}}" class="img-fluid " alt="App Logo"
-                                    style="max-height:25px;"></td>
+                            <td><img src="{{static_url}}{{obj.app.logo|default:'default-logo.png'}}" class="img-fluid "
+                                    alt="App Logo" style="max-height:25px;"></td>
                             <td class="d-none d-xxl-table-cell">{{ obj.app.name }}</td>
                             {% if obj.table_field.url %}
                             <td class="sorting_1">
@@ -76,34 +76,35 @@
                                             Logs (disabled)
                                         </a>
 
-                                            {% if obj.app.user_can_edit %}
-                                            
-                                                <a class="dropdown-item default" href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
-                                                    <i class="bi bi-sliders2-vertical me-1"></i>
-                                                    Settings
-                                                </a>
-                                            {% else %}
+                                        {% if obj.app.user_can_edit %}
 
-                                                <a class="dropdown-item default disabled">
-                                                    <i class="bi bi-sliders2-vertical me-1"></i>
-                                                    Settings
-                                                </a>
-                                            {% endif %}
-                                            
-                                            {% if obj.app.user_can_delete %}
-                                                
-                                                <a class="dropdown-item bg-danger text-white confirm-delete default"
-                                                    href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
-                                                    <i class="bi bi-trash me-1"></i>
-                                                    Delete
-                                                </a>
-                                            {% else %}
+                                        <a class="dropdown-item default"
+                                            href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
+                                            <i class="bi bi-sliders2-vertical me-1"></i>
+                                            Settings
+                                        </a>
+                                        {% else %}
 
-                                                <a class="dropdown-item bg-danger text-white confirm-delete default disabled">
-                                                    <i class="bi bi-trash me-1"></i>
-                                                    Delete
-                                                </a>
-                                            {% endif %}
+                                        <a class="dropdown-item default disabled">
+                                            <i class="bi bi-sliders2-vertical me-1"></i>
+                                            Settings
+                                        </a>
+                                        {% endif %}
+
+                                        {% if obj.app.user_can_delete %}
+
+                                        <a class="dropdown-item bg-danger text-white confirm-delete default"
+                                            href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
+                                            <i class="bi bi-trash me-1"></i>
+                                            Delete
+                                        </a>
+                                        {% else %}
+
+                                        <a class="dropdown-item bg-danger text-white confirm-delete default disabled">
+                                            <i class="bi bi-trash me-1"></i>
+                                            Delete
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
@@ -163,22 +164,22 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item"
+                                        <a class="dropdown-item default"
                                             href="{% url 'models:details_private' request.user project.slug model.pk %}">
                                             <i class="bi bi-text-center me-1"></i>
                                             Details
                                         </a>
-                                        <a class="dropdown-item"
+                                        <a class="dropdown-item default"
                                             href="{% url 'models:publish_model' request.user project.slug model.pk %}">
                                             <i class="bi bi-sliders2-vertical me-1"></i>
                                             Settings
                                         </a>
-                                        <a class="dropdown-item"
+                                        <a class="dropdown-item default"
                                             href="{% url 'apps:serve' request.user project.slug model.object_type.all.first.app_slug model.version  %}">
                                             <i class="bi bi-check2-circle me-1"></i>
                                             Serve
                                         </a>
-                                        <a class="dropdown-item bg-danger text-white confirm-delete"
+                                        <a class="dropdown-item default bg-danger text-white confirm-delete"
                                             href="{% url 'models:delete' request.user project.slug model.pk %}">
                                             <i class="bi bi-trash me-1"></i>
                                             Delete
