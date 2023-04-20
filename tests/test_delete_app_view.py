@@ -112,5 +112,5 @@ class DeleteAppViewTestCase(TestCase):
             )
 
             self.assertEqual("private", self.app_instance.access)
-            
+
             mock_task.assert_called_once()
