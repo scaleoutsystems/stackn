@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
@@ -63,7 +65,7 @@ class DeleteAppViewTestCase(TestCase):
 
         return project
 
-    def test_user_can_delete_true(self):
+    def test_user_can_delete_false(self):
         c = Client()
 
         response = c.post(
@@ -82,7 +84,7 @@ class DeleteAppViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_user_can_delete_false(self):
+    def test_user_can_delete_true(self):
         c = Client()
 
         response = c.post(
@@ -95,17 +97,20 @@ class DeleteAppViewTestCase(TestCase):
         self.app.user_can_delete = True
         self.app.save()
 
-        url = (
-            f"/{self.user.username}/{self.project.slug}/apps/delete/"
-            + f"{self.category.slug}/{self.app_instance.id}"
-        )
+        with patch("apps.tasks.delete_resource.delay") as mock_task:
+            url = (
+                f"/{self.user.username}/{self.project.slug}/apps/delete/"
+                + f"{self.category.slug}/{self.app_instance.id}"
+            )
 
-        response = c.get(url)
+            response = c.get(url)
 
-        self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.status_code, 302)
 
-        self.app_instance = AppInstance.objects.get(
-            name="test_app_instance_public"
-        )
+            self.app_instance = AppInstance.objects.get(
+                name="test_app_instance_public"
+            )
 
-        self.assertEqual("private", self.app_instance.access)
+            self.assertEqual("private", self.app_instance.access)
+            
+            mock_task.assert_called_once()
