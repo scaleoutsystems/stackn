@@ -131,9 +131,12 @@ def settings(request, user, project_slug):
 )
 class UpdatePatternView(View):
     def validate(self, pattern):
-        valid_patterns = [f"pattern-{x}" for x in range(1, 13)]
+        if pattern is None:
+            return False
 
-        return pattern in valid_patterns
+        _valid_patterns = [f"pattern-{x}" for x in range(1, 31)]
+
+        return pattern in _valid_patterns
 
     def post(self, request, user, project_slug, *args, **kwargs):
         pattern = request.POST["pattern"]

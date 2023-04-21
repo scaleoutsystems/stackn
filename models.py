@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
@@ -218,9 +218,7 @@ class Project(models.Model):
         get_user_model(), on_delete=models.DO_NOTHING, related_name="owner"
     )
 
-    pattern = models.CharField(
-        max_length=255, default=get_random_pattern_class
-    )
+    pattern = models.CharField(max_length=255, default="")
 
     s3storage = models.OneToOneField(
         S3,
@@ -261,6 +259,35 @@ def on_project_delete(sender, instance, **kwargs):
     for model in models:
         model.status = "AR"
         model.save()
+
+
+@receiver(pre_save, sender=Project)
+def on_project_save(sender, instance, **kwargs):
+    if instance.pattern == "":
+        projects = Project.objects.filter(owner=instance.owner)
+
+        patterns = projects.values_list("pattern", flat=True)
+
+        arr = []
+
+        for i in range(1, 31):
+            pattern = f"pattern-{i}"
+
+            if pattern not in patterns:
+                arr.append(pattern)
+
+        pattern = ""
+
+        if len(arr) > 0:
+            rand_index = random.randint(0, len(arr) - 1)
+
+            pattern = arr[rand_index]
+
+        else:
+            randint = random.randint(1, 30)
+            pattern = f"pattern-{randint}"
+
+        instance.pattern = pattern
 
 
 class ProjectLog(models.Model):

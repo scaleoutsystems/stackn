@@ -79,6 +79,12 @@ class UpdatePatternViewTestCase(TestCase):
         self.assertFalse(result)
 
         result = view.validate("pattern-13")
+        self.assertTrue(result)
+
+        result = view.validate("pattern-30")
+        self.assertTrue(result)
+
+        result = view.validate("pattern-31")
         self.assertFalse(result)
 
         result = view.validate("patter-5")
