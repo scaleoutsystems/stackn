@@ -795,7 +795,7 @@ def details_public(request, id):
     print(model_objs, flush=True)
     print(latest_model_obj, flush=True)
 
-    return render(request, "models_details_public.html", locals())
+    return render(request, "models/models_details_public.html", locals())
 
 
 @login_required
