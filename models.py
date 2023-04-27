@@ -7,8 +7,6 @@ from django.dispatch import receiver
 from guardian.shortcuts import assign_perm, remove_perm
 from tagulous.models import TagField
 
-from apps.helpers.get_apps_per_project_limit import get_apps_per_project_limit
-
 
 class AppCategories(models.Model):
     name = models.CharField(max_length=512)
@@ -82,7 +80,17 @@ class AppInstanceManager(models.Manager):
         return result
 
     def user_can_create(self, user, project, app_slug):
-        limit = get_apps_per_project_limit(app_slug)
+        apps_per_project = (
+            {}
+            if project.apps_per_project is None
+            else project.apps_per_project
+        )
+
+        limit = (
+            apps_per_project[app_slug]
+            if app_slug in apps_per_project
+            else None
+        )
 
         app = Apps.objects.get(slug=app_slug)
 

@@ -18,7 +18,7 @@ from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers.helpers import (
+from .helpers import (
     can_access_app_instances,
     create_app_instance,
     handle_permissions,

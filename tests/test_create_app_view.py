@@ -299,3 +299,69 @@ class CreateAppViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 403)
+
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
+    def test_app_limit_altered_for_project(self):
+        c = Client()
+
+        project = self.get_data()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        project.apps_per_project["jupyter-lab"] = 0
+
+        project.save()
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
+    def test_app_limit_altered_for_project_v2(self):
+        c = Client()
+
+        project = self.get_data()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        _ = AppInstance.objects.create(
+            access="private",
+            owner=self.user,
+            name="test_app_instance_private",
+            app=self.app,
+            project=project,
+        )
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        project.apps_per_project["jupyter-lab"] = 2
+
+        project.save()
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 200)
