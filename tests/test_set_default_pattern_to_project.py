@@ -18,7 +18,7 @@ class SetDefaultPatternToProjectTestCase(TestCase):
 
         for _ in range(30):
             project = Project.objects.create_project(
-                name="test-perm",
+                name="test-perm-SetDefaultPatternToProjectTestCase",
                 owner=self.user,
                 description="",
                 repository="",

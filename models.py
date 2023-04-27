@@ -200,6 +200,19 @@ def get_random_pattern_class():
     return f"pattern-{randint}"
 
 
+def get_default_apps_per_project_limit():
+    try:
+        apps_per_project_limit = (
+            settings.APPS_PER_PROJECT_LIMIT
+            if settings.APPS_PER_PROJECT_LIMIT is not None
+            else {}
+        )
+    except Exception:
+        apps_per_project_limit = {}
+
+    return apps_per_project_limit
+
+
 class Project(models.Model):
     authorized = models.ManyToManyField(get_user_model(), blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -216,6 +229,10 @@ class Project(models.Model):
     objects = ProjectManager()
     owner = models.ForeignKey(
         get_user_model(), on_delete=models.DO_NOTHING, related_name="owner"
+    )
+
+    apps_per_project = models.JSONField(
+        blank=True, null=True, default=get_default_apps_per_project_limit
     )
 
     pattern = models.CharField(max_length=255, default="")
