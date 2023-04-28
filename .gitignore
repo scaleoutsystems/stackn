@@ -140,3 +140,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Cypress
+cypress/screenshots
+cypress/videos
+cypress/logs
+cypress/fixtures/profile.json
+cypress/fixtures/users.json
+
+# Dependency directories
+node_modules
