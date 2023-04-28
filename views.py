@@ -88,7 +88,7 @@ def settings(request, user, project_slug):
         Q(owner=request.user) | Q(authorized=request.user),
         Q(slug=project_slug),
     ).first()
-    url_domain = django_settings.DOMAIN
+
     try:
         User._meta.get_field("is_user")
         platform_users = User.objects.filter(

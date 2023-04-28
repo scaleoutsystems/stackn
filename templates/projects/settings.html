@@ -1,6 +1,9 @@
 {% extends 'projects/base.html' %}
 
+
 {% block projects_dropdown %}
+
+
 <ul class="navbar-nav">
     <li class="nav-item px-2 dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown"
@@ -23,6 +26,9 @@
 
 {% block content %}
 
+{% load get_setting %}
+{% get_setting "ENABLE_PROJECT_EXTRA_SETTINGS" as enable_extra_settings %}
+
 <h1 class="h3 mb-3">Settings</h1>
 
 <div class="row">
@@ -35,26 +41,34 @@
 
             <div class="list-group list-group-flush" role="tablist">
 
-                <a class="default list-group-item list-group-item-action active p-3" data-bs-toggle="list" href="#projdesc"
-                    role="tab">
+                <a class="default list-group-item list-group-item-action active p-3" data-bs-toggle="list"
+                    href="#projdesc" role="tab">
                     Description
                 </a>
-                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access"
+                    role="tab">
                     Access
                 </a>
-                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage"
+                    role="tab">
                     S3 storage
                 </a>
-                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow"
+                    role="tab">
                     MLFlow
                 </a>
-                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors" role="tab">
+                {% if enable_extra_settings %}
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors"
+                    role="tab">
                     Flavors
                 </a>
-                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments"
+                    role="tab">
                     Environments
                 </a>
-                <a class="default list-group-item list-group-item-action p-3 text-red" data-bs-toggle="list" href="#delete" role="tab">
+                {% endif %}
+                <a class="default list-group-item list-group-item-action p-3 text-red" data-bs-toggle="list"
+                    href="#delete" role="tab">
                     Delete
                 </a>
             </div>
@@ -136,7 +150,7 @@
                     </div>
                 </div>
             </div>
-
+            {% if enable_extra_settings %}
             <div class="tab-pane fade" id="flavors" role="tabpanel">
                 <div class="card shadow border-0">
 
@@ -261,7 +275,7 @@
                     </div>
                 </div>
             </div>
-
+            {% endif %}
             <div class="tab-pane fade" id="s3storage" role="tabpanel">
                 <div class="card shadow border-0">
 
@@ -388,7 +402,7 @@
     const urlParams = new URLSearchParams(queryString);
     const template = urlParams.get("template")
 
-    if(!!template){
+    if (!!template) {
 
         const element = document.getElementById(template)
         element.classList.add("active")
