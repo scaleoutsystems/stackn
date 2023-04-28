@@ -1,0 +1,114 @@
+name: Build and test studio
+
+on:
+  # Adds ability to run this workflow manually
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      tags:
+        description: 'Manual run'
+        required: false
+        type: boolean
+
+jobs:
+
+  build_and_test:
+    if: github.repository == 'scilifelabdatacentre/stackn'
+    runs-on: ubuntu-20.04
+    env:
+      working-directory: .
+
+    steps:
+      - name: Branch or tag that triggered the workflow run
+        run: echo "Running on branch ${GITHUB_REF##*/}"
+
+      - name: Checkout branch serve-0.7
+        uses: actions/checkout@v3
+        with:
+          ref: 'serve-0.7'
+
+      - name: Run on microk8s
+        uses: balchua/microk8s-actions@v0.2.1
+        with:
+          channel: '1.20/stable'
+          addons: '["dns", "rbac", "storage", "ingress"]'
+
+      - name: Check k8s
+        run: |
+          echo "Checking k8s cluster version, nodes and pods"
+          kubectl version
+          kubectl get no
+          kubectl get pods -A -o wide
+
+      - name: Start studio
+        working-directory: ${{env.working-directory}}
+        id: setup
+        run: |
+          set -ex
+          #echo "Running init script"
+          #./init.sh --no-prompt
+          echo "Deploying studio"
+          docker-compose up -d
+
+      - name: Install CLI
+        working-directory: ./cli
+        id: cli
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir .
+
+      - name: Determine and set Studio URL
+        working-directory: ${{env.working-directory}}
+        run: |
+          curl --version | head -n 1
+          STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
+          echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV       
+          echo "The Studio URL is $STUDIO_URL"
+
+      - name: Wait for Studio URL is up
+        uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: ${{ env.STUDIO_URL }}
+          responseCode: '200,308,500'
+          timeout: 60000
+          interval: 5000
+        continue-on-error: true
+
+      - name: Check if Studio is ready
+        working-directory: ${{env.working-directory}}
+        id: check_studio_up
+        run: |
+          echo "Checking response from STUDIO_URL: ${{ env.STUDIO_URL }}"
+          response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
+          if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
+
+      - name: Print k8s info
+        run: |
+          echo "Checking k8s cluster version, nodes and pods"
+          kubectl version
+          kubectl get no
+          kubectl get pods -A -o wide
+
+      - name: Check URL is up
+        uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: ${{ env.STUDIO_URL }}
+          responseCode: '200,308,500'
+          timeout: 60000
+          interval: 5000
+        continue-on-error: true
+
+      - name: Cypress run e2e tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: ${{env.working-directory}}
+          config: pageLoadTimeout=100000,baseUrl=${{ env.STUDIO_URL }}
+          quiet: true
