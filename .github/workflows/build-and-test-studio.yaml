@@ -58,13 +58,6 @@ jobs:
           echo "Deploying studio"
           docker-compose up -d
 
-      - name: Install CLI
-        working-directory: ./cli
-        id: cli
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir .
-
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
         run: |
