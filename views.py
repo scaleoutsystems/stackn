@@ -536,82 +536,71 @@ def create(request):
     return render(request, template, locals())
 
 
-@login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
 )
-def details(request, user, project_slug):
-    is_authorized = False
-    try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        ).distinct("pk")
-    except TypeError as err:
-        projects = []
-        print(err)
-    if request.user.is_superuser:
-        is_authorized = True
-    else:
-        if request.user.is_authenticated:
-            is_authorized = True
-            request.session["project"] = project_slug
+class DetailsView(View):
+    template_name = "projects/overview.html"
 
-    template = "projects/overview.html"
-
-    url_domain = django_settings.DOMAIN
-    media_url = django_settings.MEDIA_URL
-
-    project = None
-    message = None
-    # username = request.user.username
-    try:
-        # owner = User.objects.filter(username=username).first()
-        project = Project.objects.get(slug=project_slug)
-        if is_authorized:
-            request.session["project_name"] = project.name
-    except Exception:
-        message = "Project not found."
-
-    if project:
-        pk_list = ""
-
-        status_success = django_settings.APPS_STATUS_SUCCESS
-        status_warning = django_settings.APPS_STATUS_WARNING
-        activity_logs = ProjectLog.objects.filter(project=project).order_by(
-            "-created_at"
-        )[:5]
+    def get(self, request, user, project_slug):
         resources = list()
-        cats = AppCategories.objects.all().order_by("-priority")
-        rslugs = []
-        for cat in cats:
-            rslugs.append({"slug": cat.slug, "name": cat.name})
+        models = Model.objects.none()
+        app_ids = []
+        project = None
 
-        for rslug in rslugs:
-            tmp = AppInstance.objects.filter(
-                ~Q(state="Deleted"),
-                Q(owner=request.user) | Q(access="project"),
-                project=project,
-                app__category__slug=rslug["slug"],
-            ).order_by("-created_on")[:5]
-            for instance in tmp:
-                pk_list += str(instance.pk) + ","
-            apps_filtered = (
-                Apps.objects.filter(
-                    category__slug=rslug["slug"], user_can_create=True
+        if request.user.is_authenticated:
+            project = Project.objects.get(slug=project_slug)
+            categories = AppCategories.objects.all().order_by("-priority")
+            models = Model.objects.filter(project=project).order_by(
+                "-uploaded_at"
+            )[:10]
+
+            def filter_func(slug):
+                return Q(app__category__slug=slug)
+
+            for category in categories:
+                app_instances_of_category = (
+                    AppInstance.objects.get_app_instances_of_project(
+                        user=request.user,
+                        project=project,
+                        filter_func=filter_func(slug=category.slug),
+                        limit=5,
+                    )
                 )
-                .order_by("slug", "-revision")
-                .distinct("slug")
-            )
-            resources.append(
-                {"title": rslug["name"], "objs": tmp, "apps": apps_filtered}
-            )
-        pk_list = pk_list[:-1]
-        pk_list = "'" + pk_list + "'"
-        models = Model.objects.filter(project=project).order_by(
-            "-uploaded_at"
-        )[:10]
 
-    return render(request, template, locals())
+                app_ids += [obj.id for obj in app_instances_of_category]
+
+                apps_of_category = (
+                    Apps.objects.filter(
+                        category=category, user_can_create=True
+                    )
+                    .order_by("slug", "-revision")
+                    .distinct("slug")
+                )
+
+                resources.append(
+                    {
+                        "title": category.name,
+                        "objs": app_instances_of_category,
+                        "apps": apps_of_category,
+                    }
+                )
+
+        context = {
+            "resources": resources,
+            "models": models,
+            "project": project,
+            "app_ids": app_ids,
+        }
+
+        return render(
+            request=request,
+            context=context,
+            template_name=self.template_name,
+        )
 
 
 @login_required

@@ -59,11 +59,11 @@
                             <td class="sorting_1">{{ obj.name }}</td>
                             {% endif %}
                             <td class="d-none d-xxl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
-                            <td id="status-{{ obj.pk }}"><span class="badge 
-                                        {% if obj.status.latest.status_type in status_success %}bg-success
-                                        {% elif obj.status.latest.status_type in status_warning %}bg-warning
-                                        {% else %}bg-danger
-                                        {% endif %}">{{ obj.status.latest.status_type }}</span></td>
+                            <td id="status-{{ obj.pk }}">
+                                <span class="badge bg-secondary">
+                                    {{ obj.status.latest.status_type }}
+                                </span>
+                            </td>
                             <td class="table-action text-center">
                                 <div class="dropdown show">
                                     <a href="#" class="default" data-bs-toggle="dropdown" data-display="static">
@@ -176,7 +176,7 @@
                                         </a>
 
                                         {% include 'common/serve_model_link.html' %}
-                                            
+
                                         <a class="dropdown-item default bg-danger text-white confirm-delete"
                                             href="{% url 'models:delete' request.user project.slug model.pk %}">
                                             <i class="bi bi-trash me-1"></i>
@@ -200,52 +200,55 @@
     </div>
 
     <script>
+        {
+            const apps = JSON.parse("{{ app_ids|escapejs }}")
+            const body = new FormData()
+            body.append("apps", apps)
 
-        const apps = {{ pk_list | safe }}
-        const url = "{% url 'apps:get_status' request.user project.slug %}"
-        const csrftoken = getCookie('csrftoken');
+            const url = "{% url 'apps:get_status' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
 
-        const updateStatus = async () => {
+            const updateStatus = async () => {
 
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                },
-                body: JSON.stringify(apps),
-            })
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body
+                })
 
-            const json = await response.json()
+                const json = await response.json()
 
-            for (const key in json) {
-                if (Object.hasOwnProperty.call(json, key)) {
+                for (const key in json) {
+                    if (Object.hasOwnProperty.call(json, key)) {
 
-                    const { status, statusGroup } = json[key]
-                    const querySelector = `#status-${key} > span`
-                    const element = document.querySelector(querySelector)
-                    const className = `badge bg-${statusGroup}`
+                        const { status, statusGroup } = json[key]
+                        const querySelector = `#status-${key} > span`
+                        const element = document.querySelector(querySelector)
+                        const className = `badge bg-${statusGroup}`
 
-                    element.className = className
-                    element.innerText = status
+                        element.className = className
+                        element.innerText = status
+                    }
                 }
             }
-        }
 
-        const loop = async () => {
+            const loop = async () => {
 
-            if (apps) {
+                if (apps) {
 
-                await updateStatus()
+                    await updateStatus()
 
-                setTimeout(() => {
-                    loop()
-                }, 5000)
+                    setTimeout(() => {
+                        loop()
+                    }, 5000)
+                }
             }
+
+            loop()
         }
-
-        loop()
-
     </script>
 
     {% endblock %}

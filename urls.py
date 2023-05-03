@@ -16,7 +16,12 @@ basicpatterns = [
     path(
         "projects/templates", views.project_templates, name="project_templates"
     ),
-    path("<user>/<project_slug>", views.details, name="details"),
+    path("<user>/<project_slug>", views.DetailsView.as_view(), name="details"),
+    path(
+        "<user>/<project_slug>/environments/create",
+        views.create_environment,
+        name="create_environment",
+    ),
     path("<user>/<project_slug>/settings", views.settings, name="settings"),
     path("<user>/<project_slug>/delete", views.delete, name="delete"),
     path(
