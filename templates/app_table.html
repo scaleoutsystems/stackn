@@ -24,13 +24,7 @@
         {% else %}
         <td></td>
         {% endif %}
-        {% if appinstance.status.latest.status_type in status_success %}
-        <td id="status-{{ appinstance.pk }}"><span class="badge bg-success">{{ appinstance.status.latest.status_type }}</span></td>
-        {% elif appinstance.status.latest.status_type in status_warning %}
-        <td id="status-{{ appinstance.pk }}"><span class="badge bg-warning">{{ appinstance.status.latest.status_type }}</span></td>
-        {% else %}
-        <td id="status-{{ appinstance.pk }}"><span class="badge bg-danger">{{ appinstance.status.latest.status_type }}</span></td>
-        {% endif %}
+        <td id="status-{{ appinstance.pk }}"><span class="badge bg-secondary">{{ appinstance.status.latest.status_type }}</span></td>
         <td>{{ appinstance.created_on }}</td>
         <td class="table-action">
           <div class="dropdown show">

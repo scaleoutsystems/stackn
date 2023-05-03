@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -55,6 +57,57 @@ class Apps(models.Model):
 
 
 class AppInstanceManager(models.Manager):
+    def get_app_instances_of_project_filter(
+        self, user, project, include_deleted=False, deleted_time_delta=None
+    ):
+        q = Q()
+
+        if not include_deleted:
+            if deleted_time_delta is None:
+                q &= ~Q(state="Deleted")
+            else:
+                time_threshold = datetime.now() - timedelta(
+                    minutes=deleted_time_delta
+                )
+                q &= ~Q(state="Deleted") | Q(deleted_on__gte=time_threshold)
+
+        q &= Q(owner=user) | Q(access__in=["project", "public"])
+        q &= Q(project=project)
+
+        return q
+
+    def get_app_instances_of_project(
+        self,
+        user,
+        project,
+        filter_func=None,
+        order_by=None,
+        limit=None,
+        override_default_filter=False,
+    ):
+        if order_by is None:
+            order_by = "-created_on"
+
+        if filter_func is None:
+            return self.filter(
+                self.get_app_instances_of_project_filter(
+                    user=user, project=project
+                )
+            ).order_by(order_by)[:limit]
+
+        if override_default_filter:
+            return self.filter(filter_func).order_by(order_by)[:limit]
+
+        return (
+            self.filter(
+                self.get_app_instances_of_project_filter(
+                    user=user, project=project
+                )
+            )
+            .filter(filter_func)
+            .order_by(order_by)[:limit]
+        )
+
     def get_available_app_dependencies(self, user, project, app_name):
         result = self.filter(
             ~Q(state="Deleted"),

@@ -23,40 +23,41 @@
                             <h3>{{ app.name }}</h3>
                         </div>
                         <div class="align-items-end d-flex h-100">
-                            
-                           <div>
-                               
-                               <div class="row">
-                                   <div class="col">
-                                       <p>{{ app.description }}</p>
-                                   </div>
-                               </div>
-                               <div>
-                               <div class="row">
-                                   <div class="col">
-                                       {% can_create_app request.user project app as can_create %}
-                               
-                                       {% if can_create %}
-                                           <a class="btn btn-primary"
-                                               href="{% url 'apps:create' request.user project.slug app.slug  %}">Create</a>
-                                       {% else %}
-                                           <button class="btn btn-secondary" style="cursor: default;" data-bs-toggle="tooltip" data-bs-placement="top"
-                                               data-bs-title="Max number of apps reached">
-                                               Create
-                                           </button>
-                                       {% endif %}
-                                   </div>
-                               </div>
-                           </div>
-                                    
+
+                            <div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <p>{{ app.description }}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="row">
+                                        <div class="col">
+                                            {% can_create_app request.user project app as can_create %}
+
+                                            {% if can_create %}
+                                            <a class="btn btn-primary"
+                                                href="{% url 'apps:create' request.user project.slug app.slug  %}">Create</a>
+                                            {% else %}
+                                            <button class="btn btn-secondary" style="cursor: default;"
+                                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                                data-bs-title="Max number of apps reached">
+                                                Create
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                     <div class="col-4">
 
                         {% static 'images/logos/apps/' as static_url %}
-                        <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end" style="height:100px;"
-                            alt="App Logo">
+                        <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end"
+                            style="height:100px;" alt="App Logo">
                     </div>
                 </div>
             </div>
@@ -66,52 +67,55 @@
 </div>
 
 <script>
+    {
+        const apps = JSON.parse("{{ app_ids|escapejs }}")
+        const body = new FormData()
+        body.append("apps", apps)
 
-    const apps = {{ pk_list | safe }}
-    const url = "{% url 'apps:get_status' request.user project.slug %}"
-    const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'apps:get_status' request.user project.slug %}"
+        const csrftoken = getCookie('csrftoken');
 
-    const updateStatus = async () => {
+        const updateStatus = async () => {
 
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            },
-            body: JSON.stringify(apps),
-        })
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body
+            })
 
-        const json = await response.json()
+            const json = await response.json()
 
-        for (const key in json) {
-            if (Object.hasOwnProperty.call(json, key)) {
+            for (const key in json) {
+                if (Object.hasOwnProperty.call(json, key)) {
 
-                const { status, statusGroup } = json[key]
-                const querySelector = `#status-${key} > span`
-                const element = document.querySelector(querySelector)
-                const className = `badge bg-${statusGroup}`
+                    const { status, statusGroup } = json[key]
+                    const querySelector = `#status-${key} > span`
+                    const element = document.querySelector(querySelector)
+                    const className = `badge bg-${statusGroup}`
 
-                element.className = className
-                element.innerText = status
+                    element.className = className
+                    element.innerText = status
+                }
             }
         }
-    }
 
-    const loop = async () => {
+        const loop = async () => {
 
-        if (apps) {
+            if (apps) {
 
-            await updateStatus()
+                await updateStatus()
 
-            setTimeout(() => {
-                loop()
-            }, 5000)
+                setTimeout(() => {
+                    loop()
+                }, 5000)
+            }
         }
+
+        loop()
     }
-
-    loop()
-
 </script>
 
 {% endblock %}
