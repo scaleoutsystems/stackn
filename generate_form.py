@@ -1,4 +1,4 @@
-import flatten_json
+from django.conf import settings
 from django.db.models import Q
 
 from models.models import Model
@@ -103,32 +103,44 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
     return dep_apps, app_deps
 
 
-def get_form_primitives(aset, project, appinstance=[]):
-    all_keys = aset.keys()
-    print("PRIMITIVES")
+def get_disable_fields():
+    try:
+        result = settings.DISABLED_APP_INSTANCE_FIELDS
+        return result if result is not None else []
+    except Exception:
+        return []
+
+
+def get_form_primitives(app_settings, appinstance=[]):
+    disabled_fields = get_disable_fields()
+
+    all_keys = app_settings.keys()
     primitives = dict()
-    if appinstance:
-        ai_vals = flatten_json.flatten(appinstance.parameters, ".")
+
     for key in all_keys:
         if key not in key_words:
-            primitives[key] = aset[key]
+            primitives[key] = app_settings[key]
             if "meta" in primitives[key]:
                 primitives[key]["meta_title"] = primitives[key]["meta"][
                     "title"
                 ]
             else:
                 primitives[key]["meta_title"] = key
-            if appinstance:
-                for subkey, subval in aset[key].items():
-                    print(subkey)
-                    try:
-                        if subkey != "meta" and subkey != "meta_title":
-                            primitives[key][subkey]["default"] = ai_vals[
-                                key + "." + subkey
-                            ]
-                    except Exception as err:
-                        print(err)
-    print(primitives)
+
+            for disabled_fiels in disabled_fields:
+                del primitives[key][disabled_fiels]
+
+            if appinstance and key in appinstance.parameters.keys():
+                for _key, _ in app_settings[key].items():
+                    is_meta_key = _key in ["meta", "meta_title"]
+                    if not is_meta_key:
+                        parameters_of_key = appinstance.parameters[key]
+
+                        if _key in parameters_of_key.keys():
+                            primitives[key][_key][
+                                "default"
+                            ] = parameters_of_key[_key]
+
     return primitives
 
 
@@ -238,7 +250,7 @@ def generate_form(aset, project, app, user, appinstance=[]):
         form["dep_flavor"] = True
         form["flavors"] = Flavor.objects.filter(project=project)
 
-    form["primitives"] = get_form_primitives(aset, project, appinstance)
+    form["primitives"] = get_form_primitives(aset, appinstance)
     form["dep_permissions"], form["form_permissions"] = get_form_permission(
         aset, project, appinstance
     )
