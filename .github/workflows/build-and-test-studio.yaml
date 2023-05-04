@@ -66,13 +66,13 @@ jobs:
           echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV       
           echo "The Studio URL is $STUDIO_URL"
 
-      - name: Wait for Studio URL is up
-        uses: cygnetdigital/wait_for_response@v2.0.0
+      - name: Check URL is up
+        uses: gerdemann/http-status-code@1.0.0
         with:
           url: ${{ env.STUDIO_URL }}
-          responseCode: '200,308,500'
-          timeout: 60000
-          interval: 5000
+          code: 200 # http status code
+          timeout: 120 # seconds
+          interval: 5 # seconds
         continue-on-error: true
 
       - name: Check if Studio is ready
@@ -89,15 +89,6 @@ jobs:
           kubectl version
           kubectl get no
           kubectl get pods -A -o wide
-
-      - name: Check URL is up
-        uses: gerdemann/http-status-code@1.0.0
-        with:
-          url: ${{ env.STUDIO_URL }}
-          code: 200 # http status code
-          timeout: 60 # seconds
-          interval: 5 # seconds
-        continue-on-error: true
 
       - name: Cypress run e2e tests
         uses: cypress-io/github-action@v5
