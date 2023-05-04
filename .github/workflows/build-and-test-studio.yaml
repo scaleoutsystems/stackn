@@ -91,12 +91,12 @@ jobs:
           kubectl get pods -A -o wide
 
       - name: Check URL is up
-        uses: cygnetdigital/wait_for_response@v2.0.0
+        uses: gerdemann/http-status-code@1.0.0
         with:
           url: ${{ env.STUDIO_URL }}
-          responseCode: '200,308,500'
-          timeout: 60000
-          interval: 5000
+          code: 200 # http status code
+          timeout: 60 # seconds
+          interval: 5 # seconds
         continue-on-error: true
 
       - name: Cypress run e2e tests
