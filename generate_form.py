@@ -127,8 +127,9 @@ def get_form_primitives(app_settings, appinstance=[]):
             else:
                 primitives[key]["meta_title"] = key
 
-            for disabled_fiels in disabled_fields:
-                del primitives[key][disabled_fiels]
+            for disabled_field in disabled_fields:
+                if disabled_field in primitives[key]:
+                    del primitives[key][disabled_field]
 
             if appinstance and key in appinstance.parameters.keys():
                 for _key, _ in app_settings[key].items():

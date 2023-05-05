@@ -100,6 +100,32 @@ class GenerateFormTestCase(TestCase):
 
         self.assertTrue(has_expected_keys)
 
+    @override_settings(
+        DISABLED_APP_INSTANCE_FIELDS=[
+            "accessModes",
+            "storageClass",
+            "madeUpValue",
+        ]
+    )
+    def test_get_form_primitives_field_not_in_model(self):
+        app_settings = deepcopy(self.app_settings_pvc)
+
+        result = get_form_primitives(app_settings, None)
+
+        result_items = result["volume"]
+        result_keys = result_items.keys()
+
+        result_length = len(result_items)
+        expected_length = 2
+
+        self.assertEqual(result_length, expected_length)
+
+        has_expected_keys = (
+            "meta_title" in result_keys and "size" in result_keys
+        )
+
+        self.assertTrue(has_expected_keys)
+
     @override_settings(DISABLED_APP_INSTANCE_FIELDS=[])
     def test_get_form_primitives_should_set_default(self):
         app_settings = deepcopy(self.app_settings_pvc)
