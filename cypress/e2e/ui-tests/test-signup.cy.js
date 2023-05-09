@@ -1,9 +1,6 @@
 describe("Test sign up", () => {
 
-    // username here must match username in db-reset.sh
-    var username = "e2e_tests_signup_" + Date.now(); // max 30 chars allowed in UI form
-    const email = "no-reply-signup@scilifelab.se";
-    const pwd = "test12345";
+    let userdata
 
     beforeEach(() => {
         // reset and seed the database prior to every test
@@ -16,13 +13,22 @@ describe("Test sign up", () => {
         }
     })
 
+    beforeEach(() => {
+        // username in fixture must match username in db-reset.sh
+        cy.fixture('user-signup.json').then(function (data) {
+            userdata = data;
+            userdata.username = data.username_prefix + Date.now(); // max 30 chars allowed in UI form
+          })
+    })
+
     it("should create new user account with valid form input", () => {
+ 
         cy.visit("/signup/");
 
-        cy.get('input[name=username]').type(username);
-        cy.get('input[name=email]').type(email);
-        cy.get('input[name=password1]').type(pwd);
-        cy.get('input[name=password2]').type(pwd);
+        cy.get('input[name=username]').type(userdata.username);
+        cy.get('input[name=email]').type(userdata.email);
+        cy.get('input[name=password1]').type(userdata.password);
+        cy.get('input[name=password2]').type(userdata.password);
 
         cy.get("input#submit-id-save").click();
 

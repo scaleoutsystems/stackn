@@ -1,8 +1,6 @@
 describe("Test login", () => {
 
-    // username here must match username in db-cleanup.sh
-    const username = "e2e_tests_login_tester"
-    const pwd = "test12345"
+    let userdata
 
     before(() => {
         // reset and seed the database ONCE prior to all tests in this class
@@ -16,11 +14,19 @@ describe("Test login", () => {
         }
     })
 
-    it("should login an existing user when input is valid", () => {
+    beforeEach(() => {
+        // username in fixture must match username in db-reset.sh
+        cy.fixture('user-login.json').then(function (data) {
+            userdata = data;
+          })
+    })
+
+    it("can login an existing user through the UI when input is valid", () => {
+
         cy.visit("accounts/login/")
 
-        cy.get('input[name=username]').type(username)
-        cy.get('input[name=password]').type(pwd)
+        cy.get('input[name=username]').type(userdata.username)
+        cy.get('input[name=password]').type(userdata.password)
 
         cy.get("button").contains('Login').click();
 

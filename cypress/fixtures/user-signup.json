@@ -1,0 +1,5 @@
+{
+    "username_prefix": "e2e_tests_signup_",
+    "password": "test12345",
+    "email": "no-reply-signup@scilifelab.se"
+}
