@@ -1,6 +1,6 @@
 describe("Test login", () => {
 
-    let userdata
+    let users
 
     before(() => {
         // reset and seed the database ONCE prior to all tests in this class
@@ -16,8 +16,8 @@ describe("Test login", () => {
 
     beforeEach(() => {
         // username in fixture must match username in db-reset.sh
-        cy.fixture('user-login.json').then(function (data) {
-            userdata = data;
+        cy.fixture('users.json').then(function (data) {
+            users = data;
           })
     })
 
@@ -25,12 +25,18 @@ describe("Test login", () => {
 
         cy.visit("accounts/login/")
 
-        cy.get('input[name=username]').type(userdata.username)
-        cy.get('input[name=password]').type(userdata.password)
+        cy.get('input[name=username]').type(users.login.username)
+        cy.get('input[name=password]').type(users.login.password)
 
         cy.get("button").contains('Login').click();
 
         cy.url().should("include", "projects");
         cy.get('h3').should('contain', 'Projects')
+    })
+
+    it("can login an existing user through the UI when input is valid using cypress command", () => {
+
+        cy.loginViaUI(users.login.username, users.login.password)
+
     })
 })
