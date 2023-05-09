@@ -42,3 +42,41 @@ Cypress.Commands.add('loginViaUI', (username, password) => {
       }
     )
   })
+
+Cypress.Commands.add('loginViaApi', (username, password) => {
+
+    const relurl = "/accounts/login/"
+
+    cy.session(
+      username,
+      () => {
+        cy.visit(relurl)
+
+        cy.get("[name=csrfmiddlewaretoken]")
+        .should("exist")
+        .should("have.attr", "value")
+        .as("csrfToken");
+
+        cy.get("@csrfToken").then((token) => {
+            cy.request({
+              method: "POST",
+              url: relurl,
+              form: true,
+              body: {
+                username: username,
+                password: password,
+              },
+              headers: {
+                "X-CSRFTOKEN": token,
+              },
+            });
+          });
+      },
+      {
+        validate: () => {
+          cy.getCookie('sessionid').should('exist')
+          cy.getCookie('csrftoken').should('exist')
+        },
+      }
+    )
+  })
