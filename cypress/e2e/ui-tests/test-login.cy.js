@@ -28,10 +28,12 @@ describe("Test login", () => {
         cy.get('input[name=username]').type(users.login.username)
         cy.get('input[name=password]').type(users.login.password)
 
-        cy.get("button").contains('Login').click();
-
-        cy.url().should("include", "projects");
-        cy.get('h3').should('contain', 'Projects')
+        cy.get("button").contains('Login').click()
+            .then((href) => {
+                cy.log(href)
+                cy.url().should("include", "projects")
+                cy.get('h3').should('contain', 'Projects')
+            })
     })
 
     it("can login an existing user through the UI when input is valid using cypress command", () => {
