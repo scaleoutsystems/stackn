@@ -47,10 +47,15 @@ describe("Test project contributor user functionality", () => {
         // Fill in the options for creating a new blank project
         cy.get('input[name=name]').type(project_name);
         cy.get('textarea[name=description]').type("A test project created by an e2e test.");
-        cy.get("button").contains('Create project').click();
+        cy.get("button").contains('Create project').click()
+            .then((href) => {
+                cy.log(href)
+                //cy.url().should("include", "/project-e2e-blank");
+                cy.get('h3').should('contain', 'Overview')
+            })
+
         // TODO: add additional asserts
-        //cy.url().should("include", "/project-e2e-blank");
-        cy.get('h3').should('contain', 'Overview');
+
     })
   
     it.skip("can create a new mlflow project", () => {
