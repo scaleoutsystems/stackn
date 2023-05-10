@@ -1,5 +1,7 @@
 describe("Test of the home page", () => {
+
     beforeEach(() => {
+
         cy.visit("/")
     })
 

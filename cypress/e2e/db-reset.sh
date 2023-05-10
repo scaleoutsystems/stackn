@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Delete all test users from e2e tests except for the contributor user
 docker exec studio bash -c "python manage.py dbshell -- \
     -c \"DELETE FROM auth_user WHERE \

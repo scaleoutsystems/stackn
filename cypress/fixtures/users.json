@@ -1,0 +1,13 @@
+{
+    "login": {
+        "username": "e2e_tests_login_tester",
+        "password": "test12345"
+    },
+
+    "contributor": {
+        "username": "e2e_tests_contributor_tester",
+        "password": "test12345",
+        "email": "no-reply-contributor@scilifelab.se"
+    }
+
+}

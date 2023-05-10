@@ -23,3 +23,60 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('loginViaUI', (username, password) => {
+    cy.session(
+      username,
+      () => {
+        cy.visit('/accounts/login/')
+        cy.get('input[name=username]').type(username)
+        cy.get('input[name=password]').type(`${password}{enter}`, { log: false })
+        cy.url().should('include', '/projects')
+        cy.get('h3').should('contain', 'Projects')
+      },
+      {
+        validate: () => {
+          cy.getCookie('sessionid').should('exist')
+          cy.getCookie('csrftoken').should('exist')
+        },
+      }
+    )
+  })
+
+Cypress.Commands.add('loginViaApi', (username, password) => {
+
+    const relurl = "/accounts/login/"
+
+    cy.session(
+      username,
+      () => {
+        cy.visit(relurl)
+
+        cy.get("[name=csrfmiddlewaretoken]")
+        .should("exist")
+        .should("have.attr", "value")
+        .as("csrfToken");
+
+        cy.get("@csrfToken").then((token) => {
+            cy.request({
+              method: "POST",
+              url: relurl,
+              form: true,
+              body: {
+                username: username,
+                password: password,
+              },
+              headers: {
+                "X-CSRFTOKEN": token,
+              },
+            });
+          });
+      },
+      {
+        validate: () => {
+          cy.getCookie('sessionid').should('exist')
+          cy.getCookie('csrftoken').should('exist')
+        },
+      }
+    )
+  })
