@@ -1,24 +1,16 @@
-from datetime import datetime, timedelta
-from json import load
-
-import django.core.exceptions as ex
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Subquery
-from django.http import (
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    JsonResponse,
-)
+from django.db.models import Q
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import HttpResponseRedirect, render, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers.helpers import (
+from .helpers import (
     can_access_app_instances,
     create_app_instance,
     handle_permissions,
@@ -111,72 +103,71 @@ def logs(request, user, project, ai_id):
     return render(request, template, locals())
 
 
-@permission_required_or_403("can_view_project", (Project, "slug", "project"))
-def filtered(request, user, project, category):
-    # template = 'index_apps.html'
-    projects = Project.objects.filter(
-        Q(owner=request.user) | Q(authorized=request.user), status="active"
-    )
-    status_success, status_warning = get_status_defs()
-    menu = dict()
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project")
+    ),
+    name="dispatch",
+)
+class FilteredView(View):
+    template_name = "new.html"
 
-    template = "new.html"
+    def get(self, request, user, project, category):
+        project = Project.objects.get(slug=project)
 
-    try:
-        cat_obj = AppCategories.objects.get(slug=category)
-    except ex.ObjectDoesNotExist:
-        print("No apps are loaded.")
-        cat_obj = []
-    menu[category] = "active"
-    media_url = settings.MEDIA_URL
-    project = Project.objects.get(slug=project)
-    try:
-        apps = Apps.objects.filter(
-            pk__in=Subquery(
-                Apps.objects.filter(
-                    (Q(access="public") | Q(projects__in=[project])),
-                    category=cat_obj,
-                    user_can_create=True,
-                )
-                .order_by("slug", "-revision")
-                .distinct("slug")
-                .values("pk")
+        def filter_func():
+            filter = AppInstance.objects.get_app_instances_of_project_filter(
+                user=request.user, project=project, deleted_time_delta=5
             )
-        ).order_by("-priority")
-    except Exception as err:
-        print(err)
 
-    time_threshold = datetime.now() - timedelta(minutes=5)
-    print(time_threshold)
-    appinstances = AppInstance.objects.filter(
-        Q(owner=request.user) | Q(access__in=["project", "public"]),
-        ~Q(state="Deleted") | Q(deleted_on__gte=time_threshold),
-        app__category=cat_obj,
-        project=project,
-    ).order_by("-created_on")
-    pk_list = ""
-    for instance in appinstances:
-        pk_list += str(instance.pk) + ","
-    pk_list = pk_list[:-1]
-    pk_list = "'" + pk_list + "'"
-    apps_installed = False
-    if appinstances:
-        apps_installed = True
+            filter &= Q(app__category__slug=category)
 
-    return render(request, template, locals())
+            return filter
+
+        app_instances_of_category = AppInstance.objects.filter(
+            filter_func()
+        ).order_by("-created_on")
+
+        app_ids = [obj.id for obj in app_instances_of_category]
+
+        apps_of_category = (
+            Apps.objects.filter(category=category, user_can_create=True)
+            .order_by("slug", "-revision")
+            .distinct("slug")
+        )
+
+        context = {
+            "apps": apps_of_category,
+            "appinstances": app_instances_of_category,
+            "app_ids": app_ids,
+            "project": project,
+            "category": category,
+        }
+
+        return render(
+            request=request,
+            context=context,
+            template_name=self.template_name,
+        )
 
 
-@permission_required_or_403("can_view_project", (Project, "slug", "project"))
-def get_status(request, user, project):
-    if request.method == "POST":
-        status_success, status_warning = get_status_defs()
-        app_pks = load(request)
-        arr = app_pks.split(",")
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project")
+    ),
+    name="dispatch",
+)
+class GetStatusView(View):
+    def post(self, request, user, project):
+        body = request.POST["apps"] if request.POST["apps"] is not None else []
+        result = {}
 
-        if len(arr) > 0 and not (len(arr) == 1 and arr[0] == ""):
+        arr = body.split(",")
+
+        if len(arr) > 0:
+            status_success, status_warning = get_status_defs()
+
             app_instances = AppInstance.objects.filter(pk__in=arr)
-
-            result = {}
 
             for instance in app_instances:
                 try:
@@ -201,7 +192,7 @@ def get_status(request, user, project):
 
             return JsonResponse(result)
 
-    return HttpResponseNotFound("<h1>Page not found</h1>")
+        return JsonResponse(result)
 
 
 @method_decorator(
@@ -228,6 +219,10 @@ class AppSettingsView(View):
         )
         existing_app_name = appinstance.name
         app = appinstance.app
+
+        if not app.user_can_edit:
+            return HttpResponseForbidden()
+
         app_settings = appinstance.app.settings
         form = generate_form(
             app_settings, project, app, request.user, appinstance
@@ -244,6 +239,9 @@ class AppSettingsView(View):
         app = appinstance.app
         app_settings = app.settings
         body = request.POST.copy()
+
+        if not app.user_can_edit:
+            return HttpResponseForbidden()
 
         if not body.get("permission", None):
             body.update({"permission": appinstance.access})
@@ -495,18 +493,20 @@ def unpublish(request, user, project, category, ai_id):
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def delete(request, user, project, category, ai_id):
-    print("PK=" + str(ai_id))
-
     if "from" in request.GET:
         from_page = request.GET.get("from")
     else:
         from_page = "filtered"
 
+    app_instance = AppInstance.objects.get(pk=ai_id)
+
+    if not app_instance.app.user_can_delete:
+        return HttpResponseForbidden()
+
     delete_resource.delay(ai_id)
     # fix: in case appinstance is public swich to private
-    app = AppInstance.objects.get(pk=ai_id)
-    app.access = "private"
-    app.save()
+    app_instance.access = "private"
+    app_instance.save()
 
     if "from" in request.GET:
         from_page = request.GET.get("from")

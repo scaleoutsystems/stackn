@@ -8,8 +8,8 @@ app_name = "apps"
 
 urlpatterns = [
     path("apps/", views.index, name="index"),
-    path("status", views.get_status, name="get_status"),
-    path("<category>", views.filtered, name="filtered"),
+    path("status", views.GetStatusView.as_view(), name="get_status"),
+    path("<category>", views.FilteredView.as_view(), name="filtered"),
     path("create/<app_slug>", CreateView.as_view(), name="create"),
     path(
         "serve/<app_slug>/<version>", CreateServeView.as_view(), name="serve"
