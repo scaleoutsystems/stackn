@@ -8,15 +8,17 @@ from projects.models import Project
 
 
 cypress_path = os.path.join(settings.BASE_DIR, "cypress/fixtures")
-#print(cypress_path) # /app/cypress/fixtures
+print(f"Now loading the json users file from fixtures path: {cypress_path}") # /app/cypress/fixtures
 
-with open( os.path.join(cypress_path, "user-contributor.json"), 'r') as f:
+with open( os.path.join(cypress_path, "users.json"), 'r') as f:
     testdata = json.load(f)
 
-    username = testdata["username"]
-    email = testdata["email"]
-    pwd = testdata["password"]
+    userdata = testdata["contributor"]
 
+    username = userdata["username"]
+    email = userdata["email"]
+    pwd = userdata["password"]
+    
     # Create the contributor user
     user = User.objects.create_user(username, email, pwd)
     user.save()

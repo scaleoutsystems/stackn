@@ -1,39 +1,40 @@
 describe("Test project contributor user functionality", () => {
 
-    // TODO: share logged in session across tests
+    // Tests performed as an authenticated user that
+    // creates and deletes objects.
+    // user: e2e_tests_contributor_tester
 
-    // username here must match username in db-seed-contributor.sh
-    const username = "e2e_tests_contributor_tester"
-    const pwd = "test12345"
+    let users
 
     before(() => {
         // seed the db with: contributor user, a blank project
         //cy.log("Seeding the db for the contributor tests. Running db-seed-contributor.sh");
-
         cy.log("Running seed_contributor.py")
         cy.exec("./cypress/e2e/db-seed-contributor.sh");
     })
+
+    beforeEach(() => {
+        // username in fixture must match username in db-reset.sh
+        cy.fixture('users.json').then(function (data) {
+            users = data;
+
+            cy.loginViaApi(users.contributor.username, users.contributor.password)
+        })
+    })
+
 
     it("can run the test setup", () => {
     })
 
     it("can create a new blank project", () => {
+
         // Names of objects to create
         const project_name = "e2e-create-proj-test";
         const volume_name = "e2e-project-vol";
 
-        // First login as the test user
-        cy.visit("accounts/login/");
+        cy.visit("/projects/")
 
-        cy.get('input[name=username]').type(username);
-        cy.get('input[name=password]').type(pwd);
-
-        cy.get("button").contains('Login').click();
-
-        cy.url().should("include", "projects");
-        cy.get('h3').should('contain', 'Projects');
-
-        // Next click button for UI to create a new project
+        // Click button for UI to create a new project
         cy.get("a").contains('New project').click();
         cy.url().should("include", "projects/templates");
         cy.get('h3').should('contain', 'New project');
@@ -47,7 +48,7 @@ describe("Test project contributor user functionality", () => {
         cy.get('input[name=name]').type(project_name);
         cy.get('textarea[name=description]').type("A test project created by an e2e test.");
         cy.get("button").contains('Create project').click();
-        // TODO: add then to add additional asserts
+        // TODO: add additional asserts
         //cy.url().should("include", "/project-e2e-blank");
         cy.get('h3').should('contain', 'Overview');
     })
@@ -56,19 +57,11 @@ describe("Test project contributor user functionality", () => {
     })
 
     it("can delete a project", () => {
+
         // Names of objects to create
         const project_name = "e2e-delete-proj-test";
 
-        // First login as the test user
-        cy.visit("accounts/login/");
-
-        cy.get('input[name=username]').type(username);
-        cy.get('input[name=password]').type(pwd);
-
-        cy.get("button").contains('Login').click();
-
-        cy.url().should("include", "projects");
-        cy.get('h3').should('contain', 'Projects');
+        cy.visit("/projects/")
 
         // Verify that the test project has been created
         cy.get('h5.card-title').should('contain', project_name);
