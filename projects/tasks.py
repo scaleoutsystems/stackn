@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 
 import apps.tasks as apptasks
 from apps.controller import delete
-from apps.helpers.helpers import create_app_instance
+from apps.helpers import create_app_instance
 
 from .exceptions import ProjectCreationException
 from .models import S3, Environment, Flavor, MLFlow, Project
