@@ -69,7 +69,7 @@ jobs:
           echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV       
           echo "The Studio URL is $STUDIO_URL"
           docker exec studio pwd
-          docker exec studio ls -al | grep media
+          docker exec studio ls -al
           docker exec studio whoami
         
       - name: Check URL is up
