@@ -28,7 +28,9 @@ jobs:
 
     steps:
       - name: Branch or tag that triggered the workflow run
-        run: echo "Running on branch ${GITHUB_REF##*/}"
+        run: |
+          echo "Running on branch ${GITHUB_REF##*/}"
+          echo "Running as UID: $UID, GID: $GID"
 
       - name: Checkout branch serve-0.7
         uses: actions/checkout@v3
@@ -52,11 +54,12 @@ jobs:
         working-directory: ${{env.working-directory}}
         id: setup
         run: |
+          echo "Running as UID: $UID, GID: $GID"
           set -ex
           #echo "Running init script"
           #./init.sh --no-prompt
           echo "Deploying studio"
-          docker-compose up -d
+          UID="$(id -u)" GID="$(id -g)" docker-compose up -d
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
