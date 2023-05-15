@@ -169,11 +169,20 @@
                                             <i class="bi bi-text-center me-1"></i>
                                             Details
                                         </a>
+
+                                        {% if model.access != "PU" %}
                                         <a class="dropdown-item default"
-                                            href="{% url 'models:publish_model' request.user project.slug model.pk %}">
-                                            <i class="bi bi-sliders2-vertical me-1"></i>
-                                            Settings
+                                            href="{% url 'models:publish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-share me-1"></i>
+                                            Publish
                                         </a>
+                                        {% else %}
+                                        <a class="dropdown-item default"
+                                            href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-slash-circle me-1"></i>
+                                            Unpublish
+                                        </a>
+                                        {% endif %}
 
                                         {% include 'common/serve_model_link.html' %}
 
