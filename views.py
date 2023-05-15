@@ -159,12 +159,12 @@ class FilteredView(View):
 )
 class GetStatusView(View):
     def post(self, request, user, project):
-        body = request.POST["apps"] if request.POST["apps"] is not None else []
+        body = request.POST.get("apps", "")
+
         result = {}
 
-        arr = body.split(",")
-
-        if len(arr) > 0:
+        if len(body) > 0:
+            arr = body.split(",")
             status_success, status_warning = get_status_defs()
 
             app_instances = AppInstance.objects.filter(pk__in=arr)

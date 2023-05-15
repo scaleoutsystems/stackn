@@ -66,9 +66,11 @@
     {% endfor %}
 </div>
 
+
 <script>
     {
         const apps = JSON.parse("{{ app_ids|escapejs }}")
+
         const body = new FormData()
         body.append("apps", apps)
 
@@ -104,7 +106,7 @@
 
         const loop = async () => {
 
-            if (apps) {
+            if ((apps?.length ?? 0) > 0) {
 
                 await updateStatus()
 
