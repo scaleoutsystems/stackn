@@ -780,7 +780,6 @@ class AppList(
                 table_field=table_field,
                 priority=int(priority),
                 access=access,
-                logo_file=request.FILES["logo"],
             )
             app.save()
             app.projects.add(*proj_list)

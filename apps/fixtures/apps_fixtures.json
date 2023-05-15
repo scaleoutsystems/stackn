@@ -25,7 +25,7 @@
       }
   },
   "chart": "apps/mongo-express/chart",
-  "logo": "apps/mongo-express/logo.png",
+  "logo": "mongo-express-logo.png",
   "updated_on": "2021-03-10T19:45:03.927Z",
   "created_on": "2021-02-19T21:34:37.815Z"
   }
@@ -60,7 +60,7 @@
       }
     },
     "chart": "apps/mongodb/chart",
-    "logo": "apps/mongodb/logo.png",
+    "logo": "mongodb-logo.png",
     "updated_on": "2021-03-10T19:45:03.927Z",
     "created_on": "2021-02-19T21:34:37.815Z"
   }
@@ -97,7 +97,7 @@
       }
   },
   "chart": "apps/fedn-combiner/chart",
-  "logo": "apps/fedn-combiner/logo.png",
+  "logo": "fedn-combiner-logo.png",
   "updated_on": "2021-03-10T19:45:03.927Z",
   "created_on": "2021-02-19T21:34:37.815Z"
   }
@@ -136,7 +136,7 @@
       }
     },
     "chart": "apps/fedn-reducer/chart",
-    "logo": "apps/fedn-reducer/logo.png",
+    "logo": "fedn-reducer-logo.png",
     "updated_on": "2021-03-10T19:45:03.927Z",
     "created_on": "2021-02-19T21:34:37.815Z"
   }
@@ -188,7 +188,7 @@
         }
       },
       "chart": "apps/docker-registry/chart",
-      "logo": "apps/docker-registry/logo.png",
+      "logo": "docker-registry-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -237,7 +237,7 @@
         "export-cli": "True"
       },
       "chart": "apps/jupyter-lab/chart",
-      "logo": "apps/jupyter-lab/logo.png",
+      "logo": "jupyter-lab-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -290,7 +290,7 @@
         }
       },
       "chart": "apps/minio/chart",
-      "logo": "apps/minio/logo.png",
+      "logo": "minio-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -343,7 +343,7 @@
         }
       },
       "chart": "apps/mlflow/chart",
-      "logo": "apps/mlflow/logo.png",
+      "logo": "mlflow-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -399,7 +399,7 @@
         "publishable": "true"
       },
       "chart": "apps/mlflow-serve/chart",
-      "logo": "apps/mlflow-serve/logo.png",
+      "logo": "mlflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -448,7 +448,7 @@
         "publishable": "true"
       },
       "chart": "apps/tensorflow-serve/chart",
-      "logo": "apps/tensorflow-serve/logo.png",
+      "logo": "tensorflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -515,7 +515,7 @@
         "publishable": "true"
       },
       "chart": "apps/pytorch-serve/chart",
-      "logo": "apps/pytorch-serve/logo.png",
+      "logo": "pytorch-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -568,7 +568,7 @@
         }
       },
       "chart": "apps/volumeK8s/chart",
-      "logo": "apps/volumeK8s/logo.png",
+      "logo": "volumeK8s-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -609,7 +609,7 @@
         }
       },
       "chart": "apps/vscode/chart",
-      "logo": "charts/apps/vscode/logo.png",
+      "logo": "vscode-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }

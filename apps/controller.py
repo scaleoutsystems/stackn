@@ -70,4 +70,9 @@ def deploy(options):
     ]
     print("CONTROLLER: RUNNING HELM COMMAND... ")
     result = subprocess.run(args, capture_output=True)
+
+    # remove file
+    rm_args = ["rm", unique_filename]
+    subprocess.run(rm_args)
+
     return result

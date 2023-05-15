@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% comment %} {% load i18n  eatn_tags static %} {% endcomment %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ title }} - Studio{% endblock %}
+{% block extrastyle %}
+    
+{% endblock %}
+{% block branding %}
+    <img src="{% static 'images/scaleout_black.png' %}" alt="Studio Logo" width="200">
+{% endblock %}
+{% block nav-global %}
+
+{% include 'common/common_fonts.html' %}
+
+
+{% endblock %}
