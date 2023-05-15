@@ -444,17 +444,18 @@ class CreateView(View):
 
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def publish(request, user, project, category, ai_id):
-    print("Publish app {}".format(ai_id))
-    print(project)
     try:
         app = AppInstance.objects.get(pk=ai_id)
-        print(app)
-        # TODO: Check that user is allowed to publish this app.
-        print("setting public")
         app.access = "public"
-        print("saving")
+
+        if app.parameters["permissions"] is not None:
+            app.parameters["permissions"] = {
+                "public": True,
+                "project": False,
+                "private": False,
+            }
+
         app.save()
-        print("done")
     except Exception as err:
         print(err)
 
@@ -475,6 +476,14 @@ def unpublish(request, user, project, category, ai_id):
     try:
         app = AppInstance.objects.get(pk=ai_id)
         app.access = "project"
+
+        if app.parameters["permissions"] is not None:
+            app.parameters["permissions"] = {
+                "public": False,
+                "project": True,
+                "private": False,
+            }
+
         app.save()
     except Exception as err:
         print(err)
