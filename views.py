@@ -452,7 +452,7 @@ class RevokeAccessToProjectView(View):
 def project_templates(request):
     template = "project_templates.html"
     templates = (
-        ProjectTemplate.objects.all()
+        ProjectTemplate.objects.filter(enabled=True)
         .order_by("slug", "-revision")
         .distinct("slug")
     )
@@ -464,7 +464,7 @@ def project_templates(request):
 def create(request):
     template = "project_create.html"
     templates = (
-        ProjectTemplate.objects.all()
+        ProjectTemplate.objects.filter(enabled=True)
         .order_by("slug", "-revision")
         .distinct("slug")
     )

@@ -337,6 +337,8 @@ class ProjectTemplate(models.Model):
     slug = models.CharField(max_length=512, default="")
     template = models.TextField(null=True, blank=True)
 
+    enabled = models.BooleanField(default=True)
+
     class Meta:
         unique_together = (
             "slug",
