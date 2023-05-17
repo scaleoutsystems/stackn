@@ -32,8 +32,6 @@ jobs:
           echo "Running on branch ${GITHUB_REF##*/}"
           echo "Running as UID: $UID, GID: $GID"
           whoami
-          export UID=$UID
-          export GID=$GID
 
       - name: Checkout branch serve-0.7
         uses: actions/checkout@v3
@@ -62,7 +60,7 @@ jobs:
           #echo "Running init script"
           #./init.sh --no-prompt
           echo "Deploying studio"
-          docker-compose up -d
+          UID=1001 GID=1001 docker-compose up -d
 
       - name: Troubleshoot folder permissions
         run: |
