@@ -17,6 +17,7 @@ services:
       - db-data:/var/lib/postgresql/data
 
   studio:
+    user: "${UID}:${GID}"
     container_name: studio
     build: 
       context: .
@@ -69,6 +70,7 @@ services:
           - rabbit.127.0.0.1.nip.io
 
   celery-worker:
+    user: "${UID}:${GID}"
     build: .
     container_name: celery-worker
     image: stackn:develop
@@ -100,6 +102,7 @@ services:
           - celery.127.0.0.1.nip.io
 
   celery-beat:
+    user: "${UID}:${GID}"
     build: .
     container_name: celery-beat
     image: stackn:develop
