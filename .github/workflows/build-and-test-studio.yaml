@@ -32,6 +32,8 @@ jobs:
           echo "Running on branch ${GITHUB_REF##*/}"
           echo "Running as UID: $UID, GID: $GID"
           whoami
+          export UID=$UID
+          export GID=$GID
 
       - name: Checkout branch serve-0.7
         uses: actions/checkout@v3
