@@ -61,9 +61,14 @@ jobs:
           #./init.sh --no-prompt
           echo "Deploying studio"
           docker-compose up -d
+
+      - name: Troubleshoot folder permissions
+        run: |
+          sleep 10s
           whoami
           pwd
           ls -al
+        shell: bash
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
