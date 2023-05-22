@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from . import views
@@ -12,7 +13,11 @@ app_name = "projects"
 
 basicpatterns = [
     path("projects/", views.IndexView.as_view(), name="index"),
-    path("projects/create", views.create, name="create"),
+    path(
+        "projects/create",
+        login_required(views.CreateProjectView.as_view()),
+        name="create",
+    ),
     path(
         "projects/templates", views.project_templates, name="project_templates"
     ),

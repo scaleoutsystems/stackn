@@ -460,26 +460,30 @@ def project_templates(request):
     return render(request, template, locals())
 
 
-@login_required
-def create(request):
-    template = "project_create.html"
-    templates = (
-        ProjectTemplate.objects.filter(enabled=True)
-        .order_by("slug", "-revision")
-        .distinct("slug")
-    )
+class CreateProjectView(View):
+    template_name = "project_create.html"
 
-    template_selected = "STACKn Default"
-    if "template" in request.GET:
-        template_selected = request.GET.get("template")
+    def get(self, request):
+        pre_selected_template = request.GET.get("template")
 
-    if request.method == "POST":
+        arr = ProjectTemplate.objects.filter(name=pre_selected_template)
+
+        template = arr[0] if len(arr) > 0 else None
+
+        context = {"template": template}
+
+        return render(
+            request=request,
+            context=context,
+            template_name=self.template_name,
+        )
+
+    def post(self, request, *args, **kwargs):
         success = True
 
+        template_id = request.POST.get("template_id")
         name = request.POST.get("name", "default")
-        access = request.POST.get("access", "org")
         description = request.POST.get("description", "")
-        repository = request.POST.get("repository", "")
 
         # Try to create database project object.
         try:
@@ -487,7 +491,7 @@ def create(request):
                 name=name,
                 owner=request.user,
                 description=description,
-                repository=repository,
+                repository="",
             )
         except ProjectCreationException:
             print("ERROR: Failed to create project database object.")
@@ -495,9 +499,7 @@ def create(request):
 
         try:
             # Create resources from the chosen template
-            project_template = ProjectTemplate.objects.get(
-                pk=request.POST.get("project-template")
-            )
+            project_template = ProjectTemplate.objects.get(pk=template_id)
             create_resources_from_template.delay(
                 request.user.username, project.slug, project_template.template
             )
@@ -532,8 +534,6 @@ def create(request):
         )
 
         return HttpResponseRedirect(next_page, {"message": "Created project"})
-
-    return render(request, template, locals())
 
 
 @method_decorator(

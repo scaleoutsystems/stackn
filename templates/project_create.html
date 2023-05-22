@@ -10,56 +10,76 @@
     </div>
 </div>
 
+
+
+
 <div class="row pt-3">
     <div class="col-12 col-xl-6">
+        {% if template %}
         <div class="card shadow border-0">
+
             <div class="card-body">
-                <form action="{% url 'projects:create' %}" method="POST">
+
+                <div class="row">
+
+                    <div class="col">
+                        <p>Create a <strong>{{template.name}}</strong> project</p>
+                    </div>
+                </div>
+
+                <form method="POST">
                     {% csrf_token %}
 
-                    <div class="mb-3 row">
-                        <label for="name" class="col-form-label col-sm-2 text-sm-right">Project name</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" placeholder="Project name" id="name" name="name"
-                                required>
-                            <div class="invalid-feedback">
-                                Valid project name is required.
-                            </div>
+
+                    <div class="row pb-3">
+                        <div class="col-12">
+                            <input type="text" class="form-control" placeholder="Name" id="name" name="name" required>
                         </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="template" class="col-form-label col-sm-2 text-sm-right">Project template</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" id="project-template" name="project-template">
-                                {% for template in templates %}
-                                  {% if template_selected == template.name %}
-                                  <option value="{{ template.pk }}" selected>{{ template.name }}</option>
-                                  {% else %}
-                                  <option value="{{ template.pk }}">{{ template.name }}</option>
-                                  {% endif %}
-                                {% endfor %}
-                            </select>
+                        {% if form.name.errors %}
+                        <div class="pt-1">
+                            {% for error in form.name.errors %}
+                            <p class="m-0">{{error|escape}}</p>
+                            {% endfor %}
                         </div>
+                        {% endif %}
                     </div>
-                    <div class="mb-3 row">
-                        <label for="description" class="col-form-label col-sm-2 text-sm-right">Project
-                            description</label>
-                        <div class="col-sm-10">
-                            <textarea class="form-control" placeholder="Project description" rows="3" id="description"
+
+                    <input type="hidden" name="template_id" value="{{template.id}}" id="template_id">
+
+                    <div class="row pb-3">
+                        <div class="col-12">
+                            <textarea type="text" class="form-control" placeholder="Description" id="description"
                                 name="description"></textarea>
                         </div>
+                        {% if form.description.errors %}
+                        <div class="pt-1">
+                            {% for error in form.description.errors %}
+                            <p class="m-0">{{error|escape}}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="mb-3 row">
-                        <div class="col-sm-10 ml-sm-auto">
-                            <button type="submit" class="btn btn-primary">Create project</button>
-                            <button class="btn btn-secondary" type="submit" onclick="window.location='{{ request.headers.referer }}' ; return false;">
-                                Cancel
-                            </button>
+
+
+                    <div class="row">
+                        <div class="d-flex justify-content-end">
+
+                            <a href="/projects/templates" class="btn me-2">Cancel</a>
+                            <input type="submit" name="save" value="Create project" class="btn btn-primary ms-2"
+                                id="submit-id-save">
                         </div>
                     </div>
+
                 </form>
             </div>
         </div>
+        {% else %}
+        <div class="alert alert-danger" role="alert">
+            Unable to find project template
+        </div>
+
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}
