@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
@@ -133,6 +133,17 @@ class MLFlow(models.Model):
 
     def __str__(self):
         return "{} ({})".format(self.name, self.project.slug)
+
+
+"""Post save signal when creating an mlflow object"""
+
+
+@receiver(post_save, sender=MLFlow)
+def create_mlflow(sender, instance, created, **kwargs):
+    if created:
+        if instance.project and not instance.project.mlflow:
+            instance.project.mlflow = instance
+            instance.project.save()
 
 
 # it will become the default objects attribute for a Project model
