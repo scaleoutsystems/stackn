@@ -51,15 +51,23 @@ jobs:
           kubectl get no
           kubectl get pods -A -o wide
 
+      - name: Prepare repository
+        run: |
+          echo "Running as UID: $UID, GID: $GID"
+          whoami
+          pwd
+          mv .env.template .env
+          mkdir media
+          ls -al
+        shell: bash
+
       - name: Start studio
         working-directory: ${{env.working-directory}}
         id: setup
         run: |
-          echo "Running as UID: $UID, GID: $GID"
           set -ex
           #echo "Running init script"
           #./init.sh --no-prompt
-          mv .env.template .env
           echo "Deploying studio"
           docker-compose up -d
 
@@ -81,6 +89,7 @@ jobs:
           docker exec studio pwd
           docker exec studio ls -al
           docker exec studio whoami
+          docker exec studio id stackn
         
       - name: Check URL is up
         uses: gerdemann/http-status-code@1.0.0
