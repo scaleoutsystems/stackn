@@ -53,7 +53,10 @@ jobs:
 
       - name: Create user stackn
         run: |
-          sudo useradd -u 1000 stackn
+          id 1000
+          groups
+          #sudo useradd -u 1000 stackn
+          sudo useradd stackn -G 1000
           sudo usermod -a -G docker stackn
 
       - name: Prepare repository
