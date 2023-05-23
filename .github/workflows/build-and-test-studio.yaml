@@ -59,7 +59,7 @@ jobs:
           whoami
           pwd
           mv .env.template .env
-          mkdir -m 777 media
+          mkdir -m 775 media
           sudo chgrp -R 1000 media
           sudo chmod -R g+rwx media
           ls -al
