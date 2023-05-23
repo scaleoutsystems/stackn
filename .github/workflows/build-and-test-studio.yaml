@@ -51,15 +51,21 @@ jobs:
           kubectl get no
           kubectl get pods -A -o wide
 
+      - name: Create user stackn
+        run: |
+          sudo useradd -u 1000 stackn
+          sudo usermod -a -G docker stackn
+
       - name: Prepare repository
         run: |
           echo "Running as UID: $UID, GID: $GID"
+          export GID=1000
+          echo "Now running as UID: $UID, GID: $GID"
           whoami
           pwd
           mv .env.template .env
-          mkdir media
+          mkdir -m 775 media
           ls -al
-        shell: bash
 
       - name: Start studio
         working-directory: ${{env.working-directory}}
@@ -77,7 +83,6 @@ jobs:
           whoami
           pwd
           ls -al
-        shell: bash
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
