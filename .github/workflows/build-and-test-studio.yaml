@@ -51,14 +51,6 @@ jobs:
           kubectl get no
           kubectl get pods -A -o wide
 
-      - name: Create user stackn
-        run: |
-          id 1000
-          groups
-          #sudo useradd -u 1000 stackn
-          sudo useradd stackn -G 1000
-          sudo usermod -a -G docker stackn
-
       - name: Prepare repository
         run: |
           echo "Running as UID: $UID, GID: $GID"
@@ -67,7 +59,9 @@ jobs:
           whoami
           pwd
           mv .env.template .env
-          mkdir -m 775 media
+          mkdir -m 777 media
+          sudo chgrp -R 1000 media
+          sudo chmod -R g+rwx media
           ls -al
 
       - name: Start studio
