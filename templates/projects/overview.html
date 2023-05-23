@@ -3,6 +3,10 @@
 
 {% block content %}
 
+
+{% if project.status == "active" %}
+
+
 <h3 class="mb-3">Overview</h3>
 
 <div class="row g-4">
@@ -260,5 +264,55 @@
             loop()
         }
     </script>
+
+    {% else %}
+
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+
+            {% include 'common/loader.html' %}
+        </div>
+    </div>
+
+    <script>
+        {
+
+            const url = "{% url 'projects:get_status' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
+
+            const getStatus = async () => {
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    }
+                })
+
+                const json = await response.json()
+
+                if (json.status !== "created") {
+                    window.location.reload()
+                }
+            }
+
+            const loop = async () => {
+
+                await getStatus()
+
+                setTimeout(() => {
+                    loop()
+                }, 2000)
+            }
+
+            loop()
+
+        }
+    </script>
+
+    {% endif %}
+
+
+
 
     {% endblock %}

@@ -366,6 +366,19 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
     ),
     name="dispatch",
 )
+class ProjectStatusView(View):
+    def get(self, request, user, project_slug):
+        project = Project.objects.get(slug=project_slug)
+
+        return JsonResponse({"status": project.status})
+
+
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
+)
 class GrantAccessToProjectView(View):
     def post(self, request, user, project_slug):
         selected_username = request.POST["selected_user"]
@@ -492,6 +505,7 @@ class CreateProjectView(View):
                 owner=request.user,
                 description=description,
                 repository="",
+                status="created",
             )
         except ProjectCreationException:
             print("ERROR: Failed to create project database object.")

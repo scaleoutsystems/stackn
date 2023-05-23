@@ -2,6 +2,7 @@ import base64
 import random
 import secrets
 import string
+from datetime import timedelta
 
 from django.apps import apps
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
 
@@ -148,7 +150,9 @@ def create_mlflow(sender, instance, created, **kwargs):
 
 # it will become the default objects attribute for a Project model
 class ProjectManager(models.Manager):
-    def create_project(self, name, owner, description, repository):
+    def create_project(
+        self, name, owner, description, repository, status="active"
+    ):
         user_can_create = self.user_can_create(owner)
 
         if not user_can_create:
@@ -170,6 +174,7 @@ class ProjectManager(models.Manager):
             description=description,
             repository=repository,
             repository_imported=False,
+            status=status,
         )
 
         assign_perm("can_view_project", owner, project)
@@ -276,6 +281,17 @@ class Project(models.Model):
 
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.status == "created":
+            if (
+                self.created_at is not None
+                and self.created_at < timezone.now() - timedelta(minutes=2)
+            ):
+                self.status = "active"
+                self.save()
 
 
 @receiver(pre_delete, sender=Project)

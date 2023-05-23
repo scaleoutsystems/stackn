@@ -5,6 +5,7 @@ from django.urls import path
 from . import views
 from .views import (
     GrantAccessToProjectView,
+    ProjectStatusView,
     RevokeAccessToProjectView,
     UpdatePatternView,
 )
@@ -61,6 +62,11 @@ basicpatterns = [
         "<user>/<project_slug>/project/access/revoke",
         RevokeAccessToProjectView.as_view(),
         name="revoke_access",
+    ),
+    path(
+        "<user>/<project_slug>/project/status",
+        ProjectStatusView.as_view(),
+        name="get_status",
     ),
 ]
 
