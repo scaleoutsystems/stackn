@@ -173,11 +173,7 @@
                     </div>
                     {% endif %}
 
-                    {% if app_action == "Create" %}
-                    <button class="btn btn-primary" type="submit">Create</button>
-                    {% else %}
                     <button class="btn btn-primary" type="submit">Update</button>
-                    {% endif %}
                     <button class="btn btn-secondary float-end" type="submit"
                         onclick="window.location='{{ request.headers.referer }}' ; return false;">
                         Cancel
@@ -204,6 +200,7 @@
                     <div class="col-12 col-md-6">
 
                         {% include './common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" required=True %}
+
                     </div>
                     <div class="col-12 col-md-6 pt-3 pt-md-0">
 
@@ -220,23 +217,24 @@
 
             <div class="row pt-3">
                 <div class="col-12 d-flex">
-                
-                {% with appinstance.tags|split:"," as tags  %}
-                
-                {% for tag in tags %}
-                    
+
+                    {% with appinstance.tags|split:"," as tags %}
+
+                    {% for tag in tags %}
+
                     <form action="{% url 'apps:remove_tag' request.user project.slug appinstance.pk %}" method="post">
-    
+
                         {% csrf_token %}
 
                         <div class="align-items-center d-flex m-1 p-2 rounded shadow">
-                            {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}" aria-label="Close"></button>
+                            {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}"
+                                aria-label="Close"></button>
                         </div>
                     </form>
-                    
-                {% endfor %}
 
-                {% endwith %}
+                    {% endfor %}
+
+                    {% endwith %}
                 </div>
             </div>
         </div>

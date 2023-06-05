@@ -3,9 +3,9 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
-from projects.models import Project
+from projects.models import Environment, Project
 
-from ..generate_form import get_form_primitives
+from ..generate_form import get_form_environments, get_form_primitives
 from ..models import AppInstance, Apps
 
 User = get_user_model()
@@ -33,6 +33,12 @@ class GenerateFormTestCase(TestCase):
                 "project": {"value": "true", "option": "true"},
             },
             "default_values": {"port": "port", "targetport": "targetport"},
+            "environment": {
+                "name": "from",
+                "type": "match",
+                "title": "Image",
+                "quantity": "one",
+            },
         }
         self.user = User.objects.create_user("foo1", "foo@test.com", "bar")
 
@@ -46,6 +52,8 @@ class GenerateFormTestCase(TestCase):
             name="Persistent Volume", slug="volumeK8s"
         )
         return super().setUp()
+
+    # primatives
 
     @override_settings(DISABLED_APP_INSTANCE_FIELDS=[])
     def test_get_form_primitives_should_return_complete(self):
@@ -177,3 +185,133 @@ class GenerateFormTestCase(TestCase):
         self.assertEqual(result_size, "1Gi")
         self.assertEqual(result_access_modes, "ReadWriteMany")
         self.assertEqual(result_storage_class, "")
+
+    # environments
+
+    def test_get_form_environments_single(self):
+        environment = Environment(
+            app=self.app,
+            project=self.project,
+            name="test",
+            slug="test",
+            repository="test-repo",
+            image="test-image",
+        )
+
+        environment.save()
+        app_settings = deepcopy(self.app_settings_pvc)
+
+        result = get_form_environments(
+            app_settings, self.project, self.app, None
+        )
+
+        dep_environment, environments = result
+
+        self.assertEqual(dep_environment, True)
+
+        objs = environments["objs"]
+
+        self.assertEqual(len(objs), 1)
+
+        result_item = objs[0]
+
+        self.assertEqual(result_item.name, "test")
+        self.assertEqual(result_item.slug, "test")
+
+    def test_get_form_environments_with_public(self):
+        environment = Environment(
+            app=self.app,
+            project=self.project,
+            name="test1",
+            slug="test1",
+            repository="test1-repo",
+            image="test1-image",
+        )
+
+        environment.save()
+
+        environment2 = Environment(
+            app=self.app,
+            name="test2",
+            slug="test2",
+            repository="test2-repo",
+            image="test2-image",
+            public=True,
+        )
+
+        environment2.save()
+
+        app_settings = deepcopy(self.app_settings_pvc)
+
+        result = get_form_environments(
+            app_settings, self.project, self.app, None
+        )
+
+        dep_environment, environments = result
+
+        self.assertEqual(dep_environment, True)
+
+        objs = environments["objs"]
+
+        self.assertEqual(len(objs), 2)
+
+        number_of_public = 0
+
+        for obj in objs:
+            self.assertIn(obj.name, ["test1", "test2"])
+            self.assertIn(obj.slug, ["test1", "test2"])
+
+            if obj.public:
+                number_of_public += 1
+
+        self.assertEqual(number_of_public, 1)
+
+    def test_get_form_environments_with_public_and_other_projects(self):
+        project = Project.objects.create_project(
+            name="test-perm-generate_form2",
+            owner=self.user,
+            description="",
+            repository="",
+        )
+
+        environment = Environment(
+            app=self.app,
+            project=project,
+            name="test1",
+            slug="test1",
+            repository="test1-repo",
+            image="test1-image",
+        )
+
+        environment.save()
+
+        environment2 = Environment(
+            app=self.app,
+            name="test2",
+            slug="test2",
+            repository="test2-repo",
+            image="test2-image",
+            public=True,
+        )
+
+        environment2.save()
+
+        app_settings = deepcopy(self.app_settings_pvc)
+
+        result = get_form_environments(
+            app_settings, self.project, self.app, None
+        )
+
+        dep_environment, environments = result
+
+        self.assertEqual(dep_environment, True)
+
+        objs = environments["objs"]
+
+        self.assertEqual(len(objs), 1)
+
+        result_item = objs[0]
+
+        self.assertEqual(result_item.name, "test2")
+        self.assertEqual(result_item.slug, "test2")
+        self.assertTrue(result_item.public)
