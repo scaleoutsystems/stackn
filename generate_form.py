@@ -137,6 +137,8 @@ def get_form_primitives(app_settings, appinstance=[]):
                     if not is_meta_key:
                         parameters_of_key = appinstance.parameters[key]
 
+                        print(f"_key: {_key}")
+
                         if _key in parameters_of_key.keys():
                             primitives[key][_key][
                                 "default"

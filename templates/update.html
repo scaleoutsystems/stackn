@@ -123,7 +123,6 @@
 
                     {% for key, vals in form.primitives.items %}
 
-                    <!-- <label class="form-label">{{ key }}</label> -->
                     <h6> {{ vals.meta_title }}</h6>
                     {% for subkey, subval in vals.items %}
                     <div class="mb-3">
@@ -157,6 +156,29 @@
                         <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}"
                             value="{{ subval.default }}" class="form-control">
                         {% endif %}
+
+
+                        {% if subval.type == "select" %}
+
+                        <label class="form-label">{{ subval.title }}</label>
+
+                        <select 
+                        {% if not subval.user_can_edit %}
+                            disabled
+                        {% endif %}
+                        name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
+                            {% for item in subval.items %}
+
+                            {% if subval.default == item.value %}
+                                <option value="{{item.value}}" selected>{{item.name}}</option>
+                            {% else %}
+                                <option value="{{item.value}}">{{item.name}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+
+                        {% endif %}
+
                     </div>
                     {% endfor %}
 

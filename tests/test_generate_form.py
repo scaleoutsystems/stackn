@@ -15,7 +15,17 @@ class GenerateFormTestCase(TestCase):
     def setUp(self) -> None:
         self.app_settings_pvc = {
             "volume": {
-                "size": {"type": "string", "title": "Size", "default": "1Gi"},
+                "size": {
+                    "type": "select",
+                    "title": "Size",
+                    "default": "1Gi",
+                    "user_can_edit": False,
+                    "items": [
+                        {"name": "1Gi", "value": "1Gi"},
+                        {"name": "2Gi", "value": "2Gi"},
+                        {"name": "5Gi", "value": "5Gi"},
+                    ],
+                },
                 "accessModes": {
                     "type": "string",
                     "title": "AccessModes",
@@ -159,10 +169,12 @@ class GenerateFormTestCase(TestCase):
         result_items = result["volume"]
 
         result_size = result_items["size"]["default"]
+        result_size_user_can_edit = result_items["size"]["user_can_edit"]
         result_access_modes = result_items["accessModes"]["default"]
         result_storage_class = result_items["storageClass"]["default"]
 
         self.assertEqual(result_size, "5Gi")
+        self.assertFalse(result_size_user_can_edit)
         self.assertEqual(result_access_modes, "ReadWriteMany")
         self.assertEqual(result_storage_class, "microk8s-hostpath")
 
