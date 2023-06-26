@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     HttpResponseRedirect,
     JsonResponse,
 )
@@ -625,10 +626,19 @@ def delete(request, user, project_slug):
     next_page = request.GET.get("next", "/projects/")
 
     if not request.user.is_superuser:
-        owner = User.objects.filter(username=user).first()
-        project = Project.objects.filter(
-            owner=owner, slug=project_slug
-        ).first()
+        users = User.objects.filter(username=user)
+
+        if len(users) != 1:
+            return HttpResponseBadRequest()
+
+        owner = users[0]
+
+        projects = Project.objects.filter(owner=owner, slug=project_slug)
+
+        if len(projects) != 1:
+            return HttpResponseForbidden()
+
+        project = projects[0]
     else:
         project = Project.objects.filter(slug=project_slug).first()
 

@@ -67,10 +67,14 @@
                     Environments
                 </a>
                 {% endif %}
+                
+                {% if request.user.pk == project.owner.pk %}
+                    
                 <a class="default list-group-item list-group-item-action p-3 text-red" data-bs-toggle="list"
                     href="#delete" role="tab">
                     Delete
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
