@@ -16,6 +16,53 @@
 
 <body>
 
+    <nav class="bg-light shadow-sm mb-3 py-2">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start p-2">
+                <a href="/" class="navbar-brand fs-4 d-flex my-2 my-lg-0 me-lg-auto link-body">
+                    <img src="{% static 'images/scilifelab_serve_logo.svg' %}" title="SciLifeLab Serve" style="height: 2.2rem;" class="hide-dark align-text-top me-4">
+                </a>
+                <ul class="nav col-12 col-lg-auto my-2 my-md-0 justify-content-center text-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa-solid fa-home d-block mx-auto"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'portal:index' %}" target="_self" title="#">
+                            Apps
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'models:index' %}" target="_self" title="#">
+                            Models
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" target="_self" title="#">
+                            User guide
+                        </a>
+                    </li>
+
+                    <li class="nav-item mx-2">
+                        <a class="btn btn-success" href="{% url 'common:signup' %}">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item mx-2">
+                        <a class="btn btn-success" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i> Log in
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
     <div class="d-flex overflow-hidden">
 
         <div style="min-height: 1rem;" class="shadow-sm">
@@ -73,6 +120,41 @@
 
                 </div>
                 <div id="modalConfirmDeleteFooter" class="modal-footer d-flex justify-content-between">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer border-top bg-light text-muted small pt-4">
+        <div class="container">
+        <div class="row pb-2">
+                <div class="col-lg-2">
+                    <ul class="list-unstyled">
+                        <li><a href="">Home</a></li>
+                        <li><a href="">Public apps</a></li>
+                        <li><a href="">Public models</a></li>
+                        <li><a href="">User guide</a></li>
+                        <li><a href="">About</a></li>
+                        <li><a href="">User support</a></li>
+                        <li><a href="">Privacy policy</a></li>
+                    </ul>
+
+                </div>
+                <div class="col-lg-6">
+                    <p>SciLifeLab Serve is developed and operated by the <a href="https://scilifelab.se/data" target="_blank" class="text-muted">SciLifeLab Data Centre</a>. SciLifeLab Serve is free to use for all life science researchers affiliated with a Swedish research institution and their collaborators. The service is based on an  <a href="#" class="text-muted">open source platform</a> working on top of a Kubernetes cluster.</p>
+                    <p>Please email serve@scilifelab.se with any questions.</p>
+                </div>
+                <div class="col-8 col-md-6 col-lg-4">
+                    <div class="row">
+                        <div class="col">
+                            <p>Supported by:</p>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col"><img class="img-fluid" src="{% static 'images/scilifelab_logo.png' %}" alt="SciLifeLab"></div>
+                        <div class="col"><img class="img-fluid" src="{% static 'images/ssf_logo.png' %}" alt="Swedish Foundation for Strategic Research"></div>
+                        <div class="col"><img class="img-fluid" src="{% static 'images/kaw_logo.png' %}" alt="Knut and Alice Wallenberg Foundation"></div>
+                    </div>
                 </div>
             </div>
         </div>
