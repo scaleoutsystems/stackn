@@ -135,6 +135,12 @@
                         <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"
                             class="form-control">
                         {% endif %}
+                        
+                        {% if subval.type == "password" %}
+                        <label class="form-label">{{ subval.title }}</label>
+                        <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"
+                            class="form-control">
+                        {% endif %}
 
                         {% if subval.type == "textfield" %}
                         <label class="form-label">{{ subval.title }}</label>

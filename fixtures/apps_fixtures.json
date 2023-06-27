@@ -312,12 +312,12 @@
         },
         "credentials": {
           "access_key": {
-            "type": "string",
+            "type": "password",
             "default": "accesskey",
             "title": "Access Key"
           },
           "secret_key": {
-            "type": "string",
+            "type": "password",
             "default": "secretkey123",
             "title": "Secret Key"
           }
