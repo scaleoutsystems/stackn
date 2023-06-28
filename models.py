@@ -44,7 +44,10 @@ class Environment(models.Model):
     image = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True
+        settings.PROJECTS_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     registry = models.ForeignKey(
         settings.APPINSTANCE_MODEL,
@@ -54,7 +57,7 @@ class Environment(models.Model):
         on_delete=models.CASCADE,
     )
     repository = models.CharField(max_length=100, blank=True, null=True)
-    slug = models.CharField(max_length=100, null=True)
+    slug = models.CharField(max_length=100, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     public = models.BooleanField(default=False)
