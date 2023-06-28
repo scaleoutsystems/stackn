@@ -39,7 +39,7 @@ class Apps(models.Model):
     logo = models.CharField(max_length=512, null=True, blank=True)
     name = models.CharField(max_length=512)
     priority = models.IntegerField(default=100)
-    projects = models.ManyToManyField("projects.Project")
+    projects = models.ManyToManyField("projects.Project", blank=True)
     revision = models.IntegerField(default=1)
     settings = models.JSONField(blank=True, null=True)
     slug = models.CharField(max_length=512, blank=True, null=True)
