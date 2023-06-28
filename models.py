@@ -190,7 +190,7 @@ class AppInstance(models.Model):
     )
     state = models.CharField(max_length=50, null=True, blank=True)
     table_field = models.JSONField(blank=True, null=True)
-    tags = TagField()
+    tags = TagField(blank=True, null=True)
     updated_on = models.DateTimeField(auto_now=True)
 
     class Meta:
