@@ -214,6 +214,18 @@ class ProjectManager(models.Manager):
             or has_perm
         )
 
+    def get_projects_from_user(self, user):
+        return self.filter(Q(owner=user) | Q(authorized=user)).distinct()
+
+    def get_project(self, user, slug=None, id=None):
+        qs = (
+            self.filter(Q(owner=user) | Q(authorized=user), pk=id)
+            if id is not None
+            else self.filter(Q(owner=user) | Q(authorized=user), slug=slug)
+        )
+
+        return qs.first() if qs.count() != 0 else None
+
 
 def get_random_pattern_class():
     randint = random.randint(1, 12)
