@@ -4,9 +4,7 @@ extend-ignore =
     # Whitespace before ':'
     E203,
     # imported but unused
-    F401,
-    # do not use bare 'except'
-    E722
+    F401
 exclude =
     migrations
     examples

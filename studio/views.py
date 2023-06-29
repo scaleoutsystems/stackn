@@ -42,7 +42,7 @@ class AccessPermission(BasePermission):
             app_instance = AppInstance.objects.get(
                 parameters__contains={'release': release})
             project = app_instance.project
-        except:
+        except:  # noqa: E722
             project_slug = request.GET.get('project')
             project = Project.objects.get(slug=project_slug)
             return request.user.has_perm('can_view_project', project)
