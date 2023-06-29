@@ -4,9 +4,12 @@ extend-ignore =
     # Whitespace before ':'
     E203,
     # imported but unused
-    F401
+    F401,
+    # do not use bare 'except'
+    E722
 exclude =
     migrations
+    examples
     __pycache__
     manage.py
     settings.py
