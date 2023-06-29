@@ -1,0 +1,27 @@
+default_stages:
+- commit
+repos:
+# general hooks to verify or beautify code
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.3.0
+  hooks:
+  - id: check-added-large-files
+    args: [--maxkb=5000]
+  - id: trailing-whitespace
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-xml
+  - id: check-yaml
+  - id: detect-private-key
+  - id: mixed-line-ending
+  - id: pretty-format-json
+    args: [--autofix]
+
+
+# autoformat code with black formatter
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+    exclude: ^.venv/
+    args: [-l 100]

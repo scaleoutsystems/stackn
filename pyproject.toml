@@ -1,0 +1,11 @@
+[tool.isort]
+profile = 'black'
+
+[tool.flake8]
+ignore = ['E203']
+max-line-length = 100
+
+[tool.mypy]
+strict = false
+python_version = "3.8"
+warn_return_any = true
