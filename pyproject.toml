@@ -1,9 +1,18 @@
 [tool.isort]
 profile = 'black'
 
-[tool.flake8]
-ignore = ['E203']
-max-line-length = 100
+[tool.black]
+line-length = 120
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.venv
+  | migrations
+)/
+'''
 
 [tool.mypy]
 strict = false
