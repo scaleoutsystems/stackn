@@ -6,6 +6,7 @@ import fire
 import numpy as np
 import requests
 import tensorflow as tf
+
 from stackn import stackn
 from stackn.auth import get_config
 

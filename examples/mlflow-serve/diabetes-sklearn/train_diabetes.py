@@ -17,18 +17,17 @@
 #
 
 import os
-import warnings
 import sys
-
-import pandas as pd
-import numpy as np
+import warnings
 from itertools import cycle
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import lasso_path, enet_path
+import numpy as np
+import pandas as pd
 from sklearn import datasets
+from sklearn.linear_model import ElasticNet, enet_path, lasso_path
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
 
 # Load Diabetes datasets
 diabetes = datasets.load_diabetes()

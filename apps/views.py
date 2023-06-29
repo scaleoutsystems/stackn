@@ -7,11 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Subquery
-from django.http import (
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    JsonResponse,
-)
+from django.http import HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import HttpResponseRedirect, render, reverse
 from django.utils.decorators import method_decorator
 from django.views import View

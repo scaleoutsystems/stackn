@@ -3,9 +3,11 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import HttpResponseRedirect
-from rest_framework.authentication import (BasicAuthentication,
-                                           SessionAuthentication,
-                                           TokenAuthentication)
+from rest_framework.authentication import (
+    BasicAuthentication,
+    SessionAuthentication,
+    TokenAuthentication,
+)
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
