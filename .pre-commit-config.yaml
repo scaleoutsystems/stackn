@@ -12,9 +12,11 @@ repos:
   - id: check-merge-conflict
   - id: check-xml
   - id: check-yaml
+    exclude: charts/apps/
   - id: detect-private-key
   - id: mixed-line-ending
   - id: end-of-file-fixer
+    exclude: static/vendor/
   - id: pretty-format-json
     args: [--autofix]
 
