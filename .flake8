@@ -1,0 +1,19 @@
+[flake8]
+max-line-length = 120
+extend-ignore =
+    # Whitespace before ':'
+    E203,
+    # imported but unused
+    F401
+exclude =
+    .git,
+    __pycache__,
+    migrations,
+    ./models,
+    examples,
+    manage.py,
+    settings.py,
+    env,
+    .env,
+    venv,
+    .venv

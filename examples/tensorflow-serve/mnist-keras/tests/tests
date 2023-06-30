@@ -4,6 +4,7 @@ import os
 import sys
 
 import fire
+
 from stackn.auth import get_config
 from stackn.get import _find_dict_by_value, call_project_endpoint
 

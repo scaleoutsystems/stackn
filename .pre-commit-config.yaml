@@ -1,0 +1,56 @@
+default_stages:
+- commit
+repos:
+# general hooks to verify or beautify code
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.3.0
+  hooks:
+  - id: check-added-large-files
+    args: [--maxkb=5000]
+  - id: trailing-whitespace
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-xml
+  - id: check-yaml
+  - id: detect-private-key
+  - id: mixed-line-ending
+  - id: end-of-file-fixer
+    exclude: static/vendor/
+  - id: pretty-format-json
+    args: [--autofix]
+
+
+# autoformat code with black formatter
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+    # 20230629: black is currently run in check only mode beecase auto fix would result in many changes
+    # that the team needs to discuss.
+    # TODO: We will change this with this issue: https://scilifelab.atlassian.net/browse/SS-490
+    args: [--check]
+
+# beautify and sort imports
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+
+
+# check code style
+- repo: https://github.com/pycqa/flake8
+  rev: 3.8.4
+  hooks:
+  - id: flake8
+    # exclude added here because the .flake8 settings are not respected by pre-commit --all-files
+    exclude: __init__.py|manage.py|settings.py|media/|models/|migrations|.venv|.env|venv|env|__pycache__
+
+
+# static type checking
+# 20230629: mypy is currently disabled from pre-commit until the team has decided on proper configuration.
+# TODO: We will change this with this issue: https://scilifelab.atlassian.net/browse/SS-490
+#- repo: https://github.com/pre-commit/mirrors-mypy
+#  rev: v0.910
+#  hooks:
+#  - id: mypy
+#    additional_dependencies: [types-requests==2.25.9]

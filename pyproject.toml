@@ -1,0 +1,27 @@
+# This file contains settings for linters and code checkers isort, black and mypy.
+# Note that these settings are not respected with pre-commit run --all-files
+# In that case add configurations to the .pre-commit-config.yaml file.
+
+[tool.isort]
+profile = 'black'
+
+[tool.black]
+line-length = 120
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.venv
+  | venv
+  | migrations
+)/
+'''
+
+[tool.mypy]
+strict = false
+python_version = "3.8"
+ignore_missing_imports = true
+warn_return_any = true
+exclude = ['venv', '.venv', 'migrations']

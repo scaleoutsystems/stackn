@@ -48,6 +48,7 @@ class SignUpForm(UserCreationForm):
             attrs={"class": "form-control", "placeholder": "Confirm"}
         ),
     )
+
     class Meta:
         model = User
         fields = [
