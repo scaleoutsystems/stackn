@@ -1,6 +1,13 @@
 name: Build and test studio
 
 on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - 'README.md'
+
   # Adds ability to run this workflow manually
   workflow_dispatch:
     inputs:
@@ -86,13 +93,13 @@ jobs:
         run: |
           curl --version | head -n 1
           STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
-          echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV       
+          echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV
           echo "The Studio URL is $STUDIO_URL"
           docker exec studio pwd
           docker exec studio ls -al
           docker exec studio whoami
           docker exec studio id stackn
-        
+
       - name: Check URL is up
         uses: gerdemann/http-status-code@1.0.0
         with:
@@ -135,4 +142,3 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-  
