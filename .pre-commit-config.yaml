@@ -41,6 +41,7 @@ repos:
   rev: 3.8.4
   hooks:
   - id: flake8
+    files: ^cypress/
 
 
 # static type checking

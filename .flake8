@@ -6,12 +6,14 @@ extend-ignore =
     # imported but unused
     F401
 exclude =
-    migrations
-    examples
-    __pycache__
-    manage.py
-    settings.py
-    env
-    .env
-    venv
+    .git,
+    __pycache__,
+    migrations,
+    ./models,
+    examples,
+    manage.py,
+    settings.py,
+    env,
+    .env,
+    venv,
     .venv
