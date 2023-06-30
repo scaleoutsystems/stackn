@@ -1,3 +1,7 @@
+# This file contains settings for linters and code checkers isort, black and mypy.
+# Note that these settings are not respected with pre-commit run --all-files
+# In that case add configurations to the .pre-commit-config.yaml file.
+
 [tool.isort]
 profile = 'black'
 

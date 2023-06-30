@@ -12,7 +12,6 @@ repos:
   - id: check-merge-conflict
   - id: check-xml
   - id: check-yaml
-    exclude: charts/apps/
   - id: detect-private-key
   - id: mixed-line-ending
   - id: end-of-file-fixer
@@ -43,7 +42,8 @@ repos:
   rev: 3.8.4
   hooks:
   - id: flake8
-    files: ^cypress/
+    # exclude added here because the .flake8 settings are not respected by pre-commit --all-files
+    exclude: __init__.py|manage.py|settings.py|media/|models/|migrations|.venv|.env|venv|env|__pycache__
 
 
 # static type checking

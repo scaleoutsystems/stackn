@@ -26,5 +26,7 @@ jobs:
       run: |
         python -m pip install --upgrade pre-commit==3.3.3
 
+    # Currently pre-commit is run for all staged files.
+    # In the future we can run using --all-files
     - name: Run pre-commit
       run: pre-commit run
