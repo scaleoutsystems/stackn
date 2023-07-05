@@ -21,7 +21,10 @@ drf-nested-routers==0.93.4
 s3fs==2023.1.0
 minio==7.1.13
 celery==5.2.7
-Pillow==9.4.0 --global-option="build_ext" --global-option="--disable-tiff" --global-option="--disable-freetype" --global-option="--disable-lcms" --global-option="--disable-webp" --global-option="--disable-webpmux" --global-option="--disable-imagequant" --global-option="--disable-xcb" --global-option="--disable-zlib"
+
+# Building with global-options takes a very long time
+#Pillow==9.4.0 --global-option="build_ext" --global-option="--disable-tiff" --global-option="--disable-freetype" --global-option="--disable-lcms" --global-option="--disable-webp" --global-option="--disable-webpmux" --global-option="--disable-imagequant" --global-option="--disable-xcb" --global-option="--disable-zlib"
+
 flatten-json==0.1.13
 PyYAML==6.0
 Markdown==3.4.1

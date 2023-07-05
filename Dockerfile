@@ -9,7 +9,7 @@ RUN apk add --update --no-cache \
     postgresql-dev \
     libpq \
     tiff-dev \
-    jpeg-dev \ 
+    jpeg-dev \
     openjpeg-dev \
     zlib-dev \
     freetype-dev \
@@ -22,6 +22,9 @@ RUN apk add --update --no-cache \
     libimagequant-dev \
     libxcb-dev libpng-dev \
     && pip install --no-cache-dir -r requirements.txt
+
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install Pillow==9.4.0 --global-option="build_ext" --global-option="--disable-tiff" --global-option="--disable-freetype" --global-option="--disable-lcms" --global-option="--disable-webp" --global-option="--disable-webpmux" --global-option="--disable-imagequant" --global-option="--disable-xcb" --global-option="--disable-zlib"
 
 FROM bitnami/kubectl:1.20.9 as kubectl
 FROM alpine/helm:3.1.1 as helm
@@ -38,7 +41,7 @@ RUN apk add --update --no-cache \
     bash \
     postgresql-client \
     libpq \
-    jpeg-dev \ 
+    jpeg-dev \
     openjpeg-dev \
     libpng-dev
 
@@ -50,10 +53,10 @@ ARG USER=stackn
 RUN adduser -D $USER \
         && echo "$USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USER \
         && chmod 0440 /etc/sudoers.d/$USER \
-        && if [ ! -d "/app/media" ]; then mkdir -p /app/media; fi \ 
+        && if [ ! -d "/app/media" ]; then mkdir -p /app/media; fi \
         && if [ ! -d "/app/charts/values" ]; then mkdir -p /app/charts/values; fi \
         && if [ ! -d "/app/sent_emails" ]; then mkdir -p /app/sent_emails; fi \
         && chown -R $USER /app/fixtures /app/media /app/charts /app/sent_emails /app/static \
         && chgrp -R $USER /app/fixtures /app/media /app/charts /app/sent_emails /app/static
-        
+
 USER $USER
