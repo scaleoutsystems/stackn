@@ -383,7 +383,7 @@ class ProjectStatusView(View):
 class GrantAccessToProjectView(View):
     def post(self, request, user, project_slug):
         selected_username = request.POST["selected_user"]
-        qs = User.objects.filter(username=selected_username, is_client=False)
+        qs = User.objects.filter(username=selected_username)
 
         if len(qs) == 1:
             selected_user = qs[0]
