@@ -71,7 +71,7 @@
                             Delete
                         </a>
                         {% elif request.user.is_superuser %}
-                        <a class="btn btn-danger" href="{% url 'projects:delete' request.user project.slug %}">
+                        <a class="confirm-delete btn btn-danger" href="{% url 'projects:delete' request.user project.slug %}">
                             (Admin) Delete
                         </a>
                         {% endif %}

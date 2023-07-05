@@ -2,14 +2,16 @@ import base64
 import random
 import secrets
 import string
+from datetime import timedelta
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
 
@@ -42,7 +44,10 @@ class Environment(models.Model):
     image = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True
+        settings.PROJECTS_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     registry = models.ForeignKey(
         settings.APPINSTANCE_MODEL,
@@ -52,8 +57,10 @@ class Environment(models.Model):
         on_delete=models.CASCADE,
     )
     repository = models.CharField(max_length=100, blank=True, null=True)
-    slug = models.CharField(max_length=100, null=True)
+    slug = models.CharField(max_length=100, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    public = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.name)
@@ -135,9 +142,22 @@ class MLFlow(models.Model):
         return "{} ({})".format(self.name, self.project.slug)
 
 
+"""Post save signal when creating an mlflow object"""
+
+
+@receiver(post_save, sender=MLFlow)
+def create_mlflow(sender, instance, created, **kwargs):
+    if created:
+        if instance.project and not instance.project.mlflow:
+            instance.project.mlflow = instance
+            instance.project.save()
+
+
 # it will become the default objects attribute for a Project model
 class ProjectManager(models.Manager):
-    def create_project(self, name, owner, description, repository):
+    def create_project(
+        self, name, owner, description, repository, status="active"
+    ):
         user_can_create = self.user_can_create(owner)
 
         if not user_can_create:
@@ -159,6 +179,7 @@ class ProjectManager(models.Manager):
             description=description,
             repository=repository,
             repository_imported=False,
+            status=status,
         )
 
         assign_perm("can_view_project", owner, project)
@@ -192,6 +213,18 @@ class ProjectManager(models.Manager):
             or project_per_user_limit > num_of_projects
             or has_perm
         )
+
+    def get_projects_from_user(self, user):
+        return self.filter(Q(owner=user) | Q(authorized=user)).distinct()
+
+    def get_project(self, user, slug=None, id=None):
+        qs = (
+            self.filter(Q(owner=user) | Q(authorized=user), pk=id)
+            if id is not None
+            else self.filter(Q(owner=user) | Q(authorized=user), slug=slug)
+        )
+
+        return qs.first() if qs.count() != 0 else None
 
 
 def get_random_pattern_class():
@@ -266,6 +299,17 @@ class Project(models.Model):
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.status == "created":
+            if (
+                self.created_at is not None
+                and self.created_at < timezone.now() - timedelta(minutes=2)
+            ):
+                self.status = "active"
+                self.save()
+
 
 @receiver(pre_delete, sender=Project)
 def on_project_delete(sender, instance, **kwargs):
@@ -336,6 +380,8 @@ class ProjectTemplate(models.Model):
     revision = models.IntegerField(default=1)
     slug = models.CharField(max_length=512, default="")
     template = models.TextField(null=True, blank=True)
+
+    enabled = models.BooleanField(default=True)
 
     class Meta:
         unique_together = (

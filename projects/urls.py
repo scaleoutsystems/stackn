@@ -1,9 +1,11 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from . import views
 from .views import (
     GrantAccessToProjectView,
+    ProjectStatusView,
     RevokeAccessToProjectView,
     UpdatePatternView,
 )
@@ -12,7 +14,11 @@ app_name = "projects"
 
 basicpatterns = [
     path("projects/", views.IndexView.as_view(), name="index"),
-    path("projects/create", views.create, name="create"),
+    path(
+        "projects/create",
+        login_required(views.CreateProjectView.as_view()),
+        name="create",
+    ),
     path(
         "projects/templates", views.project_templates, name="project_templates"
     ),
@@ -56,6 +62,11 @@ basicpatterns = [
         "<user>/<project_slug>/project/access/revoke",
         RevokeAccessToProjectView.as_view(),
         name="revoke_access",
+    ),
+    path(
+        "<user>/<project_slug>/project/status",
+        ProjectStatusView.as_view(),
+        name="get_status",
     ),
 ]
 
