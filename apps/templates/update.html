@@ -123,7 +123,6 @@
 
                     {% for key, vals in form.primitives.items %}
 
-                    <!-- <label class="form-label">{{ key }}</label> -->
                     <h6> {{ vals.meta_title }}</h6>
                     {% for subkey, subval in vals.items %}
                     <div class="mb-3">
@@ -152,11 +151,48 @@
                             rows="20">{{ subval.default }}</textarea>
                         {% endif %}
 
+                        {% if subval.type == "password" %}
+                        <label class="form-label">{{ subval.title }}</label>
+
+                        <div class="input-group">
+                            <input type="password" id="{{ subkey }}" name="{{ key }}.{{ subkey }}"
+                                value="{{ subval.default }}" class="form-control">
+
+                            <button type="button" class="btn btn-outline-dark btn-show-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button disabled type="button" class="btn btn-outline-dark btn-copy"
+                                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Copy">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                        {% endif %}
+
                         {% if subval.type == "number" %}
                         <label class="form-label">{{ subval.title }}</label>
                         <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}"
                             value="{{ subval.default }}" class="form-control">
                         {% endif %}
+
+
+                        {% if subval.type == "select" %}
+
+                        <label class="form-label">{{ subval.title }}</label>
+
+                        <select {% if not subval.user_can_edit %} disabled {% endif %} name="{{ key }}.{{ subkey }}"
+                            id="{{ subkey }}" class="form-control">
+                            {% for item in subval.items %}
+
+                            {% if subval.default == item.value %}
+                            <option value="{{item.value}}" selected>{{item.name}}</option>
+                            {% else %}
+                            <option value="{{item.value}}">{{item.name}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+
+                        {% endif %}
+
                     </div>
                     {% endfor %}
 
@@ -173,15 +209,8 @@
                     </div>
                     {% endif %}
 
-                    {% if app_action == "Create" %}
-                    <button class="btn btn-primary" type="submit">Create</button>
-                    {% else %}
                     <button class="btn btn-primary" type="submit">Update</button>
-                    {% endif %}
-                    <button class="btn btn-secondary float-end" type="submit"
-                        onclick="window.location='{{ request.headers.referer }}' ; return false;">
-                        Cancel
-                    </button>
+                    <a class="btn btn-secondary float-end" href="{{ request.headers.referer }}">Cancel</a>
                 </form>
             </div>
         </div>
@@ -190,7 +219,7 @@
 
 <div class="row pt-3">
 
-    <div class="col">
+    <div class="col-12 col-xl-6">
 
         <div class="card shadow border-0 p-3">
             <h3 class="card-title">Tags</h3>
@@ -201,15 +230,16 @@
                 {% csrf_token %}
 
                 <div class="row pt-3">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-10">
 
                         {% include './common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" required=True %}
+
                     </div>
-                    <div class="col-12 col-md-6 pt-3 pt-md-0">
+                    <div class="col-12 col-md-2 pt-3 pt-md-0">
 
                         <div class="row">
                             <div class="col">
-                                <input type="submit" class="btn btn-primary" value="Add">
+                                <input type="submit" class="btn btn-primary w-100" value="Add">
                             </div>
                         </div>
                     </div>
@@ -220,27 +250,78 @@
 
             <div class="row pt-3">
                 <div class="col-12 d-flex">
-                
-                {% with appinstance.tags|split:"," as tags  %}
-                
-                {% for tag in tags %}
-                    
+
+                    {% with appinstance.tags|split:"," as tags %}
+
+                    {% for tag in tags %}
+
                     <form action="{% url 'apps:remove_tag' request.user project.slug appinstance.pk %}" method="post">
-    
+
                         {% csrf_token %}
 
                         <div class="align-items-center d-flex m-1 p-2 rounded shadow">
-                            {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}" aria-label="Close"></button>
+                            {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}"
+                                aria-label="Close"></button>
                         </div>
                     </form>
-                    
-                {% endfor %}
 
-                {% endwith %}
+                    {% endfor %}
+
+                    {% endwith %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    {
+
+        const COPY_STR = "Copy", COPIED_STR = "Copied!"
+
+        const copyBtns = document.querySelectorAll('.btn-copy');
+        const showPasswordBtns = document.querySelectorAll('.btn-show-password');
+
+        const resetAll = () => {
+
+            copyBtns.forEach(element => {
+
+                const tooltipInstance = bootstrap.Tooltip.getInstance(element);
+                tooltipInstance.setContent({ '.tooltip-inner': COPY_STR });
+            })
+        }
+
+        copyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+
+                resetAll();
+                const input = btn.parentElement.querySelector('input');
+                input.select();
+                document.execCommand('copy');
+
+                const tooltipInstance = bootstrap.Tooltip.getInstance(btn);
+                tooltipInstance.setContent({ '.tooltip-inner': COPIED_STR });
+
+            });
+        });
+
+        showPasswordBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+
+                resetAll();
+                const input = btn.parentElement.querySelector('input');
+                const copyBtn = btn.parentElement.querySelector('button.btn-copy');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                    copyBtn.disabled = false;
+                } else {
+                    input.type = 'password';
+                    btn.innerHTML = '<i class="bi bi-eye"></i>';
+                    copyBtn.disabled = true;
+                }
+            });
+        })
+    }
+</script>
 {% endblock %}

@@ -135,6 +135,12 @@
                         <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"
                             class="form-control">
                         {% endif %}
+                        
+                        {% if subval.type == "password" %}
+                        <label class="form-label">{{ subval.title }}</label>
+                        <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"
+                            class="form-control">
+                        {% endif %}
 
                         {% if subval.type == "textfield" %}
                         <label class="form-label">{{ subval.title }}</label>
@@ -147,6 +153,24 @@
                         <input type="number" id="{{ subkey }}" name="{{ key }}.{{ subkey }}"
                             value="{{ subval.default }}" class="form-control">
                         {% endif %}
+
+                        {% if subval.type == "select" %}
+
+                        <label class="form-label">{{ subval.title }}</label>
+
+                        <select name="{{ key }}.{{ subkey }}" id="{{ subkey }}" class="form-control">
+                            {% for item in subval.items %}
+
+                            {% if subval.default == item.value %}
+                                <option value="{{item.value}}" selected>{{item.name}}</option>
+                            {% else %}
+                                <option value="{{item.value}}">{{item.name}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+
+                        {% endif %}
+
                     </div>
                     {% endfor %}
 

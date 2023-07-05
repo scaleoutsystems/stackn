@@ -563,6 +563,9 @@ def sync_mlflow_models():
         ~Q(state="Deleted"), project__status="active", app__slug="mlflow"
     )
     for mlflow_app in mlflow_apps:
+        if mlflow_app.project is None or mlflow_app.project.mlflow is None:
+            continue
+
         url = "http://{}/{}".format(
             mlflow_app.project.mlflow.host,
             "api/2.0/mlflow/model-versions/search",

@@ -78,3 +78,19 @@ class GetStatusViewTestCase(TestCase):
         response = c.post(url, {"apps": [self.app_instance.id]})
 
         self.assertEqual(response.status_code, 403)
+
+    def test_apps_empty(self):
+        c = Client()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        url = f"/{self.user.username}/{self.project.slug}/apps/status"
+
+        response = c.post(url, {"apps": []})
+
+        self.assertEqual(response.status_code, 200)

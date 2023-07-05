@@ -6,7 +6,7 @@
           <th>App</th>
           <th>Name</th>
           <th></th>
-          <th>State</th>
+          <th>Status</th>
           <th>Created</th>
           <th>Actions</th>
           <th></th>
@@ -24,7 +24,20 @@
         {% else %}
         <td></td>
         {% endif %}
-        <td id="status-{{ appinstance.pk }}"><span class="badge bg-secondary">{{ appinstance.status.latest.status_type }}</span></td>
+        <td id="status-{{ appinstance.pk }}">
+        <span class="badge bg-secondary">
+        {{ appinstance.status.latest.status_type }}
+        </span>
+        
+        {% if category == "serve" %}
+        <span class="badge bg-info">
+              {% if appinstance.access != "public" %}
+              unpublished
+              {% else %}
+              published</span>
+          {% endif %}
+        {% endif %}
+        </td>
         <td>{{ appinstance.created_on }}</td>
         <td class="table-action">
           <div class="dropdown show">
@@ -37,19 +50,7 @@
                     Logs (disabled)
                   </a>
 
-                  {% if appinstance.app.settings.publishable == "true" and appinstance.owner.id == request.user.id %}
-                    {% if appinstance.access == "public" %}
-                    <a class="dropdown-item default" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
-                      <i class="bi bi-slash-circle me-1"></i>
-                      Unpublish
-                    </a>
-                    {% else %}
-                    <a class="dropdown-item default" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
-                      <i class="bi bi-share me-1"></i>
-                      Publish
-                    </a>
-                    {% endif %}
-                  {% endif %}
+                  {% include './app_table_publishable_link.html' %}
 
                   {% if appinstance.app.user_can_edit %}
 

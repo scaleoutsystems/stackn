@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from models.models import Model
 from projects.models import S3, Environment, Flavor, ReleaseName
@@ -137,6 +137,8 @@ def get_form_primitives(app_settings, appinstance=[]):
                     if not is_meta_key:
                         parameters_of_key = appinstance.parameters[key]
 
+                        print(f"_key: {_key}")
+
                         if _key in parameters_of_key.keys():
                             primitives[key][_key][
                                 "default"
@@ -200,13 +202,38 @@ def get_form_environments(aset, project, app, appinstance=[]):
         dep_environment = True
         if aset["environment"]["type"] == "match":
             environments["objs"] = Environment.objects.filter(
-                project=project, app__slug=app.slug
+                Q(project=project) | Q(project__isnull=True, public=True),
+                app__slug=app.slug,
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
             )
         elif aset["environment"]["type"] == "any":
-            environments["objs"] = Environment.objects.filter(project=project)
+            environments["objs"] = Environment.objects.filter(
+                Q(project=project) | Q(project__isnull=True, public=True)
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
+            )
         elif "apps" in aset["environment"]:
             environments["objs"] = Environment.objects.filter(
-                project=project, app__slug__in=aset["environment"]["apps"]
+                Q(project=project) | Q(project__isnull=True, public=True),
+                app__slug__in=aset["environment"]["apps"],
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
             )
 
         environments["title"] = aset["environment"]["title"]
