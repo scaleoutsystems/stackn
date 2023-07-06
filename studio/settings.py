@@ -332,5 +332,9 @@ APPS_PER_USER_LIMIT = {
 
 PROJECTS_PER_USER_LIMIT = 3
 
-# for django-wiki
+# For django-wiki
 SITE_ID = 1
+# wiki: Sign up, login and logout views should be accessible.
+WIKI_ACCOUNT_HANDLING = True
+# wiki: No user signup, but superusers can create new users.
+WIKI_ACCOUNT_SIGNUP_ALLOWED = False
