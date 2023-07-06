@@ -23,6 +23,8 @@ RUN apk add --update --no-cache \
     libxcb-dev libpng-dev \
     && pip install --no-cache-dir -r requirements.txt
 
+# Installing Pillow separate from the packages in requirements
+# greatly speeds up the docker build.
 RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install Pillow==9.4.0 --global-option="build_ext" --global-option="--disable-tiff" --global-option="--disable-freetype" --global-option="--disable-lcms" --global-option="--disable-webp" --global-option="--disable-webpmux" --global-option="--disable-imagequant" --global-option="--disable-xcb" --global-option="--disable-zlib"
 
