@@ -22,9 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-t)9$8__a+vfsak+w30xf9ui9p8#rnyqb6p($!6ne8lin%&zf0h"
-)
+SECRET_KEY = "django-insecure-t)9$8__a+vfsak+w30xf9ui9p8#rnyqb6p($!6ne8lin%&zf0h"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -61,6 +59,18 @@ INSTALLED_APPS = [
     "apps",
     "api",
     "customtags",
+    # for django-wiki
+    "django.contrib.sites.apps.SitesConfig",
+    "django.contrib.humanize.apps.HumanizeConfig",
+    "django_nyt.apps.DjangoNytConfig",
+    "mptt",
+    "sekizai",
+    "sorl.thumbnail",
+    "wiki.apps.WikiConfig",
+    "wiki.plugins.attachments.apps.AttachmentsConfig",
+    "wiki.plugins.notifications.apps.NotificationsConfig",
+    "wiki.plugins.images.apps.ImagesConfig",
+    "wiki.plugins.macros.apps.MacrosConfig",
 ]
 
 MIDDLEWARE = [
@@ -72,6 +82,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    # for django-wiki
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
 ]
 
 ROOT_URLCONF = "studio.urls"
@@ -88,6 +100,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # for django-wiki
+                "sekizai.context_processors.sekizai",
             ],
             "libraries": {
                 "custom_tags": "models.templatetags.custom_tags",
@@ -213,9 +227,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # https://www.django-rest-framework.org/api-guide/authentication/#setting-the-authentication-scheme
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication"
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
 }
 
 # Tagulous serialization settings
@@ -294,11 +306,11 @@ EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 VERSION = "dev"
 
 MIGRATION_MODULES = {
-    'apps': 'studio.migrations.apps',
-    'models': 'studio.migrations.models',
-    'monitor': 'studio.migrations.monitor',
-    'portal': 'studio.migrations.portal',
-    'projects': 'studio.migrations.projects'
+    "apps": "studio.migrations.apps",
+    "models": "studio.migrations.models",
+    "monitor": "studio.migrations.monitor",
+    "portal": "studio.migrations.portal",
+    "projects": "studio.migrations.projects",
 }
 
 # Defines how many apps a user is allowed to create within one project
@@ -319,3 +331,6 @@ APPS_PER_USER_LIMIT = {
 }
 
 PROJECTS_PER_USER_LIMIT = 3
+
+# for django-wiki
+SITE_ID = 1
