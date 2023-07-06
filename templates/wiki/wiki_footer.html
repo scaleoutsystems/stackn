@@ -1,0 +1,37 @@
+{% load static %}
+{% include 'common/common_fonts.html' %}
+
+<div class="footer bg-light text-muted small pt-4">
+    <div class="container">
+    <div class="row pb-2">
+            <div class="col-lg-2">
+                <ul class="list-unstyled">
+                    <li><a href="">Home</a></li>
+                    <li><a href="">Public apps</a></li>
+                    <li><a href="">Public models</a></li>
+                    <li><a href="">User guide</a></li>
+                    <li><a href="">About</a></li>
+                    <li><a href="">User support</a></li>
+                    <li><a href="">Privacy policy</a></li>
+                </ul>
+
+            </div>
+            <div class="col-lg-6">
+                <p>SciLifeLab Serve is developed and operated by the <a href="https://scilifelab.se/data" target="_blank" class="text-muted">SciLifeLab Data Centre</a>. SciLifeLab Serve is free to use for all life science researchers affiliated with a Swedish research institution and their collaborators. The service is based on an  <a href="#" class="text-muted">open source platform</a> working on top of a Kubernetes cluster.</p>
+                <p>Please email serve@scilifelab.se with any questions.</p>
+            </div>
+            <div class="col-8 col-md-6 col-lg-4">
+                <div class="row">
+                    <div class="col">
+                        <p>Supported by:</p>
+                    </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col"><img class="img-fluid" src="{% static 'images/scilifelab_logo.png' %}" alt="SciLifeLab"></div>
+                    <div class="col"><img class="img-fluid" src="{% static 'images/ssf_logo.png' %}" alt="Swedish Foundation for Strategic Research"></div>
+                    <div class="col"><img class="img-fluid" src="{% static 'images/kaw_logo.png' %}" alt="Knut and Alice Wallenberg Foundation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
