@@ -39,7 +39,7 @@ class Apps(models.Model):
     logo = models.CharField(max_length=512, null=True, blank=True)
     name = models.CharField(max_length=512)
     priority = models.IntegerField(default=100)
-    projects = models.ManyToManyField("projects.Project")
+    projects = models.ManyToManyField("projects.Project", blank=True)
     revision = models.IntegerField(default=1)
     settings = models.JSONField(blank=True, null=True)
     slug = models.CharField(max_length=512, blank=True, null=True)
@@ -190,7 +190,7 @@ class AppInstance(models.Model):
     )
     state = models.CharField(max_length=50, null=True, blank=True)
     table_field = models.JSONField(blank=True, null=True)
-    tags = TagField()
+    tags = TagField(blank=True)
     updated_on = models.DateTimeField(auto_now=True)
 
     class Meta:

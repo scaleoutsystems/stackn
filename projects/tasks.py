@@ -147,6 +147,9 @@ def create_resources_from_template(user, project_slug, template):
             print("Template has either not valid or unknown keys")
             raise (ProjectCreationException)
 
+    project.status = "active"
+    project.save()
+
 
 @shared_task
 def delete_project_apps(project_slug):

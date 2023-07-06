@@ -56,6 +56,8 @@ class ObjectType(models.Model):
     )
     app_slug = models.CharField(max_length=100, null=True, blank=True)
 
+    enabled = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
 
@@ -65,7 +67,6 @@ def upload_headline_path(instance, filename):
 
 
 class Model(models.Model):
-
     objects_version = ModelManager()
     objects = models.Manager()
     PRIVATE = "PR"

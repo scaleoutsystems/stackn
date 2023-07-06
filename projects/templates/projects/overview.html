@@ -3,6 +3,10 @@
 
 {% block content %}
 
+
+{% if project.status == "active" %}
+
+
 <h3 class="mb-3">Overview</h3>
 
 <div class="row g-4">
@@ -151,7 +155,7 @@
                         <tr class="odd">
                             <td class="sorting_1">{{ model.name }}</td>
                             <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
-                            <td class="d-none d-xxl-table-cell">{{ model.uploaded_at }}</td>
+                            <td class="d-none d-xxl-table-cell">{{ model.uploaded_at | date:"d/n/y H:i" }}</td>
                             <td><span class="badge 
                                         {% if model.status == 'CR' %}bg-warning
                                         {% elif model.status == 'DP' %}bg-success
@@ -169,11 +173,20 @@
                                             <i class="bi bi-text-center me-1"></i>
                                             Details
                                         </a>
+
+                                        {% if model.access != "PU" %}
                                         <a class="dropdown-item default"
-                                            href="{% url 'models:publish_model' request.user project.slug model.pk %}">
-                                            <i class="bi bi-sliders2-vertical me-1"></i>
-                                            Settings
+                                            href="{% url 'models:publish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-share me-1"></i>
+                                            Publish
                                         </a>
+                                        {% else %}
+                                        <a class="dropdown-item default"
+                                            href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-slash-circle me-1"></i>
+                                            Unpublish
+                                        </a>
+                                        {% endif %}
 
                                         {% include 'common/serve_model_link.html' %}
 
@@ -237,7 +250,7 @@
 
             const loop = async () => {
 
-                if (apps) {
+                if ((apps?.length ?? 0) > 0) {
 
                     await updateStatus()
 
@@ -250,5 +263,55 @@
             loop()
         }
     </script>
+
+    {% else %}
+
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+
+            {% include 'common/loader.html' %}
+        </div>
+    </div>
+
+    <script>
+        {
+
+            const url = "{% url 'projects:get_status' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
+
+            const getStatus = async () => {
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    }
+                })
+
+                const json = await response.json()
+
+                if (json.status !== "created") {
+                    window.location.reload()
+                }
+            }
+
+            const loop = async () => {
+
+                await getStatus()
+
+                setTimeout(() => {
+                    loop()
+                }, 2000)
+            }
+
+            loop()
+
+        }
+    </script>
+
+    {% endif %}
+
+
+
 
     {% endblock %}

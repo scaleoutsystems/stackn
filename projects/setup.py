@@ -10,8 +10,8 @@ setup(
     package_dir={"projects": "."},
     python_requires=">=3.6,<4",
     install_requires=[
-        "django==4.1.7",
-        "requests==2.28.1",
+        "django==4.2.1",
+        "requests==2.31.0",
         "django-guardian==2.4.0",
         "celery==5.2.7",
         "Pillow==9.4.0",

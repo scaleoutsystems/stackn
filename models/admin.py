@@ -8,10 +8,10 @@ class ModelAdmin(admin.ModelAdmin):
     list_display = ("name", "version", "project_name", "object_type_name")
 
     def project_name(self, obj):
-        return obj.project.name
+        return obj.project.name if obj.project else None
 
     def object_type_name(self, obj):
-        return obj.object_type.name
+        return obj.object_type.name if obj.object_type else None
 
 
 admin.site.register(Model, ModelAdmin)

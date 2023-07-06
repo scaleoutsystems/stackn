@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     HttpResponseRedirect,
     JsonResponse,
 )
@@ -366,10 +367,23 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
     ),
     name="dispatch",
 )
+class ProjectStatusView(View):
+    def get(self, request, user, project_slug):
+        project = Project.objects.get(slug=project_slug)
+
+        return JsonResponse({"status": project.status})
+
+
+@method_decorator(
+    permission_required_or_403(
+        "can_view_project", (Project, "slug", "project_slug")
+    ),
+    name="dispatch",
+)
 class GrantAccessToProjectView(View):
     def post(self, request, user, project_slug):
         selected_username = request.POST["selected_user"]
-        qs = User.objects.filter(username=selected_username, is_client=False)
+        qs = User.objects.filter(username=selected_username)
 
         if len(qs) == 1:
             selected_user = qs[0]
@@ -452,7 +466,7 @@ class RevokeAccessToProjectView(View):
 def project_templates(request):
     template = "project_templates.html"
     templates = (
-        ProjectTemplate.objects.all()
+        ProjectTemplate.objects.filter(enabled=True)
         .order_by("slug", "-revision")
         .distinct("slug")
     )
@@ -460,26 +474,30 @@ def project_templates(request):
     return render(request, template, locals())
 
 
-@login_required
-def create(request):
-    template = "project_create.html"
-    templates = (
-        ProjectTemplate.objects.all()
-        .order_by("slug", "-revision")
-        .distinct("slug")
-    )
+class CreateProjectView(View):
+    template_name = "project_create.html"
 
-    template_selected = "STACKn Default"
-    if "template" in request.GET:
-        template_selected = request.GET.get("template")
+    def get(self, request):
+        pre_selected_template = request.GET.get("template")
 
-    if request.method == "POST":
+        arr = ProjectTemplate.objects.filter(name=pre_selected_template)
+
+        template = arr[0] if len(arr) > 0 else None
+
+        context = {"template": template}
+
+        return render(
+            request=request,
+            context=context,
+            template_name=self.template_name,
+        )
+
+    def post(self, request, *args, **kwargs):
         success = True
 
+        template_id = request.POST.get("template_id")
         name = request.POST.get("name", "default")
-        access = request.POST.get("access", "org")
         description = request.POST.get("description", "")
-        repository = request.POST.get("repository", "")
 
         # Try to create database project object.
         try:
@@ -487,7 +505,8 @@ def create(request):
                 name=name,
                 owner=request.user,
                 description=description,
-                repository=repository,
+                repository="",
+                status="created",
             )
         except ProjectCreationException:
             print("ERROR: Failed to create project database object.")
@@ -495,9 +514,7 @@ def create(request):
 
         try:
             # Create resources from the chosen template
-            project_template = ProjectTemplate.objects.get(
-                pk=request.POST.get("project-template")
-            )
+            project_template = ProjectTemplate.objects.get(pk=template_id)
             create_resources_from_template.delay(
                 request.user.username, project.slug, project_template.template
             )
@@ -532,8 +549,6 @@ def create(request):
         )
 
         return HttpResponseRedirect(next_page, {"message": "Created project"})
-
-    return render(request, template, locals())
 
 
 @method_decorator(
@@ -611,10 +626,19 @@ def delete(request, user, project_slug):
     next_page = request.GET.get("next", "/projects/")
 
     if not request.user.is_superuser:
-        owner = User.objects.filter(username=user).first()
-        project = Project.objects.filter(
-            owner=owner, slug=project_slug
-        ).first()
+        users = User.objects.filter(username=user)
+
+        if len(users) != 1:
+            return HttpResponseBadRequest()
+
+        owner = users[0]
+
+        projects = Project.objects.filter(owner=owner, slug=project_slug)
+
+        if len(projects) != 1:
+            return HttpResponseForbidden()
+
+        project = projects[0]
     else:
         project = Project.objects.filter(slug=project_slug).first()
 

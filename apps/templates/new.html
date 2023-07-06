@@ -66,6 +66,7 @@
     {% endfor %}
 </div>
 
+
 <script>
     {
         const apps = JSON.parse("{{ app_ids|escapejs }}")
@@ -104,7 +105,7 @@
 
         const loop = async () => {
 
-            if (apps) {
+            if ((apps?.length ?? 0) > 0) {
 
                 await updateStatus()
 
