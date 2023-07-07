@@ -32,6 +32,34 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = ["localhost"]
 
+# For django-wiki
+SITE_ID = 1
+# wiki: Sign up, login and logout views should be accessible.
+WIKI_ACCOUNT_HANDLING = True
+# wiki: No user signup, but superusers can create new users.
+WIKI_ACCOUNT_SIGNUP_ALLOWED = False
+
+DJANGO_WIKI_APPS = [
+    "django.contrib.sites.apps.SitesConfig",
+    "django.contrib.humanize.apps.HumanizeConfig",
+    "django_nyt.apps.DjangoNytConfig",
+    "mptt",
+    "sekizai",
+    "sorl.thumbnail",
+    "wiki.apps.WikiConfig",
+    "wiki.plugins.attachments.apps.AttachmentsConfig",
+    "wiki.plugins.notifications.apps.NotificationsConfig",
+    "wiki.plugins.images.apps.ImagesConfig",
+    "wiki.plugins.macros.apps.MacrosConfig",
+]
+
+DJANGO_WIKI_MIDDLEWARE = [
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
+]
+
+DJANGO_WIKI_CONTEXT_PROCESSOR = [
+    "sekizai.context_processors.sekizai",
+]
 
 # Application definition
 
@@ -59,24 +87,7 @@ INSTALLED_APPS = [
     "apps",
     "api",
     "customtags",
-]
-
-# for django-wiki
-DJANGO_WIKI_APPS = [
-    "django.contrib.sites.apps.SitesConfig",
-    "django.contrib.humanize.apps.HumanizeConfig",
-    "django_nyt.apps.DjangoNytConfig",
-    "mptt",
-    "sekizai",
-    "sorl.thumbnail",
-    "wiki.apps.WikiConfig",
-    "wiki.plugins.attachments.apps.AttachmentsConfig",
-    "wiki.plugins.notifications.apps.NotificationsConfig",
-    "wiki.plugins.images.apps.ImagesConfig",
-    "wiki.plugins.macros.apps.MacrosConfig",
-]
-
-INSTALLED_APPS += DJANGO_WIKI_APPS
+] + DJANGO_WIKI_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -87,9 +98,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    # for django-wiki
-    "django.contrib.sites.middleware.CurrentSiteMiddleware",
-]
+] + DJANGO_WIKI_MIDDLEWARE
 
 ROOT_URLCONF = "studio.urls"
 CRISPY_TEMPLATE_PACK = "bootstrap"
@@ -105,9 +114,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # for django-wiki
-                "sekizai.context_processors.sekizai",
-            ],
+            ]
+            + DJANGO_WIKI_CONTEXT_PROCESSOR,
             "libraries": {
                 "custom_tags": "models.templatetags.custom_tags",
             },
@@ -336,10 +344,3 @@ APPS_PER_USER_LIMIT = {
 }
 
 PROJECTS_PER_USER_LIMIT = 3
-
-# For django-wiki
-SITE_ID = 1
-# wiki: Sign up, login and logout views should be accessible.
-WIKI_ACCOUNT_HANDLING = True
-# wiki: No user signup, but superusers can create new users.
-WIKI_ACCOUNT_SIGNUP_ALLOWED = False
