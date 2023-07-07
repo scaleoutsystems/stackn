@@ -31,9 +31,8 @@ celery==5.2.7
 flatten-json==0.1.13
 PyYAML==6.0
 
-# Aligning Markdown with django-wiki
+# Aligning Markdown with django-wiki. Previously: Markdown==3.4.1
 Markdown>=3.3,<3.4
-#Markdown==3.4.1
 
 black==23.3.0
 isort==5.12.0

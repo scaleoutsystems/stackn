@@ -59,7 +59,10 @@ INSTALLED_APPS = [
     "apps",
     "api",
     "customtags",
-    # for django-wiki
+]
+
+# for django-wiki
+DJANGO_WIKI_APPS = [
     "django.contrib.sites.apps.SitesConfig",
     "django.contrib.humanize.apps.HumanizeConfig",
     "django_nyt.apps.DjangoNytConfig",
@@ -72,6 +75,8 @@ INSTALLED_APPS = [
     "wiki.plugins.images.apps.ImagesConfig",
     "wiki.plugins.macros.apps.MacrosConfig",
 ]
+
+INSTALLED_APPS += DJANGO_WIKI_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
