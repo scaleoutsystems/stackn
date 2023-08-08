@@ -43,7 +43,7 @@ jobs:
       - name: Checkout the develop branch
         uses: actions/checkout@v3
         with:
-          ref: 'develop'
+          ref: '${GITHUB_REF##*/}'
 
       - name: Run on microk8s
         uses: balchua/microk8s-actions@v0.2.1
