@@ -142,7 +142,7 @@ WSGI_APPLICATION = "studio.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-if sys.argv[1] == "test":
+if len(sys.argv) > 1 and sys.argv[1] == "test":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
