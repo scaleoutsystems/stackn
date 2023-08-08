@@ -43,7 +43,7 @@ jobs:
       - name: Checkout the develop branch
         uses: actions/checkout@v3
         with:
-          ref: '${GITHUB_REF##*/}'
+          ref: SS-495-implement-test-with-pytest-django
 
       - name: Run on microk8s
         uses: balchua/microk8s-actions@v0.2.1
