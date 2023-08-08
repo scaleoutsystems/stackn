@@ -139,7 +139,7 @@ STATICFILES_FINDERS = (
 
 WSGI_APPLICATION = "studio.wsgi.application"
 
-TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
