@@ -117,6 +117,12 @@ jobs:
           response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
           if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
 
+      - name: Run tests
+        working-directory: ${{env.working-directory}}
+        id: tests
+        run: |
+          docker-compose run tests
+
       - name: Print k8s info
         run: |
           echo "Checking k8s cluster version, nodes and pods"

@@ -133,7 +133,7 @@ services:
         aliases:
           - celery-beat.127.0.0.1.nip.io
 
-  test:
+  tests:
     image: stackn:develop
     volumes:
     - .:/app:cached  
