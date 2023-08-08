@@ -29,7 +29,7 @@ celery==5.2.7
 #Pillow==9.4.0 --global-option="build_ext" --global-option="--disable-tiff" --global-option="--disable-freetype" --global-option="--disable-lcms" --global-option="--disable-webp" --global-option="--disable-webpmux" --global-option="--disable-imagequant" --global-option="--disable-xcb" --global-option="--disable-zlib"
 
 flatten-json==0.1.13
-PyYAML==6.0
+PyYAML==6.0.1
 
 # Aligning Markdown with django-wiki. Previously: Markdown==3.4.1
 Markdown>=3.3,<3.4
@@ -46,3 +46,6 @@ uvicorn==0.20.0
 #oauthlib
 #social-auth-app-django
 #social-auth-core
+
+# Pytest Django
+pytest-django==4.5.2
