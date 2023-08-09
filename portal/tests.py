@@ -24,7 +24,7 @@ def test_index():
     assert response.status_code == 200
 
 
-def test_HomeView():
+def test_home_view_class():
     # Get correct request
     request = RequestFactory().get(reverse("portal:home"))
 
