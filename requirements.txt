@@ -49,3 +49,4 @@ uvicorn==0.20.0
 
 # Pytest Django
 pytest-django==4.5.2
+pytest-cov==4.1.0
