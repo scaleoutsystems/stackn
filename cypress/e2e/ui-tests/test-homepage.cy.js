@@ -26,12 +26,7 @@ describe("Test of the home page", () => {
 
     it("should open the About page on link click", () => {
         cy.get("li.nav-item a").contains("About").click()
-        cy.url().should("include", "/portal/home")
-    })
-
-    it("should open the About page on link click", () => {
-        cy.get("li.nav-item a").contains("About").click()
-        cy.url().should("include", "/portal/home")
+        cy.url().should("include", "/portal/about")
     })
 
     it("should open the signup page on link click", () => {
