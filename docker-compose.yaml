@@ -133,6 +133,19 @@ services:
         aliases:
           - celery-beat.127.0.0.1.nip.io
 
+  tests:
+    image: stackn:develop
+    volumes:
+    - .:/app:cached  
+    working_dir: /app
+    command: ["pytest --cov=."] 
+    profiles:
+      - donotstart
+    networks:
+      internal_network:
+        aliases:
+          - studio.127.0.0.1.nip.io
+
 networks:
   internal_network:
     driver: bridge
