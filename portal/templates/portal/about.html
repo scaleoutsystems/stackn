@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-sm-12 col-md-9">
+            <h3 class="mb-3" style="margin-right: 5px;">
+                About SciLifeLab Serve
+            </h3>
+            <p>SciLifeLab Serve is a service for models and apps that will be offered to life science researchers in affiliated with Swedish Universities. Currently, the service is in beta-test phase and is accepting test users to help with testing and improving functionality. SciLifeLab Serve allows to serve Tensorflow models, PyTorch models, general Python models, Dash apps and R Shiny apps. The service will be available free of charge to researchers in Sweden, both with and without an affiliation to SciLifeLab, as well as to SciLifeLab platforms.</p>
+            
+            <h3 class="mb-3" style="margin-right: 5px;">
+                Infrastructure behind the service
+            </h3>
+            <p>SciLifeLab Serve is developed and maintained by the <a href="https://scilifelab.se/data">SciLifeLab Data Centre</a>. The service is based on the open-source platform <a href="https://github.com/scaleoutsystems/stackn">STACKn</a>, developed by <a href="https://github.com/scaleoutsystems">Scaleout systems</a>, a spinoff from the Department of Information Technology at Uppsala University.</p>
+            <p>STACKn is a cloud native platform that is deployed on a Kubernetes cluster that is managed by the SciLifeLab Data Centre. The platform is vendor agnostic and based on plugin architecture, meaning that the list of supported frameworks can easily be extended according to the needs of the research community. Currently, the platform supports the serving of different types of models and apps. TensorFlow models are served using an integration with the official TensorFlow Serving docker image. Similarly, PyTorch models are served via a PyTorch Serve docker image that is integrated with the model on the platform. The platform also supports serving of other machine learning models using a FastAPI server.</p>
+        
+            <h3 class="mb-3" style="margin-right: 5px;">
+                Organisations behind the service
+            <h3>
+            <h4>SciLifeLab</h4>
+            <p><a href="https://www.scilifelab.se/">https://www.scilifelab.se</a></p>
+            <p>SciLifeLab, Science for Life Laboratory, is an institution for the advancement of molecular biosciences in Sweden. We are funded as a national research infrastructure by the Swedish government. Our organization leverages the unique strengths of individual researchers across Sweden into a focused resource for the life science community. We provide access, via our infrastructure units, for thousands of researchers to the cutting-edge instrumentation and deep scientific expertise necessary to be internationally competitive in bioscience research. Our infrastructure is supported and developed by our research community, including internationally recognised experts in life science and technology. Our facilities and expertise create a unique environment for carrying out health and environmental research at the highest level.</p>
+            <p>SciLifeLab started out in 2010 as a joint effort between four universities: Karolinska Institutet, KTH Royal Institute of Technology, Stockholm University and Uppsala University. Today, we support research activities at all major Swedish universities.</p>
+            
+            <h4>SciLifeLab Data Centre</h4>
+            <p><a href="https://www.scilifelab.se/data/">https://www.scilifelab.se/data/</a></p>
+            <p>Life science research is increasingly becoming not only technology-driven, but also data-driven. SciLifeLab coordinates and supports activities throughout the life cycle of data, from project planning, data production, data analysis, data sharing, to publishing and reuse of data, where researchers are dependent on advanced data analysis and e-infrastructures.</p>
+            <p>We focus primarily on ensuring that data generated using the SciLifeLab infrastructure platforms is used to promote how data can aid in progressing knowledge, especially when it is made findable and available. At SciLifeLab, we see data as one of the most valuable and long-lasting products of our operations, and strive to make our data FAIR, to ensure that it is handled according to open science standards, and to maximise the long-term value of the data to the scientific community.</p>
+        </div>
+    </div>
+ 
+    <div class="row">
+        <div class="col-md-12 col-lg-6 offset-lg-1">
+
+        <div class="card border-0 shadow-lg my-5 py-5">
+            <div class="card-body">
+            <!-- Nested Row within Card Body -->
+            <div class="col-lg-6 offset-lg-3">
+                <div class="d-flex justify-content-center mb-1">
+                <img src="{% static 'images/kaw_logo.png' %}" alt="SciLifeLab and Knut and Alice Wallenberg Foundation" width="350px">
+                </div>
+    
+                <div class="py-4 d-flex justify-content-center">
+                <p>This work is supported by a grant from the Knut and Alice Wallenberg Foundation <a href="https://www.scilifelab.se/data-driven/">given  to SciLifeLab for the purposes of progressing research in Data Driven Life Science</a>.</p>
+    
+                </div>
+                
+            </div>
+            </div>
+        </div>
+        </div>
+
+
+{% endblock %}
+

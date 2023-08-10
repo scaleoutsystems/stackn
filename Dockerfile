@@ -21,6 +21,7 @@ RUN apk add --update --no-cache \
     fribidi-dev \
     libimagequant-dev \
     libxcb-dev libpng-dev \
+    && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Installing Pillow separate from the packages in requirements
