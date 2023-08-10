@@ -79,7 +79,7 @@ jobs:
           #echo "Running init script"
           #./init.sh --no-prompt
           echo "Deploying studio"
-          docker-compose up -d
+          docker compose up -d
 
       - name: Troubleshoot folder permissions
         run: |
@@ -121,7 +121,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         id: tests
         run: |
-          docker-compose run tests
+          docker compose run tests pytest
 
       - name: Print k8s info
         run: |
