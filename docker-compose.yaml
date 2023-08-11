@@ -138,7 +138,7 @@ services:
     volumes:
     - .:/app:cached  
     working_dir: /app
-    command: ["pytest --cov=."] 
+    command: ["pytest"] 
     profiles:
       - donotstart
     networks:
