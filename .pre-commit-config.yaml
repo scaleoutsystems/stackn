@@ -25,10 +25,8 @@ repos:
   rev: 22.3.0
   hooks:
   - id: black
-    # 20230629: black is currently run in check only mode beecase auto fix would result in many changes
-    # that the team needs to discuss.
-    # TODO: We will change this with this issue: https://scilifelab.atlassian.net/browse/SS-490
-    args: [--check]
+    # 20230811: black is now run to both check and modify files as needed
+    #args: [--check]
 
 # beautify and sort imports
 - repo: https://github.com/pycqa/isort
@@ -47,10 +45,8 @@ repos:
 
 
 # static type checking
-# 20230629: mypy is currently disabled from pre-commit until the team has decided on proper configuration.
-# TODO: We will change this with this issue: https://scilifelab.atlassian.net/browse/SS-490
-#- repo: https://github.com/pre-commit/mirrors-mypy
-#  rev: v0.910
-#  hooks:
-#  - id: mypy
-#    additional_dependencies: [types-requests==2.25.9]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v0.910
+  hooks:
+  - id: mypy
+    additional_dependencies: [types-requests==2.25.9]
