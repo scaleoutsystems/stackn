@@ -6,7 +6,10 @@ on:
       - main
       - develop
     paths-ignore:
-      - 'README.md'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 
   # Adds ability to run this workflow manually
   workflow_dispatch:
