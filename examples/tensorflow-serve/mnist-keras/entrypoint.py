@@ -46,9 +46,7 @@ def _create_model(name="mnist-keras", seed="seed.npz", dir="models/1/"):
     model.set_weights(weights)
 
     tf.saved_model.save(model, dir)
-    stackn.create_object(
-        name, object_type="tensorflow", release_type="major", secure_mode=False
-    )
+    stackn.create_object(name, object_type="tensorflow", release_type="major", secure_mode=False)
 
 
 def _get_data(out_dir="data"):
@@ -101,9 +99,7 @@ def _predict(endpoint, n=2, data_path="data/mnist.npz"):
     info_json = model_info.json()
     print(info_json)
 
-    pred = requests.post(
-        endpoint + ":predict", json=input, headers=auth_header, verify=False
-    )
+    pred = requests.post(endpoint + ":predict", json=input, headers=auth_header, verify=False)
     pred_json = pred.json()
     print(pred_json)
 

@@ -28,9 +28,7 @@ class BasicAuth(models.Model):
 
 
 class Environment(models.Model):
-    app = models.ForeignKey(
-        settings.APPS_MODEL, on_delete=models.CASCADE, null=True
-    )
+    app = models.ForeignKey(settings.APPS_MODEL, on_delete=models.CASCADE, null=True)
     appenv = models.ForeignKey(
         settings.APPINSTANCE_MODEL,
         related_name="envobj",
@@ -41,9 +39,7 @@ class Environment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
-    project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True
-    )
+    project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True)
     registry = models.ForeignKey(
         settings.APPINSTANCE_MODEL,
         related_name="environments",
@@ -70,9 +66,7 @@ class Flavor(models.Model):
     ephmem_req = models.TextField(blank=True, null=True, default="200Mi")
     mem_req = models.TextField(blank=True, null=True, default="0.5Gi")
     name = models.CharField(max_length=512)
-    project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True
-    )
+    project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -113,9 +107,7 @@ class MLFlow(models.Model):
         blank=True,
         related_name="mlflowobj",
     )
-    basic_auth = models.ForeignKey(
-        BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True
-    )
+    basic_auth = models.ForeignKey(BasicAuth, on_delete=models.DO_NOTHING, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     mlflow_url = models.CharField(max_length=512)
     host = models.CharField(max_length=512, blank=True, default="")
@@ -126,9 +118,7 @@ class MLFlow(models.Model):
         on_delete=models.CASCADE,
         related_name="mlflow_project",
     )
-    s3 = models.ForeignKey(
-        S3, on_delete=models.DO_NOTHING, blank=True, null=True
-    )
+    s3 = models.ForeignKey(S3, on_delete=models.DO_NOTHING, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -184,11 +174,7 @@ class ProjectManager(models.Manager):
 
         has_perm = user.has_perm("projects.add_project")
 
-        return (
-            project_per_user_limit is None
-            or project_per_user_limit > num_of_projects
-            or has_perm
-        )
+        return project_per_user_limit is None or project_per_user_limit > num_of_projects or has_perm
 
 
 class Project(models.Model):
@@ -205,12 +191,8 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=512)
     objects = ProjectManager()
-    owner = models.ForeignKey(
-        get_user_model(), on_delete=models.DO_NOTHING, related_name="owner"
-    )
-    project_image = models.ImageField(
-        upload_to="projects/images/", null=True, blank=True, default=None
-    )
+    owner = models.ForeignKey(get_user_model(), on_delete=models.DO_NOTHING, related_name="owner")
+    project_image = models.ImageField(upload_to="projects/images/", null=True, blank=True, default=None)
     s3storage = models.OneToOneField(
         S3,
         on_delete=models.SET_NULL,
@@ -219,9 +201,7 @@ class Project(models.Model):
         related_name="project_s3",
     )
     slug = models.CharField(max_length=512, unique=True)
-    status = models.CharField(
-        max_length=20, null=True, blank=True, default="active"
-    )
+    status = models.CharField(max_length=20, null=True, blank=True, default="active")
     updated_at = models.DateTimeField(auto_now=True)
 
     # These fields should be removed.
@@ -264,19 +244,13 @@ class ProjectLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length=512)
     headline = models.CharField(max_length=256)
-    module = models.CharField(
-        max_length=2, choices=MODULE_CHOICES, default="UN"
-    )
-    project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE
-    )
+    module = models.CharField(max_length=2, choices=MODULE_CHOICES, default="UN")
+    project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE)
 
 
 class ProjectTemplate(models.Model):
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(
-        upload_to="projecttemplates/images/", blank=True, null=True
-    )
+    image = models.ImageField(upload_to="projecttemplates/images/", blank=True, null=True)
     name = models.CharField(max_length=512)
     revision = models.IntegerField(default=1)
     slug = models.CharField(max_length=512, default="")
@@ -302,9 +276,7 @@ class ReleaseName(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=512)
     status = models.CharField(max_length=10)
-    project = models.ForeignKey(
-        settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True
-    )
+    project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "{}-{}-{}".format(self.name, self.project, self.app)

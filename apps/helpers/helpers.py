@@ -5,9 +5,9 @@ from django.apps import apps
 from django.conf import settings
 from django.template import engines
 
-from ..models import AppInstance, AppStatus
-from ..serialize import serialize_app
-from ..tasks import deploy_resource
+from ..models import AppInstance, AppStatus  # type: ignore
+from ..serialize import serialize_app  # type: ignore
+from ..tasks import deploy_resource  # type: ignore
 
 ReleaseName = apps.get_model(app_label=settings.RELEASENAME_MODEL)
 
@@ -51,9 +51,7 @@ def create_instance_params(instance, action="create"):
     if "project" not in instance.parameters:
         instance.parameters["project"] = dict()
 
-    instance.parameters["project"].update(
-        {"name": instance.project.name, "slug": instance.project.slug}
-    )
+    instance.parameters["project"].update({"name": instance.project.name, "slug": instance.project.slug})
 
 
 def can_access_app_instance(app_instance, user, project):
@@ -127,9 +125,7 @@ def handle_permissions(parameters, project):
 def create_app_instance(user, project, app, app_settings, data=[], wait=False):
     app_name = data.get("app_name")
 
-    parameters_out, app_deps, model_deps = serialize_app(
-        data, project, app_settings, user.username
-    )
+    parameters_out, app_deps, model_deps = serialize_app(data, project, app_settings, user.username)
 
     authorized = can_access_app_instances(app_deps, user, project)
 
@@ -155,9 +151,7 @@ def create_app_instance(user, project, app, app_settings, data=[], wait=False):
     if "app_release_name" in data and data.get("app_release_name") != "":
         submitted_rn = data.get("app_release_name")
         try:
-            rel_name_obj = ReleaseName.objects.get(
-                name=submitted_rn, project=project, status="active"
-            )
+            rel_name_obj = ReleaseName.objects.get(name=submitted_rn, project=project, status="active")
             rel_name_obj.status = "in-use"
             rel_name_obj.save()
             app_instance.parameters["release"] = submitted_rn
@@ -170,9 +164,7 @@ def create_app_instance(user, project, app, app_settings, data=[], wait=False):
     # to be displayed as app details in views
     if app_instance.app.table_field and app_instance.app.table_field != "":
         django_engine = engines["django"]
-        info_field = django_engine.from_string(
-            app_instance.app.table_field
-        ).render(app_instance.parameters)
+        info_field = django_engine.from_string(app_instance.app.table_field).render(app_instance.parameters)
         app_instance.table_field = eval(info_field)
     else:
         app_instance.table_field = {}

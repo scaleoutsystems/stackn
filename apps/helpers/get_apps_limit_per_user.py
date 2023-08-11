@@ -11,11 +11,7 @@ def get_apps_limit_per_user(slug):
         Integer or None: returns the limit or None if not set
     """
     try:
-        apps_per_user_limit = (
-            settings.APPS_PER_USER_LIMIT
-            if settings.APPS_PER_USER_LIMIT is not None
-            else {}
-        )
+        apps_per_user_limit = settings.APPS_PER_USER_LIMIT if settings.APPS_PER_USER_LIMIT is not None else {}
     except Exception:
         apps_per_user_limit = {}
 

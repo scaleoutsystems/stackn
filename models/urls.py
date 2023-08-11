@@ -30,9 +30,7 @@ urlpatterns = [
         views.details_private,
         name="details_private",
     ),
-    path(
-        "<user>/<project>/models/<int:id>/delete", views.delete, name="delete"
-    ),
+    path("<user>/<project>/models/<int:id>/delete", views.delete, name="delete"),
     path(
         "<user>/<project>/models/<int:id>/publish",
         views.publish_model,

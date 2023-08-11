@@ -6,7 +6,7 @@ import subprocess
 import uuid
 from collections import defaultdict
 
-import markdown
+import markdown  # type: ignore
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -25,7 +25,7 @@ from .forms import EnvironmentForm, ModelForm, UploadModelCardHeadlineForm
 from .helpers import add_pmo_to_publish, set_artifact
 from .models import Metadata, Model, ModelLog, ObjectType
 
-new_data = defaultdict(list)
+new_data = defaultdict(list)  # type: ignore
 logger = logging.getLogger(__name__)
 
 Apps = apps.get_model(app_label=settings.APPS_MODEL)
@@ -55,9 +55,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
         # For showing the persistent volumes currently
         # available within the project
         volumeK8s_set = Apps.objects.get(slug="volumeK8s")
-        volumes = AppInstance.objects.filter(
-            Q(app=volumeK8s_set), Q(state="Running")
-        )
+        volumes = AppInstance.objects.filter(Q(app=volumeK8s_set), Q(state="Running"))
 
         # Passing the current project to the view/template
         project = (
@@ -130,11 +128,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             app = AppInstance.objects.get(pk=model_app)
             app_release = app.parameters["release"]  # e.g 'rfc058c6f'
             # Now find the related pod
-            cmd = (
-                "kubectl get po -l release="
-                + app_release
-                + ' -o jsonpath="{.items[0].metadata.name}"'
-            )
+            cmd = "kubectl get po -l release=" + app_release + ' -o jsonpath="{.items[0].metadata.name}"'
             try:
                 result = subprocess.check_output(cmd, shell=True)
                 # because the above subprocess run returns a byte-like object
@@ -142,17 +136,12 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             except subprocess.CalledProcessError:
                 messages.error(
                     request,
-                    (
-                        "Something went wrong: "
-                        "the model object was not created!"
-                    ),
+                    ("Something went wrong: " "the model object was not created!"),
                 )
                 return redirect(redirect_url)
 
             # Copy model folder from pod to a temp location within studio pod
-            temp_folder_path = (
-                settings.BASE_DIR + "/tmp"
-            )  # which should be /app/tmp
+            temp_folder_path = settings.BASE_DIR + "/tmp"  # which should be /app/tmp
             # Create and move into the new directory
             try:
                 os.mkdir(temp_folder_path)
@@ -181,10 +170,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             except (subprocess.CalledProcessError, FileNotFoundError):
                 messages.error(
                     request,
-                    (
-                        "Something went wrong: "
-                        "Models folder could not be copied"
-                    ),
+                    ("Something went wrong: " "Models folder could not be copied"),
                 )
                 return redirect(redirect_url)
 
@@ -212,10 +198,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
                 except (subprocess.CalledProcessError, FileNotFoundError):
                     messages.error(
                         request,
-                        (
-                            "Something went wrong: "
-                            "The archive for the model folder was not created!"
-                        ),
+                        ("Something went wrong: " "The archive for the model folder was not created!"),
                     )
                     # Clean up
                     os.system("rm {}.tar.gz".format(self.model_uid))
@@ -242,10 +225,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             if not status:
                 messages.error(
                     request,
-                    (
-                        "Something went wrong: "
-                        "failed to upload model to S3 storage!"
-                    ),
+                    ("Something went wrong: " "failed to upload model to S3 storage!"),
                 )
                 return redirect(redirect_url)
 
@@ -288,17 +268,13 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
 # Published models visible under the "Catalogs" menu
 def index(request, user=None, project=None, id=0):
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        )
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     except Exception:
         print("User not logged in.")
 
     if project:
         project = Project.objects.filter(slug=project).first()
-        published_models = Model.objects.filter(project=project).distinct(
-            "name"
-        )
+        published_models = Model.objects.filter(project=project).distinct("name")
 
         return render(request, "models/index.html", locals())
     else:
@@ -374,9 +350,7 @@ def list(request, user, project):
     # dict context with local variables
     menu = dict()
     menu["objects"] = "active"
-    projects = Project.objects.filter(
-        Q(owner=request.user) | Q(authorized=request.user), status="active"
-    )
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     project = (
         Project.objects.filter(
             Q(owner=request.user) | Q(authorized=request.user),
@@ -398,9 +372,7 @@ def unpublish_model(request, user, project, id):
     model = Model.objects.get(pk=id)
 
     try:
-        pmodel = PublishedModel.objects.get(
-            name=model.name, project=model.project
-        )
+        pmodel = PublishedModel.objects.get(name=model.name, project=model.project)
         pmos = pmodel.model_obj.all()
         pmos.delete()
         pmodel.delete()
@@ -408,9 +380,7 @@ def unpublish_model(request, user, project, id):
         print(err)
     model.access = "PR"
     model.save()
-    return HttpResponseRedirect(
-        reverse("models:list", kwargs={"user": user, "project": project})
-    )
+    return HttpResponseRedirect(reverse("models:list", kwargs={"user": user, "project": project}))
 
 
 @login_required
@@ -422,13 +392,9 @@ def publish_model(request, user, project, id):
     model = Model.objects.get(pk=id)
     print(model)
     # Default behavior is that all versions of a model are published.
-    models = Model.objects.filter(
-        id=id, name=model.name, project=model.project
-    )
+    models = Model.objects.filter(id=id, name=model.name, project=model.project)
 
-    img = settings.STATIC_ROOT + "images/patterns/image-{}.png".format(
-        random.randrange(8, 13)
-    )
+    img = settings.STATIC_ROOT + "images/patterns/image-{}.png".format(random.randrange(8, 13))
     img_file = open(img, "rb")
     image = File(img_file)
 
@@ -444,9 +410,7 @@ def publish_model(request, user, project, id):
     model.access = "PU"
     model.save()
 
-    return HttpResponseRedirect(
-        reverse("models:list", kwargs={"user": user, "project": project})
-    )
+    return HttpResponseRedirect(reverse("models:list", kwargs={"user": user, "project": project}))
 
 
 @login_required
@@ -465,17 +429,13 @@ def change_access(request, user, project, id):
                 project=project_obj,
                 module="MO",
                 headline="Model - {name}".format(name=model.name),
-                description=(
-                    "Changed Access Level from {previous} to {current}"
-                ).format(
+                description=("Changed Access Level from {previous} to {current}").format(
                     previous=previous, current=model.get_access_display()
                 ),
             )
             log.save()
 
-    return HttpResponseRedirect(
-        reverse("models:details_public", kwargs={"id": id})
-    )
+    return HttpResponseRedirect(reverse("models:details_public", kwargs={"id": id}))
 
 
 @login_required
@@ -487,9 +447,7 @@ def add_tag(request, published_id, id):
         print("New Tag: ", new_tag)
         model.tags.add(new_tag)
         model.save()
-    return HttpResponseRedirect(
-        reverse("models:details_public", kwargs={"id": published_id})
-    )
+    return HttpResponseRedirect(reverse("models:details_public", kwargs={"id": published_id}))
 
 
 @login_required
@@ -503,9 +461,7 @@ def remove_tag(request, published_id, id):
         model.tags.remove(new_tag)
         model.save()
 
-    return HttpResponseRedirect(
-        reverse("models:details_public", kwargs={"id": published_id})
-    )
+    return HttpResponseRedirect(reverse("models:details_public", kwargs={"id": published_id}))
 
 
 @login_required
@@ -612,9 +568,7 @@ def add_docker_image(request, user, project, id):
             )
             log.save()
 
-            return HttpResponseRedirect(
-                reverse("models:details_public", kwargs={"id": id})
-            )
+            return HttpResponseRedirect(reverse("models:details_public", kwargs={"id": id}))
     else:
         form = EnvironmentForm()
 
@@ -631,9 +585,7 @@ def details(request, user, project, id):
 
     # Note: Removed commented code related to Report
 
-    log_objects = ModelLog.objects.filter(
-        project=project.name, trained_model=model
-    )
+    log_objects = ModelLog.objects.filter(project=project.name, trained_model=model)
     model_logs = []
     for log in log_objects:
         model_logs.append(
@@ -651,19 +603,15 @@ def details(request, user, project, id):
             }
         )
 
-    md_objects = Metadata.objects.filter(
-        project=project.name, trained_model=model
-    )
+    md_objects = Metadata.objects.filter(project=project.name, trained_model=model)
     if md_objects:
         metrics = get_chart_data(md_objects)
 
     filename = None
     readme = None
-    import requests as r
+    import requests as r  # type: ignore
 
-    url = "http://{}-file-controller/models/{}/readme".format(
-        project.slug, model.name
-    )
+    url = "http://{}-file-controller/models/{}/readme".format(project.slug, model.name)
     try:
         response = r.get(url)
         if response.status_code == 200 or response.status_code == 203:
@@ -674,9 +622,7 @@ def details(request, user, project, id):
                 md = markdown.Markdown(extensions=["extra"])
                 readme = md.convert(payload["readme"])
     except Exception as e:
-        logger.error(
-            "Failed to get response from {} with error: {}".format(url, e)
-        )
+        logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return render(request, "models_details.html", locals())
 
@@ -730,9 +676,7 @@ def import_model(request, id):
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def details_private(request, user, project, id):
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        )
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     except Exception:
         print("User not logged in.")
     base_template = "base.html"
@@ -776,9 +720,7 @@ def details_public(request, id):
     all_tags = Model.tags.tag_model.objects.all()
     print("Details tag ID:", id)
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        )
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     except Exception:
         print("User not logged in.")
     base_template = "base.html"
@@ -817,7 +759,6 @@ def details_public(request, id):
 @login_required
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def delete(request, user, project, id):
-
     project = Project.objects.get(slug=project)
     model = Model.objects.get(id=id)
 
@@ -831,6 +772,4 @@ def delete(request, user, project, id):
 
     model.delete()
 
-    return HttpResponseRedirect(
-        reverse("models:list", kwargs={"user": user, "project": project.slug})
-    )
+    return HttpResponseRedirect(reverse("models:list", kwargs={"user": user, "project": project.slug}))

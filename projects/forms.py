@@ -12,13 +12,11 @@ class TransferProjectOwnershipForm(forms.Form):
 
 class PublishProjectToGitHub(forms.Form):
     user_name = forms.CharField(label="GitHub username", max_length=256)
-    user_password = forms.CharField(
-        label="GitHub password", widget=forms.PasswordInput(), max_length=256
-    )
+    user_password = forms.CharField(label="GitHub password", widget=forms.PasswordInput(), max_length=256)
 
 
 class GrantAccessForm(forms.Form):
-    platform_users = []
+    platform_users = []  # type: ignore
 
     def __init__(self, *args, **kwargs):
         super(GrantAccessForm, self).__init__(*args, **kwargs)
@@ -28,15 +26,11 @@ class GrantAccessForm(forms.Form):
     for user in platform_users:
         OPTIONS.append((user.pk, user.username))
 
-    selected_users = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple, choices=OPTIONS
-    )
+    selected_users = forms.MultipleChoiceField(widget=forms.SelectMultiple, choices=OPTIONS)
 
 
 class FlavorForm(forms.Form):
-    cpu_req = forms.CharField(
-        label="CPU request", max_length=10, initial="200m"
-    )
+    cpu_req = forms.CharField(label="CPU request", max_length=10, initial="200m")
     mem_req = forms.CharField(label="Memory request", max_length=15)
     gpu_req = forms.CharField(label="GPU request", max_length=10)
 

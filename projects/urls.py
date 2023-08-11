@@ -7,9 +7,7 @@ app_name = "projects"
 urlpatterns = [
     path("projects/", views.IndexView.as_view(), name="index"),
     path("projects/create", views.create, name="create"),
-    path(
-        "projects/templates", views.project_templates, name="project_templates"
-    ),
+    path("projects/templates", views.project_templates, name="project_templates"),
     path("<user>/<project_slug>", views.details, name="details"),
     path(
         "<user>/<project_slug>/environments/create",
@@ -23,9 +21,7 @@ urlpatterns = [
         views.set_s3storage,
         name="set_s3storage",
     ),
-    path(
-        "<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"
-    ),
+    path("<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"),
     path(
         "<user>/<project_slug>/createflavor",
         views.create_flavor,

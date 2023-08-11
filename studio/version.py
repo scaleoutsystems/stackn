@@ -5,9 +5,7 @@ class Version:
         self.minor = int(numbers[1])
         self.patch = int(numbers[2])
         if self.major < 0 or self.minor < 0 or self.patch < 0:
-            raise Exception(
-                "Major, minor, patch should be nonegative integers."
-            )
+            raise Exception("Major, minor, patch should be nonegative integers.")
 
     # Release a new version
     # Default is new minor version
@@ -47,11 +45,7 @@ class Version:
         return False
 
     def __eq__(self, other):
-        if (
-            self.major == other.major
-            and self.minor == other.minor
-            and self.patch == other.minor
-        ):
+        if self.major == other.major and self.minor == other.minor and self.patch == other.minor:
             return True
 
         return False

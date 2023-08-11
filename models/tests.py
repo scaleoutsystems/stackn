@@ -13,9 +13,7 @@ class ModelViewForbidden(TestCase):
     def setUp(self):
         user = User.objects.create_user("foo", "foo@test.com", "bar")
 
-        project = Project.objects.create_project(
-            name="test-perm", owner=user, description="", repository=""
-        )
+        project = Project.objects.create_project(name="test-perm", owner=user, description="", repository="")
 
         new_model = Model(
             uid="test_uid",
@@ -37,11 +35,7 @@ class ModelViewForbidden(TestCase):
         """
         owner = User.objects.get(username="foo")
         project = Project.objects.get(name="test-perm")
-        response = self.client.get(
-            reverse(
-                "models:list", kwargs={"user": owner, "project": project.slug}
-            )
-        )
+        response = self.client.get(reverse("models:list", kwargs={"user": owner, "project": project.slug}))
         self.assertTemplateUsed(response, "403.html")
         self.assertEqual(response.status_code, 403)
 

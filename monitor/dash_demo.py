@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import requests
+import requests  # type: ignore
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from django_plotly_dash import DjangoDash
@@ -57,9 +57,7 @@ main = dbc.Row(
                                                 html.Tr(
                                                     [
                                                         html.Th("Name"),
-                                                        html.Th(
-                                                            "Active Clients"
-                                                        ),
+                                                        html.Th("Active Clients"),
                                                         html.Th("IP"),
                                                         html.Th("Country"),
                                                         html.Th("Region"),
@@ -68,9 +66,7 @@ main = dbc.Row(
                                                 )
                                             ]
                                         ),
-                                        html.Tbody(
-                                            [], id="combiner-info-table"
-                                        ),
+                                        html.Tbody([], id="combiner-info-table"),
                                     ]
                                 ),
                             ]
@@ -91,9 +87,7 @@ main = dbc.Row(
                     [
                         dbc.CardBody(
                             [
-                                html.H4(
-                                    "Combiner Load", className="card-title"
-                                ),
+                                html.H4("Combiner Load", className="card-title"),
                                 dcc.Graph(id="combiners-combiner-plot"),
                             ]
                         )
@@ -123,25 +117,20 @@ app.layout = html.Div([menu, main])
 @app.callback(
     Output(component_id="combiner-info-table", component_property="children"),
     Output(component_id="combiners-round-plot", component_property="figure"),
-    Output(
-        component_id="combiners-combiner-plot", component_property="figure"
-    ),
+    Output(component_id="combiners-combiner-plot", component_property="figure"),
     Output(component_id="combiners-memcpu-plot", component_property="figure"),
     Output(component_id="reducer-state", component_property="children"),
     Output(component_id="reducer-select", component_property="options"),
     Input(component_id="reducer-select", component_property="value"),
 )
 def reducer_select(red_select, request):
-
     if "current_project" in request.session:
         project_slug = request.session["current_project"]
     else:
         raise PreventUpdate()
     reducer_app = Apps.objects.get(slug="reducer")
     this_project = Project.objects.get(slug=project_slug)
-    reducers = AppInstance.objects.filter(
-        app=reducer_app, project=this_project
-    )
+    reducers = AppInstance.objects.filter(app=reducer_app, project=this_project)
     options = []
     for reducer in reducers:
         options.append({"label": reducer.name, "value": str(reducer.pk)})
@@ -153,9 +142,7 @@ def reducer_select(red_select, request):
     state = ""
     if red_select is not None:
         # TODO: Check that user has access to project.
-        sel_reducer = AppInstance.objects.get(
-            pk=red_select, project__slug=project_slug
-        )
+        sel_reducer = AppInstance.objects.get(pk=red_select, project__slug=project_slug)
         reducer_params = sel_reducer.parameters
         r_host = reducer_params["release"]
         r_domain = reducer_params["global"]["domain"]
@@ -188,9 +175,7 @@ def reducer_select(red_select, request):
             combiners_info.append(html.Tr(row))
 
         try:
-            url = "https://{}.{}/api/combiners/roundplot".format(
-                r_host, r_domain
-            )
+            url = "https://{}.{}/api/combiners/roundplot".format(r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             roundplot = res.json()
@@ -198,9 +183,7 @@ def reducer_select(red_select, request):
             print(err)
 
         try:
-            url = "https://{}.{}/api/combiners/combinerplot".format(
-                r_host, r_domain
-            )
+            url = "https://{}.{}/api/combiners/combinerplot".format(r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             combinerplot = res.json()
@@ -208,9 +191,7 @@ def reducer_select(red_select, request):
             print(err)
 
         try:
-            url = "https://{}.{}/api/combiners/memcpuplot".format(
-                r_host, r_domain
-            )
+            url = "https://{}.{}/api/combiners/memcpuplot".format(r_host, r_domain)
             print(url)
             res = requests.get(url, verify=False)
             memcpuplot = res.json()

@@ -22,9 +22,7 @@ def run(*args):
     else:
         # Fetching the charts path from settings.py and create a list of
         # all the apps folder
-        subfolders = [
-            f.path for f in os.scandir(settings.CHART_FOLDER) if f.is_dir()
-        ]
+        subfolders = [f.path for f in os.scandir(settings.CHART_FOLDER) if f.is_dir()]
     subfolders.sort()
     curr_dir = os.getcwd()
 
@@ -41,9 +39,7 @@ def run(*args):
             curr_app = Apps.objects.get(slug=tail)
             curr_app.logo_file.save(new_filename, file_to_upload)
             file_to_upload.close()
-            print(
-                "INFO: {} uploaded successfully in the DB".format(new_filename)
-            )
+            print("INFO: {} uploaded successfully in the DB".format(new_filename))
             os.chdir(curr_dir)
         else:
             continue
