@@ -4,8 +4,8 @@ import subprocess
 import tarfile
 import uuid
 
-import yaml
-from django.conf import settings
+import yaml  # type: ignore
+from django.conf import settings  # type: ignore
 
 from .models import Apps
 
@@ -23,16 +23,12 @@ def delete(options):
 def deploy(options):
     print("STARTING DEPLOY FROM CONTROLLER")
     _ = os.environ["BASE_PATH"]
-    app = Apps.objects.get(
-        slug=options["app_slug"], revision=options["app_revision"]
-    )
+    app = Apps.objects.get(slug=options["app_slug"], revision=options["app_revision"])
     if app.chart_archive and app.chart_archive != "":
         try:
             chart_file = settings.MEDIA_ROOT + app.chart_archive.name
             tar = tarfile.open(chart_file, "r:gz")
-            extract_path = (
-                "/app/extracted_charts/" + app.slug + "/" + str(app.revision)
-            )
+            extract_path = "/app/extracted_charts/" + app.slug + "/" + str(app.revision)
             tar.extractall(extract_path)
             tar.close()
             chart = extract_path
@@ -44,14 +40,10 @@ def deploy(options):
 
     if "release" not in options:
         print("Release option not specified.")
-        return json.dumps(
-            {"status": "failed", "reason": "Option release not set."}
-        )
+        return json.dumps({"status": "failed", "reason": "Option release not set."})
 
     # Save helm values file for internal reference
-    unique_filename = "charts/values/{}-{}.yaml".format(
-        str(uuid.uuid4()), str(options["app_name"])
-    )
+    unique_filename = "charts/values/{}-{}.yaml".format(str(uuid.uuid4()), str(options["app_name"]))
     f = open(unique_filename, "w")
     f.write(yaml.dump(options))
     f.close()

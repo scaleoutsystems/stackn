@@ -23,9 +23,7 @@ def compare_version(v1, v2):
 
 class ModelManager(models.Manager):
     def sorted_by_version(self, model_name, project):
-        models = (
-            super().get_queryset().filter(project=project, name=model_name)
-        )
+        models = super().get_queryset().filter(project=project, name=model_name)
         if models:
             models = sorted(models, key=cmp_to_key(compare_version))
             return models
@@ -34,9 +32,7 @@ class ModelManager(models.Manager):
     # Get latest version.
     def latest(self, model_name, project):
         # Get all models in the project
-        models = (
-            super().get_queryset().filter(project=project, name=model_name)
-        )
+        models = super().get_queryset().filter(project=project, name=model_name)
         if models:
             # Sort by version
             models = sorted(models, key=cmp_to_key(compare_version))
@@ -48,12 +44,8 @@ class ModelManager(models.Manager):
 
 
 class ObjectType(models.Model):
-    name = models.CharField(
-        max_length=100, null=True, blank=True, default="Model"
-    )
-    slug = models.CharField(
-        max_length=100, null=True, blank=True, default="model"
-    )
+    name = models.CharField(max_length=100, null=True, blank=True, default="Model")
+    slug = models.CharField(max_length=100, null=True, blank=True, default="model")
     app_slug = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
@@ -65,7 +57,6 @@ def upload_headline_path(instance, filename):
 
 
 class Model(models.Model):
-
     objects_version = ModelManager()
     objects = models.Manager()
     PRIVATE = "PR"
@@ -95,24 +86,16 @@ class Model(models.Model):
     uid = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     version = models.CharField(max_length=255, default="1.0")
-    release_type = models.CharField(
-        max_length=255, choices=RELEASE_TYPE, default=MINOR
-    )
+    release_type = models.CharField(max_length=255, choices=RELEASE_TYPE, default=MINOR)
     description = models.CharField(max_length=255, null=True, blank=True)
     model_card = models.TextField(null=True, blank=True)
     access = models.CharField(max_length=2, choices=ACCESS, default=PRIVATE)
     resource = models.URLField(max_length=2048, null=True, blank=True)
     object_type = models.ManyToManyField(ObjectType, blank=True)
     url = models.URLField(max_length=512, null=True, blank=True)
-    s3 = models.ForeignKey(
-        "projects.S3", null=True, blank=True, on_delete=models.CASCADE
-    )
-    bucket = models.CharField(
-        max_length=200, null=True, blank=True, default="models"
-    )
-    path = models.CharField(
-        max_length=200, null=True, blank=True, default="models"
-    )
+    s3 = models.ForeignKey("projects.S3", null=True, blank=True, on_delete=models.CASCADE)
+    bucket = models.CharField(max_length=200, null=True, blank=True, default="models")
+    path = models.CharField(max_length=200, null=True, blank=True, default="models")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     tags = TagField(blank=True)
     project = models.ForeignKey(
@@ -123,9 +106,7 @@ class Model(models.Model):
     )
     status = models.CharField(max_length=2, choices=STATUS, default=CREATED)
     # tag = models.CharField(max_length=10, default='latest')
-    model_card_headline = models.ImageField(
-        upload_to="models/image", null=True, blank=True, default=None
-    )
+    model_card_headline = models.ImageField(upload_to="models/image", null=True, blank=True, default=None)
     docker_image = models.OneToOneField(
         "projects.Environment",
         null=True,
@@ -165,9 +146,7 @@ class ModelLog(models.Model):
     latest_git_commit = models.CharField(max_length=255, default="")
     system_details = models.TextField(blank=True)
     cpu_details = models.TextField(blank=True)
-    training_status = models.CharField(
-        max_length=2, choices=STATUS, default=STARTED
-    )
+    training_status = models.CharField(max_length=2, choices=STATUS, default=STARTED)
 
     class Meta:
         unique_together = ("run_id", "trained_model")
@@ -205,10 +184,9 @@ def pre_save_model(sender, instance, using, **kwargs):
         print("New version: " + instance.version)
         if not release_status:
             raise Exception(
-                (
-                    "Failed to create new release for "
-                    "model {}-{}, release type {}."
-                ).format(instance.name, instance.version, release_type)
+                ("Failed to create new release for " "model {}-{}, release type {}.").format(
+                    instance.name, instance.version, release_type
+                )
             )
 
 
@@ -224,8 +202,4 @@ def pre_delete_model(sender, instance, using, **kwargs):
         )
         client.remove_object("models", instance.uid)
     except Exception:
-        print(
-            "Failed to delete model object {} from minio store.".format(
-                instance.uid
-            )
-        )
+        print("Failed to delete model object {} from minio store.".format(instance.uid))

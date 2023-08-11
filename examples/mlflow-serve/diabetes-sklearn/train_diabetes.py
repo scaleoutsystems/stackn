@@ -22,6 +22,10 @@ import warnings
 from itertools import cycle
 
 import matplotlib.pyplot as plt
+
+# Import mlflow
+import mlflow
+import mlflow.sklearn
 import numpy as np
 import pandas as pd
 from sklearn import datasets
@@ -41,11 +45,6 @@ cols = diabetes.feature_names + ["progression"]
 data = pd.DataFrame(d, columns=cols)
 
 
-# Import mlflow
-import mlflow
-import mlflow.sklearn
-
-
 # Evaluate metrics
 def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
@@ -61,7 +60,8 @@ if __name__ == "__main__":
     # Split the data into training and test sets. (0.75, 0.25) split.
     train, test = train_test_split(data)
 
-    # The predicted column is "progression" which is a quantitative measure of disease progression one year after baseline
+    # The predicted column is "progression" which is a quantitative measure of disease progression
+    # one year after baseline
     train_x = train.drop(["progression"], axis=1)
     test_x = test.drop(["progression"], axis=1)
     train_y = train[["progression"]]

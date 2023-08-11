@@ -10,9 +10,7 @@ Project = apps.get_model(app_label=settings.PROJECTS_MODEL)
 
 def index(request, id=0):
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        )
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     except Exception:
         print("User not logged in.")
     if "project" in request.session:
@@ -43,9 +41,7 @@ def index(request, id=0):
         if "tf_add" not in request.GET and "tf_remove" not in request.GET:
             request.session["app_tags"] = {}
 
-    published_apps = AppInstance.objects.filter(
-        ~Q(state="Deleted"), access="public"
-    )
+    published_apps = AppInstance.objects.filter(~Q(state="Deleted"), access="public")
 
     # create session object to store ids for tag seacrh if it does not exist
     if "app_tag_filters" not in request.session:
@@ -84,6 +80,7 @@ class HomeView(View):
 
     def get(self, request):
         return render(request, self.template, locals())
+
 
 def about(request):
     template = "portal/about.html"

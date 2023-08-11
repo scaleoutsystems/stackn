@@ -13,9 +13,7 @@ class AppInstaceTestCase(TestCase):
         self.user = User.objects.create_user("foo1", "foo@test.com", "bar")
 
     def get_data(self, access):
-        project = Project.objects.create_project(
-            name="test-perm", owner=self.user, description="", repository=""
-        )
+        project = Project.objects.create_project(name="test-perm", owner=self.user, description="", repository="")
         app = Apps.objects.create(name="FEDn Combiner", slug="combiner")
 
         app_instance = AppInstance.objects.create(

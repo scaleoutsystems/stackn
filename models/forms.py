@@ -78,7 +78,7 @@ class ModelLogForm(forms.ModelForm):
         )
 
 
-class Metadata(forms.ModelForm):
+class Metadata(forms.ModelForm):  # type: ignore
     class Meta:
         model = Metadata
         fields = (

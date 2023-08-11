@@ -54,9 +54,7 @@ def create_resources_from_template(user, project_slug, template):
             print("Environments: {}".format(environments))
             for key, item in environments.items():
                 try:
-                    app = Apps.objects.filter(slug=item["app"]).order_by(
-                        "-revision"
-                    )[0]
+                    app = Apps.objects.filter(slug=item["app"]).order_by("-revision")[0]
                 except Exception as err:
                     print("App for environment not found.")
                     print(item["app"])
@@ -88,19 +86,13 @@ def create_resources_from_template(user, project_slug, template):
                 app_name = key
                 data = {"app_name": app_name, "app_action": "Create"}
                 if "credentials.access_key" in item:
-                    item["credentials.access_key"] = "".join(
-                        secrets.choice(alphabet) for i in range(8)
-                    )
+                    item["credentials.access_key"] = "".join(secrets.choice(alphabet) for i in range(8))
                 if "credentials.secret_key" in item:
-                    item["credentials.secret_key"] = "".join(
-                        secrets.choice(alphabet) for i in range(14)
-                    )
+                    item["credentials.secret_key"] = "".join(secrets.choice(alphabet) for i in range(14))
                 if "credentials.username" in item:
                     item["credentials.username"] = "admin"
                 if "credentials.password" in item:
-                    item["credentials.password"] = "".join(
-                        secrets.choice(alphabet) for i in range(14)
-                    )
+                    item["credentials.password"] = "".join(secrets.choice(alphabet) for i in range(14))
 
                 data = {**data, **item}
                 print("DATA TEMPLATE")
@@ -108,9 +100,7 @@ def create_resources_from_template(user, project_slug, template):
 
                 user_obj = User.objects.get(username=user)
 
-                app = Apps.objects.filter(slug=item["slug"]).order_by(
-                    "-revision"
-                )[0]
+                app = Apps.objects.filter(slug=item["slug"]).order_by("-revision")[0]
 
                 (successful, _, _,) = create_app_instance(
                     user=user_obj,

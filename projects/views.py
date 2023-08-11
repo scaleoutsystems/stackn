@@ -2,7 +2,7 @@ import base64
 import logging
 import random
 
-import requests as r
+import requests as r  # type: ignore
 from django.apps import apps
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
@@ -42,9 +42,7 @@ class IndexView(View):
         template = "projects/index.html"
         try:
             if request.user.is_superuser:
-                projects = Project.objects.filter(status="active").distinct(
-                    "pk"
-                )
+                projects = Project.objects.filter(status="active").distinct("pk")
             else:
                 projects = Project.objects.filter(
                     Q(owner=request.user) | Q(authorized=request.user),
@@ -69,14 +67,12 @@ class IndexView(View):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def settings(request, user, project_slug):
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        ).distinct("pk")
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active").distinct(
+            "pk"
+        )
     except TypeError as err:
         projects = []
         print(err)
@@ -105,26 +101,18 @@ def settings(request, user, project_slug):
     environments = Environment.objects.filter(project=project)
     apps = Apps.objects.all().order_by("slug", "-revision").distinct("slug")
 
-    s3instances = S3.objects.filter(
-        Q(project=project), Q(app__state="Running")
-    )
+    s3instances = S3.objects.filter(Q(project=project), Q(app__state="Running"))
     flavors = Flavor.objects.filter(project=project)
-    mlflows = MLFlow.objects.filter(
-        Q(project=project), Q(app__state="Running")
-    )
+    mlflows = MLFlow.objects.filter(Q(project=project), Q(app__state="Running"))
 
     registry_app = Apps.objects.get(slug="docker-registry")
-    registries = AppInstance.objects.filter(
-        app=registry_app.pk, project=project
-    )
+    registries = AppInstance.objects.filter(app=registry_app.pk, project=project)
 
     return render(request, template, locals())
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def update_image(request, user, project_slug):
     project = Project.objects.filter(
         Q(owner=request.user) | Q(authorized=request.user),
@@ -149,9 +137,7 @@ def update_image(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def change_description(request, user, project_slug):
     project = Project.objects.filter(
         Q(owner=request.user) | Q(authorized=request.user),
@@ -181,9 +167,7 @@ def change_description(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def create_environment(request, user, project_slug):
     # TODO: Ensure that user is allowed to create environment in this project.
     if request.method == "POST":
@@ -211,9 +195,7 @@ def create_environment(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def delete_environment(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -231,9 +213,7 @@ def delete_environment(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def create_flavor(request, user, project_slug):
     # TODO: Ensure that user is allowed to create flavor in this project.
     if request.method == "POST":
@@ -265,9 +245,7 @@ def create_flavor(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def delete_flavor(request, user, project_slug):
     if request.method == "POST":
         project = Project.objects.get(slug=project_slug)
@@ -285,9 +263,7 @@ def delete_flavor(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def set_s3storage(request, user, project_slug, s3storage=[]):
     # TODO: Ensure that the user has the correct permissions to set
     # this specific
@@ -321,9 +297,7 @@ def set_s3storage(request, user, project_slug, s3storage=[]):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def set_mlflow(request, user, project_slug, mlflow=[]):
     # TODO: Ensure that the user has the correct permissions
     # to set this specific
@@ -354,9 +328,7 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def grant_access_to_project(request, user, project_slug):
     project = Project.objects.get(slug=project_slug)
 
@@ -367,9 +339,7 @@ def grant_access_to_project(request, user, project_slug):
             project=project,
             module="PR",
             headline="New members",
-            description=(
-                "{number} new members have been added to the Project"
-            ).format(number=len(selected_users)),
+            description=("{number} new members have been added to the Project").format(number=len(selected_users)),
         )
         log.save()
 
@@ -381,9 +351,7 @@ def grant_access_to_project(request, user, project_slug):
             project.authorized.add(user_tmp)
             assign_perm("can_view_project", user_tmp, project)
             username_tmp = user_tmp.username
-            logger.info(
-                "Trying to add user {} to project.".format(username_tmp)
-            )
+            logger.info("Trying to add user {} to project.".format(username_tmp))
 
     return HttpResponseRedirect(
         reverse(
@@ -394,9 +362,7 @@ def grant_access_to_project(request, user, project_slug):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def revoke_access_to_project(request, user, project_slug):
     project = Project.objects.get(slug=project_slug)
 
@@ -407,9 +373,7 @@ def revoke_access_to_project(request, user, project_slug):
             project=project,
             module="PR",
             headline="Removed Project members",
-            description=(
-                "{number} of members have been removed from the Project"
-            ).format(number=len(selected_users)),
+            description=("{number} of members have been removed from the Project").format(number=len(selected_users)),
         )
         log.save()
 
@@ -421,11 +385,7 @@ def revoke_access_to_project(request, user, project_slug):
             project.authorized.remove(user_tmp)
             remove_perm("can_view_project", user_tmp, project)
             username_tmp = user_tmp.username
-            logger.info(
-                "Trying to remove user access {} to project.".format(
-                    username_tmp
-                )
-            )
+            logger.info("Trying to remove user access {} to project.".format(username_tmp))
 
     # TODO: Currently all project members with 'can_view_projects'
     # can revoke access
@@ -445,11 +405,7 @@ def revoke_access_to_project(request, user, project_slug):
 @login_required
 def project_templates(request):
     template = "project_templates.html"
-    templates = (
-        ProjectTemplate.objects.all()
-        .order_by("slug", "-revision")
-        .distinct("slug")
-    )
+    templates = ProjectTemplate.objects.all().order_by("slug", "-revision").distinct("slug")
     media_url = django_settings.MEDIA_URL
     return render(request, template, locals())
 
@@ -457,11 +413,7 @@ def project_templates(request):
 @login_required
 def create(request):
     template = "project_create.html"
-    templates = (
-        ProjectTemplate.objects.all()
-        .order_by("slug", "-revision")
-        .distinct("slug")
-    )
+    templates = ProjectTemplate.objects.all().order_by("slug", "-revision").distinct("slug")
 
     template_selected = "STACKn Default"
     if "template" in request.GET:
@@ -482,9 +434,7 @@ def create(request):
             else:
                 static_files = django_settings.STATIC_ROOT
             print(f"STATIC FILES DIR: {static_files}", flush=True)
-            img = static_files + "/images/patterns/image-{}.png".format(
-                random.randrange(8, 13)
-            )
+            img = static_files + "/images/patterns/image-{}.png".format(random.randrange(8, 13))
             print(img)
             img_file = open(img, "rb")
             project = Project.objects.create_project(
@@ -501,12 +451,8 @@ def create(request):
 
         try:
             # Create resources from the chosen template
-            project_template = ProjectTemplate.objects.get(
-                pk=request.POST.get("project-template")
-            )
-            create_resources_from_template.delay(
-                request.user.username, project.slug, project_template.template
-            )
+            project_template = ProjectTemplate.objects.get(pk=request.POST.get("project-template"))
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
         except ProjectCreationException:
             print("ERROR: could not create project resources")
@@ -527,15 +473,11 @@ def create(request):
                 project=project,
                 module="PR",
                 headline="Getting started",
-                description="Getting started with project {}".format(
-                    project.name
-                ),
+                description="Getting started with project {}".format(project.name),
             )
             l2.save()
 
-        next_page = request.POST.get(
-            "next", "/{}/{}".format(request.user, project.slug)
-        )
+        next_page = request.POST.get("next", "/{}/{}".format(request.user, project.slug))
 
         return HttpResponseRedirect(next_page, {"message": "Created project"})
 
@@ -543,15 +485,13 @@ def create(request):
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def details(request, user, project_slug):
     is_authorized = False
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        ).distinct("pk")
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active").distinct(
+            "pk"
+        )
     except TypeError as err:
         projects = []
         print(err)
@@ -583,9 +523,7 @@ def details(request, user, project_slug):
 
         status_success = django_settings.APPS_STATUS_SUCCESS
         status_warning = django_settings.APPS_STATUS_WARNING
-        activity_logs = ProjectLog.objects.filter(project=project).order_by(
-            "-created_at"
-        )[:5]
+        activity_logs = ProjectLog.objects.filter(project=project).order_by("-created_at")[:5]
         resources = list()
         cats = AppCategories.objects.all().order_by("-priority")
         rslugs = []
@@ -602,36 +540,26 @@ def details(request, user, project_slug):
             for instance in tmp:
                 pk_list += str(instance.pk) + ","
             apps_filtered = (
-                Apps.objects.filter(
-                    category__slug=rslug["slug"], user_can_create=True
-                )
+                Apps.objects.filter(category__slug=rslug["slug"], user_can_create=True)
                 .order_by("slug", "-revision")
                 .distinct("slug")
             )
-            resources.append(
-                {"title": rslug["name"], "objs": tmp, "apps": apps_filtered}
-            )
+            resources.append({"title": rslug["name"], "objs": tmp, "apps": apps_filtered})
         pk_list = pk_list[:-1]
         pk_list = "'" + pk_list + "'"
-        models = Model.objects.filter(project=project).order_by(
-            "-uploaded_at"
-        )[:10]
+        models = Model.objects.filter(project=project).order_by("-uploaded_at")[:10]
 
     return render(request, template, locals())
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def delete(request, user, project_slug):
     next_page = request.GET.get("next", "/projects/")
 
     if not request.user.is_superuser:
         owner = User.objects.filter(username=user).first()
-        project = Project.objects.filter(
-            owner=owner, slug=project_slug
-        ).first()
+        project = Project.objects.filter(owner=owner, slug=project_slug).first()
     else:
         project = Project.objects.filter(slug=project_slug).first()
 
@@ -640,15 +568,11 @@ def delete(request, user, project_slug):
     project.save()
     delete_project.delay(project.pk)
 
-    return HttpResponseRedirect(
-        next_page, {"message": "Deleted project successfully."}
-    )
+    return HttpResponseRedirect(next_page, {"message": "Deleted project successfully."})
 
 
 @login_required
-@permission_required_or_403(
-    "can_view_project", (Project, "slug", "project_slug")
-)
+@permission_required_or_403("can_view_project", (Project, "slug", "project_slug"))
 def publish_project(request, user, project_slug):
     owner = User.objects.filter(username=user).first()
     project = Project.objects.filter(owner=owner, slug=project_slug).first()
@@ -686,18 +610,13 @@ def publish_project(request, user, project_slug):
                                 project=project,
                                 module="PR",
                                 headline="GitHub repository",
-                                description=(
-                                    "Published project files"
-                                    " to a GitHub repository {url}"
-                                ).format(url=project.clone_url),
+                                description=("Published project files" " to a GitHub repository {url}").format(
+                                    url=project.clone_url
+                                ),
                             )
                             log.save()
             except Exception as e:
-                logger.error(
-                    "Failed to get response from {} with error: {}".format(
-                        url, e
-                    )
-                )
+                logger.error("Failed to get response from {} with error: {}".format(url, e))
 
     return HttpResponseRedirect(
         reverse(

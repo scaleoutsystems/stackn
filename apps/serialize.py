@@ -59,9 +59,7 @@ def serialize_model(form_selection):
                 "url": "http://{}".format(obj[0].s3.host),
                 "service": obj[0].s3.app.parameters["service"]["name"],
                 "port": obj[0].s3.app.parameters["service"]["port"],
-                "targetport": obj[0].s3.app.parameters["service"][
-                    "targetport"
-                ],
+                "targetport": obj[0].s3.app.parameters["service"]["targetport"],
                 "access_key": obj[0].s3.access_key,
                 "secret_key": obj[0].s3.secret_key,
                 "bucket": obj[0].bucket,
@@ -137,9 +135,7 @@ def serialize_environment(form_selection, project):
         try:
             environment = Environment.objects.get(pk=environment_id)
         except:  # noqa E722 TODO: Add exception
-            environment = Environment.objects.get(
-                name=environment_id, project=project
-            )
+            environment = Environment.objects.get(name=environment_id, project=project)
         environment_json["environment"] = {
             "pk": environment.pk,
             "repository": environment.repository,
@@ -147,9 +143,7 @@ def serialize_environment(form_selection, project):
             "registry": False,
         }
         if environment.registry:
-            environment_json["environment"][
-                "registry"
-            ] = environment.registry.parameters
+            environment_json["environment"]["registry"] = environment.registry.parameters
             environment_json["environment"]["registry"]["enabled"] = True
         else:
             environment_json["environment"]["registry"] = {"enabled": False}
@@ -165,17 +159,9 @@ def serialize_apps(form_selection, project):
         if "app:" in key and key[0:4] == "app:":
             app_name = key[4:]
             try:
-                app = (
-                    Apps.objects.filter(name=app_name)
-                    .order_by("-revision")
-                    .first()
-                )
+                app = Apps.objects.filter(name=app_name).order_by("-revision").first()
                 if not app:
-                    app = (
-                        Apps.objects.filter(slug=app_name)
-                        .order_by("-revision")
-                        .first()
-                    )
+                    app = Apps.objects.filter(slug=app_name).order_by("-revision").first()
             except Exception as err:
                 print("Failed to fetch app: {}".format(app_name))
                 print(err)
@@ -187,19 +173,13 @@ def serialize_apps(form_selection, project):
             print(app_name)
             print("id: " + str(form_selection[key]))
             try:
-                objs = AppInstance.objects.filter(
-                    pk__in=form_selection.getlist(key)
-                )
+                objs = AppInstance.objects.filter(pk__in=form_selection.getlist(key))
             except:  # noqa E722 TODO: Add exception
-                objs = AppInstance.objects.filter(
-                    name__in=form_selection[key], project=project
-                )
+                objs = AppInstance.objects.filter(name__in=form_selection[key], project=project)
 
             for obj in objs:
                 app_deps.append(obj)
-                parameters["apps"][app.slug][
-                    slugify(obj.name)
-                ] = obj.parameters
+                parameters["apps"][app.slug][slugify(obj.name)] = obj.parameters
 
     return parameters, app_deps
 
@@ -271,15 +251,11 @@ def serialize_project(project):
             "host": project.mlflow.host,
             "service": project.mlflow.app.parameters["service"]["name"],
             "port": project.mlflow.app.parameters["service"]["port"],
-            "targetport": project.mlflow.app.parameters["service"][
-                "targetport"
-            ],
+            "targetport": project.mlflow.app.parameters["service"]["targetport"],
             "s3url": "https://" + project.mlflow.s3.host,
             "s3service": project.mlflow.s3.app.parameters["service"]["name"],
             "s3port": project.mlflow.s3.app.parameters["service"]["port"],
-            "s3targetport": project.mlflow.s3.app.parameters["service"][
-                "targetport"
-            ],
+            "s3targetport": project.mlflow.s3.app.parameters["service"]["targetport"],
             "access_key": project.mlflow.s3.access_key,
             "secret_key": project.mlflow.s3.secret_key,
             "region": project.mlflow.s3.region,
@@ -325,9 +301,7 @@ def serialize_env_variables(username, project, aset):
         appsettings = app.app.settings
         if "env_variables" in appsettings:
             tmp = json.dumps(appsettings["env_variables"])
-            env_vars = json.loads(
-                django_engine.from_string(tmp).render(params)
-            )
+            env_vars = json.loads(django_engine.from_string(tmp).render(params))
             for key in env_vars.keys():
                 parameters["app_env"][slugify(key)] = env_vars[key]
     print(parameters)

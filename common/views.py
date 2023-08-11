@@ -10,30 +10,30 @@ from .forms import SignUpForm
 
 # Create your views here.
 class HomeView(TemplateView):
-    template_name = 'common/landing.html'
+    template_name = "common/landing.html"
 
 
 class RegistrationCompleteView(TemplateView):
-    template_name = 'registration/registration_complete.html'
+    template_name = "registration/registration_complete.html"
+
 
 # Sign Up View
 
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    template_name = 'common/signup.html'
+    template_name = "common/signup.html"
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
             form.save()
             if settings.INACTIVE_USERS:
-                messages.success(
-                    request, "Account request has been registered! Please wait for admin to approve!")
-                redirect_name = 'common:success'
+                messages.success(request, "Account request has been registered! Please wait for admin to approve!")
+                redirect_name = "common:success"
             else:
                 messages.success(request, "Account created successfully!")
-                redirect_name = 'login'
+                redirect_name = "login"
 
             return HttpResponseRedirect(reverse_lazy(redirect_name))
 

@@ -55,16 +55,12 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -74,22 +70,16 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
-        response = c.post(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.post(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -101,22 +91,16 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data(user)
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
-        response = c.post(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.post(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -130,16 +114,12 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -149,16 +129,12 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -172,24 +148,18 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
         project = self.get_data()
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -201,9 +171,7 @@ class CreateAppViewTestCase(TestCase):
             project=project,
         )
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -213,30 +181,20 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
         content_type = ContentType.objects.get_for_model(AppInstance)
-        project_permissions = Permission.objects.filter(
-            content_type=content_type
-        )
+        project_permissions = Permission.objects.filter(content_type=content_type)
 
         add_permission = next(
-            (
-                perm
-                for perm in project_permissions
-                if perm.codename == "add_appinstance"
-            ),
+            (perm for perm in project_permissions if perm.codename == "add_appinstance"),
             None,
         )
 
@@ -244,8 +202,6 @@ class CreateAppViewTestCase(TestCase):
 
         self.user = User.objects.get(username="foo1")
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)

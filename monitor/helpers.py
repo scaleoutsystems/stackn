@@ -1,6 +1,6 @@
 import logging
 
-import requests as r
+import requests as r  # type: ignore
 from django.conf import settings
 
 
@@ -58,17 +58,11 @@ def get_count_over_time(name, app_name, path, status_code, time_span):
             + time_span
             + "]))"
         )
-        response = r.get(
-            settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-        )
+        response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
         if response:
             total_count = response.json()["data"]["result"][0]["value"][1]
     except Exception:
-        print(
-            "Failed to get total count for: {}, {}, {}.".format(
-                app_name, path, status_code
-            )
-        )
+        print("Failed to get total count for: {}, {}, {}.".format(app_name, path, status_code))
 
     return total_count
 
@@ -80,9 +74,7 @@ def get_total_labs_cpu_usage_60s(project_slug):
         + '", label_app="lab"})'
     )
     print(query)
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     if result:
         cpu_usage = result[0]["value"][1]
@@ -99,9 +91,7 @@ def get_total_cpu_usage_60s_ts(project_slug, resource_type):
         + '"})) [30m:30s]'
     )
     print(query)
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     # print(response.json())
     result = response.json()["data"]["result"]
     if result:
@@ -115,9 +105,7 @@ def get_total_labs_memory_usage_60s(project_slug):
         + project_slug
         + '", label_app="lab"})'
     )
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     if result:
         memory_usage = result[0]["value"][1]
@@ -136,9 +124,7 @@ def get_labs_memory_requests(project_slug):
     )
     # query = 'kube_pod_container_resource_requests_cpu_cores'
 
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     if result:
         memory = result[0]["value"][1]
@@ -153,9 +139,7 @@ def get_labs_cpu_requests(project_slug):
         + '"})'
     )
 
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     if result:
         num_cpus = result[0]["value"][1]
@@ -179,9 +163,7 @@ def get_resource(project_slug, resource_type, q_type, mem_or_cpu, app_name=[]):
         query += ', label_app="' + app_name + '"})'
     else:
         query += "})"
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     if result:
         res = result[0]["value"][1]
@@ -191,8 +173,6 @@ def get_resource(project_slug, resource_type, q_type, mem_or_cpu, app_name=[]):
 
 def get_all():
     query = 'kube_pod_container_resource_limits_memory_bytes * on(pod) group_left kube_pod_labels{label_type="lab", label_project="stochss-dev-tiz"}'  # noqa: E501
-    response = r.get(
-        settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query}
-    )
+    response = r.get(settings.PROMETHEUS_SVC + "/api/v1/query", params={"query": query})
     result = response.json()["data"]["result"]
     print(result)

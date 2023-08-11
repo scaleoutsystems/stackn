@@ -102,22 +102,12 @@ def create_client(S3_storage, secure_mode=True):
     try:
         access_key = S3_storage.access_key
     except Exception:
-        print(
-            (
-                "No access key could be found with "
-                "the current S3 storage instance: {}"
-            ).format(S3_storage)
-        )
+        print(("No access key could be found with " "the current S3 storage instance: {}").format(S3_storage))
         return []
     try:
         secret_key = S3_storage.secret_key
     except Exception:
-        print(
-            (
-                "No secret key could be found with "
-                "the current S3 storage instance: {}"
-            ).format(S3_storage)
-        )
+        print(("No secret key could be found with " "the current S3 storage instance: {}").format(S3_storage))
         return []
 
     # API connection does not want scheme in the minio URL

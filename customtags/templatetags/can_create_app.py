@@ -10,8 +10,6 @@ register = template.Library()
 def can_create_app(user, project, app):
     app_slug = app.slug
 
-    user_can_create = AppInstance.objects.user_can_create(
-        user=user, project=project, app_slug=app_slug
-    )
+    user_can_create = AppInstance.objects.user_can_create(user=user, project=project, app_slug=app_slug)
 
     return user_can_create

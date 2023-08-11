@@ -49,9 +49,7 @@ def get_cpu_mem(resources, project_slug, resource_type):
             "memory_bytes",
             app_name=resource.appname,
         )
-        res_mem_request = "{:.2f}".format(
-            float(res_mem_request) / 1e9 * 0.931323
-        )
+        res_mem_request = "{:.2f}".format(float(res_mem_request) / 1e9 * 0.931323)
 
         if resource_type == "lab":
             res_owner = resource.lab_session_owner.username
@@ -115,9 +113,7 @@ def get_cpu_mem(resources, project_slug, resource_type):
 @login_required
 def liveout(request, user, project):
     is_authorized = True
-    user_permissions = get_permissions(  # noqa: F821
-        request, project, sett.MONITOR_PERM
-    )
+    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)  # noqa: F821
 
     if not user_permissions["view"]:
         request.session["oidc_id_token_expiration"] = -1
@@ -133,17 +129,15 @@ def liveout(request, user, project):
 @login_required
 def overview(request, user, project):
     try:
-        projects = Project.objects.filter(
-            Q(owner=request.user) | Q(authorized=request.user), status="active"
-        ).distinct("pk")
+        projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active").distinct(
+            "pk"
+        )
     except TypeError as err:
         projects = []
         print(err)
 
     is_authorized = True
-    user_permissions = get_permissions(  # noqa: F821
-        request, project, sett.MONITOR_PERM
-    )
+    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)  # noqa: F821
     if not user_permissions["view"]:
         request.session["oidc_id_token_expiration"] = -1
         request.session.save()
@@ -190,9 +184,7 @@ def overview(request, user, project):
 def delete_lab(request, user, project, uid):
     # project = Project.objects.filter(Q(slug=project), Q(owner=request.user) | Q(authorized=request.user)).first() # noqa E501
     # session = Session.objects.filter(Q(id=id), Q(project=project), Q(lab_session_owner=request.user)).first() # noqa E501
-    user_permissions = get_permissions(  # noqa F821
-        request, project, sett.MONITOR_PERM
-    )
+    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)  # noqa F821
     if not user_permissions["view"]:
         request.session["oidc_id_token_expiration"] = -1
         request.session.save()
@@ -211,9 +203,7 @@ def delete_lab(request, user, project, uid):
 
 
 def delete_deployment(request, user, project, model_id):
-    user_permissions = get_permissions(  # noqa F821
-        request, project, sett.MONITOR_PERM
-    )
+    user_permissions = get_permissions(request, project, sett.MONITOR_PERM)  # noqa F821
     if not user_permissions["view"]:
         request.session["oidc_id_token_expiration"] = -1
         request.session.save()
@@ -248,7 +238,6 @@ def cpuchart(request, user, project, resource_type):
 
 
 def usage(request, user, project):
-
     curr_timestamp = time.time()
     points = ResourceData.objects.filter(
         time__gte=curr_timestamp - 2 * 3600, appinstance__project__slug=project
@@ -256,11 +245,7 @@ def usage(request, user, project):
     all_cpus = list()
     for point in points:
         all_cpus.append(point.cpu)
-    total = (
-        points.annotate(timeP=F("time"))
-        .values("timeP")
-        .annotate(total_cpu=Sum("cpu"), total_mem=Sum("mem"))
-    )
+    total = points.annotate(timeP=F("time")).values("timeP").annotate(total_cpu=Sum("cpu"), total_mem=Sum("mem"))
 
     labels = list(total.values_list("timeP"))
     labels = list(itertools.chain.from_iterable(labels))
@@ -279,6 +264,4 @@ def usage(request, user, project):
     total_cpu = list(total.values_list("total_cpu"))
     total_cpu = list(itertools.chain.from_iterable(total_cpu))[::step]
 
-    return JsonResponse(
-        data={"labels": x_data, "data_cpu": total_cpu, "data_mem": total_mem}
-    )
+    return JsonResponse(data={"labels": x_data, "data_cpu": total_cpu, "data_mem": total_mem})

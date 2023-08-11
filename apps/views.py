@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from json import load
 
 import django.core.exceptions as ex
-import requests
+import requests  # type: ignore
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -47,9 +47,7 @@ def index(request, user, project):
     apps = Apps.objects.filter(category=cat_obj)
     project = Project.objects.get(slug=project)
     appinstances = AppInstance.objects.filter(
-        Q(owner=request.user)
-        | Q(permission__projects__slug=project.slug)
-        | Q(permission__public=True),
+        Q(owner=request.user) | Q(permission__projects__slug=project.slug) | Q(permission__public=True),
         app__category=cat_obj,
     )
 
@@ -75,19 +73,9 @@ def logs(request, user, project, ai_id):
         try:
             url = settings.LOKI_SVC + "/loki/api/v1/query_range"
             app_params = app.parameters
-            print(
-                '{container="'
-                + container
-                + '",release="'
-                + app_params["release"]
-                + '"}'
-            )
+            print('{container="' + container + '",release="' + app_params["release"] + '"}')
             query = {
-                "query": '{container="'
-                + container
-                + '",release="'
-                + app_params["release"]
-                + '"}',
+                "query": '{container="' + container + '",release="' + app_params["release"] + '"}',
                 "limit": 50,
                 "start": 0,
             }
@@ -110,9 +98,7 @@ def logs(request, user, project, ai_id):
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def filtered(request, user, project, category):
     # template = 'index_apps.html'
-    projects = Project.objects.filter(
-        Q(owner=request.user) | Q(authorized=request.user), status="active"
-    )
+    projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     status_success, status_warning = get_status_defs()
     menu = dict()
 
@@ -181,11 +167,7 @@ def get_status(request, user, project):
                     status = instance.state
 
                 status_group = (
-                    "success"
-                    if status in status_success
-                    else "warning"
-                    if status in status_warning
-                    else "danger"
+                    "success" if status in status_success else "warning" if status in status_warning else "danger"
                 )
 
                 obj = {
@@ -201,9 +183,7 @@ def get_status(request, user, project):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project")),
     name="dispatch",
 )
 class AppSettingsView(View):
@@ -219,15 +199,11 @@ class AppSettingsView(View):
         all_tags = AppInstance.tags.tag_model.objects.all()
         template = "update.html"
         show_permissions = True
-        from_page = (
-            request.GET.get("from") if "from" in request.GET else "filtered"
-        )
+        from_page = request.GET.get("from") if "from" in request.GET else "filtered"
         existing_app_name = appinstance.name
         app = appinstance.app
         app_settings = appinstance.app.settings
-        form = generate_form(
-            app_settings, project, app, request.user, appinstance
-        )
+        form = generate_form(app_settings, project, app, request.user, appinstance)
 
         if request.user.id != appinstance.owner.id:
             show_permissions = False
@@ -244,9 +220,7 @@ class AppSettingsView(View):
         if not body.get("permission", None):
             body.update({"permission": appinstance.access})
 
-        parameters, app_deps, model_deps = serialize_app(
-            body, project, app_settings, request.user.username
-        )
+        parameters, app_deps, model_deps = serialize_app(body, project, app_settings, request.user.username)
 
         authorized = can_access_app_instances(app_deps, request.user, project)
 
@@ -345,9 +319,7 @@ class CreateServeView(View):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project")),
     name="dispatch",
 )
 class CreateView(View):
@@ -358,9 +330,7 @@ class CreateView(View):
 
         return [project, app, app_settings]
 
-    def get(
-        self, request, user, project, app_slug, data=[], wait=False, call=False
-    ):
+    def get(self, request, user, project, app_slug, data=[], wait=False, call=False):
         template = "create.html"
         project, app, app_settings = self.get_shared_data(project, app_slug)
 
@@ -374,9 +344,7 @@ class CreateView(View):
             from_page = ""
             user = User.objects.get(username=user)
 
-        user_can_create = AppInstance.objects.user_can_create(
-            user, project, app_slug
-        )
+        user_can_create = AppInstance.objects.user_can_create(user, project, app_slug)
 
         if not user_can_create:
             return HttpResponseForbidden()
@@ -390,9 +358,7 @@ class CreateView(View):
         data = request.POST
         user = request.user
 
-        user_can_create = AppInstance.objects.user_can_create(
-            user, project, app_slug
-        )
+        user_can_create = AppInstance.objects.user_can_create(user, project, app_slug)
 
         if not user_can_create:
             return HttpResponseForbidden()
@@ -400,9 +366,7 @@ class CreateView(View):
         if not app.user_can_create:
             raise Exception("User not allowed to create app")
 
-        successful, project_slug, app_category_slug = create_app_instance(
-            user, project, app, app_settings, data, wait
-        )
+        successful, project_slug, app_category_slug = create_app_instance(user, project, app, app_settings, data, wait)
 
         if not successful:
             return HttpResponseRedirect(

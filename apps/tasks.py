@@ -3,7 +3,7 @@ import subprocess
 import time
 from datetime import datetime
 
-import requests
+import requests  # type: ignore
 from celery import shared_task
 from django.conf import settings
 from django.core.exceptions import EmptyResultSet
@@ -19,12 +19,7 @@ from .models import AppInstance, Apps, AppStatus, ResourceData
 
 
 def get_URI(parameters):
-    URI = (
-        "https://"
-        + parameters["release"]
-        + "."
-        + parameters["global"]["domain"]
-    )
+    URI = "https://" + parameters["release"] + "." + parameters["global"]["domain"]
 
     URI = URI.strip("/")
     return URI
@@ -49,23 +44,14 @@ def post_create_hooks(instance):
 
         # OBS!! TEMP WORKAROUND to be able to connect to minio
         minio_svc = "{}-minio".format(instance.parameters["release"])
-        cmd = (
-            "kubectl"
-            + " get svc "
-            + minio_svc
-            + ' -o jsonpath="{.spec.clusterIP"}'
-        )
+        cmd = "kubectl" + " get svc " + minio_svc + ' -o jsonpath="{.spec.clusterIP"}'
         minio_host_url = ""
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True)
             minio_host_url = result.stdout.decode("utf-8")
             minio_host_url += ":9000"
         except subprocess.CalledProcessError:
-            print(
-                "Oops, something went wrong running the command: {}".format(
-                    cmd
-                )
-            )
+            print("Oops, something went wrong running the command: {}".format(cmd))
 
         try:
             s3obj = instance.s3obj
@@ -90,17 +76,11 @@ def post_create_hooks(instance):
         # We can assume one registry here
         for reg_key in params["apps"]["docker_registry"].keys():
             reg_release = params["apps"]["docker_registry"][reg_key]["release"]
-            reg_domain = params["apps"]["docker_registry"][reg_key]["global"][
-                "domain"
-            ]
+            reg_domain = params["apps"]["docker_registry"][reg_key]["global"]["domain"]
         repository = reg_release + "." + reg_domain
-        registry = AppInstance.objects.get(
-            parameters__contains={"release": reg_release}
-        )
+        registry = AppInstance.objects.get(parameters__contains={"release": reg_release})
 
-        target_environment = Environment.objects.get(
-            pk=params["environment"]["pk"]
-        )
+        target_environment = Environment.objects.get(pk=params["environment"]["pk"])
         target_app = target_environment.app
 
         env_obj = Environment(
@@ -121,25 +101,14 @@ def post_create_hooks(instance):
         # between docker and k8s does not work currently)
         # Sure one could use FQDN but lets avoid going via the internet
         mlflow_svc = instance.parameters["service"]["name"]
-        cmd = (
-            "kubectl"
-            + " get svc "
-            + mlflow_svc
-            + ' -o jsonpath="{.spec.clusterIP"}'
-        )
+        cmd = "kubectl" + " get svc " + mlflow_svc + ' -o jsonpath="{.spec.clusterIP"}'
         mlflow_host_ip = ""
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True)
             mlflow_host_ip = result.stdout.decode("utf-8")
-            mlflow_host_ip += ":{}".format(
-                instance.parameters["service"]["port"]
-            )
+            mlflow_host_ip += ":{}".format(instance.parameters["service"]["port"])
         except subprocess.CalledProcessError:
-            print(
-                "Oops, something went wrong running the command: {}".format(
-                    cmd
-                )
-            )
+            print("Oops, something went wrong running the command: {}".format(cmd))
 
         s3 = S3.objects.get(pk=instance.parameters["s3"]["pk"])
         basic_auth = BasicAuth(
@@ -259,10 +228,7 @@ def delete_resource(pk):
         # Invoke chart controller
         results = controller.delete(parameters)
 
-        if (
-            results.returncode == 0
-            or "release: not found" in results.stderr.decode("utf-8")
-        ):
+        if results.returncode == 0 or "release: not found" in results.stderr.decode("utf-8"):
             status = AppStatus(appinstance=appinstance)
             status.status_type = "Terminated"
             status.save()
@@ -283,10 +249,7 @@ def delete_resource_permanently(appinstance):
     # Invoke chart controller
     results = controller.delete(parameters)
 
-    if not (
-        results.returncode == 0
-        or "release: not found" in results.stderr.decode("utf-8")
-    ):
+    if not (results.returncode == 0 or "release: not found" in results.stderr.decode("utf-8")):
         status = AppStatus(appinstance=appinstance)
         status.status_type = "FailedToDelete"
         status.save()
@@ -356,11 +319,7 @@ def check_status():
         if release in app_statuses:
             current_status = app_statuses[release]["phase"]
             try:
-                latest_status = (
-                    AppStatus.objects.filter(appinstance=instance)
-                    .latest("time")
-                    .status_type
-                )
+                latest_status = AppStatus.objects.filter(appinstance=instance).latest("time").status_type
             except:  # noqa E722 TODO: Add exception
                 latest_status = "Unknown"
             if current_status != latest_status:
@@ -377,9 +336,7 @@ def check_status():
             # else:
             #     print("No update for release: {}".format(release))
         else:
-            delete_exists = AppStatus.objects.filter(
-                appinstance=instance, status_type="Terminated"
-            ).exists()
+            delete_exists = AppStatus.objects.filter(appinstance=instance, status_type="Terminated").exists()
             if delete_exists:
                 status = AppStatus(appinstance=instance)
                 status.status_type = "Deleted"
@@ -406,22 +363,11 @@ def check_status():
             except subprocess.CalledProcessError:
                 print("Error running the command: {}".format(cmd))
 
-            if (
-                result_stdout != ""
-                and "No resources found in default namespace."
-                not in result_stderr
-            ):
+            if result_stdout != "" and "No resources found in default namespace." not in result_stderr:
                 # Extract the the status of the related release pod
-                cmd = (
-                    "kubectl"
-                    + " get po -l release="
-                    + app_release
-                    + ' -o jsonpath="{.items[0].status.phase}"'
-                )
+                cmd = "kubectl" + " get po -l release=" + app_release + ' -o jsonpath="{.items[0].status.phase}"'
                 try:
-                    result = subprocess.run(
-                        cmd, shell=True, capture_output=True
-                    )
+                    result = subprocess.run(cmd, shell=True, capture_output=True)
                     pod_status = result.stdout.decode("utf-8")
                     print(pod_status)
                 except subprocess.CalledProcessError:
@@ -429,16 +375,10 @@ def check_status():
 
                 if pod_status == "Running" and instance.state == "Deleted":
                     print("INFO: running pod associated to app (Deleted)")
-                    print(
-                        "INFO: DELETE RESOURCE with release: {}".format(
-                            app_release
-                        )
-                    )
+                    print("INFO: DELETE RESOURCE with release: {}".format(app_release))
                     cmd = "helm" + " delete " + app_release
                     try:
-                        result = subprocess.run(
-                            cmd, shell=True, capture_output=True
-                        )
+                        result = subprocess.run(cmd, shell=True, capture_output=True)
                         print(result)
                     except subprocess.CalledProcessError:
                         print("Error running the command: {}".format(cmd))
@@ -512,9 +452,7 @@ def get_resource_usage():
         entry = resources[key]
         # print(entry['labels']['release'])
         try:
-            appinstance = AppInstance.objects.get(
-                parameters__contains={"release": entry["labels"]["release"]}
-            )
+            appinstance = AppInstance.objects.get(parameters__contains={"release": entry["labels"]["release"]})
             # print(timestamp)
             # print(appinstance)
             # print(entry)
@@ -535,9 +473,7 @@ def get_resource_usage():
 
 @app.task
 def sync_mlflow_models():
-    mlflow_apps = AppInstance.objects.filter(
-        ~Q(state="Deleted"), project__status="active", app__slug="mlflow"
-    )
+    mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), project__status="active", app__slug="mlflow")
     for mlflow_app in mlflow_apps:
         url = "http://{}/{}".format(
             mlflow_app.project.mlflow.host,
@@ -588,24 +524,14 @@ def sync_mlflow_models():
                         else:
                             raise EmptyResultSet
                     else:
-                        if (
-                            item["current_stage"] == "Archived"
-                            and stackn_model.status != "AR"
-                        ):
+                        if item["current_stage"] == "Archived" and stackn_model.status != "AR":
                             stackn_model.status = "AR"
                             stackn_model.save()
-                        if (
-                            item["current_stage"] != "Archived"
-                            and stackn_model.status == "AR"
-                        ):
+                        if item["current_stage"] != "Archived" and stackn_model.status == "AR":
                             stackn_model.status = "CR"
                             stackn_model.save()
         else:
-            print(
-                "WARNING: Failed to fetch info from MLflow Server: {}".format(
-                    url
-                )
-            )
+            print("WARNING: Failed to fetch info from MLflow Server: {}".format(url))
 
 
 @app.task

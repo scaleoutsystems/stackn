@@ -34,15 +34,10 @@ def get_form_models(aset, project, appinstance=[]):
             object_type = aset["model"]["object_type"]
         else:
             object_type = "default"
-        models = Model.objects.filter(
-            project=project, object_type__slug=object_type
-        )
+        models = Model.objects.filter(project=project, object_type__slug=object_type)
 
         for model in models:
-            if (
-                appinstance
-                and model.appinstance_set.filter(pk=appinstance.pk).exists()
-            ):
+            if appinstance and model.appinstance_set.filter(pk=appinstance.pk).exists():
                 print(model)
                 model.selected = "selected"
             else:
@@ -85,10 +80,7 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
                 )
 
             for ain in app_instances:
-                if (
-                    appinstance
-                    and ain.appinstance_set.filter(pk=appinstance.pk).exists()
-                ):
+                if appinstance and ain.appinstance_set.filter(pk=appinstance.pk).exists():
                     ain.selected = "selected"
                 else:
                     ain.selected = ""
@@ -116,9 +108,7 @@ def get_form_primitives(aset, project, appinstance=[]):
         if key not in key_words:
             primitives[key] = aset[key]
             if "meta" in primitives[key]:
-                primitives[key]["meta_title"] = primitives[key]["meta"][
-                    "title"
-                ]
+                primitives[key]["meta_title"] = primitives[key]["meta"]["title"]
             else:
                 primitives[key]["meta_title"] = key
             if appinstance:
@@ -126,9 +116,7 @@ def get_form_primitives(aset, project, appinstance=[]):
                     print(subkey)
                     try:
                         if subkey != "meta" and subkey != "meta_title":
-                            primitives[key][subkey]["default"] = ai_vals[
-                                key + "." + subkey
-                            ]
+                            primitives[key][subkey]["default"] = ai_vals[key + "." + subkey]
                     except Exception as err:
                         print(err)
     print(primitives)
@@ -151,15 +139,9 @@ def get_form_permission(aset, project, appinstance=[]):
             try:
                 ai_vals = appinstance.parameters
                 print(ai_vals["permissions"])
-                form_permissions["public"]["value"] = ai_vals["permissions"][
-                    "public"
-                ]
-                form_permissions["project"]["value"] = ai_vals["permissions"][
-                    "project"
-                ]
-                form_permissions["private"]["value"] = ai_vals["permissions"][
-                    "private"
-                ]
+                form_permissions["public"]["value"] = ai_vals["permissions"]["public"]
+                form_permissions["project"]["value"] = ai_vals["permissions"]["project"]
+                form_permissions["private"]["value"] = ai_vals["permissions"]["private"]
                 print(form_permissions)
             except Exception as err:
                 print(err)
@@ -189,9 +171,7 @@ def get_form_environments(aset, project, app, appinstance=[]):
     if "environment" in aset:
         dep_environment = True
         if aset["environment"]["type"] == "match":
-            environments["objs"] = Environment.objects.filter(
-                project=project, app__slug=app.slug
-            )
+            environments["objs"] = Environment.objects.filter(project=project, app__slug=app.slug)
         elif aset["environment"]["type"] == "any":
             environments["objs"] = Environment.objects.filter(project=project)
         elif "apps" in aset["environment"]:
@@ -219,21 +199,11 @@ def get_form_S3(aset, project, app, appinstance=[]):
 
 def generate_form(aset, project, app, user, appinstance=[]):
     form = dict()
-    form["dep_model"], form["models"] = get_form_models(
-        aset, project, appinstance
-    )
-    form["dep_apps"], form["app_deps"] = get_form_apps(
-        aset, project, app, user, appinstance
-    )
-    form["dep_appobj"], form["appobjs"] = get_form_appobj(
-        aset, project, appinstance
-    )
-    form["dep_environment"], form["environments"] = get_form_environments(
-        aset, project, app, appinstance
-    )
-    form["dep_S3"], form["s3stores"] = get_form_S3(
-        aset, project, app, appinstance
-    )
+    form["dep_model"], form["models"] = get_form_models(aset, project, appinstance)
+    form["dep_apps"], form["app_deps"] = get_form_apps(aset, project, app, user, appinstance)
+    form["dep_appobj"], form["appobjs"] = get_form_appobj(aset, project, appinstance)
+    form["dep_environment"], form["environments"] = get_form_environments(aset, project, app, appinstance)
+    form["dep_S3"], form["s3stores"] = get_form_S3(aset, project, app, appinstance)
 
     form["dep_vols"] = False
     form["dep_flavor"] = False
@@ -242,11 +212,7 @@ def generate_form(aset, project, app, user, appinstance=[]):
         form["flavors"] = Flavor.objects.filter(project=project)
 
     form["primitives"] = get_form_primitives(aset, project, appinstance)
-    form["dep_permissions"], form["form_permissions"] = get_form_permission(
-        aset, project, appinstance
-    )
-    release_names = ReleaseName.objects.filter(
-        project=project, status="active"
-    )
+    form["dep_permissions"], form["form_permissions"] = get_form_permission(aset, project, appinstance)
+    release_names = ReleaseName.objects.filter(project=project, status="active")
     form["release_names"] = release_names
     return form

@@ -20,9 +20,7 @@ class AppCategories(models.Model):
 
 class Apps(models.Model):
     user_can_create = models.BooleanField(default=True)
-    access = models.CharField(
-        max_length=20, blank=True, null=True, default="public"
-    )
+    access = models.CharField(max_length=20, blank=True, null=True, default="public")
     category = models.ForeignKey(
         "AppCategories",
         related_name="apps",
@@ -34,9 +32,7 @@ class Apps(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True, default="")
     logo = models.CharField(max_length=512, default="")
-    logo_file = models.ImageField(
-        upload_to="apps/logos", null=True, blank=True
-    )
+    logo_file = models.ImageField(upload_to="apps/logos", null=True, blank=True)
     name = models.CharField(max_length=512)
     priority = models.IntegerField(default=100)
     projects = models.ManyToManyField("projects.Project")
@@ -60,9 +56,7 @@ class AppInstanceManager(models.Manager):
     def user_can_create(self, user, project, app_slug):
         limit = get_apps_limit_per_user(app_slug)
 
-        num_of_app_instances = self.filter(
-            Q(owner=user), app__slug=app_slug, project=project
-        ).count()
+        num_of_app_instances = self.filter(Q(owner=user), app__slug=app_slug, project=project).count()
 
         has_perm = user.has_perm("apps.add_appinstance")
 
@@ -72,12 +66,8 @@ class AppInstanceManager(models.Manager):
 class AppInstance(models.Model):
     objects = AppInstanceManager()
 
-    access = models.CharField(
-        max_length=20, default="private", null=True, blank=True
-    )
-    app = models.ForeignKey(
-        "Apps", on_delete=models.CASCADE, related_name="appinstance"
-    )
+    access = models.CharField(max_length=20, default="private", null=True, blank=True)
+    app = models.ForeignKey("Apps", on_delete=models.CASCADE, related_name="appinstance")
     app_dependencies = models.ManyToManyField("apps.AppInstance", blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     deleted_on = models.DateTimeField(null=True, blank=True)
@@ -105,9 +95,7 @@ class AppInstance(models.Model):
         permissions = [("can_access_app", "Can access app service")]
 
     def __str__(self):
-        return str(self.name) + " ({})-{}-{}-{}".format(
-            self.state, self.owner, self.app.name, self.project
-        )
+        return str(self.name) + " ({})-{}-{}-{}".format(self.state, self.owner, self.app.name, self.project)
 
 
 @receiver(
@@ -128,9 +116,7 @@ def update_permission(sender, instance, created, **kwargs):
 
 
 class AppStatus(models.Model):
-    appinstance = models.ForeignKey(
-        "AppInstance", on_delete=models.CASCADE, related_name="status"
-    )
+    appinstance = models.ForeignKey("AppInstance", on_delete=models.CASCADE, related_name="status")
     info = models.JSONField(blank=True, null=True)
     status_type = models.CharField(max_length=15, default="app_name")
     time = models.DateTimeField(auto_now_add=True)
@@ -143,9 +129,7 @@ class AppStatus(models.Model):
 
 
 class ResourceData(models.Model):
-    appinstance = models.ForeignKey(
-        "AppInstance", on_delete=models.CASCADE, related_name="resourcedata"
-    )
+    appinstance = models.ForeignKey("AppInstance", on_delete=models.CASCADE, related_name="resourcedata")
     cpu = models.IntegerField()
     gpu = models.IntegerField()
     mem = models.IntegerField()

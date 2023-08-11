@@ -63,15 +63,11 @@ from .serializers import (
 # https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.serializer_class(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
-        return Response(
-            {"token": token.key, "user_id": user.pk, "email": user.email}
-        )
+        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
 
 
 class ObjectTypeList(
@@ -130,9 +126,7 @@ class ModelList(
 
         try:
             model_name = request.data["name"]
-            prev_model = Model.objects.filter(
-                name=model_name, project=project
-            ).order_by("-version")
+            prev_model = Model.objects.filter(name=model_name, project=project).order_by("-version")
             print("INFO - Previous Model Objects: {}".format(prev_model))
             if len(prev_model) > 0:
                 print("ACCESS")
@@ -150,9 +144,7 @@ class ModelList(
             object_type = ObjectType.objects.get(slug=object_type_slug)
         except Exception as err:
             print(err)
-            return HttpResponse(
-                "Failed to create object: incorrect input data.", 400
-            )
+            return HttpResponse("Failed to create object: incorrect input data.", 400)
 
         try:
             new_model = Model(
@@ -169,9 +161,7 @@ class ModelList(
             new_model.save()
             new_model.object_type.set([object_type])
 
-            pmodel = PublishedModel.objects.get(
-                name=new_model.name, project=new_model.project
-            )
+            pmodel = PublishedModel.objects.get(name=new_model.name, project=new_model.project)
             if pmodel:
                 # Model is published, so we should create a new
                 # PublishModelObject.
@@ -182,9 +172,7 @@ class ModelList(
 
         except Exception as err:
             print(err)
-            return HttpResponse(
-                "Failed to create object: failed to save object.", 400
-            )
+            return HttpResponse("Failed to create object: failed to save object.", 400)
         return HttpResponse("ok", 200)
 
 
@@ -338,9 +326,7 @@ class MembersList(
             print("username" + user.username)
             project.authorized.remove(user)
             for role in settings.PROJECT_ROLES:
-                return HttpResponse(
-                    "Successfully removed members.", status=200
-                )
+                return HttpResponse("Successfully removed members.", status=200)
         else:
             return HttpResponse("Cannot remove owner of project.", status=400)
         return HttpResponse("Failed to remove user.", status=400)
@@ -366,16 +352,13 @@ class ProjectList(
         """
         current_user = self.request.user
         return Project.objects.filter(
-            Q(owner__username=current_user)
-            | Q(authorized__pk__exact=current_user.pk),
+            Q(owner__username=current_user) | Q(authorized__pk__exact=current_user.pk),
             ~Q(status="archived"),
         ).distinct("name")
 
     def destroy(self, request, *args, **kwargs):
         project = self.get_object()
-        if (
-            request.user == project.owner or request.user.is_superuser
-        ) and project.status.lower() != "deleted":
+        if (request.user == project.owner or request.user.is_superuser) and project.status.lower() != "deleted":
             print("Delete project")
             print("SCHEDULING DELETION OF ALL INSTALLED APPS")
             delete_project_apps(project.slug)
@@ -413,9 +396,7 @@ class ProjectList(
             template_slug = request.data["template"]
             template = ProjectTemplate.objects.get(slug=template_slug)
             project_template = ProjectTemplate.objects.get(pk=template.pk)
-            create_resources_from_template.delay(
-                request.user.username, project.slug, project_template.template
-            )
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
             # Reset user token
             if "oidc_id_token_expiration" in request.session:
@@ -444,9 +425,7 @@ class ProjectList(
                 project=project,
                 module="PR",
                 headline="Getting started",
-                description="Getting started with project {}".format(
-                    project.name
-                ),
+                description="Getting started with project {}".format(project.name),
             )
             l2.save()
 
@@ -477,9 +456,7 @@ class ResourceList(
         # }
         print(template)
         project = Project.objects.get(id=self.kwargs["project_pk"])
-        create_resources_from_template.delay(
-            request.user.username, project.slug, json.dumps(template)
-        )
+        create_resources_from_template.delay(request.user.username, project.slug, json.dumps(template))
         return HttpResponse("Submitted request to create app.", status=200)
 
 
@@ -499,9 +476,7 @@ class AppInstanceList(
     filterset_fields = ["id", "name", "app__category"]
 
     def get_queryset(self):
-        return AppInstance.objects.filter(
-            ~Q(state="Deleted"), project__pk=self.kwargs["project_pk"]
-        )
+        return AppInstance.objects.filter(~Q(state="Deleted"), project__pk=self.kwargs["project_pk"])
 
     def create(self, request, *args, **kwargs):
         project = Project.objects.get(id=self.kwargs["project_pk"])
@@ -541,9 +516,7 @@ class AppInstanceList(
         if access:
             delete_resource.delay(appinstance.pk)
         else:
-            return HttpResponse(
-                "User is not allowed to delete resource.", status=403
-            )
+            return HttpResponse("User is not allowed to delete resource.", status=403)
         return HttpResponse("Deleted app.", status=200)
 
 
@@ -591,9 +564,7 @@ class EnvironmentList(
     filterset_fields = ["id", "name"]
 
     def get_queryset(self):
-        return Environment.objects.filter(
-            project__pk=self.kwargs["project_pk"]
-        )
+        return Environment.objects.filter(project__pk=self.kwargs["project_pk"])
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -677,9 +648,7 @@ class ReleaseNameList(
     filterset_fields = ["id", "name", "project"]
 
     def get_queryset(self):
-        return ReleaseName.objects.filter(
-            project__pk=self.kwargs["project_pk"]
-        )
+        return ReleaseName.objects.filter(project__pk=self.kwargs["project_pk"])
 
     def create(self, request, *args, **kwargs):
         name = slugify(request.data["name"])
@@ -692,9 +661,7 @@ class ReleaseNameList(
 
         rn = ReleaseName(name=name, status=status, project=project)
         rn.save()
-        return HttpResponse(
-            "Created release name {}.".format(name), status=200
-        )
+        return HttpResponse("Created release name {}.".format(name), status=200)
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -762,9 +729,7 @@ class AppList(
         print(name)
         print(slug)
         try:
-            app_latest_rev = Apps.objects.filter(slug=slug).order_by(
-                "-revision"
-            )
+            app_latest_rev = Apps.objects.filter(slug=slug).order_by("-revision")
             if app_latest_rev:
                 revision = app_latest_rev[0].revision + 1
             else:
@@ -829,14 +794,10 @@ class ProjectTemplateList(
         except Exception as err:
             print(request.data)
             print(err)
-            return HttpResponse(
-                "Failed to create new template: {}".format(name), status=400
-            )
+            return HttpResponse("Failed to create new template: {}".format(name), status=400)
 
         try:
-            template_latest_rev = ProjectTemplate.objects.filter(
-                slug=slug
-            ).order_by("-revision")
+            template_latest_rev = ProjectTemplate.objects.filter(slug=slug).order_by("-revision")
             if template_latest_rev:
                 revision = template_latest_rev[0].revision + 1
             else:
@@ -852,6 +813,4 @@ class ProjectTemplateList(
             template.save()
         except Exception as err:
             print(err)
-        return HttpResponse(
-            "Created new template: {}.".format(name), status=200
-        )
+        return HttpResponse("Created new template: {}.".format(name), status=200)
