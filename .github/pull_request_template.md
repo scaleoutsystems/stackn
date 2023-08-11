@@ -27,7 +27,7 @@ This is simply a reminder of what we are going to look for before merging your c
 - [ ] I have included a link to the issue on GitHub or JIRA (if any)
 - [ ] I have included migration files (if there are changes to the model classes)
 - [ ] I have read the [CONTRIBUTING](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md) doc
-- [ ] I have included tests to complement my changes
+- [ ] I have included, reviewed and executed tests (unit and end2end) to complement my changes
 - [ ] I have updated the related documentation (if necessary) 
 - [ ] I have updated the release notes (docs/releasenotes.md)
 - [ ] I have added a reviewer for this pull request
