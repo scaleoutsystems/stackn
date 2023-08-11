@@ -124,7 +124,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         id: tests
         run: |
-          docker compose run tests pytest
+          docker compose run tests
 
       - name: Print k8s info
         run: |
