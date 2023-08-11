@@ -136,7 +136,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             except subprocess.CalledProcessError:
                 messages.error(
                     request,
-                    ("Something went wrong: " "the model object was not created!"),
+                    "Something went wrong: the model object was not created!",
                 )
                 return redirect(redirect_url)
 
