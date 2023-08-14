@@ -85,3 +85,8 @@ class HomeView(View):
 def about(request):
     template = "portal/about.html"
     return render(request, template, locals())
+
+
+def teaching(request):
+    template = "portal/teaching.html"
+    return render(request, template, locals())

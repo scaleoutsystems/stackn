@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extra_head %}
+<script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-12 col-md-9">
+        <h3 class="mb-3" style="margin-right: 5px;">
+            Teaching through SciLifeLab Serve
+        </h3>
+        <p>Users will not currently gain access to cloud-based JupyterLab Notebooks or RStudio by default. However,
+            users can request access to these resources and use them for teaching courses and workshops. It is
+            possible to establish individual instances of JupyterLab notebook and RStudio for each student/attendee,
+            they can be granted access to those instances via unique URLs. This negates the need for teachers to spend
+            time ensuring that the software and dependencies needed to complete tasks are correctly installed on each
+            machine. This will both save time and help to ensure the course/workshop can run smoothly. Python modules
+            and R packages can be installed as usual in student instances, and a terminal window will also be
+            available.</p>
+          <p>As with all other resources available through SciLifeLab Serve, JupyterLab
+            notebooks and Rstudio are provided free of charge. Whilst still in the <b>beta testing phase</b>,
+            SciLifeLab Serve has already been used for teaching classes (of around 30 students) with great success.
+            Should any issues arise though, we will work with you to resolve them as quickly as possible.</p>
+          <h3>How do I request to use SciLifeLab Serve for teaching?</h3>
+          <p>To ensure that the functionality intended for teaching is not used for other purposes, and that only one
+            course is running at any given time, we have established a specific <a href="#application">application
+              form</a> for access to this functionality. The <a href="#application">form</a>, found below, enables you
+            to provide details about yourself and your planned course/workshop. Upon approval of your application,
+            your SciLifeLab Serve account will be granted permission to create multiple instances of JupyterLab
+            notebook and/or RStudio. Each instance that you create will be assigned a unique URL that you can assign
+            to a given student/attendee.</p>
+          <h3>Who is eligible to apply?</h3>
+          <p>We accept applications for courses, workshops, and webinars that are organised by Swedish universities or
+            SciLifeLab infrastructure units. The courses/workshops/webinars should be aimed life science researchers
+            at the doctoral level or above.</p>
+          <h3>What kind of compute and storage capacity will we receive? Is there a limit to participant number?</h3>
+          <p>We will discuss your individual requirements for CPUs and memory with you. We expect to be able to cover
+            the needs of most courses. For reference, SciLifeLab Serve has previously been used to teach courses
+            involving up to 30 paticipants without issue.</p>
+          <h3>What support will be provided?</h3>
+          <p>Before the course, we will be available to answer any questions that you might have regarding features of
+            SciLifeLab Serve, setting up the required instances for students, and the interface of SciLifeLab Serve.
+            During the course, we will be on hand to answer any questions as quickly as possible and will monitor our
+            servers throughout. In the event of a server issue, we will do all we can to resolve it quickly. We
+            recommend having a backup plan in case there are unforeseen issues that cannot be resolved promptly.</p>
+          <h3>How is SciLifeLab Serve funded?</h3>
+          <p>SciLifeLab Serve is supported by a grant from the Knut and Alice Wallenberg Foundation given to
+            SciLifeLab for the purpose of supporting research in data-driven life science in Sweden. SciLifeLab Serve
+            is available free of charge to researchers affiliated with Swedish research institutions, regardless of an
+            affiliation with SciLifeLab. It is also offered to ScLifeLab infrastructure units. Refer to our <a
+              href="{% url 'portal:about' %}">'about' page</a> for more information.</p>
+
+        <h2 id="application">Application form</h2>
+
+        <div class="container">
+            <form class="needs-validation" action="https://forms.dckube.scilifelab.se/api/v1/form/noRF3FO03F_2F8pL/incoming" method="POST" accept-charset="utf-8">
+            <input type='hidden' name='csrfmiddlewaretoken' value='{{ csrf_token }}' />
+            <div class="row justify-content-center">
+              <div class="col-6 border rounded p-4">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Your name:</label>
+                  <input type="text" class="form-control" name="name" id="name">
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Your email address(that connected to your SciLifeLab Serve
+                    account):</label>
+                  <input type="email" class="form-control" name="email" id="email">
+                </div>
+                <div class="mb-3">
+                  <label for="course_title" class="form-label">Title of course/workshop/webinar:</label>
+                  <input type="text" class="form-control" name="course_title" id="course_title">
+                </div>
+                <div class="mb-3">
+                  <label for="course_dates" class="form-label">Date(s) and time(s) of couse/workshop/webinar:</label>
+                  <input type="text" class="form-control" name="course_dates" id="course_dates">
+                </div>
+                <div class="mb-3">
+                  <label for="course_description" class="form-label">Description of couse/workshop/webinar:</label>
+                  <textarea class="form-control" name="course_description" id="course_description" rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                  <button class="btn btn-primary" type="submit">Submit application</button>
+                </div>
+                <div class="mb-3">
+                  <div class="g-recaptcha" data-sitekey="6LfX3uggAAAAAFOoQPUE-iPY8wR9dPYp7bIBTc9W"></div>
+                </div>
+              </div>
+            </div>
+          </form>
+          </div>
+
+
+    </div>
+</div>
+
+
+{% endblock %}
