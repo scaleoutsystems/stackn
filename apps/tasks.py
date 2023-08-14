@@ -3,7 +3,7 @@ import subprocess
 import time
 from datetime import datetime
 
-import requests  # type: ignore
+import requests
 from celery import shared_task
 from django.conf import settings
 from django.core.exceptions import EmptyResultSet

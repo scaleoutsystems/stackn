@@ -6,7 +6,7 @@ import subprocess
 import uuid
 from collections import defaultdict
 
-import markdown  # type: ignore
+import markdown
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -609,7 +609,7 @@ def details(request, user, project, id):
 
     filename = None
     readme = None
-    import requests as r  # type: ignore
+    import requests as r
 
     url = "http://{}-file-controller/models/{}/readme".format(project.slug, model.name)
     try:

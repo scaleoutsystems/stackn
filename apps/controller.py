@@ -4,8 +4,8 @@ import subprocess
 import tarfile
 import uuid
 
-import yaml  # type: ignore
-from django.conf import settings  # type: ignore
+import yaml
+from django.conf import settings
 
 from .models import Apps
 

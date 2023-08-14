@@ -25,3 +25,27 @@ python_version = "3.8"
 ignore_missing_imports = true
 warn_return_any = true
 exclude = ["venv", ".venv", "migrations", "examples"]
+
+[[tool.mypy.overrides]]
+module = [
+	"django.*",
+	"rest_framework.*",
+	"flatten_json.*",
+	"guardian.*",
+	"django_filters.*",
+	"rest_framework_nested.*",
+	"tagulous.*",
+	"minio.*",
+	"celery.*",
+	"dash.*",
+	"dash_core_components.*",
+	"dash_html_components.*",
+	"django_plotly_dash.*",
+	"dash_bootstrap_components.*",
+	"markdown.*",
+  "requests.*",
+  "s3fs.*",
+	"setuptools.*",
+  "yaml.*",
+	]
+ignore_missing_imports = true

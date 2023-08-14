@@ -2,7 +2,7 @@ import base64
 import logging
 import random
 
-import requests as r  # type: ignore
+import requests as r
 from django.apps import apps
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
