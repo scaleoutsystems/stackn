@@ -43,9 +43,9 @@ module = [
 	"django_plotly_dash.*",
 	"dash_bootstrap_components.*",
 	"markdown.*",
-  "requests.*",
-  "s3fs.*",
+	"requests.*",
+	"s3fs.*",
 	"setuptools.*",
-  "yaml.*",
+	"yaml.*",
 	]
 ignore_missing_imports = true
