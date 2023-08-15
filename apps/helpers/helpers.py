@@ -5,9 +5,9 @@ from django.apps import apps
 from django.conf import settings
 from django.template import engines
 
-from ..models import AppInstance, AppStatus  # type: ignore
-from ..serialize import serialize_app  # type: ignore
-from ..tasks import deploy_resource  # type: ignore
+from apps.models import AppInstance, AppStatus
+from apps.serialize import serialize_app
+from apps.tasks import deploy_resource
 
 ReleaseName = apps.get_model(app_label=settings.RELEASENAME_MODEL)
 

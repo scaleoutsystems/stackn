@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from json import load
 
 import django.core.exceptions as ex
-import requests  # type: ignore
+import requests
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
