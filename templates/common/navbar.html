@@ -1,97 +1,65 @@
-<nav class="navbar navbar-expand navbar-light justify-content-between shadow-sm">
+{% load static %}
 
-    <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSidebar"
-        aria-expanded="false" aria-controls="collapseSidebar">
-        <i class="bi bi-layout-sidebar fs-4"></i>
-    </button>
-
-    <ul class="navbar-nav">
-        <li class="nav-item d-none d-md-block">
-            <a class="nav-link d-flex align-items-center"
-                href="/wiki/">
-                <i class="bi bi-file-text me-1 fs-4"></i>
-                User Guide
+<nav class="bg-light shadow-sm mb-3 py-2">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start p-2">
+            <a href="/" class="navbar-brand fs-4 d-flex my-2 my-lg-0 me-lg-auto link-body">
+                <img src="{% static 'images/scilifelab_serve_logo.svg' %}" title="SciLifeLab Serve" style="height: 2.2rem;" class="hide-dark align-text-top me-4">
             </a>
-        </li>
-        <li class="nav-item d-none d-md-block">
-            <a class="nav-link d-flex align-items-center" href="{% url 'portal:about' %}">
-                <i class="bi bi-house me-1 fs-4"></i>
-                About
-            </a>
-        </li>
-
-        {% if request.user.is_authenticated %}
-
-        <li class="nav-item dropdown">
-
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                data-bs-toggle="dropdown">
-                <i class="bi bi-person-circle me-1 fs-4"></i>
-                {{request.user}}
-            </a>
-            <div class="dropdown-menu dropdown-menu-end">
-                <a class="dropdown-item d-flex align-items-center" href="{% url 'password_change' %}">
-                    <i class="bi bi-key me-1"></i>
-                    Change Password
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">
-                    <i class="bi bi-box-arrow-right me-1"></i>
-                    Sign out
-                </a>
-            </div>
-        </li>
-
-        {% else %}
-        <li class="nav-item d-none d-md-block">
-
-            <a class="nav-link d-flex align-items-center" href="{% url 'common:signup' %}">
-                <i class="bi bi-person-check me-1 fs-4"></i>
-                Sign up
-            </a>
-        </li>
-        <li class="nav-item d-none d-md-block">
-
-            <a class="nav-link d-flex align-items-center" href="{% url 'login' %}">
-                <i class="bi bi-door-open me-1 fs-4"></i>
-                Login
-            </a>
-        </li>
-        <li class="nav-item dropdown d-md-none">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-list fs-4"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li>
-                    <a class="dropdown-item" href="https://scaleoutsystems.github.io/stackn/#/tutorial"
-                        target="_blank">
-                        <i class="bi bi-file-text me-1"></i>
-                        User Guide
+            <ul class="nav col-12 col-lg-auto my-2 my-md-0 justify-content-center text-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="fa-solid fa-home d-block mx-auto"></i>
+                        Home
                     </a>
                 </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'portal:about' %}">
-                        <i class="bi bi-house me-1"></i>
-                        About
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'portal:index' %}" target="_self" title="#">
+                        Apps
                     </a>
                 </li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'common:signup' %}">
-                        <i class="bi bi-person-check me-1"></i>
-                        Sign up
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'models:index' %}" target="_self" title="#">
+                        Models
                     </a>
                 </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'login' %}">
-                        <i class="bi bi-door-open me-1"></i>
-                        Sign in
+                <li class="nav-item">
+                    <a class="nav-link" href="/wiki/" target="_self" title="#">
+                        User guide
                     </a>
                 </li>
+
+                {% if request.user.is_authenticated %}
+
+                <li class="nav-item">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> {{request.user}}
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{% url 'password_change' %}"><i class="bi bi-key me-1"></i>Change Password</a></li>
+                      <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-1"></i>Sign out</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+                {% else %}
+
+                <li class="nav-item mx-2">
+                    <a class="btn btn-success" href="{% url 'common:signup' %}">
+                        <i class="bi bi-person-plus"></i> Register
+                    </a>
+                </li>
+
+                <li class="nav-item mx-2">
+                    <a class="btn btn-success" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i> Log in
+                    </a>
+                </li>
+
+                {% endif %}
+
             </ul>
-        </li>
-        {% endif %}
-    </ul>
+        </div>
+    </div>
 </nav>

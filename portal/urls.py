@@ -9,5 +9,6 @@ urlpatterns = [
     path("portal/home", views.HomeView.as_view(), name="home"),
     path("about", views.about, name="about"),
     path("teaching", views.teaching, name="teaching"),
+    path("privacy", views.privacy, name="privacy"),
     path("", views.HomeView.as_view(), name="about-page"),
 ]

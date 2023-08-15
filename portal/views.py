@@ -90,3 +90,8 @@ def about(request):
 def teaching(request):
     template = "portal/teaching.html"
     return render(request, template, locals())
+
+
+def privacy(request):
+    template = "portal/privacy.html"
+    return render(request, template, locals())

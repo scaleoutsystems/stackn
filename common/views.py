@@ -22,7 +22,7 @@ class RegistrationCompleteView(TemplateView):
 
 class SignUpView(CreateView):
     form_class = SignUpForm
-    template_name = "common/signup.html"
+    template_name = "registration/signup.html"
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
