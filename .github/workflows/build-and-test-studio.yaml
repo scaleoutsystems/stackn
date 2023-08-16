@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
       - develop
     paths-ignore:
       - '**.md'
