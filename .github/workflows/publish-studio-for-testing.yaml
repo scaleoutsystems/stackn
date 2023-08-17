@@ -1,0 +1,52 @@
+
+name: Publish studio and ingress for testing
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+    paths-ignore:
+      - '**.md'
+
+jobs:
+ 
+  build-containers:
+    if: github.repository == 'scilifelabdatacentre/stackn'
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./Dockerfile
+            image: ghcr.io/${{ github.repository }}/studio
+          - dockerfile: ./Dockerfile.nginx
+            image: ghcr.io/${{ github.repository }}/ingress
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Docker meta
+        uses: docker/metadata-action@v4
+        id: meta
+        with:
+          images: ${{ matrix.image }}
+          tags: |
+            type=raw,value={{date 'YYYYMMDD'}},prefix=${{ github.ref_name }}-
+    
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: docker build studio
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: "${{ github.event_name != 'pull_request' }}"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: ${{ matrix.dockerfile }}
