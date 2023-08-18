@@ -31,7 +31,7 @@ on:
 
 jobs:
 
-  build_and_test:
+  build:
     if: github.repository == 'scilifelabdatacentre/stackn'
     runs-on: ubuntu-20.04
     env:
@@ -121,18 +121,25 @@ jobs:
           response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
           if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
 
-      - name: Run tests
-        working-directory: ${{env.working-directory}}
-        id: tests
-        run: |
-          docker compose run tests
-
       - name: Print k8s info
         run: |
           echo "Checking k8s cluster version, nodes and pods"
           kubectl version
           kubectl get no
           kubectl get pods -A -o wide
+
+  test:
+    if: github.repository == 'scilifelabdatacentre/stackn'
+    needs: build
+    runs-on: ubuntu-20.04
+    env:
+      working-directory: .
+    steps:
+      - name: Run unit tests
+        working-directory: ${{env.working-directory}}
+        id: tests
+        run: |
+          docker compose run tests
 
       - name: Cypress run e2e tests
         uses: cypress-io/github-action@v5
@@ -156,7 +163,7 @@ jobs:
   publish:
     if: | 
       github.repository == 'scilifelabdatacentre/stackn'
-    needs: build_and_test
+    needs: test
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
