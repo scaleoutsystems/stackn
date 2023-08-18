@@ -132,9 +132,9 @@ jobs:
       matrix:
         include:
           - dockerfile: ./Dockerfile
-            image: ghcr.io/${{ github.repository }}/studio
+            image: ghcr.io/${{ github.repository }}/serve-studio
           - dockerfile: ./Dockerfile.nginx
-            image: ghcr.io/${{ github.repository }}/ingress
+            image: ghcr.io/${{ github.repository }}/serve-ingress
     permissions:
       packages: write
       contents: read
