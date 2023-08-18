@@ -31,7 +31,7 @@ on:
 
 jobs:
 
-  build:
+  build_and_test:
     if: github.repository == 'scilifelabdatacentre/stackn'
     runs-on: ubuntu-20.04
     env:
@@ -44,10 +44,8 @@ jobs:
           echo "Running as UID: $UID, GID: $GID"
           whoami
 
-      - name: Checkout the develop branch
+      - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: 'develop'
 
       - name: Run on microk8s
         uses: balchua/microk8s-actions@v0.2.1
@@ -128,13 +126,6 @@ jobs:
           kubectl get no
           kubectl get pods -A -o wide
 
-  test:
-    if: github.repository == 'scilifelabdatacentre/stackn'
-    needs: build
-    runs-on: ubuntu-20.04
-    env:
-      working-directory: .
-    steps:
       - name: Run unit tests
         working-directory: ${{env.working-directory}}
         id: tests
@@ -163,7 +154,7 @@ jobs:
   publish:
     if: | 
       github.repository == 'scilifelabdatacentre/stackn'
-    needs: test
+    needs: build_and_test
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
