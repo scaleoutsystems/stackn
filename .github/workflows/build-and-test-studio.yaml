@@ -153,9 +153,10 @@ jobs:
           name: cypress-videos
           path: cypress/videos
 
-  publish-images:
+  publish:
     if: | 
       github.repository == 'scilifelabdatacentre/stackn'
+    needs: build_and_test
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
