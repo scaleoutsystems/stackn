@@ -1,5 +1,5 @@
-import flatten_json
-from django.db.models import Q
+from django.conf import settings
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from models.models import Model
 from projects.models import S3, Environment, Flavor, ReleaseName
@@ -61,11 +61,8 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
             print(">>>>>")
             # TODO: Only get app instances that we have permission to list.
 
-            app_instances = AppInstance.objects.filter(
-                ~Q(state="Deleted"),
-                Q(owner=user) | Q(access__in=["project", "public"]),
-                project=project,
-                app__name=app_name,
+            app_instances = AppInstance.objects.get_available_app_dependencies(
+                user=user, project=project, app_name=app_name
             )
             # TODO: Special case here for "environment" app.
             # Could be solved by supporting "condition":
@@ -98,28 +95,45 @@ def get_form_apps(aset, project, myapp, user, appinstance=[]):
     return dep_apps, app_deps
 
 
-def get_form_primitives(aset, project, appinstance=[]):
-    all_keys = aset.keys()
-    print("PRIMITIVES")
+def get_disable_fields():
+    try:
+        result = settings.DISABLED_APP_INSTANCE_FIELDS
+        return result if result is not None else []
+    except Exception:
+        return []
+
+
+def get_form_primitives(app_settings, appinstance=[]):
+    disabled_fields = get_disable_fields()
+
+    all_keys = app_settings.keys()
     primitives = dict()
-    if appinstance:
-        ai_vals = flatten_json.flatten(appinstance.parameters, ".")
+
     for key in all_keys:
         if key not in key_words:
-            primitives[key] = aset[key]
+            primitives[key] = app_settings[key]
             if "meta" in primitives[key]:
                 primitives[key]["meta_title"] = primitives[key]["meta"]["title"]
             else:
                 primitives[key]["meta_title"] = key
-            if appinstance:
-                for subkey, subval in aset[key].items():
-                    print(subkey)
-                    try:
-                        if subkey != "meta" and subkey != "meta_title":
-                            primitives[key][subkey]["default"] = ai_vals[key + "." + subkey]
-                    except Exception as err:
-                        print(err)
-    print(primitives)
+
+            for disabled_field in disabled_fields:
+                if disabled_field in primitives[key]:
+                    del primitives[key][disabled_field]
+
+            if appinstance and key in appinstance.parameters.keys():
+                for _key, _ in app_settings[key].items():
+                    is_meta_key = _key in ["meta", "meta_title"]
+                    if not is_meta_key:
+                        parameters_of_key = appinstance.parameters[key]
+
+                        print(f"_key: {_key}")
+
+                        if _key in parameters_of_key.keys():
+                            primitives[key][_key][
+                                "default"
+                            ] = parameters_of_key[_key]
+
     return primitives
 
 
@@ -171,12 +185,39 @@ def get_form_environments(aset, project, app, appinstance=[]):
     if "environment" in aset:
         dep_environment = True
         if aset["environment"]["type"] == "match":
-            environments["objs"] = Environment.objects.filter(project=project, app__slug=app.slug)
+            environments["objs"] = Environment.objects.filter(
+                Q(project=project) | Q(project__isnull=True, public=True),
+                app__slug=app.slug,
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
+            )
         elif aset["environment"]["type"] == "any":
-            environments["objs"] = Environment.objects.filter(project=project)
+            environments["objs"] = Environment.objects.filter(
+                Q(project=project) | Q(project__isnull=True, public=True)
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
+            )
         elif "apps" in aset["environment"]:
             environments["objs"] = Environment.objects.filter(
-                project=project, app__slug__in=aset["environment"]["apps"]
+                Q(project=project) | Q(project__isnull=True, public=True),
+                app__slug__in=aset["environment"]["apps"],
+            ).order_by(
+                Case(
+                    When(name__contains="- public", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
+                "-name",
             )
 
         environments["title"] = aset["environment"]["title"]
@@ -211,8 +252,12 @@ def generate_form(aset, project, app, user, appinstance=[]):
         form["dep_flavor"] = True
         form["flavors"] = Flavor.objects.filter(project=project)
 
-    form["primitives"] = get_form_primitives(aset, project, appinstance)
-    form["dep_permissions"], form["form_permissions"] = get_form_permission(aset, project, appinstance)
-    release_names = ReleaseName.objects.filter(project=project, status="active")
+    form["primitives"] = get_form_primitives(aset, appinstance)
+    form["dep_permissions"], form["form_permissions"] = get_form_permission(
+        aset, project, appinstance
+    )
+    release_names = ReleaseName.objects.filter(
+        project=project, status="active"
+    )
     form["release_names"] = release_names
     return form

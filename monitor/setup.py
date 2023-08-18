@@ -10,8 +10,8 @@ setup(
     package_dir={"monitor": "."},
     python_requires=">=3.6,<4",
     install_requires=[
-        "django==4.1.7",
-        "requests==2.28.1",
+        "django==4.2.1",
+        "requests==2.31.0",
     ],
     license="Copyright Scaleout Systems AB. See license for details",
     zip_safe=False,

@@ -1,14 +1,28 @@
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from . import views
+from .views import (
+    GrantAccessToProjectView,
+    ProjectStatusView,
+    RevokeAccessToProjectView,
+    UpdatePatternView,
+)
 
 app_name = "projects"
 
-urlpatterns = [
+basicpatterns = [
     path("projects/", views.IndexView.as_view(), name="index"),
-    path("projects/create", views.create, name="create"),
-    path("projects/templates", views.project_templates, name="project_templates"),
-    path("<user>/<project_slug>", views.details, name="details"),
+    path(
+        "projects/create",
+        login_required(views.CreateProjectView.as_view()),
+        name="create",
+    ),
+    path(
+        "projects/templates", views.project_templates, name="project_templates"
+    ),
+    path("<user>/<project_slug>", views.DetailsView.as_view(), name="details"),
     path(
         "<user>/<project_slug>/environments/create",
         views.create_environment,
@@ -21,7 +35,47 @@ urlpatterns = [
         views.set_s3storage,
         name="set_s3storage",
     ),
-    path("<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"),
+    path(
+        "<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"
+    ),
+    path(
+        "<user>/<project_slug>/details/change",
+        views.change_description,
+        name="change_description",
+    ),
+    path(
+        "<user>/<project_slug>/pattern/update",
+        UpdatePatternView.as_view(),
+        name="update_pattern",
+    ),
+    path(
+        "<user>/<project_slug>/project/publish",
+        views.publish_project,
+        name="publish_project",
+    ),
+    path(
+        "<user>/<project_slug>/project/access/grant",
+        GrantAccessToProjectView.as_view(),
+        name="grant_access",
+    ),
+    path(
+        "<user>/<project_slug>/project/access/revoke",
+        RevokeAccessToProjectView.as_view(),
+        name="revoke_access",
+    ),
+    path(
+        "<user>/<project_slug>/project/status",
+        ProjectStatusView.as_view(),
+        name="get_status",
+    ),
+]
+
+extrapatterns = [
+    path(
+        "<user>/<project_slug>/environments/create",
+        views.create_environment,
+        name="create_environment",
+    ),
     path(
         "<user>/<project_slug>/createflavor",
         views.create_flavor,
@@ -42,29 +96,9 @@ urlpatterns = [
         views.delete_environment,
         name="delete_environment",
     ),
-    path(
-        "<user>/<project_slug>/details/change",
-        views.change_description,
-        name="change_description",
-    ),
-    path(
-        "<user>/<project_slug>/image/update",
-        views.update_image,
-        name="update_image",
-    ),
-    path(
-        "<user>/<project_slug>/project/publish",
-        views.publish_project,
-        name="publish_project",
-    ),
-    path(
-        "<user>/<project_slug>/project/access/grant",
-        views.grant_access_to_project,
-        name="grant_access",
-    ),
-    path(
-        "<user>/<project_slug>/project/access/revoke",
-        views.revoke_access_to_project,
-        name="revoke_access",
-    ),
 ]
+
+if settings.ENABLE_PROJECT_EXTRA_SETTINGS:
+    urlpatterns = basicpatterns + extrapatterns
+else:
+    urlpatterns = basicpatterns

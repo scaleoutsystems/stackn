@@ -46,7 +46,7 @@ class CreateAppViewTestCase(TestCase):
         return project
 
     @override_settings(
-        APPS_PER_USER_LIMIT={
+        APPS_PER_PROJECT_LIMIT={
             "jupyter-lab": 1,
         }
     )
@@ -64,7 +64,7 @@ class CreateAppViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(APPS_PER_USER_LIMIT={"jupyter-lab": 0})
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 0})
     def test_has_reached_app_limit(self):
         c = Client()
 
@@ -83,7 +83,7 @@ class CreateAppViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    @override_settings(APPS_PER_USER_LIMIT={"jupyter-lab": 1})
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
     def test_missing_access_to_project(self):
         c = Client()
 
@@ -105,7 +105,7 @@ class CreateAppViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @override_settings(
-        APPS_PER_USER_LIMIT={
+        APPS_PER_PROJECT_LIMIT={
             "jupyter-lab": None,
         }
     )
@@ -123,7 +123,7 @@ class CreateAppViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(APPS_PER_USER_LIMIT={})
+    @override_settings(APPS_PER_PROJECT_LIMIT={})
     def test_has_permission_when_not_specified(self):
         c = Client()
 
@@ -139,7 +139,7 @@ class CreateAppViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @override_settings(
-        APPS_PER_USER_LIMIT={
+        APPS_PER_PROJECT_LIMIT={
             "jupyter-lab": 1,
         }
     )
@@ -175,7 +175,7 @@ class CreateAppViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    @override_settings(APPS_PER_USER_LIMIT={"jupyter-lab": 0})
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 0})
     def test_permission_overrides_reached_app_limit(self):
         c = Client()
 
@@ -203,5 +203,121 @@ class CreateAppViewTestCase(TestCase):
         self.user = User.objects.get(username="foo1")
 
         response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
+    def test_app_limit_is_per_project(self):
+        c = Client()
+
+        project = self.get_data()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        user2 = User.objects.create_user("foo123", "foo123@test.com", "bar123")
+
+        project.authorized.add(user2)
+        project.save()
+
+        response = c.get(
+            f"/{user2.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        _ = AppInstance.objects.create(
+            access="private",
+            owner=self.user,
+            name="test_app_instance_private",
+            app=self.app,
+            project=project,
+        )
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        response = c.get(
+            f"/{user2.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
+    def test_app_limit_altered_for_project(self):
+        c = Client()
+
+        project = self.get_data()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        project.apps_per_project["jupyter-lab"] = 0
+
+        project.save()
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(APPS_PER_PROJECT_LIMIT={"jupyter-lab": 1})
+    def test_app_limit_altered_for_project_v2(self):
+        c = Client()
+
+        project = self.get_data()
+
+        response = c.post(
+            "/accounts/login/", {"username": "foo1", "password": "bar"}
+        )
+        response.status_code
+
+        self.assertEqual(response.status_code, 302)
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        _ = AppInstance.objects.create(
+            access="private",
+            owner=self.user,
+            name="test_app_instance_private",
+            app=self.app,
+            project=project,
+        )
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        project.apps_per_project["jupyter-lab"] = 2
+
+        project.save()
+
+        response = c.get(
+            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
+        )
 
         self.assertEqual(response.status_code, 200)

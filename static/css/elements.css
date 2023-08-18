@@ -1,13 +1,14 @@
 /* buttons */
 
-.btn{
+.btn {
     opacity: 1;
 }
 
-.btn:focus, .btn:hover {
+.btn:focus,
+.btn:hover {
 
-    box-shadow: 0 0.5rem 1rem rgba(var(--bs-body-color-rgb),.15)!important;
-    text-decoration: none;   
+    box-shadow: 0 0.5rem 1rem rgba(var(--bs-body-color-rgb), .15) !important;
+    text-decoration: none;
 }
 
 .btn-primary {
@@ -15,7 +16,7 @@
     --bs-btn-border-color: var(--scaleout-black);
     --bs-btn-hover-bg: var(--scaleout-black);
     --bs-btn-hover-border-color: var(--scaleout-black);
-    --bs-btn-focus-shadow-rgb: 49,132,253;
+    --bs-btn-focus-shadow-rgb: 49, 132, 253;
     --bs-btn-active-bg: var(--scaleout-black);
     --bs-btn-active-border-color: var(--scaleout-black);
     --bs-btn-disabled-bg: var(--scaleout-black);
@@ -24,18 +25,18 @@
 
 /* forms */
 
-.form-control{
+.form-control {
     border-color: var(--scaleout-grey-6);
 }
 
-.form-control:focus{
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+.form-control:focus {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
     border-color: var(--scaleout-grey-6);
 }
 
-.form-check-input:focus{
-    border-color: var(--scaleout-grey-6  );
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+.form-check-input:focus {
+    border-color: var(--scaleout-grey-6);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
 }
 
 .form-check-input:checked {
@@ -45,21 +46,60 @@
 
 /* links */
 
-a{
+a {
     text-decoration: none;
+    display: inline-block;
 }
 
-a:hover, a:focus, a.active{
-    opacity: 1;
-    text-shadow: .2px .2px .2px var(--scaleout-black);
+a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 1px;
+    background: #000;
+    transition: width .4s;
 }
 
-.navbar-nav{
+a:hover::after, a:focus::after, a.active::after {
+    width: 100%;
+}
+
+a.default::after{
+    content:none;
+}
+
+a.default:hover::after, a.default:focus::after, a.default.active::after {
+    width: 100%;
+}
+
+a.btn::after{
+    content:none;
+}
+
+a.btn:hover::after, a.btn:focus::after, a.btn.active::after {
+    width: 100%;
+}
+
+.navbar-nav {
     --bs-nav-link-color: var(--scaleout-black-rgb)
 }
 
 /* text */
 
-p, h1, h2, h3, h4, h5, h6, a{
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a {
     opacity: .8;
+}
+
+/* lists */
+
+.list-group-item {
+    --bs-list-group-active-bg: var(--scaleout-black);
+    --bs-list-group-active-border-color: var(--scaleout-black);
 }

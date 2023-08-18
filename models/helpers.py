@@ -43,14 +43,14 @@ def add_pmo_to_publish(mdl, pmodel):
         # needs to be compressed
         else:
             # download files on folder inside bucket into tmp folder
-            s3.get(bucket + "/" + path, "./tmp/", recursive=True)
+            s3.get(bucket + "/" + path, "./charts/tmp/", recursive=True)
             # create tar file
-            with tarfile.open("model.tar", "w") as tar:
-                tar.add("./tmp/")
+            with tarfile.open("./charts/model.tar", "w") as tar:
+                tar.add("./charts/tmp/")
             # remove tmp folder
-            shutil.rmtree("./tmp")
+            shutil.rmtree("./charts/tmp")
             # open tar for later read
-            fobj = open("./model.tar", "rb")
+            fobj = open("./charts/model.tar", "rb")
 
         print("Opened s3 file.")
 

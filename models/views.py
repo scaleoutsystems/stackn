@@ -1,7 +1,6 @@
 import ast
 import logging
 import os
-import random
 import subprocess
 import uuid
 from collections import defaultdict
@@ -12,7 +11,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.files import File
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -170,7 +168,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
             except (subprocess.CalledProcessError, FileNotFoundError):
                 messages.error(
                     request,
-                    ("Something went wrong: " "Models folder could not be copied"),
+                    "Something went wrong: Models folder could not be copied",
                 )
                 return redirect(redirect_url)
 
@@ -390,18 +388,14 @@ def publish_model(request, user, project, id):
 
     # TODO: Check that user has access to this particular model.
     model = Model.objects.get(pk=id)
-    print(model)
-    # Default behavior is that all versions of a model are published.
-    models = Model.objects.filter(id=id, name=model.name, project=model.project)
 
-    img = settings.STATIC_ROOT + "images/patterns/image-{}.png".format(random.randrange(8, 13))
-    img_file = open(img, "rb")
-    image = File(img_file)
+    # Default behavior is that all versions of a model are published.
+    models = Model.objects.filter(
+        id=id, name=model.name, project=model.project
+    )
 
     pmodel = PublishedModel(name=model.name, project=model.project)
     pmodel.save()
-    img_uid = str(uuid.uuid1().hex)
-    pmodel.img.save(img_uid, image)
 
     # Copy files to public location
     for mdl in models:
@@ -753,7 +747,7 @@ def details_public(request, id):
     print(model_objs, flush=True)
     print(latest_model_obj, flush=True)
 
-    return render(request, "models_details_public.html", locals())
+    return render(request, "models/models_details_public.html", locals())
 
 
 @login_required

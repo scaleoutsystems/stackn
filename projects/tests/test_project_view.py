@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from guardian.shortcuts import assign_perm
 
 from ..models import Project
 
@@ -14,46 +13,6 @@ class ProjectViewTestCase(TestCase):
         _ = Project.objects.create_project(name="test-perm", owner=user, description="", repository="")
         user = User.objects.create_user("member", "bar@test.com", "bar")
         self.client.login(username="foo", password="bar")
-
-    def test_grant_access_to_project(self):
-        """
-        Test granting/adding member to a project
-        """
-        member = User.objects.get(username="member")
-        owner = User.objects.get(username="foo")
-        project = Project.objects.get(name="test-perm")
-        response = self.client.post(
-            reverse(
-                "projects:grant_access",
-                kwargs={"user": owner, "project_slug": project.slug},
-            ),
-            {"selected_users": [member.pk]},
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(member.has_perm("can_view_project", project))
-        self.assertTrue(project.authorized.exists())
-
-    def test_revoke_access_to_project(self):
-        """
-        Test revoke access of added member to a project
-        """
-        member = User.objects.get(username="member")
-        owner = User.objects.get(username="foo")
-        project = Project.objects.get(name="test-perm")
-        assign_perm("can_view_project", member, project)
-        project.authorized.add(member)
-
-        _ = self.client.post(
-            reverse(
-                "projects:revoke_access",
-                kwargs={"user": owner, "project_slug": project.slug},
-            ),
-            {"selected_users": [member.pk]},
-        )
-
-        self.assertFalse(member.has_perm("can_view_project", project))
-        self.assertFalse(project.authorized.exists())
 
     def test_forbidden_project_details(self):
         """

@@ -1,0 +1,139 @@
+{% load get_range %}
+
+{% comment %}
+Pattern Selector
+
+params:
+- project: Project model
+{% endcomment %}
+
+{% if request.user.id == project.owner.id %}
+    
+<button class="btn rounded-100 bg-white shadow-sm opacity-75 m-1 hover-opacity-100" data-bs-toggle="modal"
+    data-bs-target="#modal-project-{{project.slug}}">
+    <i class="bi bi-pen"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-project-{{project.slug}}" tabindex="-1"
+    aria-labelledby="modal-label-project-{{project.slug}}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modal-label-project-{{project.slug}}">{{project.name}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Change project image:</p>
+
+                <div class="row">
+
+                    {% get_range 1 31 as range %}
+
+                    {% for i in range %}
+
+                    <div class="col-2 p-2 rounded">
+                        <button
+                            class="btn pattern-display w-100 pattern-{{i}} shadow opacity-75 hover-opacity-100 btn-light"
+                            data-pattern="pattern-{{i}}" style="min-height: 8rem;"></button>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btn-save-{{project.slug}}" disabled data-bs-dismiss="modal" type="button"
+                    class="btn btn-primary">Save
+                    changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    {
+        const url = "{% url 'projects:update_pattern' request.user project.slug %}"
+        const csrftoken = getCookie('csrftoken');
+
+        let initialPattern = "{{ project.pattern }}"
+
+        let activePattern = initialPattern
+
+        const elements = document.querySelectorAll("#modal-project-{{project.slug}} .pattern-display")
+        const button = document.querySelector("#btn-save-{{project.slug}}")
+
+        const setActiveElement = () => {
+
+            elements.forEach((element) => {
+
+                if (element.classList.contains(activePattern)) {
+
+                    element.classList.add("opacity-100")
+                    element.classList.add("border-dark")
+                    element.parentElement.classList.add("bg-grey-6")
+                }
+                else if (element.classList.contains("opacity-100")) {
+
+                    element.classList.remove("opacity-100")
+                    element.classList.remove("border-dark")
+                    element.parentElement.classList.remove("bg-grey-6")
+                }
+            })
+        }
+
+        const toggleButtonDisabled = () => {
+
+            const disabled = initialPattern === activePattern
+
+            button.disabled = disabled
+        }
+
+        elements.forEach((element) => {
+
+            element.addEventListener("click", () => {
+
+                activePattern = element.getAttribute("data-pattern")
+
+                setActiveElement()
+                toggleButtonDisabled()
+            })
+        })
+
+        button.addEventListener("click", async () => {
+
+            const body = new FormData()
+            body.append("pattern", activePattern)
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body
+                })
+
+                if (response.status === 200) {
+
+                    initialPattern = activePattern
+
+                    toggleButtonDisabled()
+
+                    const element = document.getElementById("project-pattern-element-{{project.slug}}")
+                    element.className = `${activePattern} rounded-top`
+                }
+
+            } catch (error) {
+                console.log({ error });
+            }
+
+        })
+
+        setActiveElement()
+    }
+</script>
+
+{% endif %}

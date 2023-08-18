@@ -1,0 +1,26 @@
+{% load can_create_app %}
+
+{% can_create_app request.user project model.object_type.all.first.app_slug as can_create %}
+
+{% if can_create %}
+    <a class="dropdown-item default"
+        href="{% url 'apps:serve' request.user project.slug model.object_type.all.first.app_slug model.version  %}">
+        <i class="bi bi-check2-circle me-1"></i>
+        Serve
+    </a>
+    
+{% else %}
+
+    <div class="dropdown-item border-bottom">
+        <a class="opacity-50 default">
+            <i class="bi bi-check2-circle me-1"></i>
+            Serve
+        </a>
+        <p class="m-0">
+            <small>
+                Max number of apps reached
+            </small>
+        </p>
+    </div>
+
+{% endif %}

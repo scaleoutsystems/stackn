@@ -48,6 +48,8 @@ class ObjectType(models.Model):
     slug = models.CharField(max_length=100, null=True, blank=True, default="model")
     app_slug = models.CharField(max_length=100, null=True, blank=True)
 
+    enabled = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
 

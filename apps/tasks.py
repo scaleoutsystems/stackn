@@ -44,10 +44,20 @@ def post_create_hooks(instance):
 
         # OBS!! TEMP WORKAROUND to be able to connect to minio
         minio_svc = "{}-minio".format(instance.parameters["release"])
-        cmd = "kubectl" + " get svc " + minio_svc + ' -o jsonpath="{.spec.clusterIP"}'
+        cmd = (
+            "kubectl"
+            f" -n {settings.NAMESPACE}"
+            f" get svc {minio_svc}"
+            ' -o jsonpath="{.spec.clusterIP"} '
+        )
         minio_host_url = ""
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True)
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                timeout=settings.KUBE_API_REQUEST_TIMEOUT,
+            )
             minio_host_url = result.stdout.decode("utf-8")
             minio_host_url += ":9000"
         except subprocess.CalledProcessError:
@@ -101,10 +111,20 @@ def post_create_hooks(instance):
         # between docker and k8s does not work currently)
         # Sure one could use FQDN but lets avoid going via the internet
         mlflow_svc = instance.parameters["service"]["name"]
-        cmd = "kubectl" + " get svc " + mlflow_svc + ' -o jsonpath="{.spec.clusterIP"}'
+        cmd = (
+            "kubectl"
+            f" -n {settings.NAMESPACE}"
+            f" get svc {mlflow_svc}"
+            ' -o jsonpath="{.spec.clusterIP"} '
+        )
         mlflow_host_ip = ""
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True)
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                timeout=settings.KUBE_API_REQUEST_TIMEOUT,
+            )
             mlflow_host_ip = result.stdout.decode("utf-8")
             mlflow_host_ip += ":{}".format(instance.parameters["service"]["port"])
         except subprocess.CalledProcessError:
@@ -275,12 +295,14 @@ def check_status():
         "-o",
         "json",
     ]
-    # print(args)
-    results = subprocess.run(args, capture_output=True)
-    # print(results)
+    results = subprocess.run(
+        args,
+        capture_output=True,
+        check=True,
+        timeout=settings.KUBE_API_REQUEST_TIMEOUT,
+    )
     res_json = json.loads(results.stdout.decode("utf-8"))
     app_statuses = dict()
-    # print(res_json)
     # TODO: Handle case of having many pods (could have many replicas,
     # or could be right after update)
     for item in res_json["items"]:
@@ -354,10 +376,19 @@ def check_status():
             # Find the app instance release name
             app_release = instance.parameters["release"]  # e.g 'rfc058c6f'
             # Now check if there exists a pod with that release
-            cmd = "kubectl" + " get po -l release=" + app_release
+            cmd = (
+                "kubectl"
+                f" -n {settings.NAMESPACE}"
+                f"get po -l release={app_release}"
+            )
             try:
                 # returns a byte-like object
-                result = subprocess.run(cmd, shell=True, capture_output=True)
+                result = subprocess.run(
+                    cmd,
+                    shell=True,
+                    capture_output=True,
+                    timeout=settings.KUBE_API_REQUEST_TIMEOUT,
+                )
                 result_stdout = result.stdout.decode("utf-8")
                 result_stderr = result.stderr.decode("utf-8")
             except subprocess.CalledProcessError:
@@ -365,9 +396,19 @@ def check_status():
 
             if result_stdout != "" and "No resources found in default namespace." not in result_stderr:
                 # Extract the the status of the related release pod
-                cmd = "kubectl" + " get po -l release=" + app_release + ' -o jsonpath="{.items[0].status.phase}"'
+                cmd = (
+                    "kubectl"
+                    f" -n {settings.NAMESPACE}"
+                    f" get po -l release={app_release} "
+                    ' -o jsonpath="{.items[0].status.phase}"'
+                )
                 try:
-                    result = subprocess.run(cmd, shell=True, capture_output=True)
+                    result = subprocess.run(
+                        cmd,
+                        shell=True,
+                        capture_output=True,
+                        timeout=settings.KUBE_API_REQUEST_TIMEOUT,
+                    )
                     pod_status = result.stdout.decode("utf-8")
                     print(pod_status)
                 except subprocess.CalledProcessError:
@@ -475,6 +516,9 @@ def get_resource_usage():
 def sync_mlflow_models():
     mlflow_apps = AppInstance.objects.filter(~Q(state="Deleted"), project__status="active", app__slug="mlflow")
     for mlflow_app in mlflow_apps:
+        if mlflow_app.project is None or mlflow_app.project.mlflow is None:
+            continue
+
         url = "http://{}/{}".format(
             mlflow_app.project.mlflow.host,
             "api/2.0/mlflow/model-versions/search",

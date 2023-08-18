@@ -1,0 +1,45 @@
+{% if appinstance.app.settings.publishable == "true" %}
+{% if appinstance.access == "public" %}
+
+{% if appinstance.owner.id == request.user.id %}
+<a class="dropdown-item default" href="{% url 'apps:unpublish' request.user project.slug category appinstance.pk %}">
+    <i class="bi bi-slash-circle me-1"></i>
+    Unpublish
+</a>
+{% else %}
+<div class="dropdown-item border-bottom">
+
+    <a class="opacity-50 default">
+        <i class="bi bi-slash-circle me-1"></i>
+        Unpublish
+        <p class="m-0">
+            <small>
+                Owners only
+            </small>
+        </p>
+    </a>
+</div>
+{% endif %}
+{% else %}
+
+{% if appinstance.owner.id == request.user.id %}
+<a class="dropdown-item default" href="{% url 'apps:publish' request.user project.slug category appinstance.pk %}">
+    <i class="bi bi-share me-1"></i>
+    Publish
+</a>
+{% else %}
+<div class="dropdown-item border-bottom">
+
+    <a class="opacity-50 default">
+        <i class="bi bi-share me-1"></i>
+        Publish
+        <p class="m-0">
+            <small>
+                Owners only
+            </small>
+        </p>
+    </a>
+</div>
+{% endif %}
+{% endif %}
+{% endif %}
