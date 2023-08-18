@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
       - develop
     paths-ignore:
       - '**.md'
@@ -43,23 +44,8 @@ jobs:
           echo "Running as UID: $UID, GID: $GID"
           whoami
 
-      - name: Checkout the develop branch
+      - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: 'develop'
-
-      - name: Run on microk8s
-        uses: balchua/microk8s-actions@v0.2.1
-        with:
-          channel: '1.20/stable'
-          addons: '["dns", "rbac", "storage", "ingress"]'
-
-      - name: Check k8s
-        run: |
-          echo "Checking k8s cluster version, nodes and pods"
-          kubectl version
-          kubectl get no
-          kubectl get pods -A -o wide
 
       - name: Prepare repository
         run: |
@@ -79,17 +65,8 @@ jobs:
         id: setup
         run: |
           set -ex
-          #echo "Running init script"
-          #./init.sh --no-prompt
           echo "Deploying studio"
           docker compose up -d
-
-      - name: Troubleshoot folder permissions
-        run: |
-          sleep 10s
-          whoami
-          pwd
-          ls -al
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
@@ -120,18 +97,11 @@ jobs:
           response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
           if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ${{env.working-directory}}
         id: tests
         run: |
           docker compose run tests
-
-      - name: Print k8s info
-        run: |
-          echo "Checking k8s cluster version, nodes and pods"
-          kubectl version
-          kubectl get no
-          kubectl get pods -A -o wide
 
       - name: Cypress run e2e tests
         uses: cypress-io/github-action@v5
@@ -151,3 +121,47 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+
+  publish:
+    if: | 
+      github.repository == 'scilifelabdatacentre/stackn'
+    needs: build_and_test
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./Dockerfile
+            image: ghcr.io/${{ github.repository }}/serve-studio
+          - dockerfile: ./Dockerfile.nginx
+            image: ghcr.io/${{ github.repository }}/serve-ingress
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Docker meta
+        uses: docker/metadata-action@v4
+        id: meta
+        with:
+          images: ${{ matrix.image }}
+          tags: |
+            type=raw,value={{date 'YYYYMMDD'}},prefix=${{ github.ref_name }}-
+    
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: docker build studio
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: "${{ github.event_name != 'pull_request' }}"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: ${{ matrix.dockerfile }}
