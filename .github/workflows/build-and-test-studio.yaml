@@ -47,19 +47,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run on microk8s
-        uses: balchua/microk8s-actions@v0.2.1
-        with:
-          channel: '1.20/stable'
-          addons: '["dns", "rbac", "storage", "ingress"]'
-
-      - name: Check k8s
-        run: |
-          echo "Checking k8s cluster version, nodes and pods"
-          kubectl version
-          kubectl get no
-          kubectl get pods -A -o wide
-
       - name: Prepare repository
         run: |
           echo "Running as UID: $UID, GID: $GID"
@@ -78,17 +65,8 @@ jobs:
         id: setup
         run: |
           set -ex
-          #echo "Running init script"
-          #./init.sh --no-prompt
           echo "Deploying studio"
           docker compose up -d
-
-      - name: Troubleshoot folder permissions
-        run: |
-          sleep 10s
-          whoami
-          pwd
-          ls -al
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}
@@ -118,13 +96,6 @@ jobs:
           echo "Checking response from STUDIO_URL: ${{ env.STUDIO_URL }}"
           response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
           if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
-
-      - name: Print k8s info
-        run: |
-          echo "Checking k8s cluster version, nodes and pods"
-          kubectl version
-          kubectl get no
-          kubectl get pods -A -o wide
 
       - name: Run unit tests
         working-directory: ${{env.working-directory}}
