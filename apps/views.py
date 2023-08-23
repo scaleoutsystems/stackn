@@ -10,11 +10,7 @@ from django.views import View
 from guardian.decorators import permission_required_or_403
 
 from .generate_form import generate_form
-from .helpers import (
-    can_access_app_instances,
-    create_app_instance,
-    handle_permissions,
-)
+from .helpers import can_access_app_instances, create_app_instance, handle_permissions
 from .models import AppCategories, AppInstance, Apps
 from .serialize import serialize_app
 from .tasks import delete_resource, deploy_resource
