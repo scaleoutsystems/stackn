@@ -107,40 +107,30 @@ class AppInstaceManagerTestCase(TestCase):
             project=project,
         )
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project)
 
         self.assertEqual(len(result), 5)
 
         app_instance.project = self.project
         app_instance.save()
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project)
 
         self.assertEqual(len(result), 6)
 
         app_instance.access = "private"
         app_instance.save()
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project)
 
         self.assertEqual(len(result), 6)
 
     def test_get_app_instances_of_project_limit(self):
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project, limit=3
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project, limit=3)
 
         self.assertEqual(len(result), 3)
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project)
 
         self.assertEqual(len(result), 5)
 
@@ -164,9 +154,7 @@ class AppInstaceManagerTestCase(TestCase):
 
         self.assertEqual(len(result), 5)
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project)
 
         self.assertEqual(len(result), 6)
 
@@ -179,17 +167,13 @@ class AppInstaceManagerTestCase(TestCase):
         self.assertEqual(len(result), 0)
 
     def test_get_app_instances_of_project_order_by(self):
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project, order_by="name"
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project, order_by="name")
 
         self.assertEqual(len(result), 5)
         self.assertEqual(result.first().name, "test_app_instance_1")
         self.assertEqual(result.last().name, "test_app_instance_5")
 
-        result = AppInstance.objects.get_app_instances_of_project(
-            self.user, self.project, order_by="-name"
-        )
+        result = AppInstance.objects.get_app_instances_of_project(self.user, self.project, order_by="-name")
 
         self.assertEqual(len(result), 5)
         self.assertEqual(result.first().name, "test_app_instance_5")

@@ -19,9 +19,7 @@ basicpatterns = [
         login_required(views.CreateProjectView.as_view()),
         name="create",
     ),
-    path(
-        "projects/templates", views.project_templates, name="project_templates"
-    ),
+    path("projects/templates", views.project_templates, name="project_templates"),
     path("<user>/<project_slug>", views.DetailsView.as_view(), name="details"),
     path(
         "<user>/<project_slug>/environments/create",
@@ -35,9 +33,7 @@ basicpatterns = [
         views.set_s3storage,
         name="set_s3storage",
     ),
-    path(
-        "<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"
-    ),
+    path("<user>/<project_slug>/setmlflow", views.set_mlflow, name="set_mlflow"),
     path(
         "<user>/<project_slug>/details/change",
         views.change_description,

@@ -23,9 +23,7 @@ class Apps(models.Model):
     user_can_create = models.BooleanField(default=True)
     user_can_edit = models.BooleanField(default=True)
     user_can_delete = models.BooleanField(default=True)
-    access = models.CharField(
-        max_length=20, blank=True, null=True, default="public"
-    )
+    access = models.CharField(max_length=20, blank=True, null=True, default="public")
     category = models.ForeignKey(
         "AppCategories",
         related_name="apps",
@@ -57,18 +55,14 @@ class Apps(models.Model):
 
 
 class AppInstanceManager(models.Manager):
-    def get_app_instances_of_project_filter(
-        self, user, project, include_deleted=False, deleted_time_delta=None
-    ):
+    def get_app_instances_of_project_filter(self, user, project, include_deleted=False, deleted_time_delta=None):
         q = Q()
 
         if not include_deleted:
             if deleted_time_delta is None:
                 q &= ~Q(state="Deleted")
             else:
-                time_threshold = datetime.now() - timedelta(
-                    minutes=deleted_time_delta
-                )
+                time_threshold = datetime.now() - timedelta(minutes=deleted_time_delta)
                 q &= ~Q(state="Deleted") | Q(deleted_on__gte=time_threshold)
 
         q &= Q(owner=user) | Q(access__in=["project", "public"])
@@ -89,21 +83,15 @@ class AppInstanceManager(models.Manager):
             order_by = "-created_on"
 
         if filter_func is None:
-            return self.filter(
-                self.get_app_instances_of_project_filter(
-                    user=user, project=project
-                )
-            ).order_by(order_by)[:limit]
+            return self.filter(self.get_app_instances_of_project_filter(user=user, project=project)).order_by(order_by)[
+                :limit
+            ]
 
         if override_default_filter:
             return self.filter(filter_func).order_by(order_by)[:limit]
 
         return (
-            self.filter(
-                self.get_app_instances_of_project_filter(
-                    user=user, project=project
-                )
-            )
+            self.filter(self.get_app_instances_of_project_filter(user=user, project=project))
             .filter(filter_func)
             .order_by(order_by)[:limit]
         )
@@ -116,10 +104,7 @@ class AppInstanceManager(models.Manager):
             app__name=app_name,
         )
 
-        if (
-            settings.STUDIO_ACCESSMODE == "ReadWriteOnce"
-            and app_name == "Persistent Volume"
-        ):
+        if settings.STUDIO_ACCESSMODE == "ReadWriteOnce" and app_name == "Persistent Volume":
             for instance in result:
                 exists = self.filter(
                     ~Q(state="Deleted"),
@@ -133,17 +118,9 @@ class AppInstanceManager(models.Manager):
         return result
 
     def user_can_create(self, user, project, app_slug):
-        apps_per_project = (
-            {}
-            if project.apps_per_project is None
-            else project.apps_per_project
-        )
+        apps_per_project = {} if project.apps_per_project is None else project.apps_per_project
 
-        limit = (
-            apps_per_project[app_slug]
-            if app_slug in apps_per_project
-            else None
-        )
+        limit = apps_per_project[app_slug] if app_slug in apps_per_project else None
 
         app = Apps.objects.get(slug=app_slug)
 

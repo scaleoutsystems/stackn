@@ -147,9 +147,7 @@ def create_mlflow(sender, instance, created, **kwargs):
 
 # it will become the default objects attribute for a Project model
 class ProjectManager(models.Manager):
-    def create_project(
-        self, name, owner, description, repository, status="active"
-    ):
+    def create_project(self, name, owner, description, repository, status="active"):
         user_can_create = self.user_can_create(owner)
 
         if not user_can_create:
@@ -200,11 +198,7 @@ class ProjectManager(models.Manager):
 
         has_perm = user.has_perm("projects.add_project")
 
-        return (
-            project_per_user_limit is None
-            or project_per_user_limit > num_of_projects
-            or has_perm
-        )
+        return project_per_user_limit is None or project_per_user_limit > num_of_projects or has_perm
 
     def get_projects_from_user(self, user):
         return self.filter(Q(owner=user) | Q(authorized=user)).distinct()
@@ -227,11 +221,7 @@ def get_random_pattern_class():
 
 def get_default_apps_per_project_limit():
     try:
-        apps_per_project_limit = (
-            settings.APPS_PER_PROJECT_LIMIT
-            if settings.APPS_PER_PROJECT_LIMIT is not None
-            else {}
-        )
+        apps_per_project_limit = settings.APPS_PER_PROJECT_LIMIT if settings.APPS_PER_PROJECT_LIMIT is not None else {}
     except Exception:
         apps_per_project_limit = {}
 
@@ -252,13 +242,9 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=512)
     objects = ProjectManager()
-    owner = models.ForeignKey(
-        get_user_model(), on_delete=models.DO_NOTHING, related_name="owner"
-    )
+    owner = models.ForeignKey(get_user_model(), on_delete=models.DO_NOTHING, related_name="owner")
 
-    apps_per_project = models.JSONField(
-        blank=True, null=True, default=get_default_apps_per_project_limit
-    )
+    apps_per_project = models.JSONField(blank=True, null=True, default=get_default_apps_per_project_limit)
 
     pattern = models.CharField(max_length=255, default="")
 
@@ -293,10 +279,7 @@ class Project(models.Model):
         super().__init__(*args, **kwargs)
 
         if self.status == "created":
-            if (
-                self.created_at is not None
-                and self.created_at < timezone.now() - timedelta(minutes=2)
-            ):
+            if self.created_at is not None and self.created_at < timezone.now() - timedelta(minutes=2):
                 self.status = "active"
                 self.save()
 

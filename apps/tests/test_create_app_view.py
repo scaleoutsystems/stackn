@@ -212,16 +212,12 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -230,9 +226,7 @@ class CreateAppViewTestCase(TestCase):
         project.authorized.add(user2)
         project.save()
 
-        response = c.get(
-            f"/{user2.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{user2.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -244,15 +238,11 @@ class CreateAppViewTestCase(TestCase):
             project=project,
         )
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
-        response = c.get(
-            f"/{user2.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{user2.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -262,9 +252,7 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -273,9 +261,7 @@ class CreateAppViewTestCase(TestCase):
 
         project.save()
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -285,16 +271,12 @@ class CreateAppViewTestCase(TestCase):
 
         project = self.get_data()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)
 
@@ -306,9 +288,7 @@ class CreateAppViewTestCase(TestCase):
             project=project,
         )
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 403)
 
@@ -316,8 +296,6 @@ class CreateAppViewTestCase(TestCase):
 
         project.save()
 
-        response = c.get(
-            f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab"
-        )
+        response = c.get(f"/{self.user.username}/{project.slug}/apps/create/jupyter-lab")
 
         self.assertEqual(response.status_code, 200)

@@ -390,9 +390,7 @@ def publish_model(request, user, project, id):
     model = Model.objects.get(pk=id)
 
     # Default behavior is that all versions of a model are published.
-    models = Model.objects.filter(
-        id=id, name=model.name, project=model.project
-    )
+    models = Model.objects.filter(id=id, name=model.name, project=model.project)
 
     pmodel = PublishedModel(name=model.name, project=model.project)
     pmodel.save()

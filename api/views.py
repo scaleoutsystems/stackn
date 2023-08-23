@@ -487,7 +487,11 @@ class AppInstanceList(
 
         app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
 
-        (successful, _, _,) = helpers.create_app_instance(
+        (
+            successful,
+            _,
+            _,
+        ) = helpers.create_app_instance(
             user=user,
             project=project,
             app=app,

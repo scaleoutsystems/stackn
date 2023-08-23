@@ -11,9 +11,7 @@ User = get_user_model()
 class AppSettingsViewTestCase(TestCase):
     def setUp(self) -> None:
         self.user = User.objects.create_user("foo1", "foo@test.com", "bar")
-        self.category = AppCategories.objects.create(
-            name="Network", priority=100, slug="network"
-        )
+        self.category = AppCategories.objects.create(name="Network", priority=100, slug="network")
         self.app = Apps.objects.create(
             name="Jupyter Lab",
             slug="jupyter-lab",
@@ -69,17 +67,12 @@ class AppSettingsViewTestCase(TestCase):
     def test_user_can_edit_true(self):
         c = Client()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        url = (
-            f"/{self.user.username}/{self.project.slug}/"
-            + f"apps/settings/{self.app_instance.id}"
-        )
+        url = f"/{self.user.username}/{self.project.slug}/" + f"apps/settings/{self.app_instance.id}"
 
         response = c.get(url)
 
@@ -88,9 +81,7 @@ class AppSettingsViewTestCase(TestCase):
     def test_user_can_edit_false(self):
         c = Client()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -98,10 +89,7 @@ class AppSettingsViewTestCase(TestCase):
         self.app.user_can_edit = True
         self.app.save()
 
-        url = (
-            f"/{self.user.username}/{self.project.slug}/"
-            + f"apps/settings/{self.app_instance.id}"
-        )
+        url = f"/{self.user.username}/{self.project.slug}/" + f"apps/settings/{self.app_instance.id}"
 
         response = c.get(url)
 

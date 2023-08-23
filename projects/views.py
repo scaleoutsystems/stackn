@@ -115,9 +115,7 @@ def settings(request, user, project_slug):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project_slug")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project_slug")),
     name="dispatch",
 )
 class UpdatePatternView(View):
@@ -338,9 +336,7 @@ def set_mlflow(request, user, project_slug, mlflow=[]):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project_slug")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project_slug")),
     name="dispatch",
 )
 class ProjectStatusView(View):
@@ -351,9 +347,7 @@ class ProjectStatusView(View):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project_slug")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project_slug")),
     name="dispatch",
 )
 class GrantAccessToProjectView(View):
@@ -377,15 +371,11 @@ class GrantAccessToProjectView(View):
 
             log.save()
 
-        return HttpResponseRedirect(
-            f"/{user}/{project_slug}/settings?template=access"
-        )
+        return HttpResponseRedirect(f"/{user}/{project_slug}/settings?template=access")
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project_slug")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project_slug")),
     name="dispatch",
 )
 class RevokeAccessToProjectView(View):
@@ -441,11 +431,7 @@ class RevokeAccessToProjectView(View):
 @login_required
 def project_templates(request):
     template = "project_templates.html"
-    templates = (
-        ProjectTemplate.objects.filter(enabled=True)
-        .order_by("slug", "-revision")
-        .distinct("slug")
-    )
+    templates = ProjectTemplate.objects.filter(enabled=True).order_by("slug", "-revision").distinct("slug")
     media_url = django_settings.MEDIA_URL
     return render(request, template, locals())
 
@@ -491,9 +477,7 @@ class CreateProjectView(View):
         try:
             # Create resources from the chosen template
             project_template = ProjectTemplate.objects.get(pk=template_id)
-            create_resources_from_template.delay(
-                request.user.username, project.slug, project_template.template
-            )
+            create_resources_from_template.delay(request.user.username, project.slug, project_template.template)
 
         except ProjectCreationException:
             print("ERROR: could not create project resources")
@@ -524,9 +508,7 @@ class CreateProjectView(View):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project_slug")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project_slug")),
     name="dispatch",
 )
 class DetailsView(View):
@@ -541,29 +523,23 @@ class DetailsView(View):
         if request.user.is_authenticated:
             project = Project.objects.get(slug=project_slug)
             categories = AppCategories.objects.all().order_by("-priority")
-            models = Model.objects.filter(project=project).order_by(
-                "-uploaded_at"
-            )[:10]
+            models = Model.objects.filter(project=project).order_by("-uploaded_at")[:10]
 
             def filter_func(slug):
                 return Q(app__category__slug=slug)
 
             for category in categories:
-                app_instances_of_category = (
-                    AppInstance.objects.get_app_instances_of_project(
-                        user=request.user,
-                        project=project,
-                        filter_func=filter_func(slug=category.slug),
-                        limit=5,
-                    )
+                app_instances_of_category = AppInstance.objects.get_app_instances_of_project(
+                    user=request.user,
+                    project=project,
+                    filter_func=filter_func(slug=category.slug),
+                    limit=5,
                 )
 
                 app_ids += [obj.id for obj in app_instances_of_category]
 
                 apps_of_category = (
-                    Apps.objects.filter(
-                        category=category, user_can_create=True
-                    )
+                    Apps.objects.filter(category=category, user_can_create=True)
                     .order_by("slug", "-revision")
                     .distinct("slug")
                 )

@@ -29,9 +29,7 @@ class RevokeAccessToProjectViewTestCase(TestCase):
         return project
 
     def test_revoke_access_to_user(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -58,9 +56,7 @@ class RevokeAccessToProjectViewTestCase(TestCase):
         self.assertFalse(has_perm)
 
     def test_revoke_access_non_existing_user(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -75,9 +71,7 @@ class RevokeAccessToProjectViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_revoke_access_user_no_access_to_project(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -92,9 +86,7 @@ class RevokeAccessToProjectViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_revoke_access_can_not_remove_if_not_owner(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo2", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo2", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)

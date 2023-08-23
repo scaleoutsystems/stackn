@@ -58,9 +58,7 @@ class GenerateFormTestCase(TestCase):
             description="",
             repository="",
         )
-        self.app = Apps.objects.create(
-            name="Persistent Volume", slug="volumeK8s"
-        )
+        self.app = Apps.objects.create(name="Persistent Volume", slug="volumeK8s")
         return super().setUp()
 
     # primatives
@@ -96,9 +94,7 @@ class GenerateFormTestCase(TestCase):
                 result_val = result_item[_key]
                 self.assertEqual(result_val, _val)
 
-    @override_settings(
-        DISABLED_APP_INSTANCE_FIELDS=["accessModes", "storageClass"]
-    )
+    @override_settings(DISABLED_APP_INSTANCE_FIELDS=["accessModes", "storageClass"])
     def test_get_form_primitives_should_remove_two(self):
         app_settings = deepcopy(self.app_settings_pvc)
 
@@ -112,9 +108,7 @@ class GenerateFormTestCase(TestCase):
 
         self.assertEqual(result_length, expected_length)
 
-        has_expected_keys = (
-            "meta_title" in result_keys and "size" in result_keys
-        )
+        has_expected_keys = "meta_title" in result_keys and "size" in result_keys
 
         self.assertTrue(has_expected_keys)
 
@@ -138,9 +132,7 @@ class GenerateFormTestCase(TestCase):
 
         self.assertEqual(result_length, expected_length)
 
-        has_expected_keys = (
-            "meta_title" in result_keys and "size" in result_keys
-        )
+        has_expected_keys = "meta_title" in result_keys and "size" in result_keys
 
         self.assertTrue(has_expected_keys)
 
@@ -213,9 +205,7 @@ class GenerateFormTestCase(TestCase):
         environment.save()
         app_settings = deepcopy(self.app_settings_pvc)
 
-        result = get_form_environments(
-            app_settings, self.project, self.app, None
-        )
+        result = get_form_environments(app_settings, self.project, self.app, None)
 
         dep_environment, environments = result
 
@@ -255,9 +245,7 @@ class GenerateFormTestCase(TestCase):
 
         app_settings = deepcopy(self.app_settings_pvc)
 
-        result = get_form_environments(
-            app_settings, self.project, self.app, None
-        )
+        result = get_form_environments(app_settings, self.project, self.app, None)
 
         dep_environment, environments = result
 
@@ -310,9 +298,7 @@ class GenerateFormTestCase(TestCase):
 
         app_settings = deepcopy(self.app_settings_pvc)
 
-        result = get_form_environments(
-            app_settings, self.project, self.app, None
-        )
+        result = get_form_environments(app_settings, self.project, self.app, None)
 
         dep_environment, environments = result
 

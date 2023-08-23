@@ -13,9 +13,7 @@ User = get_user_model()
 class DeleteAppViewTestCase(TestCase):
     def setUp(self) -> None:
         self.user = User.objects.create_user("foo1", "foo@test.com", "bar")
-        self.category = AppCategories.objects.create(
-            name="Network", priority=100, slug="network"
-        )
+        self.category = AppCategories.objects.create(name="Network", priority=100, slug="network")
         self.app = Apps.objects.create(
             name="Jupyter Lab",
             slug="jupyter-lab",
@@ -68,17 +66,12 @@ class DeleteAppViewTestCase(TestCase):
     def test_user_can_delete_false(self):
         c = Client()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
 
-        url = (
-            f"/{self.user.username}/{self.project.slug}/apps/delete/"
-            + f"{self.category.slug}/{self.app_instance.id}"
-        )
+        url = f"/{self.user.username}/{self.project.slug}/apps/delete/" + f"{self.category.slug}/{self.app_instance.id}"
 
         response = c.get(url)
 
@@ -87,9 +80,7 @@ class DeleteAppViewTestCase(TestCase):
     def test_user_can_delete_true(self):
         c = Client()
 
-        response = c.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = c.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -107,9 +98,7 @@ class DeleteAppViewTestCase(TestCase):
 
             self.assertEqual(response.status_code, 302)
 
-            self.app_instance = AppInstance.objects.get(
-                name="test_app_instance_public"
-            )
+            self.app_instance = AppInstance.objects.get(name="test_app_instance_public")
 
             self.assertEqual("private", self.app_instance.access)
 

@@ -102,7 +102,11 @@ def create_resources_from_template(user, project_slug, template):
 
                 app = Apps.objects.filter(slug=item["slug"]).order_by("-revision")[0]
 
-                (successful, _, _,) = create_app_instance(
+                (
+                    successful,
+                    _,
+                    _,
+                ) = create_app_instance(
                     user=user_obj,
                     project=project,
                     app=app,

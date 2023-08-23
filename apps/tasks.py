@@ -44,12 +44,7 @@ def post_create_hooks(instance):
 
         # OBS!! TEMP WORKAROUND to be able to connect to minio
         minio_svc = "{}-minio".format(instance.parameters["release"])
-        cmd = (
-            "kubectl"
-            f" -n {settings.NAMESPACE}"
-            f" get svc {minio_svc}"
-            ' -o jsonpath="{.spec.clusterIP"} '
-        )
+        cmd = "kubectl" f" -n {settings.NAMESPACE}" f" get svc {minio_svc}" ' -o jsonpath="{.spec.clusterIP"} '
         minio_host_url = ""
         try:
             result = subprocess.run(
@@ -111,12 +106,7 @@ def post_create_hooks(instance):
         # between docker and k8s does not work currently)
         # Sure one could use FQDN but lets avoid going via the internet
         mlflow_svc = instance.parameters["service"]["name"]
-        cmd = (
-            "kubectl"
-            f" -n {settings.NAMESPACE}"
-            f" get svc {mlflow_svc}"
-            ' -o jsonpath="{.spec.clusterIP"} '
-        )
+        cmd = "kubectl" f" -n {settings.NAMESPACE}" f" get svc {mlflow_svc}" ' -o jsonpath="{.spec.clusterIP"} '
         mlflow_host_ip = ""
         try:
             result = subprocess.run(
@@ -376,11 +366,7 @@ def check_status():
             # Find the app instance release name
             app_release = instance.parameters["release"]  # e.g 'rfc058c6f'
             # Now check if there exists a pod with that release
-            cmd = (
-                "kubectl"
-                f" -n {settings.NAMESPACE}"
-                f"get po -l release={app_release}"
-            )
+            cmd = "kubectl" f" -n {settings.NAMESPACE}" f"get po -l release={app_release}"
             try:
                 # returns a byte-like object
                 result = subprocess.run(

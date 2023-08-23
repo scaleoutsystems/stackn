@@ -25,9 +25,7 @@ class PublishedModel(models.Model):
 @receiver(pre_save, sender=PublishedModel)
 def on_project_save(sender, instance, **kwargs):
     if instance.pattern == "":
-        published_models = PublishedModel.objects.filter(
-            project=instance.project
-        )
+        published_models = PublishedModel.objects.filter(project=instance.project)
 
         patterns = published_models.values_list("pattern", flat=True)
 

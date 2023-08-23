@@ -130,9 +130,7 @@ def get_form_primitives(app_settings, appinstance=[]):
                         print(f"_key: {_key}")
 
                         if _key in parameters_of_key.keys():
-                            primitives[key][_key][
-                                "default"
-                            ] = parameters_of_key[_key]
+                            primitives[key][_key]["default"] = parameters_of_key[_key]
 
     return primitives
 
@@ -253,11 +251,7 @@ def generate_form(aset, project, app, user, appinstance=[]):
         form["flavors"] = Flavor.objects.filter(project=project)
 
     form["primitives"] = get_form_primitives(aset, appinstance)
-    form["dep_permissions"], form["form_permissions"] = get_form_permission(
-        aset, project, appinstance
-    )
-    release_names = ReleaseName.objects.filter(
-        project=project, status="active"
-    )
+    form["dep_permissions"], form["form_permissions"] = get_form_permission(aset, project, appinstance)
+    release_names = ReleaseName.objects.filter(project=project, status="active")
     form["release_names"] = release_names
     return form

@@ -10,9 +10,7 @@ class GrantAccessToProjectViewTestCase(TestCase):
     def setUp(self) -> None:
         self.user = User.objects.create_user("foo1", "foo@test.com", "bar")
         self.user2 = User.objects.create_user("foo2", "foo2@test.com", "bar")
-        self.user3 = User.objects.create_user(
-            "client1", "foo3@test.com", "bar"
-        )
+        self.user3 = User.objects.create_user("client1", "foo3@test.com", "bar")
         self.client = Client()
 
     def get_data(self, user=None):
@@ -26,9 +24,7 @@ class GrantAccessToProjectViewTestCase(TestCase):
         return project
 
     def test_grant_access_to_user(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -59,9 +55,7 @@ class GrantAccessToProjectViewTestCase(TestCase):
         self.assertTrue(has_perm)
 
     def test_grant_access_to_user_no_access(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -76,9 +70,7 @@ class GrantAccessToProjectViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_grant_access_to_non_existing_user(self):
-        response = self.client.post(
-            "/accounts/login/", {"username": "foo1", "password": "bar"}
-        )
+        response = self.client.post("/accounts/login/", {"username": "foo1", "password": "bar"})
         response.status_code
 
         self.assertEqual(response.status_code, 302)
@@ -98,7 +90,7 @@ class GrantAccessToProjectViewTestCase(TestCase):
 
         self.assertEquals(len(authorized), 0)
 
-    '''
+    """
     THIS TEST FAILS ON SCALEOUT DUE TO is_client does not exist
     def test_grant_access_to_client(self):
         response = self.client.post(
@@ -122,4 +114,4 @@ class GrantAccessToProjectViewTestCase(TestCase):
         authorized = project.authorized.all()
 
         self.assertEquals(len(authorized), 0)
-    '''
+    """

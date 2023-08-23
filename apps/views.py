@@ -92,9 +92,7 @@ def logs(request, user, project, ai_id):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project")),
     name="dispatch",
 )
 class FilteredView(View):
@@ -112,16 +110,12 @@ class FilteredView(View):
 
             return filter
 
-        app_instances_of_category = AppInstance.objects.filter(
-            filter_func()
-        ).order_by("-created_on")
+        app_instances_of_category = AppInstance.objects.filter(filter_func()).order_by("-created_on")
 
         app_ids = [obj.id for obj in app_instances_of_category]
 
         apps_of_category = (
-            Apps.objects.filter(category=category, user_can_create=True)
-            .order_by("slug", "-revision")
-            .distinct("slug")
+            Apps.objects.filter(category=category, user_can_create=True).order_by("slug", "-revision").distinct("slug")
         )
 
         context = {
@@ -140,9 +134,7 @@ class FilteredView(View):
 
 
 @method_decorator(
-    permission_required_or_403(
-        "can_view_project", (Project, "slug", "project")
-    ),
+    permission_required_or_403("can_view_project", (Project, "slug", "project")),
     name="dispatch",
 )
 class GetStatusView(View):

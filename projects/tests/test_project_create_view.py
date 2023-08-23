@@ -33,9 +33,7 @@ class ProjectCreateViewTestCase(TestCase):
         self.assertTrue(response.context["template"].id > 0)
 
     def test_project_create_post(self):
-        with patch(
-            "projects.tasks.create_resources_from_template.delay"
-        ) as mock_task:
+        with patch("projects.tasks.create_resources_from_template.delay") as mock_task:
             response = self.client.post(
                 "/projects/create?template=Template",
                 {
