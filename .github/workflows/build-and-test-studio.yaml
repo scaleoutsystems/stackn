@@ -66,7 +66,7 @@ jobs:
         run: |
           set -ex
           echo "Deploying studio"
-          docker compose up -d
+          docker compose up -d --build
 
       - name: Determine and set Studio URL
         working-directory: ${{env.working-directory}}

@@ -29,7 +29,10 @@
         <div class="card h-100 border-0 shadow">
 
             <div style="height:350px;" class="align-items-center d-flex justify-content-center p-2">
-                <img width="200" class="img-fluid img-cover" src="{{ media_url }}{{ app.app.logo_file }}"
+
+                {% static 'images/logos/apps/' as static_url %}
+
+                <img width="200" class="img-fluid img-cover" src="{{static_url}}{{app.app.slug}}-logo.png"
                     alt="Card image cap">
             </div>
             <div class="card-body px-4 pt-2">

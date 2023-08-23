@@ -3,6 +3,10 @@
 
 {% block content %}
 
+
+{% if project.status == "active" %}
+
+
 <h3 class="mb-3">Overview</h3>
 
 <div class="row g-4">
@@ -14,13 +18,14 @@
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
 
                 <div class="dropdown show">
-                    <a href="#" data-bs-toggle="dropdown" data-display="static" aria-expanded="false">
-                        <button class="btn shadow-sm">New</button>
+                    <a href="#" class="btn shadow-sm" data-bs-toggle="dropdown" data-display="static"
+                        aria-expanded="false">
+                        New
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right">
                         {% for app in objs.apps %}
-                            {% include './create_app_link.html' with app=app %}
+                        {% include './create_app_link.html' %}
                         {% endfor %}
                     </div>
                 </div>
@@ -43,42 +48,67 @@
                     <tbody>
                         {% for obj in objs.objs %}
                         <tr class="odd">
-                            <td><img src="{{ media_url}}{{ obj.app.logo_file }}" class="img-fluid " alt="App Logo"
-                                    style="max-height:25px;"></td>
+
+                            {% static 'images/logos/apps/' as static_url %}
+                            <td><img src="{{static_url}}{{obj.app.logo|default:'default-logo.png'}}" class="img-fluid "
+                                    alt="App Logo" style="max-height:25px;"></td>
                             <td class="d-none d-xxl-table-cell">{{ obj.app.name }}</td>
                             {% if obj.table_field.url %}
-                            <td class="sorting_1"><a href="{{ obj.table_field.url }}" target="_blank">{{ obj.name }}</a>
+                            <td class="sorting_1">
+                                <a href="{{ obj.table_field.url }}" target="_blank">
+                                    {{obj.name}} <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
                             </td>
                             {% else %}
                             <td class="sorting_1">{{ obj.name }}</td>
                             {% endif %}
                             <td class="d-none d-xxl-table-cell">{{ obj.created_on | date:"d/n/y H:i" }}</td>
-                            <td id="status-{{ obj.pk }}"><span class="badge 
-                                        {% if obj.status.latest.status_type in status_success %}bg-success
-                                        {% elif obj.status.latest.status_type in status_warning %}bg-warning
-                                        {% else %}bg-danger
-                                        {% endif %}">{{ obj.status.latest.status_type }}</span></td>
+                            <td id="status-{{ obj.pk }}">
+                                <span class="badge bg-secondary">
+                                    {{ obj.status.latest.status_type }}
+                                </span>
+                            </td>
                             <td class="table-action text-center">
                                 <div class="dropdown show">
-                                    <a href="#" data-bs-toggle="dropdown" data-display="static">
+                                    <a href="#" class="default" data-bs-toggle="dropdown" data-display="static">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item disabled"
+                                        <a class="dropdown-item disabled default"
                                             href="{% url 'apps:logs' request.user project.slug obj.pk %}">
                                             <i class="bi bi-activity me-1"></i>
                                             Logs (disabled)
                                         </a>
-                                        <a class="dropdown-item"
+
+                                        {% if obj.app.user_can_edit %}
+
+                                        <a class="dropdown-item default"
                                             href="{% url 'apps:appsettings' request.user project.slug obj.pk %}?from=overview">
                                             <i class="bi bi-sliders2-vertical me-1"></i>
                                             Settings
                                         </a>
-                                        <a class="dropdown-item bg-danger text-white confirm-delete"
+                                        {% else %}
+
+                                        <a class="dropdown-item default disabled">
+                                            <i class="bi bi-sliders2-vertical me-1"></i>
+                                            Settings
+                                        </a>
+                                        {% endif %}
+
+                                        {% if obj.app.user_can_delete %}
+
+                                        <a class="dropdown-item bg-danger text-white confirm-delete default"
                                             href="{% url 'apps:delete' request.user project.slug obj.app.category.slug obj.pk %}?from=overview">
                                             <i class="bi bi-trash me-1"></i>
                                             Delete
                                         </a>
+                                        {% else %}
+
+                                        <a class="dropdown-item bg-danger text-white confirm-delete default disabled">
+                                            <i class="bi bi-trash me-1"></i>
+                                            Delete
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
@@ -125,7 +155,7 @@
                         <tr class="odd">
                             <td class="sorting_1">{{ model.name }}</td>
                             <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
-                            <td class="d-none d-xxl-table-cell">{{ model.uploaded_at }}</td>
+                            <td class="d-none d-xxl-table-cell">{{ model.uploaded_at | date:"d/n/y H:i" }}</td>
                             <td><span class="badge 
                                         {% if model.status == 'CR' %}bg-warning
                                         {% elif model.status == 'DP' %}bg-success
@@ -138,22 +168,29 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item"
+                                        <a class="dropdown-item default"
                                             href="{% url 'models:details_private' request.user project.slug model.pk %}">
                                             <i class="bi bi-text-center me-1"></i>
                                             Details
                                         </a>
-                                        <a class="dropdown-item"
-                                            href="{% url 'models:publish_model' request.user project.slug model.pk %}">
-                                            <i class="bi bi-sliders2-vertical me-1"></i>
-                                            Settings
+
+                                        {% if model.access != "PU" %}
+                                        <a class="dropdown-item default"
+                                            href="{% url 'models:publish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-share me-1"></i>
+                                            Publish
                                         </a>
-                                        <a class="dropdown-item"
-                                            href="{% url 'apps:serve' request.user project.slug model.object_type.all.first.app_slug model.version  %}">
-                                            <i class="bi bi-check2-circle me-1"></i>
-                                            Serve
+                                        {% else %}
+                                        <a class="dropdown-item default"
+                                            href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
+                                            <i class="bi bi-slash-circle me-1"></i>
+                                            Unpublish
                                         </a>
-                                        <a class="dropdown-item bg-danger text-white confirm-delete"
+                                        {% endif %}
+
+                                        {% include 'common/serve_model_link.html' %}
+
+                                        <a class="dropdown-item default bg-danger text-white confirm-delete"
                                             href="{% url 'models:delete' request.user project.slug model.pk %}">
                                             <i class="bi bi-trash me-1"></i>
                                             Delete
@@ -176,52 +213,105 @@
     </div>
 
     <script>
+        {
+            const apps = JSON.parse("{{ app_ids|escapejs }}")
+            const body = new FormData()
+            body.append("apps", apps)
 
-        const apps = {{ pk_list | safe }}
-        const url = "{% url 'apps:get_status' request.user project.slug %}"
-        const csrftoken = getCookie('csrftoken');
+            const url = "{% url 'apps:get_status' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
 
-        const updateStatus = async () => {
+            const updateStatus = async () => {
 
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                },
-                body: JSON.stringify(apps),
-            })
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body
+                })
 
-            const json = await response.json()
+                const json = await response.json()
 
-            for (const key in json) {
-                if (Object.hasOwnProperty.call(json, key)) {
+                for (const key in json) {
+                    if (Object.hasOwnProperty.call(json, key)) {
 
-                    const { status, statusGroup } = json[key]
-                    const querySelector = `#status-${key} > span`
-                    const element = document.querySelector(querySelector)
-                    const className = `badge bg-${statusGroup}`
+                        const { status, statusGroup } = json[key]
+                        const querySelector = `#status-${key} > span`
+                        const element = document.querySelector(querySelector)
+                        const className = `badge bg-${statusGroup}`
 
-                    element.className = className
-                    element.innerText = status
+                        element.className = className
+                        element.innerText = status
+                    }
                 }
             }
+
+            const loop = async () => {
+
+                if ((apps?.length ?? 0) > 0) {
+
+                    await updateStatus()
+
+                    setTimeout(() => {
+                        loop()
+                    }, 5000)
+                }
+            }
+
+            loop()
         }
+    </script>
 
-        const loop = async () => {
+    {% else %}
 
-            if (apps) {
+    <div class="row">
+        <div class="col d-flex justify-content-center">
 
-                await updateStatus()
+            {% include 'common/loader.html' %}
+        </div>
+    </div>
+
+    <script>
+        {
+
+            const url = "{% url 'projects:get_status' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
+
+            const getStatus = async () => {
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    }
+                })
+
+                const json = await response.json()
+
+                if (json.status !== "created") {
+                    window.location.reload()
+                }
+            }
+
+            const loop = async () => {
+
+                await getStatus()
 
                 setTimeout(() => {
                     loop()
-                }, 5000)
+                }, 2000)
             }
+
+            loop()
+
         }
-
-        loop()
-
     </script>
+
+    {% endif %}
+
+
+
 
     {% endblock %}

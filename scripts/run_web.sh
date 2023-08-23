@@ -29,7 +29,6 @@ if $INIT; then
     python manage.py loaddata fixtures/periodic_tasks_fixtures.json
     python manage.py loaddata fixtures/appcats_fixtures.json
     python manage.py loaddata fixtures/apps_fixtures.json
-    python manage.py runscript load_apps_logo -v2
     # Related to Models
     python manage.py loaddata fixtures/objecttype_fixtures.json
 

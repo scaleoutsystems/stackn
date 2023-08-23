@@ -487,7 +487,11 @@ class AppInstanceList(
 
         app = Apps.objects.filter(slug=app_slug).order_by("-revision")[0]
 
-        (successful, _, _,) = helpers.create_app_instance(
+        (
+            successful,
+            _,
+            _,
+        ) = helpers.create_app_instance(
             user=user,
             project=project,
             app=app,
@@ -745,7 +749,6 @@ class AppList(
                 table_field=table_field,
                 priority=int(priority),
                 access=access,
-                logo_file=request.FILES["logo"],
             )
             app.save()
             app.projects.add(*proj_list)

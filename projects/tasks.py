@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 
 import apps.tasks as apptasks
 from apps.controller import delete
-from apps.helpers.helpers import create_app_instance
+from apps.helpers import create_app_instance
 
 from .exceptions import ProjectCreationException
 from .models import S3, Environment, Flavor, MLFlow, Project
@@ -102,7 +102,11 @@ def create_resources_from_template(user, project_slug, template):
 
                 app = Apps.objects.filter(slug=item["slug"]).order_by("-revision")[0]
 
-                (successful, _, _,) = create_app_instance(
+                (
+                    successful,
+                    _,
+                    _,
+                ) = create_app_instance(
                     user=user_obj,
                     project=project,
                     app=app,
@@ -136,6 +140,9 @@ def create_resources_from_template(user, project_slug, template):
         else:
             print("Template has either not valid or unknown keys")
             raise (ProjectCreationException)
+
+    project.status = "active"
+    project.save()
 
 
 @shared_task

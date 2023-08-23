@@ -46,7 +46,7 @@
         }
       },
       "chart": "apps/docker-registry/chart",
-      "logo": "apps/docker-registry/logo.png",
+      "logo": "docker-registry-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -68,7 +68,7 @@
           "Persistent Volume": "many"
         },
         "flavor": "one",
-        "default_values":{
+        "default_values": {
           "port": "80",
           "targetport": "8888"
         },
@@ -95,7 +95,7 @@
         "export-cli": "True"
       },
       "chart": "apps/jupyter-lab/chart",
-      "logo": "apps/jupyter-lab/logo.png",
+      "logo": "jupyter-lab-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -148,7 +148,7 @@
         }
       },
       "chart": "apps/minio/chart",
-      "logo": "apps/minio/logo.png",
+      "logo": "minio-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -201,7 +201,7 @@
         }
       },
       "chart": "apps/mlflow/chart",
-      "logo": "apps/mlflow/logo.png",
+      "logo": "mlflow-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -236,7 +236,7 @@
           "is_tar": "False",
           "port": "5000",
           "targetport": "8501"
-      },
+        },
         "permissions": {
           "public": {
             "value": "false",
@@ -257,7 +257,7 @@
         "publishable": "true"
       },
       "chart": "apps/mlflow-serve/chart",
-      "logo": "apps/mlflow-serve/logo.png",
+      "logo": "mlflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -306,7 +306,7 @@
         "publishable": "true"
       },
       "chart": "apps/tensorflow-serve/chart",
-      "logo": "apps/tensorflow-serve/logo.png",
+      "logo": "tensorflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -365,7 +365,7 @@
         "publishable": "true"
       },
       "chart": "apps/pytorch-serve/chart",
-      "logo": "apps/pytorch-serve/logo.png",
+      "logo": "pytorch-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -418,7 +418,7 @@
         }
       },
       "chart": "apps/volumeK8s/chart",
-      "logo": "apps/volumeK8s/logo.png",
+      "logo": "volumeK8s-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -459,7 +459,7 @@
         }
       },
       "chart": "apps/vscode/chart",
-      "logo": "charts/apps/vscode/logo.png",
+      "logo": "vscode-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -481,7 +481,7 @@
         }
       },
       "chart": "apps/netpolicy/chart",
-      "logo": "apps/netpolicy/logo.png",
+      "logo": "netpolicy-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }

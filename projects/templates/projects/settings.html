@@ -1,6 +1,9 @@
 {% extends 'projects/base.html' %}
 
+
 {% block projects_dropdown %}
+
+
 <ul class="navbar-nav">
     <li class="nav-item px-2 dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown"
@@ -23,6 +26,9 @@
 
 {% block content %}
 
+{% load get_setting %}
+{% get_setting "ENABLE_PROJECT_EXTRA_SETTINGS" as enable_extra_settings %}
+
 <h1 class="h3 mb-3">Settings</h1>
 
 <div class="row">
@@ -35,32 +41,40 @@
 
             <div class="list-group list-group-flush" role="tablist">
 
-                <a class="list-group-item list-group-item-action active p-3" data-bs-toggle="list" href="#projdesc"
-                    role="tab">
+                <a class="default list-group-item list-group-item-action active p-3" data-bs-toggle="list"
+                    href="#projdesc" role="tab">
                     Description
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#image" role="tab">
-                    Image
-                </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access"
+                    role="tab">
                     Access
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage"
+                    role="tab">
                     S3 storage
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow"
+                    role="tab">
                     MLFlow
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors" role="tab">
+                {% if enable_extra_settings %}
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors"
+                    role="tab">
                     Flavors
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments" role="tab">
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments"
+                    role="tab">
                     Environments
                 </a>
-                <a class="list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#delete" role="tab"
-                    style="color: red;">
+                {% endif %}
+                
+                {% if request.user.pk == project.owner.pk %}
+                    
+                <a class="default list-group-item list-group-item-action p-3 text-red" data-bs-toggle="list"
+                    href="#delete" role="tab">
                     Delete
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -96,103 +110,10 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="image" role="tabpanel">
-                <div class="card shadow border-0">
-
-                    <div class="card-header bg-white py-3">
-                        <h5 class="card-title mb-0">Change project image</h5>
-                    </div>
-                    <div class="card-body">
-
-                        <form action="{% url 'projects:update_image' request.user project.slug %}" method="post"
-                            enctype="multipart/form-data">
-                            {% csrf_token %}
-
-                            <div class="mb-3">
-                                <input type="file" class="form-control" id="image" name="image"
-                                    accept="image/png, image/jpeg">
-                            </div>
-
-                            <button type="submit" class="btn btn-square btn-primary">Save</button>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
             <div class="tab-pane fade" id="access" role="tabpanel">
-                <div class="card shadow border-0">
 
-                    <div class="card-header bg-white py-3">
-                        <h5 class="card-title mb-0">Grant or revoke access</h5>
-                    </div>
-                    <div class="card-body">
+                {% include './grant_revoke_access.html' %}
 
-                        <p>For granting/revoking access to this project,
-                            select one or more users from the list below.</p>
-                        <p>Hold <b>ctrl</b> or <b>shift</b> (or drag with the mouse)
-                            to select more than one.</p>
-
-                        {% if platform_users|length == project.authorized.all|length %}
-                        <div class="alert alert-success alert-outline alert-dismissible" role="alert">
-                            <div class="alert-icon">
-                                <i class="far fa-fw fa-bell"></i>
-                            </div>
-                            <div class="alert-message">
-                                <strong>Well done!</strong> All users have already been added as members to this
-                                project.
-                            </div>
-                        </div>
-                        {% else %}
-                        <form action="{% url 'projects:grant_access' request.user project.slug %}" method="post">
-                            {% csrf_token %}
-
-                            <div class="mb-3">
-                                <label class="form-label" for="id_selected_users">Unauthorized users</label>
-                                <select name="selected_users" id="id_selected_users" class="form-control" multiple
-                                    required>
-                                    {% for user in platform_users %}
-                                    {% if user not in project.authorized.all %}
-                                    <option value="{{ user.pk }}">
-                                        {{ user.username }}
-                                    </option>
-                                    {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-square btn-primary">Grant access</button>
-                        </form>
-                        {% endif %}
-                        {% if project.authorized.all %}
-                        <form action="{% url 'projects:revoke_access' request.user project.slug %}"
-                            onsubmit="confirm(displayResult());" method="post" style="margin-top: 24px;">
-                            {% csrf_token %}
-                            <script>
-                                function displayResult() {
-                                    var x = document.getElementById("id_selected_users");
-                                    var txt = "Revoke access to the following users: ";
-                                    var i;
-                                    for (i = 0; i < x.length; i++) {
-                                        txt = txt + "\n" + x.options[i].text;
-                                    }
-                                    return txt;
-                                }
-                            </script>
-                            <div class="mb-3">
-                                <label class="form-label" for="id_selected_users">Authorized users</label>
-                                <select name="selected_users" id="id_selected_users" class="form-control" multiple
-                                    required>
-                                    {% for user in project.authorized.all %}
-                                    <option value="{{ user.pk }}">
-                                        {{ user.username }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-square btn-danger">Revoke access</button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
             <div class="tab-pane fade" id="publish" role="tabpanel">
                 <div class="card shadow border-0">
@@ -233,7 +154,7 @@
                     </div>
                 </div>
             </div>
-
+            {% if enable_extra_settings %}
             <div class="tab-pane fade" id="flavors" role="tabpanel">
                 <div class="card shadow border-0">
 
@@ -358,7 +279,7 @@
                     </div>
                 </div>
             </div>
-
+            {% endif %}
             <div class="tab-pane fade" id="s3storage" role="tabpanel">
                 <div class="card shadow border-0">
 
@@ -478,4 +399,33 @@
         </div>
     </div>
 </div>
+
+<script>
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const template = urlParams.get("template")
+
+    if (!!template) {
+
+        const element = document.getElementById(template)
+        element.classList.add("active")
+        element.classList.add("show")
+
+        const linkElement = document.querySelector(`[href="#${template}"]`)
+
+        linkElement.classList.add("active")
+
+        const defaultId = "projdesc"
+
+        const defaultElement = document.getElementById(defaultId)
+        defaultElement.classList.remove("active")
+        defaultElement.classList.remove("show")
+
+        const defaultLinkElement = document.querySelector(`[href="#${defaultId}"]`)
+
+        defaultLinkElement.classList.remove("active")
+    }
+
+</script>
 {% endblock %}

@@ -1,8 +1,8 @@
-from django.test import RequestFactory
+import pytest
 from django.contrib.sessions.backends.db import SessionStore
+from django.test import RequestFactory
 from django.urls import reverse
 
-import pytest
 from portal import views
 
 

@@ -1,146 +1,194 @@
 [
   {
-  "model": "apps.apps",
-  "pk": 5,
-  "fields": {
-    "name": "Mongo Express",
-    "slug": "mongo-express",
-    "category": "store",
-    "table_field": {
+    "model": "apps.apps",
+    "pk": 5,
+    "fields": {
+      "name": "Mongo Express",
+      "slug": "mongo-express",
+      "category": "store",
+      "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
-    },
-    "description": "",
-    "settings": {
-      "apps":{
-          "MongoDB":"one"
       },
-      "default_values": {
+      "description": "",
+      "settings": {
+        "apps": {
+          "MongoDB": "one"
+        },
+        "default_values": {
           "port": "80",
           "targetport": "8081"
         },
-      "permissions": {
-          "public": {"value":"false", "option": "false"},
-          "project": {"value":"true", "option": "true"},
-          "private": {"value":"false", "option": "true"}
-      }
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "false"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        }
+      },
+      "chart": "apps/mongo-express/chart",
+      "logo": "mongo-express-logo.png",
+      "updated_on": "2021-03-10T19:45:03.927Z",
+      "created_on": "2021-02-19T21:34:37.815Z"
+    }
   },
-  "chart": "apps/mongo-express/chart",
-  "logo": "apps/mongo-express/logo.png",
-  "updated_on": "2021-03-10T19:45:03.927Z",
-  "created_on": "2021-02-19T21:34:37.815Z"
-  }
-},
   {
-  "model": "apps.apps",
-  "pk": 1,
-  "fields": {
-    "name": "MongoDB",
-    "slug": "mongodb",
-    "category": "store",
-    "table_field": {
+    "model": "apps.apps",
+    "pk": 1,
+    "fields": {
+      "name": "MongoDB",
+      "slug": "mongodb",
+      "category": "store",
+      "table_field": {
         "info": "mongodb://{{ release }}:27017"
       },
-    "description": "",
-    "settings": {
-      "apps":{
-          "Persistent Volume":"one"
-      },
-      "default_values": {
+      "description": "",
+      "settings": {
+        "apps": {
+          "Persistent Volume": "one"
+        },
+        "default_values": {
           "port": "27017",
           "targetport": "27017"
         },
-      "credentials": {
-          "username": {"type": "string", "default":"admin","title":"Username"},
-          "password": {"type": "string", "default":"password","title":"Password"}
+        "credentials": {
+          "username": {
+            "type": "string",
+            "default": "admin",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "default": "password",
+            "title": "Password"
+          }
+        },
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "false"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        }
       },
-      "permissions": {
-          "public": {"value":"false", "option": "false"},
-          "project": {"value":"true", "option": "true"},
-          "private": {"value":"false", "option": "true"}
-      }
-    },
-    "chart": "apps/mongodb/chart",
-    "logo": "apps/mongodb/logo.png",
-    "updated_on": "2021-03-10T19:45:03.927Z",
-    "created_on": "2021-02-19T21:34:37.815Z"
-  }
-},
-  {
-  "model": "apps.apps",
-  "pk": 2,
-  "fields": {
-    "name": "FEDn Combiner",
-    "slug": "combiner",
-    "category": "compute",
-    "table_field": {},
-    "description": "",
-    "settings": {  
-    "apps":{
-      "FEDn Reducer":"one",
-      "Persistent Volume": "one"
-    },
-    "default_values": {
-      "port": "443",
-      "targetport": "443"
-    },
-    "environment": {
-      "name": "from",
-      "title": "Image",
-      "quantity": "one",
-      "type": "match"
-    },
-    "logs": ["combiner"],
-    "permissions": {
-        "public": {"value":"false", "option": "false"},
-        "project": {"value":"true", "option": "true"},
-        "private": {"value":"false", "option": "true"}
-      }
+      "chart": "apps/mongodb/chart",
+      "logo": "mongodb-logo.png",
+      "updated_on": "2021-03-10T19:45:03.927Z",
+      "created_on": "2021-02-19T21:34:37.815Z"
+    }
   },
-  "chart": "apps/fedn-combiner/chart",
-  "logo": "apps/fedn-combiner/logo.png",
-  "updated_on": "2021-03-10T19:45:03.927Z",
-  "created_on": "2021-02-19T21:34:37.815Z"
-  }
-},
   {
-  "model": "apps.apps",
-  "pk": 4,
-  "fields": {
-    "name": "FEDn Reducer",
-    "slug": "reducer",
-    "category": "compute",
-    "table_field": {
-      "url": "https://{{ release }}.{{ global.domain }}"
+    "model": "apps.apps",
+    "pk": 2,
+    "fields": {
+      "name": "FEDn Combiner",
+      "slug": "combiner",
+      "category": "compute",
+      "table_field": {},
+      "description": "",
+      "settings": {
+        "apps": {
+          "FEDn Reducer": "one",
+          "Persistent Volume": "one"
+        },
+        "default_values": {
+          "port": "443",
+          "targetport": "443"
+        },
+        "environment": {
+          "name": "from",
+          "title": "Image",
+          "quantity": "one",
+          "type": "match"
+        },
+        "logs": [
+          "combiner"
+        ],
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "false"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        }
       },
-    "description": "",
-    "settings": {
-      "S3": "one",
-      "apps":{
-        "MongoDB":"one"
+      "chart": "apps/fedn-combiner/chart",
+      "logo": "fedn-combiner-logo.png",
+      "updated_on": "2021-03-10T19:45:03.927Z",
+      "created_on": "2021-02-19T21:34:37.815Z"
+    }
+  },
+  {
+    "model": "apps.apps",
+    "pk": 4,
+    "fields": {
+      "name": "FEDn Reducer",
+      "slug": "reducer",
+      "category": "compute",
+      "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
       },
-      "default_values": {
-        "port": "8090",
-        "targetport": "8090"
-      },	
-      "environment": {
-        "name": "from",
-        "title": "Image",
-        "quantity": "one",
-        "type": "match"
+      "description": "",
+      "settings": {
+        "S3": "one",
+        "apps": {
+          "MongoDB": "one"
+        },
+        "default_values": {
+          "port": "8090",
+          "targetport": "8090"
+        },
+        "environment": {
+          "name": "from",
+          "title": "Image",
+          "quantity": "one",
+          "type": "match"
+        },
+        "logs": [
+          "reducer"
+        ],
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "false"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        }
       },
-      "logs": ["reducer"],
-      "permissions": {
-          "public": {"value":"false", "option": "false"},
-          "project": {"value":"true", "option": "true"},
-          "private": {"value":"false", "option": "true"}
-      }
-    },
-    "chart": "apps/fedn-reducer/chart",
-    "logo": "apps/fedn-reducer/logo.png",
-    "updated_on": "2021-03-10T19:45:03.927Z",
-    "created_on": "2021-02-19T21:34:37.815Z"
-  }
-},
+      "chart": "apps/fedn-reducer/chart",
+      "logo": "fedn-reducer-logo.png",
+      "updated_on": "2021-03-10T19:45:03.927Z",
+      "created_on": "2021-02-19T21:34:37.815Z"
+    }
+  },
   {
     "model": "apps.apps",
     "pk": 3,
@@ -188,7 +236,7 @@
         }
       },
       "chart": "apps/docker-registry/chart",
-      "logo": "apps/docker-registry/logo.png",
+      "logo": "docker-registry-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -210,7 +258,7 @@
           "Persistent Volume": "many"
         },
         "flavor": "one",
-        "default_values":{
+        "default_values": {
           "port": "80",
           "targetport": "8888"
         },
@@ -237,7 +285,7 @@
         "export-cli": "True"
       },
       "chart": "apps/jupyter-lab/chart",
-      "logo": "apps/jupyter-lab/logo.png",
+      "logo": "jupyter-lab-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -264,12 +312,12 @@
         },
         "credentials": {
           "access_key": {
-            "type": "string",
+            "type": "password",
             "default": "accesskey",
             "title": "Access Key"
           },
           "secret_key": {
-            "type": "string",
+            "type": "password",
             "default": "secretkey123",
             "title": "Secret Key"
           }
@@ -290,7 +338,7 @@
         }
       },
       "chart": "apps/minio/chart",
-      "logo": "apps/minio/logo.png",
+      "logo": "minio-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -343,7 +391,7 @@
         }
       },
       "chart": "apps/mlflow/chart",
-      "logo": "apps/mlflow/logo.png",
+      "logo": "mlflow-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -378,7 +426,7 @@
           "is_tar": "False",
           "port": "5000",
           "targetport": "8501"
-      },
+        },
         "permissions": {
           "public": {
             "value": "false",
@@ -399,7 +447,7 @@
         "publishable": "true"
       },
       "chart": "apps/mlflow-serve/chart",
-      "logo": "apps/mlflow-serve/logo.png",
+      "logo": "mlflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -448,7 +496,7 @@
         "publishable": "true"
       },
       "chart": "apps/tensorflow-serve/chart",
-      "logo": "apps/tensorflow-serve/logo.png",
+      "logo": "tensorflow-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -515,7 +563,7 @@
         "publishable": "true"
       },
       "chart": "apps/pytorch-serve/chart",
-      "logo": "apps/pytorch-serve/logo.png",
+      "logo": "pytorch-serve-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -533,9 +581,24 @@
       "settings": {
         "volume": {
           "size": {
-            "type": "string",
+            "type": "select",
+            "title": "Size",
             "default": "1Gi",
-            "title": "Size"
+            "user_can_edit": false,
+            "items": [
+              {
+                "name": "1Gi",
+                "value": "1Gi"
+              },
+              {
+                "name": "2Gi",
+                "value": "2Gi"
+              },
+              {
+                "name": "5Gi",
+                "value": "5Gi"
+              }
+            ]
           },
           "storageClass": {
             "type": "string",
@@ -568,7 +631,7 @@
         }
       },
       "chart": "apps/volumeK8s/chart",
-      "logo": "apps/volumeK8s/logo.png",
+      "logo": "volumeK8s-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
@@ -579,7 +642,7 @@
     "fields": {
       "name": "VS Code",
       "slug": "vscode",
-      "category": "develop",
+      "category": "compute",
       "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
       },
@@ -609,7 +672,7 @@
         }
       },
       "chart": "apps/vscode/chart",
-      "logo": "charts/apps/vscode/logo.png",
+      "logo": "vscode-logo.png",
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }

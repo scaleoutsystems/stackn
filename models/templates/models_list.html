@@ -3,15 +3,13 @@
 {% block content %}
 
 <div class="row">
-    <div class="col d-flex justify-content-between">
-        <div>
-            <h1 class="h3 mb-3">Models</h1>
-        </div>
+    <div class="col">
+        <h3>Models</h3>
     </div>
 </div>
 
 
-<div class="row">
+<div class="row py-3">
     <div class="col">
         {% include 'common/flash_messages.html' %}
     </div>
@@ -54,13 +52,13 @@
                                         {% elif model.status == 'AR' %}bg-danger
                                         {% endif %}">{{ model.get_status_display }}</span>
                                         <span class="badge bg-info">
-                                        {% if model.access != "PU" %}
-                                        unpublished
-                                        {% else %}
-                                        published</span>
+                                            {% if model.access != "PU" %}
+                                            unpublished
+                                            {% else %}
+                                            published</span>
                                         {% endif %}
                                     </td>
-        
+
                                     <td>{{ project.owner }}</td>
                                     <td class="table-action">
                                         <div class="dropdown show">
@@ -69,22 +67,23 @@
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
                                                 {% if model.access != "PU" %}
-                                                <a class="dropdown-item" href="{% url 'models:publish_model' request.user project.slug model.id %}">
+                                                <a class="dropdown-item default"
+                                                    href="{% url 'models:publish_model' request.user project.slug model.id %}">
                                                     <i class="bi bi-share me-1"></i>
                                                     Publish
                                                 </a>
                                                 {% else %}
-                                                <a class="dropdown-item" href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
+                                                <a class="dropdown-item default"
+                                                    href="{% url 'models:unpublish_model' request.user project.slug model.id %}">
                                                     <i class="bi bi-slash-circle me-1"></i>
                                                     Unpublish
                                                 </a>
                                                 {% endif %}
-        
-                                                <a class="dropdown-item" href="{% url 'apps:serve' request.user project.slug model.object_type.all.first.app_slug model.version  %}">
-                                                    <i class="bi bi-check2-circle me-1"></i>
-                                                    Serve
-                                                </a>
-                                                <a class="dropdown-item bg-danger text-white confirm-delete" href="{% url 'models:delete' request.user project.slug model.pk %}">
+
+                                                {% include 'common/serve_model_link.html' %}
+
+                                                <a class="dropdown-item bg-danger text-white confirm-delete default"
+                                                    href="{% url 'models:delete' request.user project.slug model.pk %}">
                                                     <i class="bi bi-trash me-1"></i>
                                                     Delete
                                                 </a>

@@ -2,14 +2,16 @@ import base64
 import random
 import secrets
 import string
+from datetime import timedelta
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_delete
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.text import slugify
 from guardian.shortcuts import assign_perm
 
@@ -39,7 +41,12 @@ class Environment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
-    project = models.ForeignKey(settings.PROJECTS_MODEL, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(
+        settings.PROJECTS_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     registry = models.ForeignKey(
         settings.APPINSTANCE_MODEL,
         related_name="environments",
@@ -48,8 +55,10 @@ class Environment(models.Model):
         on_delete=models.CASCADE,
     )
     repository = models.CharField(max_length=100, blank=True, null=True)
-    slug = models.CharField(max_length=100, null=True)
+    slug = models.CharField(max_length=100, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    public = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.name)
@@ -125,9 +134,20 @@ class MLFlow(models.Model):
         return "{} ({})".format(self.name, self.project.slug)
 
 
+"""Post save signal when creating an mlflow object"""
+
+
+@receiver(post_save, sender=MLFlow)
+def create_mlflow(sender, instance, created, **kwargs):
+    if created:
+        if instance.project and not instance.project.mlflow:
+            instance.project.mlflow = instance
+            instance.project.save()
+
+
 # it will become the default objects attribute for a Project model
 class ProjectManager(models.Manager):
-    def create_project(self, name, owner, description, repository):
+    def create_project(self, name, owner, description, repository, status="active"):
         user_can_create = self.user_can_create(owner)
 
         if not user_can_create:
@@ -149,6 +169,7 @@ class ProjectManager(models.Manager):
             description=description,
             repository=repository,
             repository_imported=False,
+            status=status,
         )
 
         assign_perm("can_view_project", owner, project)
@@ -165,6 +186,9 @@ class ProjectManager(models.Manager):
         return password
 
     def user_can_create(self, user):
+        if not user.is_authenticated:
+            return False
+
         num_of_projects = self.filter(Q(owner=user), status="active").count()
 
         try:
@@ -175,6 +199,33 @@ class ProjectManager(models.Manager):
         has_perm = user.has_perm("projects.add_project")
 
         return project_per_user_limit is None or project_per_user_limit > num_of_projects or has_perm
+
+    def get_projects_from_user(self, user):
+        return self.filter(Q(owner=user) | Q(authorized=user)).distinct()
+
+    def get_project(self, user, slug=None, id=None):
+        qs = (
+            self.filter(Q(owner=user) | Q(authorized=user), pk=id)
+            if id is not None
+            else self.filter(Q(owner=user) | Q(authorized=user), slug=slug)
+        )
+
+        return qs.first() if qs.count() != 0 else None
+
+
+def get_random_pattern_class():
+    randint = random.randint(1, 12)
+
+    return f"pattern-{randint}"
+
+
+def get_default_apps_per_project_limit():
+    try:
+        apps_per_project_limit = settings.APPS_PER_PROJECT_LIMIT if settings.APPS_PER_PROJECT_LIMIT is not None else {}
+    except Exception:
+        apps_per_project_limit = {}
+
+    return apps_per_project_limit
 
 
 class Project(models.Model):
@@ -192,7 +243,11 @@ class Project(models.Model):
     name = models.CharField(max_length=512)
     objects = ProjectManager()
     owner = models.ForeignKey(get_user_model(), on_delete=models.DO_NOTHING, related_name="owner")
-    project_image = models.ImageField(upload_to="projects/images/", null=True, blank=True, default=None)
+
+    apps_per_project = models.JSONField(blank=True, null=True, default=get_default_apps_per_project_limit)
+
+    pattern = models.CharField(max_length=255, default="")
+
     s3storage = models.OneToOneField(
         S3,
         on_delete=models.SET_NULL,
@@ -220,6 +275,14 @@ class Project(models.Model):
     def __str__(self):
         return "Name: {} ({})".format(self.name, self.status)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.status == "created":
+            if self.created_at is not None and self.created_at < timezone.now() - timedelta(minutes=2):
+                self.status = "active"
+                self.save()
+
 
 @receiver(pre_delete, sender=Project)
 def on_project_delete(sender, instance, **kwargs):
@@ -230,6 +293,35 @@ def on_project_delete(sender, instance, **kwargs):
     for model in models:
         model.status = "AR"
         model.save()
+
+
+@receiver(pre_save, sender=Project)
+def on_project_save(sender, instance, **kwargs):
+    if instance.pattern == "":
+        projects = Project.objects.filter(owner=instance.owner)
+
+        patterns = projects.values_list("pattern", flat=True)
+
+        arr = []
+
+        for i in range(1, 31):
+            pattern = f"pattern-{i}"
+
+            if pattern not in patterns:
+                arr.append(pattern)
+
+        pattern = ""
+
+        if len(arr) > 0:
+            rand_index = random.randint(0, len(arr) - 1)
+
+            pattern = arr[rand_index]
+
+        else:
+            randint = random.randint(1, 30)
+            pattern = f"pattern-{randint}"
+
+        instance.pattern = pattern
 
 
 class ProjectLog(models.Model):
@@ -255,6 +347,8 @@ class ProjectTemplate(models.Model):
     revision = models.IntegerField(default=1)
     slug = models.CharField(max_length=512, default="")
     template = models.TextField(null=True, blank=True)
+
+    enabled = models.BooleanField(default=True)
 
     class Meta:
         unique_together = (

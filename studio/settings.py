@@ -273,6 +273,7 @@ CHART_FOLDER = "/app/charts/apps"
 EXTERNAL_KUBECONF = True
 KUBECONFIG = "/app/cluster.conf"
 NAMESPACE = "default"
+KUBE_API_REQUEST_TIMEOUT = 1
 STORAGECLASS = "microk8s-hostpath"
 
 # This can be simply "localhost", but it's better to test with a
@@ -316,6 +317,7 @@ PUBLICMODELOBJECT_MODEL = "portal.PublicModelObject"
 # Email
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+EMAIL_TEMPLATE_PROTOCOL = "http"
 
 VERSION = "dev"
 
@@ -345,3 +347,8 @@ APPS_PER_USER_LIMIT = {
 }
 
 PROJECTS_PER_USER_LIMIT = 3
+
+STUDIO_ACCESSMODE = os.environ.get("STUDIO_ACCESSMODE", "")
+ENABLE_PROJECT_EXTRA_SETTINGS = True
+
+DISABLED_APP_INSTANCE_FIELDS = []
