@@ -1,0 +1,38 @@
+{
+    "name": "Standard App",
+    "slug": "standardapp",
+    "category": "serve",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+    "description": "",
+    "priority": "400",
+    "settings": {
+        "flavor": "one",
+        "logs": ["serve"],
+        "default_values": {
+          "port": "80",
+          "targetport": "8000"
+        },
+        "permissions": {
+            "public": {"value":"false", "option": "true"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        },
+        "image_selection": {
+          "meta": {
+              "title": "Select image"
+          },
+          "image": {
+            "type": "string",
+            "default": "ghcr.io/sandstromviktor/dash:latest",
+            "title": "Image"
+          },
+          "port": {
+              "type": "string",
+              "default": "8000",
+              "title": "Port"
+          }
+        }
+    }
+}
