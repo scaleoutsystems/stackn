@@ -26,10 +26,10 @@ This is simply a reminder of what we are going to look for before merging your c
 - [ ] This pull request is against **develop** branch (not applicable for hotfixes)
 - [ ] I have included a link to the issue on GitHub or JIRA (if any)
 - [ ] I have included migration files (if there are changes to the model classes)
-- [ ] I have read the [CONTRIBUTING](https://github.com/scaleoutsystems/stackn/blob/master/CONTRIBUTING.md) doc
+- [ ] I have read the [CONTRIBUTING](https://github.com/ScilifelabDataCentre/stackn/blob/develop/CONTRIBUTING.md) doc
 - [ ] I have included, reviewed and executed tests (unit and end2end) to complement my changes
 - [ ] I have updated the related documentation (if necessary)
-- [ ] I have updated the release notes (docs/releasenotes.md)
+- [ ] I have updated the release notes (releasenotes.md)
 - [ ] I have added a reviewer for this pull request
 - [ ] I have added myself as an author for this pull request
 - [ ] In the case I have modified settings.py, then I have also updated the studio-settings-configmap.yaml file in serve-charts
