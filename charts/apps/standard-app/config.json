@@ -19,19 +19,24 @@
             "project": {"value":"true", "option": "true"},
             "private": {"value":"false", "option": "true"}
         },
-        "image_selection": {
+        "appconfig": {
           "meta": {
-              "title": "Select image"
+            "title": "Configurations"
           },
           "image": {
             "type": "string",
-            "default": "ghcr.io/sandstromviktor/dash:latest",
+            "default": "registry/repository/image:tag",
             "title": "Image"
           },
           "port": {
-              "type": "string",
-              "default": "8000",
-              "title": "Port"
+            "type": "number",
+            "default": "8000",
+            "title": "Port"
+          },
+          "path": {
+            "type": "string",
+            "default": "",
+            "title": "Path to folder for persistent storage (leave blank if Persistent Volume is set to None)"
           }
         }
     }

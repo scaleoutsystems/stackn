@@ -40,9 +40,32 @@ spec:
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
       {{- end }}
+      {{ if .Values.apps.volumeK8s }}
+      initContainers:
+      - name: copy-to-pvc
+        image: {{ .Values.appconfig.image }}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        command:
+          - /bin/sh
+          - -c
+          - cp -r {{ $.Values.appconfig.path }}/* /tmp
+        volumeMounts:
+        {{- range $key, $value := .Values.apps.volumeK8s }}
+        - name: {{ $key }}
+          mountPath: /tmp
+      {{- end }} 
+      {{ end }}
       containers:
       - name: standardapp
-        image: {{ .Values.image_selection.image }}
+        image: {{ .Values.appconfig.image }}
         imagePullPolicy: IfNotPresent
         {{- if .Values.securityContext.enabled }}
         securityContext:
@@ -55,21 +78,25 @@ spec:
               - all
         {{- end }}
         command:
-          - "/bin/sh"
-          - "-c"
-          - ./start-script.sh
+          - /bin/sh
+          - -c
+          - ./start-script.sh;
         ports:
-          - containerPort: {{ .Values.image_selection.port }}
+          - containerPort: {{ .Values.appconfig.port }}
+        {{ if .Values.apps.volumeK8s }}
         volumeMounts:
         {{- range $key, $value := .Values.apps.volumeK8s }}
         - name: {{ $key }}
-          mountPath: /{{ $key }}
+          mountPath: {{ $.Values.appconfig.path }}
         {{- end }}
+        {{ end }}
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
+      {{ if .Values.apps.volumeK8s }}
       volumes:
       {{- range $key, $value := .Values.apps.volumeK8s }}
       - name: {{ $key }}
         persistentVolumeClaim:
           claimName: {{ $value.release }}
       {{- end }}
+      {{ end }}
