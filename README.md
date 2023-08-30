@@ -1,9 +1,20 @@
+<p align="center">
+   <a href="https://opensource.org/license/apache-2-0/">
+      <img alt="Licence: Apache 2.0" src="https://img.shields.io/badge/License-Apache_2.0-yellow.svg">
+   </a>
+   <a href="[https://opensource.org/licenses/MIT](https://github.com/psf/black)">
+      <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
+   </a>
+   <br />
+      <img alt="Pre-commit" src="https://github.com/ScilifelabDataCentre/stackn/actions/workflows/pre-commit.yaml/badge.svg?branch=develop">
+   <img alt="Build and test" src="https://github.com/ScilifelabDataCentre/stackn/actions/workflows/build-and-test-studio.yaml/badge.svg?branch=develop">
+</p>
 
 # SciLifeLab Serve
 
 SciLifeLab Serve ([https://serve.scilifelab.se](https://serve.scilifelab.se)) is a platform offering machine learning model serving, app hosting (Shiny, Streamlit, Dash, etc.), web-based integrated development environments, and other tools to life science researchers affiliated with a Swedish research institute. It is developed and operated by the [SciLifeLab Data Centre](https://github.com/ScilifelabDataCentre), part of [SciLifeLab](https://scilifelab.se/). See [this page for information about funders and mandate](https://serve.scilifelab.se/about/).
 
-This repository contains the code behind SciLifeLab Serve. It is  based on the open-source platform [Stackn](https://github.com/scaleoutsystems/stackn).
+This repository contains source code for SciLifeLab Serve. It is  based on the open-source platform [Stackn](https://github.com/scaleoutsystems/stackn).
 
 ## Reporting bugs and requesting features
 
