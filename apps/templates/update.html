@@ -92,19 +92,6 @@
                     </div>
                     {% endif %}
 
-
-                    {% if form.dep_volumes %}
-                    <div class="mb-3">
-                        <label class="form-label">Volumes</label>
-                        <select name="volumes" id="volumes" class="form-control" required>
-                            {% for volume in form.volumes %}
-                            <option value="{{ volume.pk }}">{{ volume.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% endif %}
-
-
                     {% if form.dep_apps %}
                     {% for app_name, appinstances in form.app_deps.items %}
                     <div class="mb-3">
