@@ -1,4 +1,4 @@
-name: Build and test studio
+name: Build and test Serve
 
 on:
   push:
@@ -59,21 +59,21 @@ jobs:
           sudo chmod -R g+rwx media
           ls -al
 
-      - name: Start studio
+      - name: Start serve
         working-directory: ${{env.working-directory}}
         id: setup
         run: |
           set -ex
-          echo "Deploying studio"
+          echo "Deploying serve"
           docker compose up -d --build
 
-      - name: Determine and set Studio URL
+      - name: Determine and set Serve URL
         working-directory: ${{env.working-directory}}
         run: |
           curl --version | head -n 1
           STUDIO_URL=`awk -F '= ' -v replace="'" '/STUDIO_URL/{gsub(replace, "", $NF); print $NF}' studio/settings.py`
           echo "STUDIO_URL=$STUDIO_URL" >> $GITHUB_ENV
-          echo "The Studio URL is $STUDIO_URL"
+          echo "The Serve URL is $STUDIO_URL"
           docker exec studio pwd
           docker exec studio ls -al
           docker exec studio whoami
@@ -88,13 +88,13 @@ jobs:
           interval: 5 # seconds
         continue-on-error: true
 
-      - name: Check if Studio is ready
+      - name: Check if Serve is ready
         working-directory: ${{env.working-directory}}
-        id: check_studio_up
+        id: check_serve_up
         run: |
           echo "Checking response from STUDIO_URL: ${{ env.STUDIO_URL }}"
           response=$(curl --write-out '%{http_code}' --silent --output /dev/null ${{ env.STUDIO_URL }})
-          if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "studio is ready"; fi
+          if [[ "$response" -ne 200 ]] ; then echo "status $response" && sleep 30; else echo "serve is ready"; fi
 
       - name: Run unit tests
         working-directory: ${{env.working-directory}}
@@ -156,7 +156,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: docker build studio
+      - name: docker build serve
         uses: docker/build-push-action@v2
         with:
           context: .
