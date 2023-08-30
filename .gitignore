@@ -1,8 +1,6 @@
 # About Studio (Django)
-charts/values/*
 certs
 cluster.conf
-media
 tmp
 
 # Byte-compiled / optimized / DLL files
