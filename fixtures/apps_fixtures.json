@@ -490,7 +490,7 @@
     "model": "apps.apps",
     "pk": 22,
     "fields": {
-      "name": "RStudio",
+    "name": "RStudio",
     "slug": "rstudio",
     "category": "develop",
     "table_field": {
