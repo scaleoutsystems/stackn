@@ -1,5 +1,5 @@
 namespace: default
-appname: standardapp
+appname: dashapp
 project:
   name: project
   slug: project-slug

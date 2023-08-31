@@ -8,10 +8,10 @@ spec:
   selector:
     matchLabels:
       release: {{ $.Release.Name }}
-      app: dashapp
+      app: {{ .Values.appname }}
       project: {{ $.Values.project.slug }}
       type: app
-      pod: dashapp
+      pod: {{ .Values.appname }}
   template:
     metadata:
       annotations:
@@ -20,12 +20,12 @@ spec:
         # prometheus.io/port: "8501"
       labels:
         release: {{ $.Release.Name }}
-        app: dashapp
+        app: {{ .Values.appname }}
         project: {{ $.Values.project.slug }}
         networking/allow-internet-egress: "true"
         networking/allow-egress-to-studio-web: "true"
         type: app
-        pod: dashapp
+        pod: {{ .Values.appname }}
     spec:
     {{ if .Values.app.gpu.enabled }}
       affinity:
@@ -41,7 +41,7 @@ spec:
         fsGroup: {{ .Values.securityContext.fsGroup }}
       {{- end }}
       containers:
-      - name: dashapp
+      - name: {{ .Values.appname }}
         image: {{ .Values.appconfig.image }}
         imagePullPolicy: IfNotPresent
         {{- if .Values.securityContext.enabled }}
