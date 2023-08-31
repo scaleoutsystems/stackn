@@ -40,29 +40,6 @@ spec:
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
       {{- end }}
-      {{ if .Values.apps.volumeK8s }}
-      initContainers:
-      - name: copy-to-pvc
-        image: {{ .Values.appconfig.image }}
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: {{ .Values.securityContext.runAsUser }}
-          runAsGroup: {{ .Values.securityContext.runAsGroup }}
-          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
-          privileged: {{ .Values.securityContext.privileged }}
-          capabilities:
-            drop:
-              - all
-        command:
-          - /bin/sh
-          - -c
-          - cp -r {{ $.Values.appconfig.path }}/* /tmp
-        volumeMounts:
-        {{- range $key, $value := .Values.apps.volumeK8s }}
-        - name: {{ $key }}
-          mountPath: /tmp
-      {{- end }} 
-      {{ end }}
       containers:
       - name: dashapp
         image: {{ .Values.appconfig.image }}
@@ -79,20 +56,5 @@ spec:
         {{- end }}
         ports:
           - containerPort: {{ .Values.service.targetport }}
-        {{ if .Values.apps.volumeK8s }}
-        volumeMounts:
-        {{- range $key, $value := .Values.apps.volumeK8s }}
-        - name: {{ $key }}
-          mountPath: {{ $.Values.appconfig.path }}
-        {{- end }}
-        {{ end }}
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
-      {{ if .Values.apps.volumeK8s }}
-      volumes:
-      {{- range $key, $value := .Values.apps.volumeK8s }}
-      - name: {{ $key }}
-        persistentVolumeClaim:
-          claimName: {{ $value.release }}
-      {{- end }}
-      {{ end }}

@@ -1,6 +1,6 @@
 {
-    "name": "Standard App",
-    "slug": "standardapp",
+    "name": "Dash App",
+    "slug": "dashapp",
     "category": "serve",
     "table_field": {
         "url": "https://{{ release }}.{{ global.domain }}"
@@ -27,16 +27,6 @@
             "type": "string",
             "default": "registry/repository/image:tag",
             "title": "Image"
-          },
-          "port": {
-            "type": "number",
-            "default": "8000",
-            "title": "Port"
-          },
-          "path": {
-            "type": "string",
-            "default": "",
-            "title": "Path to folder for persistent storage (leave blank if Persistent Volume is set to None)"
           }
         }
     }
