@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    run: {{ .Release.Name }}-dashapp
+    run: {{ .Release.Name }}-shinyapp
 spec:
   ports:
   - protocol: TCP
