@@ -430,14 +430,14 @@ class RevokeAccessToProjectView(View):
 
 @login_required
 def project_templates(request):
-    template = "project_templates.html"
+    template = "projects/project_templates.html"
     templates = ProjectTemplate.objects.filter(enabled=True).order_by("slug", "-revision").distinct("slug")
     media_url = django_settings.MEDIA_URL
     return render(request, template, locals())
 
 
 class CreateProjectView(View):
-    template_name = "project_create.html"
+    template_name = "projects/project_create.html"
 
     def get(self, request):
         pre_selected_template = request.GET.get("template")

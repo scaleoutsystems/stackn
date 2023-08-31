@@ -1,0 +1,25 @@
+{% load can_create_app %}
+
+{% can_create_app request.user project app as can_create %}
+
+{% if can_create %}
+
+    <a class="dropdown-item default"
+        href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">
+        {{ app.name }}
+    </a>
+
+{% else %}
+
+    <div class="dropdown-item border-bottom">
+        <a class="opacity-50 default">
+            {{app.name}}
+        </a>
+        <p class="m-0">
+            <small>
+                Max number of apps reached
+            </small>
+        </p>
+    </div>
+
+{% endif %}

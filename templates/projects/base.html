@@ -1,7 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block extra_sidebar_items %}
 
+% This on the bottom becomes content block
+% Then inside of this content block I have something like "content_content" block
+% The rest of the stuff goes under this content_content block in other templates
+
+{% block content %}
+
+<div class="d-flex overflow-hidden">
+
+    <div style="min-height: 1rem;" class="shadow-sm">
+
+        <div id="collapseSidebar" class="collapse collapse-horizontal show">
+            <div style="width: calc(200px + 3rem)">
+                <div class="d-flex flex-column p-4">
 
 <ul class="nav flex-column border-top my-3 py-4">
 
@@ -29,7 +41,7 @@
     </li>
 
     {% url 'apps:filtered' request.user project.slug 'compute' as notebooks_url %}
-    
+
     <li class="nav-item d-flex align-items-center">
         <i class="bi bi-cpu fs-4"></i>
         <a class="nav-link {% if request.path == notebooks_url %}active{% endif %}"
@@ -81,6 +93,22 @@
         <div class="border-top"></div>
     </li>
 </ul>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="d-flex flex-column min-vh-100 w-100 shadow">
+
+<main class="flex-grow-1">
+<div class="container-fluid p-0 p-lg-5">
+{% block projects_content %} {% endblock %}
+</div>
+</main>
+
+</div>
+</div>
 
 {% endblock %}
 
