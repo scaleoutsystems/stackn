@@ -582,6 +582,59 @@
         "logo": "rstudio-logo.png",
         "updated_on": "2023-08-31T09:30:00.000Z",
         "created_on": "2023-08-31T09:30:00.000Z"
-      }
+      
+  },
+  {
+    "model": "apps.apps",
+    "pk": 24,
+    "fields": {
+      "name": "Shiny App",
+      "slug": "shinyapp",
+      "category": "serve",
+      "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+      },
+      "description": "",
+      "priority": "400",
+      "settings": {
+        "publishable": "true",
+        "flavor": "one",
+        "logs": [
+          "serve"
+        ],
+        "default_values": {
+          "port": "80",
+          "targetport": "3838"
+        },
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "true"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        },
+        "appconfig": {
+          "meta": {
+            "title": "Configurations"
+          },
+          "image": {
+            "type": "string",
+            "default": "registry/repository/image:tag",
+            "title": "Image"
+          }
+        }
+      },
+      "chart": "apps/shiny/chart",
+      "logo": "shinyapp-logo.png",
+      "updated_on": "2023-08-25T19:45:03.927Z",
+      "created_on": "2023-08-25T21:34:37.815Z"
+    }
   }
 ]

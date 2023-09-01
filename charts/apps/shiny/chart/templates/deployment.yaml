@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      release: {{ $.Release.Name }}
+      app: {{ .Values.appname }}
+      project: {{ $.Values.project.slug }}
+      type: app
+      pod: {{ .Values.appname }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        # prometheus.io/port: "8501"
+      labels:
+        release: {{ $.Release.Name }}
+        app: {{ .Values.appname }}
+        project: {{ $.Values.project.slug }}
+        networking/allow-internet-egress: "true"
+        networking/allow-egress-to-studio-web: "true"
+        type: app
+        pod: {{ .Values.appname }}
+    spec:
+    {{ if .Values.app.gpu.enabled }}
+      affinity:
+        {{ .Values.app.affinity | toYaml | nindent 8 | trim }}
+    {{ end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      automountServiceAccountToken: false
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
+      containers:
+      - name: {{ .Values.appname }}
+        image: {{ .Values.appconfig.image }}
+        imagePullPolicy: IfNotPresent
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.securityContext.runAsGroup }}
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+          privileged: {{ .Values.securityContext.privileged }}
+          capabilities:
+            drop:
+              - all
+        {{- end }}
+        ports:
+          - containerPort: {{ .Values.service.targetport }}
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
