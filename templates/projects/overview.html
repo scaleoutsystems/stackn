@@ -1,34 +1,26 @@
-{% extends 'projects/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
+{% load can_create_app %}
 
 {% block title %}Project overview{% endblock %}
 
-{% block projects_content %}
+{% block content %}
 
 {% if project.status == "active" %}
 
-<h3 class="mb-3">Overview</h3>
+<h3 class="mb-3"><a href="{% url 'projects:index' %}">My projects</a> > {{ project.name }}</h3>
+<a href="{%  url 'projects:settings' request.user project.slug %}" class="btn btn-primary">
+    <i class="bi bi-gear me-1"></i>
+    Settings
+</a>
 
 <div class="row g-4">
     {% for objs in resources %}
-    <div class="col-12 col-xl-6 d-flex">
+    <div class="col-12 d-flex">
         <div class="card w-100 shadow border-0">
             <div class="card-header bg-white d-flex align-items-center justify-content-between py-3"
                 style="min-height: 5rem;">
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
-
-                <div class="dropdown show">
-                    <a href="#" class="btn shadow-sm" data-bs-toggle="dropdown" data-display="static"
-                        aria-expanded="false">
-                        New
-                    </a>
-
-                    <div class="dropdown-menu dropdown-menu-right">
-                        {% for app in objs.apps %}
-                        {% include './create_app_link.html' %}
-                        {% endfor %}
-                    </div>
-                </div>
             </div>
             {% if objs.objs %}
             <div class="no-footer">
@@ -122,10 +114,36 @@
                 <p>No instances.</p>
             </div>
             {% endif %}
+            <div class="h-100 p-4 d-flex">
+                {% for app in objs.apps %}
+                {% can_create_app request.user project app as can_create %}
+
+                {% if can_create %}
+
+                    <a href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">
+                        {{ app.name }}
+                    </a>
+
+                {% else %}
+
+                    <div class="dropdown-item border-bottom">
+                        <a class="opacity-50 default">
+                            {{app.name}}
+                        </a>
+                        <p class="m-0">
+                            <small>
+                                Max number of apps reached
+                            </small>
+                        </p>
+                    </div>
+
+                {% endif %}
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% endfor %}
-    <div class="col-12 col-xl-6 d-flex">
+    <div class="col-12 d-flex">
         <div class="card w-100 shadow border-0">
             <div class="bg-white py-3 card-header d-flex justify-content-between align-items-center"
                 style="min-height: 5rem;">
@@ -203,11 +221,13 @@
                     </tbody>
                 </table>
                 {% else %}
-
                 <div class="h-100 p-4 d-flex align-items-center justify-content-center">
                     <p>No models have been uploaded to this project yet.</p>
                 </div>
                 {% endif %}
+                <div class="h-100 p-4 d-flex">
+                 Placeholder for model options
+                </div>
             </div>
         </div>
     </div>
