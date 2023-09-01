@@ -17,16 +17,16 @@
 <div class="row g-4">
     {% for objs in resources %}
     <div class="col-12 d-flex">
-        <div class="card w-100 shadow border-0">
-            <div class="card-header bg-white d-flex align-items-center justify-content-between py-3"
-                style="min-height: 5rem;">
+        <div class="card w-100 border">
+            <div class="card-header border-bottom-0 bg-white d-flex align-items-center justify-content-between py-3"
+                style="min-height: 3rem;">
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
             </div>
             {% if objs.objs %}
-            <div class="no-footer">
+            <div class="no-footer mx-2">
 
                 <table id="datatables-dashboard-projects-{{ forloop.counter }}"
-                    class="table table-striped my-0 no-footer" role="grid">
+                    class="table table-striped my-0 no-footer table-bordered" role="grid">
                     <thead>
                         <tr>
                             <th class="d-none d-xxl-table-cell " tabindex="0" rowspan="1" colspan="1"></th>
@@ -110,50 +110,75 @@
                 </table>
             </div>
             {% else %}
-            <div class="h-100 p-4 d-flex align-items-center justify-content-center">
+            <div class="h-100 p-4 d-flex align-items-center justify-content-center border-bottom">
                 <p>No instances.</p>
             </div>
             {% endif %}
-            <div class="h-100 p-4 d-flex">
+                <div class="row g-2 py-2 mx-2">
                 {% for app in objs.apps %}
-                {% can_create_app request.user project app as can_create %}
+                    <div class="col-12 col-md-4 col-xl-3">
+                    <div class="card">
+                    <div class="card-body">
+                        <div class="row g-0 w-100 h-100">
+                            <div class="col-8 d-flex align-items-bottom flex-column">
+                                <div class="pt-2">
+                                    <h5>{{ app.name }}</h5>
+                                </div>
+                                <div class="align-items-end d-flex h-100">
+                                    <div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <p>{{ app.description }}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    {% can_create_app request.user project app as can_create %}
 
-                {% if can_create %}
+                                                    {% if can_create %}
+                                                    <a class="btn btn-primary"
+                                                        href="{% url 'apps:create' request.user project.slug app.slug  %}">Create</a>
+                                                    {% else %}
+                                                    <button class="btn btn-secondary" style="cursor: default;"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                                        data-bs-title="Max number of apps reached">
+                                                        Create
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
 
-                    <a href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">
-                        {{ app.name }}
-                    </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
 
-                {% else %}
-
-                    <div class="dropdown-item border-bottom">
-                        <a class="opacity-50 default">
-                            {{app.name}}
-                        </a>
-                        <p class="m-0">
-                            <small>
-                                Max number of apps reached
-                            </small>
-                        </p>
+                                {% static 'images/logos/apps/' as static_url %}
+                                <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end"
+                                    style="height:100px;" alt="App Logo">
+                            </div>
+                        </div>
                     </div>
-
-                {% endif %}
+                    </div>
+                    </div>
                 {% endfor %}
-            </div>
+                </div>
         </div>
     </div>
     {% endfor %}
     <div class="col-12 d-flex">
-        <div class="card w-100 shadow border-0">
+        <div class="card w-100 border">
             <div class="bg-white py-3 card-header d-flex justify-content-between align-items-center"
                 style="min-height: 5rem;">
 
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
-            <div class="no-footer">
+            <div class="no-footer mx-2">
 
-                <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer" role="grid">
+                <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer table-bordered" role="grid">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
@@ -283,7 +308,7 @@
             loop()
         }
     </script>
-
+</div>
     {% else %}
 
     <div class="row">
