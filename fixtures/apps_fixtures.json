@@ -551,5 +551,37 @@
       "updated_on": "2023-08-25T19:45:03.927Z",
       "created_on": "2023-08-25T21:34:37.815Z"
     }
+  }, 
+  {
+    "model": "apps.apps",
+    "pk": 22,
+    "fields": {
+    "name": "RStudio",
+    "slug": "rstudio",
+    "category": "develop",
+    "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+    },
+      "description": "",
+      "priority": "600",
+      "settings": {
+        "apps": {
+            "Persistent Volume":"many"
+        },
+        "default_values": {
+            "port": "80",
+            "targetport": "8787"
+          },
+        "permissions": {
+            "public": {"value":"false", "option": "false"},
+            "project": {"value":"true", "option": "true"},
+            "private": {"value":"false", "option": "true"}
+        }
+      },
+        "chart": "apps/rstudio/chart",
+        "logo": "rstudio-logo.png",
+        "updated_on": "2023-08-31T09:30:00.000Z",
+        "created_on": "2023-08-31T09:30:00.000Z"
+      }
   }
 ]
