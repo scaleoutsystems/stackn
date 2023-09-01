@@ -182,7 +182,7 @@ class AppSettingsView(View):
         project, appinstance = self.get_shared_data(project, ai_id)
 
         all_tags = AppInstance.tags.tag_model.objects.all()
-        template = "update.html"
+        template = "apps/update.html"
         show_permissions = True
         from_page = request.GET.get("from") if "from" in request.GET else "filtered"
         existing_app_name = appinstance.name
@@ -292,7 +292,7 @@ class CreateServeView(View):
         return [project, app, app_settings]
 
     def get(self, request, user, project, app_slug, version):
-        template = "create.html"
+        template = "apps/create.html"
         project, app, app_settings = self.get_shared_data(project, app_slug)
 
         user = request.user
@@ -323,7 +323,7 @@ class CreateView(View):
         return [project, app, app_settings]
 
     def get(self, request, user, project, app_slug, data=[], wait=False, call=False):
-        template = "create.html"
+        template = "apps/create.html"
         project, app, app_settings = self.get_shared_data(project, app_slug)
 
         if not call:

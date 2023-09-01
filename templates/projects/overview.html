@@ -8,7 +8,14 @@
 
 {% if project.status == "active" %}
 
-<h3 class="mb-3"><a href="{% url 'projects:index' %}">My projects</a> > {{ project.name }}</h3>
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">My projects</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+    </ol>
+</nav>
+
+<h3 class="mb-3">{{ project.name }}</h3>
 <a href="{%  url 'projects:settings' request.user project.slug %}" class="btn btn-primary">
     <i class="bi bi-gear me-1"></i>
     Settings

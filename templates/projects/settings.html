@@ -7,7 +7,15 @@
 {% load get_setting %}
 {% get_setting "ENABLE_PROJECT_EXTRA_SETTINGS" as enable_extra_settings %}
 
-<h3 class="h3 mb-3"><a href="{% url 'projects:index' %}">My projects</a> > <a href="{% url 'projects:details' request.user project.slug %}">{{ project.name }}</a> > Settings</h3>
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">My projects</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'projects:details' request.user project.slug %}">{{ project.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Settings</li>
+    </ol>
+</nav>
+
+<h3 class="h3 mb-3">Project settings</h3>
 
 <div class="row">
     <div class="col-md-3 col-xl-2">
