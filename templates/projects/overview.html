@@ -15,11 +15,25 @@
     </ol>
 </nav>
 
-<h3 class="mb-3">{{ project.name }}</h3>
-<a href="{%  url 'projects:settings' request.user project.slug %}" class="btn btn-primary">
-    <i class="bi bi-gear me-1"></i>
-    Settings
-</a>
+<div class="d-flex justify-content-between">
+    <h3>{{ project.name }}</h3>
+    <a href="{%  url 'projects:settings' request.user project.slug %}" class="btn btn-primary">
+        <i class="bi bi-gear me-1"></i>
+        Settings
+    </a>
+</div>
+
+<div class="row my-2">
+     <div class="col">
+        {% if project.description %}
+            <p class="card-text"><b>Description:</b> {{ project.description }}</p>
+            {% endif %}
+            <p><b>Project owner:</b> {{ project.owner.email }}</p>
+            {% if project.authorized.all %}
+            <p><b>Project members:</b> {% for user in project.authorized.all %}{{ user.email }}; {% endfor %}</p>
+            {% endif %}
+    </div>
+</div>
 
 <div class="row g-4">
     {% for objs in resources %}
