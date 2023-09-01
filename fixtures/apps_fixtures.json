@@ -485,5 +485,71 @@
       "updated_on": "2021-03-10T19:45:03.927Z",
       "created_on": "2021-02-19T21:34:37.815Z"
     }
+  },
+  {
+    "model": "apps.apps",
+    "pk": 21,
+    "fields": {
+      "name": "Standard App",
+      "slug": "standardapp",
+      "category": "serve",
+      "table_field": {
+        "url": "https://{{ release }}.{{ global.domain }}"
+      },
+      "description": "",
+      "priority": "400",
+      "settings": {
+        "apps": {
+          "Persistent Volume": "one"
+        },
+        "publishable": "true",
+        "flavor": "one",
+        "logs": [
+          "serve"
+        ],
+        "default_values": {
+          "port": "80",
+          "targetport": "8000"
+        },
+        "permissions": {
+          "public": {
+            "value": "false",
+            "option": "true"
+          },
+          "project": {
+            "value": "true",
+            "option": "true"
+          },
+          "private": {
+            "value": "false",
+            "option": "true"
+          }
+        },
+        "appconfig": {
+          "meta": {
+            "title": "Configurations"
+          },
+          "image": {
+            "type": "string",
+            "default": "registry/repository/image:tag",
+            "title": "Image"
+          },
+          "port": {
+            "type": "number",
+            "default": "8000",
+            "title": "Port"
+          },
+          "path": {
+            "type": "string",
+            "default": "",
+            "title": "Path to folder for persistent storage (leave blank if Persistent Volume is set to None)"
+          }
+        }
+      },
+      "chart": "apps/standard-app/chart",
+      "logo": "default-logo.png",
+      "updated_on": "2023-08-25T19:45:03.927Z",
+      "created_on": "2023-08-25T21:34:37.815Z"
+    }
   }
 ]
