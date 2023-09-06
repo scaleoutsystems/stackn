@@ -51,13 +51,7 @@
                 <h5 class="card-title">
                     {{project.name}}
                 </h5>
-                {% if project.description %}
-                <p class="card-text">{{ project.description|truncatechars:100 }}</p>
-                {% endif %}
                 <p><b>Project owner:</b> {{ project.owner.email }}</p>
-                {% if project.authorized.all %}
-                <p><b>Project members:</b> {% for user in project.authorized.all %}{{ user.email }}; {% endfor %}</p>
-                {% endif %}
                 <div class="row pt-3">
                     <div class="col d-flex justify-content-between">
                         {% if request.user.is_authenticated %}
