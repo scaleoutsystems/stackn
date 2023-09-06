@@ -31,8 +31,10 @@ describe("Test project contributor user functionality", () => {
         // Names of objects to create
         const project_name = "e2e-create-proj-test"
         const volume_name = "e2e-project-vol"
+	const project_title_name = project_name + " | SciLifeLab Serve"
 
         cy.visit("/projects/")
+        cy.get("title").should("have.text", "Projects | SciLifeLab Serve")
 
         // Click button for UI to create a new project
         cy.get("a").contains('New project').click()
@@ -53,6 +55,9 @@ describe("Test project contributor user functionality", () => {
                 //cy.url().should("include", "/project-e2e-blank");
                 cy.get('h3').should('contain', 'Overview')
             })
+	cy.get("title").should("have.text", project_title_name)
+	cy.get("a").contains("Create").first().click()
+	cy.get("title").should("have.text", project_title_name)
 
         // TODO: add additional asserts
 

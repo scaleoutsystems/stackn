@@ -24,6 +24,9 @@ describe("Test login", () => {
     it("can login an existing user through the UI when input is valid", () => {
 
         cy.visit("accounts/login/")
+	
+
+
 
         cy.get('input[name=username]').type(users.login.username)
         cy.get('input[name=password]').type(users.login.password)
@@ -40,5 +43,10 @@ describe("Test login", () => {
 
         cy.loginViaUI(users.login.username, users.login.password)
 
+    })
+
+    it("Should have proper title", () => {
+	cy.visit("accounts/login/")
+        cy.get("title").should("have.text", "Login | SciLifeLab Serve")
     })
 })
