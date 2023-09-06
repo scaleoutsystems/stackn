@@ -38,24 +38,24 @@
 <div class="row g-4">
     {% for objs in resources %}
     <div class="col-12 d-flex">
-        <div class="card w-100 border">
-            <div class="card-header border-bottom-0 bg-white d-flex align-items-center justify-content-between py-3"
+        <div class="card w-100 border-0 shadow">
+            <div class="card-header border-bottom-0 d-flex align-items-center justify-content-between py-3"
                 style="min-height: 3rem;">
                 <h5 class="card-title mb-0">{{ objs.title }}</h5>
             </div>
             {% if objs.objs %}
-            <div class="no-footer mx-2">
+            <div class="no-footer mx-4 my-4">
 
-                <table id="datatables-dashboard-projects-{{ forloop.counter }}"
-                    class="table table-striped my-0 no-footer table-bordered" role="grid">
+                <table id=""
+                    class="table table-hover my-0 no-footer table-bordered" role="grid">
                     <thead>
                         <tr>
                             <th class="d-none d-xxl-table-cell " tabindex="0" rowspan="1" colspan="1"></th>
-                            <th tabindex="0" rowspan="1" colspan="1">App</th>
+                            <th tabindex="0" rowspan="1" colspan="1">Type</th>
                             <th tabindex="0" rowspan="1" colspan="1">Name</th>
                             <th class="d-none d-xxl-table-cell " tabindex="0" rowspan="1" colspan="1">Created</th>
                             <th class="" tabindex="0" rowspan="1" colspan="1">Status</th>
-                            <th class="d-none d-md-table-cell " tabindex="0" rowspan="1" colspan="1">Actions</th>
+                            <th tabindex="0" rowspan="1" colspan="1">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,7 +65,7 @@
                             {% static 'images/logos/apps/' as static_url %}
                             <td><img src="{{static_url}}{{obj.app.logo|default:'default-logo.png'}}" class="img-fluid "
                                     alt="App Logo" style="max-height:25px;"></td>
-                            <td class="d-none d-xxl-table-cell">{{ obj.app.name }}</td>
+                            <td class="d-none d-xxl-table-cell ">{{ obj.app.name }}</td>
                             {% if obj.table_field.url %}
                             <td class="sorting_1">
                                 <a href="{{ obj.table_field.url }}" target="_blank">
@@ -137,8 +137,8 @@
             {% endif %}
                 <div class="row g-2 py-2 mx-2">
                 {% for app in objs.apps %}
-                    <div class="col-12 col-md-4 col-xl-3">
-                    <div class="card">
+                    <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+                    <div class="card h-100">
                     <div class="card-body">
                         <div class="row g-0 w-100 h-100">
                             <div class="col-8 d-flex align-items-bottom flex-column">
@@ -152,16 +152,15 @@
                                                 <p>{{ app.description }}</p>
                                             </div>
                                         </div>
-                                        <div>
                                             <div class="row">
                                                 <div class="col">
                                                     {% can_create_app request.user project app as can_create %}
 
                                                     {% if can_create %}
-                                                    <a class="btn btn-primary"
+                                                    <a class="btn btn-primary btn-sm"
                                                         href="{% url 'apps:create' request.user project.slug app.slug  %}?from=overview">Create</a>
                                                     {% else %}
-                                                    <button class="btn btn-secondary" style="cursor: default;"
+                                                    <button class="btn btn-secondary btn-sm" style="cursor: default;"
                                                         data-bs-toggle="tooltip" data-bs-placement="top"
                                                         data-bs-title="Max number of apps reached">
                                                         Create
@@ -169,16 +168,13 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
-                                        </div>
-
                                     </div>
                                 </div>
                             </div>
                             <div class="col-4">
-
                                 {% static 'images/logos/apps/' as static_url %}
-                                <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end"
-                                    style="height:100px;" alt="App Logo">
+                                <img src="{{static_url}}{{app.logo|default:'default-logo.png'}}" class="img-fluid float-end h-75"
+                                    alt="App Logo">
                             </div>
                         </div>
                     </div>
@@ -190,16 +186,16 @@
     </div>
     {% endfor %}
     <div class="col-12 d-flex">
-        <div class="card w-100 border">
-            <div class="bg-white py-3 card-header d-flex justify-content-between align-items-center"
-                style="min-height: 5rem;">
 
+        <div class="card w-100 border-0 shadow">
+            <div class="card-header border-bottom-0 d-flex align-items-center justify-content-between py-3"
+                style="min-height: 3rem;">
                 <h5 class="card-title mb-0">Models</h5>
             </div>
             {% if models %}
             <div class="no-footer mx-2">
 
-                <table id="datatables-dashboard-projects" class="table table-striped my-0 no-footer table-bordered" role="grid">
+                <table id="datatables-dashboard-projects" class="table table-hover my-0 no-footer table-bordered" role="grid">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
