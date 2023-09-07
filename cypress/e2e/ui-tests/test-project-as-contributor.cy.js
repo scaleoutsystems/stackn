@@ -51,7 +51,12 @@ describe("Test project contributor user functionality", () => {
             .then((href) => {
                 cy.log(href)
                 //cy.url().should("include", "/project-e2e-blank");
-                cy.get('h3').should('contain', 'Overview')
+                cy.get('h3').should('contain', project_name)
+
+                // Check that project settings are available
+                cy.get('[data-cy="settings"]').click()
+                cy.url().should("include", "settings")
+                cy.get('h3').should('contain', 'Project settings')
             })
 
         // TODO: add additional asserts

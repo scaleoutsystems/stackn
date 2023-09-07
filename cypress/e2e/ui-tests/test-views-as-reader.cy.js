@@ -38,7 +38,7 @@ describe("Test views as authenticated user", () => {
 
     cy.visit("/projects/")
 
-    cy.get('h3').should('have.text', 'Projects')
+    cy.get('h3').should('have.text', 'My projects')
   })
 
 })
