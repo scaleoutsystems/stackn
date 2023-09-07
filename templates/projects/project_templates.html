@@ -2,9 +2,17 @@
 
 {% block content %}
 
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">My projects</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Create a new project</li>
+    </ol>
+</nav>
+
 <div class="row">
     <div class="col">
         <h3>New project</h3>
+        <p>Choose a template for your new project.</p>
     </div>
 </div>
 

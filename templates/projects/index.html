@@ -10,12 +10,12 @@
     <h3>My projects</h3>
     {% if request.user.is_authenticated %}
     {% if user_can_create %}
-    <a href="{% url 'projects:project_templates' %}" class="btn btn-primary">
+    <a href="{% url 'projects:project_templates' %}" class="btn btn-primary ms-2">
         <i class="bi bi-plus-lg me-1"></i>
         New project
     </a>
     {% else %}
-    <button class="btn btn-secondary" style="cursor: default;" data-bs-toggle="tooltip" data-bs-placement="top"
+    <button class="btn btn-secondary ms-2" style="cursor: default;" data-bs-toggle="tooltip" data-bs-placement="top"
         data-bs-title="Max number of projects reached">
         <i class="bi bi-plus-lg me-1"></i>
         New project
