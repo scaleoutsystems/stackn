@@ -430,14 +430,14 @@ class RevokeAccessToProjectView(View):
 
 @login_required
 def project_templates(request):
-    template = "project_templates.html"
+    template = "projects/project_templates.html"
     templates = ProjectTemplate.objects.filter(enabled=True).order_by("slug", "-revision").distinct("slug")
     media_url = django_settings.MEDIA_URL
     return render(request, template, locals())
 
 
 class CreateProjectView(View):
-    template_name = "project_create.html"
+    template_name = "projects/project_create.html"
 
     def get(self, request):
         pre_selected_template = request.GET.get("template")
@@ -523,7 +523,8 @@ class DetailsView(View):
         if request.user.is_authenticated:
             project = Project.objects.get(slug=project_slug)
             categories = AppCategories.objects.all().order_by("-priority")
-            models = Model.objects.filter(project=project).order_by("-uploaded_at")[:10]
+            # models = Model.objects.filter(project=project).order_by("-uploaded_at")[:10]
+            models = Model.objects.filter(project=project).order_by("-uploaded_at")
 
             def filter_func(slug):
                 return Q(app__category__slug=slug)
@@ -533,7 +534,7 @@ class DetailsView(View):
                     user=request.user,
                     project=project,
                     filter_func=filter_func(slug=category.slug),
-                    limit=5,
+                    # limit=5,
                 )
 
                 app_ids += [obj.id for obj in app_instances_of_category]

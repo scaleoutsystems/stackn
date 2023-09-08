@@ -32,7 +32,7 @@ describe("Test login", () => {
             .then((href) => {
                 cy.log(href)
                 cy.url().should("include", "projects")
-                cy.get('h3').should('contain', 'Projects')
+                cy.get('h3').should('contain', 'My projects')
             })
     })
 

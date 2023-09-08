@@ -34,9 +34,10 @@
                 <li class="nav-item">
                 <div class="btn-group">
                     <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle"></i> {{request.user}}
+                        <i class="bi bi-person-circle"></i> {{request.user.email}}
                     </button>
                     <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'projects:index' %}"><i class="bi bi-folder me-1"></i>My projects</a></li>
                       <li><a class="dropdown-item" href="{% url 'password_change' %}"><i class="bi bi-key me-1"></i>Change Password</a></li>
                       <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-1"></i>Sign out</a></li>
                     </ul>

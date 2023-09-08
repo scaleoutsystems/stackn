@@ -18,35 +18,9 @@
 
     {% include 'common/navbar.html' %}
 
-    <div class="d-flex overflow-hidden">
-
-        <div style="min-height: 1rem;" class="shadow-sm">
-
-            <div id="collapseSidebar" class="collapse collapse-horizontal show">
-                <div style="width: calc(200px + 3rem)">
-                    <div class="d-flex flex-column p-4">
-                        <a href="/">
-                            <img src="{% static 'images/scaleout_black.png' %}" alt="Studio Logo" width="200">
-                        </a>
-
-                        {% include 'common/sidebar_items.html' %}
-
-                        {% block extra_sidebar_items %} {% endblock %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex flex-column min-vh-100 w-100 shadow">
-
-            <main class="flex-grow-1">
-                <div class="container-fluid p-0 p-lg-5">
-                    {% block content %}{% endblock %}
-                </div>
-            </main>
-
-        </div>
-    </div>
+    <main class="container mb-3">
+    {% block content %}{% endblock %}
+    </main>
 
     <div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel"
         aria-hidden="true">
@@ -100,8 +74,8 @@
 
                     const { target } = e
 
-                    const title = target.getAttribute("data-title") ?? "Do You Really Want to Delete This?"
-                    const text = target.getAttribute("data-text") ?? "Observe that this app might be a dependecy in other app instances!"
+                    const title = target.getAttribute("data-title") ?? "Do you really want to delete this?"
+                    const text = target.getAttribute("data-text") ?? "Note that this is an irreversible action, it is not possible to recover a deleted item!"
                     const icon = target.getAttribute("data-icon") ?? "bi-exclamation-triangle"
 
                     const href = target.getAttribute("href")
@@ -142,21 +116,8 @@
 
     {% block extra_scripts %} {% endblock %}
 
-    <!-- Visitor analytics -->
-    <script>
-        var _paq = window._paq = window._paq || [];
-        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-        _paq.push(["disableCookies"]);
-        _paq.push(['trackPageView']);
-        _paq.push(['enableLinkTracking']);
-        (function () {
-            var u = "//matomo.dckube.scilifelab.se/";
-            _paq.push(['setTrackerUrl', u + 'matomo.php']);
-            _paq.push(['setSiteId', '5']);
-            var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-            g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
-        })();
-    </script>
+    {% include 'common/analytics.html' %}
+
 </body>
 
 </html>

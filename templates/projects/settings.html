@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+
+{% block title %}Project settings{% endblock %}
+
+{% block content %}
+
+{% load get_setting %}
+{% get_setting "ENABLE_PROJECT_EXTRA_SETTINGS" as enable_extra_settings %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'projects:index' %}">My projects</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'projects:details' request.user project.slug %}">{{ project.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Settings</li>
+    </ol>
+</nav>
+
+<h3 class="h3 mb-3">Project settings</h3>
+
+<div class="row">
+    <div class="col-md-3 col-xl-2">
+
+        <div class="card shadow border-0">
+            <div class="list-group list-group-flush" role="tablist">
+
+                <a class="default list-group-item list-group-item-action active p-3" data-bs-toggle="list"
+                    href="#projdesc" role="tab">
+                    Description
+                </a>
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#access"
+                    role="tab">
+                    Access
+                </a>
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#s3storage"
+                    role="tab">
+                    S3 storage
+                </a>
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#mlflow"
+                    role="tab">
+                    MLFlow
+                </a>
+                {% if enable_extra_settings %}
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#flavors"
+                    role="tab">
+                    Flavors
+                </a>
+                <a class="default list-group-item list-group-item-action p-3" data-bs-toggle="list" href="#environments"
+                    role="tab">
+                    Environments
+                </a>
+                {% endif %}
+
+                {% if request.user.pk == project.owner.pk %}
+
+                <a class="default list-group-item list-group-item-action p-3 text-red" data-bs-toggle="list"
+                    href="#delete" role="tab">
+                    Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9 col-xl-10 mt-4 mt-md-0">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="projdesc" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Change project description</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form action="{% url 'projects:change_description' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" readonly
+                                    placeholder="{{ project.name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" rows="5" id="description" name="description"
+                                    contenteditable="true">{{ project.description }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Save</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="access" role="tabpanel">
+
+                {% include './grant_revoke_access.html' %}
+
+            </div>
+            <div class="tab-pane fade" id="publish" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Publish project on GitHub</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        {% if not project.clone_url %}
+                        <form action="{% url 'projects:publish_project' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="id_user_name" class="form-label">GitHub username</label>
+                                <input type="text" class="form-control" id="id_user_name" name="user_name"
+                                    maxlength="256" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_user_password" class="form-label">GitHub password</label>
+                                <input type="password" class="form-control" id="id_user_password" name="user_password"
+                                    maxlength="256" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Publish</button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-success alert-outline alert-dismissible" role="alert">
+                            <div class="alert-icon">
+                                <i class="far fa-fw fa-bell"></i>
+                            </div>
+                            <div class="alert-message">
+                                <strong>This project is already on GitHub!</strong> Clone URL: {{ project.clone_url }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if enable_extra_settings %}
+            <div class="tab-pane fade" id="flavors" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Flavors</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{% url 'projects:delete_flavor' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <select type="text" class="form-control" id="flavor_pk" name="flavor_pk" maxlength="256"
+                                    required>
+                                    {% for flavor in flavors %}
+                                    <option value="{{ flavor.pk }}">{{ flavor.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-square btn-danger">Delete</button>
+                        </form>
+                        <div class="mt-2">
+                            or create new flavor:
+                            <form action="{% url 'projects:create_flavor' request.user project.slug %}" method="post"
+                                class="mt-2">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="flavor_name">Name</label>
+                                    <input type="text" name="flavor_name" id="flavor_name" value=""
+                                        class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cpu_req">CPU requests</label>
+                                    <input type="text" name="cpu_req" id="cpu_req" value="200m" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mem_req">Memory requests</label>
+                                    <input type="text" name="mem_req" id="mem_req" value="1Gi" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="gpu_req">GPU requests</label>
+                                    <input type="text" name="gpu_req" id="gpu_req" value="0" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cpu_lim">CPU limits</label>
+                                    <input type="text" name="cpu_lim" id="cpu_lim" value="800m" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mem_lim">Memory limits</label>
+                                    <input type="text" name="mem_lim" id="mem_lim" value="4Gi" class="form-control" />
+                                </div>
+                                <button type="submit" class="btn btn-square btn-primary">Create</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="environments" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Environments</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{% url 'projects:delete_environment' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <select type="text" class="form-control" id="environment_pk" name="environment_pk"
+                                    maxlength="256" required>
+                                    {% for environment in environments %}
+                                    <option value="{{ environment.pk }}">{{ environment.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-square btn-danger">Delete</button>
+                        </form>
+                        <div class="mt-2">
+                            or create new Environment:
+                            <form action="{% url 'projects:create_environment' request.user project.slug %}"
+                                method="post" class="mt-2">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="environment_name">Name</label>
+                                    <input type="text" name="environment_name" id="environment_name" value=""
+                                        class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_name">Registry</label>
+                                    <select type="text" class="form-control" id="environment_registry"
+                                        name="environment_registry" maxlength="256">
+                                        {% for registry in registries %}
+                                        <option value="{{ registry.pk }}">{{ registry.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_name">Repository</label>
+                                    <input type="text" name="environment_repository" id="environment_repository"
+                                        value="" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_image">Image</label>
+                                    <input type="text" name="environment_image" id="environment_image" value=""
+                                        class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="environment_app">Applies to app:</label>
+                                    <select type="text" class="form-control" id="environment_app" name="environment_app"
+                                        maxlength="256" required>
+                                        {% for app in apps %}
+                                        <option value="{{ app.pk }}">{{ app.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="btn btn-square btn-primary">Create</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="tab-pane fade" id="s3storage" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Default S3 storage</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{% url 'projects:set_s3storage' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="id_user_name" class="form-label">S3 instance</label>
+                                <select type="text" class="form-control" id="id_s3storage" name="s3storage"
+                                    maxlength="256" required>
+                                    <option value="blank" selected>--------</option>
+                                    {% for s3 in s3instances %}
+                                    {% if s3 == project.s3storage %}
+                                    <option value="{{ s3.pk }}" selected>{{ s3.name }}</option>
+                                    {% else %}
+                                    <option value="{{ s3.pk }}">{{ s3.name }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Set</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="mlflow" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0">Default MLFlow Server</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form action="{% url 'projects:set_mlflow' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="id_user_name" class="form-label">MLFlow Servers</label>
+                                <select type="text" class="form-control" id="id_mlflow" name="mlflow" maxlength="256"
+                                    required>
+                                    {% for mlflow in mlflows %}
+                                    <option value="blank" selected>--------</option>
+                                    {% if mlflow == project.mlflow %}
+                                    <option value="{{ mlflow.pk }}" selected>{{ mlflow.name }}</option>
+                                    {% else %}
+                                    <option value="{{ mlflow.pk }}">{{ mlflow.name }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-square btn-primary">Set</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="delete" role="tabpanel">
+                <div class="card shadow border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0">Delete project</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="alert alert-danger alert-outline alert-dismissible" role="alert">
+                            <i class="far fa-fw fa-bell"></i>
+                            <strong>Please be certain!</strong> Once you delete this project, there is no going
+                            back.
+                        </div>
+                        <form class="row row-cols-md-auto align-items-center"
+                            action="{% url 'projects:delete' request.user project.slug %}" method="post">
+                            {% csrf_token %}
+
+                            <div class="col-12">
+                                <label for="id_delete_button">Delete anyway?</label>
+                            </div>
+                            <div class="col-12">
+                                <button type="button" class="btn btn-danger btn-square" id="id_delete_button"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    Delete
+                                </button>
+                                <div class="modal fade" id="deleteModal" tabindex="-1" style="display: none;"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Delete project</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body m-3">
+                                                <p class="mb-0">Are you sure that you want to delete project with name
+                                                    {{ project.name }}?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-square btn-secondary"
+                                                    data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-square btn-danger">Confirm</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const template = urlParams.get("template")
+
+    if (!!template) {
+
+        const element = document.getElementById(template)
+        element.classList.add("active")
+        element.classList.add("show")
+
+        const linkElement = document.querySelector(`[href="#${template}"]`)
+
+        linkElement.classList.add("active")
+
+        const defaultId = "projdesc"
+
+        const defaultElement = document.getElementById(defaultId)
+        defaultElement.classList.remove("active")
+        defaultElement.classList.remove("show")
+
+        const defaultLinkElement = document.querySelector(`[href="#${defaultId}"]`)
+
+        defaultLinkElement.classList.remove("active")
+    }
+
+</script>
+{% endblock %}

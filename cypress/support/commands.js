@@ -32,7 +32,7 @@ Cypress.Commands.add('loginViaUI', (username, password) => {
         cy.get('input[name=username]').type(username)
         cy.get('input[name=password]').type(`${password}{enter}`, { log: false })
         cy.url().should('include', '/projects')
-        cy.get('h3').should('contain', 'Projects')
+        cy.get('h3').should('contain', 'My projects')
       },
       {
         validate: () => {

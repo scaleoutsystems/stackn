@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}My projects{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between">
+    <h3>My projects</h3>
+    {% if request.user.is_authenticated %}
+    {% if user_can_create %}
+    <a href="{% url 'projects:project_templates' %}" class="btn btn-primary ms-2">
+        <i class="bi bi-plus-lg me-1"></i>
+        New project
+    </a>
+    {% else %}
+    <button class="btn btn-secondary ms-2" style="cursor: default;" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-title="Max number of projects reached">
+        <i class="bi bi-plus-lg me-1"></i>
+        New project
+    </button>
+    {% endif %}
+    {% endif %}
+</div>
+
+<div class="row pt-3 g-4">
+
+    {% if request.user.is_authenticated %}
+    {% if not projects %}
+    <p>You don't have any projects yet.</p>
+    {% else %}
+    {% for project in projects %}
+
+    <div class="col-12 col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow h-100">
+
+            <div id="project-pattern-element-{{project.slug}}" class="{{project.pattern}} rounded-top" style="min-height: 6rem;">
+
+                <div class="row">
+                    <div class="col d-flex justify-content-end">
+
+                        {% include './pattern_selector.html' with project=project %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+                <h5 class="card-title">
+                    {{project.name}}
+                </h5>
+                <p><b>Project owner:</b> {{ project.owner.email }}</p>
+                <div class="row pt-3">
+                    <div class="col d-flex justify-content-between">
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'projects:details' request.user project.slug %}"
+                            class="btn btn-primary">Open</a>
+
+                        {% if project.owner == request.user %}
+                        <a class="confirm-delete btn btn-danger"
+                            href="{% url 'projects:delete' request.user project.slug %}">
+                            Delete
+                        </a>
+                        {% elif request.user.is_superuser %}
+                        <a class="confirm-delete btn btn-danger" href="{% url 'projects:delete' request.user project.slug %}">
+                            (Admin) Delete
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    {% endfor %}
+    {% endif %}
+    {% else %}
+    <p>You need to be logged in to be able to manage your projects.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+<div class="card shadow border-0">
+
+    <div class="card-header bg-light py-3">
+        <h5 class="card-title mb-0">Grant or revoke access</h5>
+    </div>
+    <div class="card-body">
+
+        <p>For granting access to this project,
+            enter username of user below. User will be added to project if exists.</p>
+
+        <form autocomplete="off" action="{% url 'projects:grant_access' request.user project.slug %}" method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label" for="id_selected_user">Username</label>
+                <input type="text" placeholder="Username" name="selected_user" id="id_selected_user"
+                    class="form-control">
+            </div>
+            <button type="submit" class="btn btn-square btn-primary">Grant access</button>
+        </form>
+
+        {% if project.authorized.all %}
+
+        <div class="row pt-3">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for user in project.authorized.all %}
+                        <tr id="revokeAccessRow-{{user.pk}}">
+                            <td scope="row">{{ user.username }}</td>
+
+                            {% if project.owner.id == request.user.id %}
+                                <td class="d-flex justify-content-center">
+                                    <button type="button" class="btn-close" aria-label="Close" data-bs-toggle="modal"
+                                        data-bs-target="#revokeAccessModal-{{user.pk}}"></button>
+                                </td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="revokeAccessModal-{{user.pk}}" tabindex="-1"
+                            aria-labelledby="revokeAccessModal-{{user.pk}}-Label" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="revokeAccessModal-{{user.pk}}-Label">Revoke
+                                            access for user {{user.username}}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger confirm-revoke-access"
+                                            data-bs-dismiss="modal" data-username="{{user.username}}" data-pk="{{user.pk}}">
+                                            Revoke
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+
+            const url = "{% url 'projects:revoke_access' request.user project.slug %}"
+            const csrftoken = getCookie('csrftoken');
+            const elements = document.querySelectorAll(".confirm-revoke-access")
+
+            elements.forEach(element => {
+
+                element.addEventListener("click", async evt => {
+
+                    const { target } = evt
+
+                    const username = target.getAttribute("data-username")
+                    const pk = target.getAttribute("data-pk")
+
+                    const body = new FormData()
+                    body.append("selected_user", username)
+
+                    try {
+                        const response = await fetch(url, {
+                            method: "POST",
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRFToken': csrftoken,
+                            },
+                            body
+                        })
+
+                        const rowElement = document.getElementById(`revokeAccessRow-${pk}`)
+                        rowElement.remove()
+
+                    } catch (error) {
+                        console.log({ error });
+                    }
+
+
+                })
+            })
+        </script>
+
+
+        {% endif %}
+
+    </div>
+</div>
