@@ -1,22 +1,22 @@
-{% comment %} 
+{% comment %}
 Autocomplete
 
 params:
     - str_list: comma seperated string values for autocomplete
-    - id_suffix: use to ensure unique ids on page (if multiple autocompletes are included) 
+    - id_suffix: use to ensure unique ids on page (if multiple autocompletes are included)
     - name: name of input
     - required: if True input will be required
 {% endcomment %}
 
 <div class="position-relative">
-    <input 
+    <input
     {% if required %}
     required
     {% endif %}
-    autocomplete="off" 
-    id="autocomplete-input-{{id_suffix}}" 
-    name="{{name}}" 
-    class="form-control" 
+    autocomplete="off"
+    id="autocomplete-input-{{id_suffix}}"
+    name="{{name}}"
+    class="form-control"
     type="text"
     >
     <ul id="autocomplete-ul-{{id_suffix}}" class="position-absolute bg-white shadow rounded d-none m-0 p-0 w-100 list-group" style="z-index: 300;"></ul>
@@ -50,7 +50,7 @@ params:
                     const value = target.getAttribute("data-val")
                     inputElement.value = value
                     ulElement.classList.add("d-none")
-                    
+
                     e.preventDefault()
                 })
 

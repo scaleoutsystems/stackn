@@ -64,7 +64,4 @@ def test_privacy_view():
 
     # Check status code
     assert response.status_code == 200
-    assert "<title>Privacy | SciLifeLab Serve</title>" in response.content.decode()
-
-
-
+    assert "<title>Privacy policy | SciLifeLab Serve</title>" in response.content.decode()

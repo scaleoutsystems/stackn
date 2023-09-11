@@ -41,5 +41,4 @@ class SignUpView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        raise Exception(request)
         return super().get(request, *args, **kwargs)

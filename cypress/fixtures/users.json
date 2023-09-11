@@ -1,13 +1,11 @@
 {
-    "login": {
-        "username": "e2e_tests_login_tester",
-        "password": "test12345"
-    },
-
-    "contributor": {
-        "username": "e2e_tests_contributor_tester",
-        "password": "test12345",
-        "email": "no-reply-contributor@scilifelab.se"
-    }
-
+  "contributor": {
+    "email": "no-reply-contributor@scilifelab.se",
+    "password": "test12345",
+    "username": "e2e_tests_contributor_tester"
+  },
+  "login": {
+    "password": "test12345",
+    "username": "e2e_tests_login_tester"
+  }
 }

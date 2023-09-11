@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{%block title %}{{ project.name }}{% endblock %}
 {% block extra_sidebar_items %}
 
 
@@ -29,7 +30,7 @@
     </li>
 
     {% url 'apps:filtered' request.user project.slug 'compute' as notebooks_url %}
-    
+
     <li class="nav-item d-flex align-items-center">
         <i class="bi bi-cpu fs-4"></i>
         <a class="nav-link {% if request.path == notebooks_url %}active{% endif %}"

@@ -24,7 +24,7 @@ describe("Test login", () => {
     it("can login an existing user through the UI when input is valid", () => {
 
         cy.visit("accounts/login/")
-	
+
 
 
 

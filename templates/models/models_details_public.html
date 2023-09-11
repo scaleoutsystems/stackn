@@ -1,12 +1,14 @@
+<!-- It seems like this template is being used -->
 {% extends base_template %}
 
 {% load custom_tags %}
 
+{% block title %}Model {{ model.name }} Details{% endblock %}
 {% block content %}
 
 <div class="row">
     <div class="col">
-      
+
         <h3>
             Model Details
         </h3>
@@ -56,23 +58,23 @@
                                 <form method="POST" action="{% if private  %}{% url 'models:add_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:add_tag' published_model.id model.id %}{% endif %}">
 
                                     {% csrf_token %}
-    
+
                                     <div class="row">
                                         <div class="col-12 col-md-6">
-    
+
                                             {% include 'common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" required=True %}
                                         </div>
                                         <div class="col-12 col-md-6 pt-3 pt-md-0">
-    
+
                                             <div class="row">
                                                 <div class="col">
                                                     <input type="submit" class="btn btn-primary" value="Add">
                                                 </div>
                                             </div>
                                         </div>
-    
+
                                     </div>
-    
+
                                 </form>
                             </div>
                         </div>
@@ -83,18 +85,18 @@
                             </div>
                             <div class="col-12 col-lg-8 d-flex">
                                 {% with model.tags|split:"," as tags  %}
-                                
+
                                 {% for tag in tags %}
-                                    
+
                                     <form method="post" action="{% if private  %}{% url 'models:remove_tag_private' request.user project.slug model.id %}{% else %}{% url 'models:remove_tag' published_model.id model.id %}{% endif %}">
-                    
+
                                         {% csrf_token %}
 
                                         <div class="align-items-center d-flex m-1 p-2 rounded shadow">
                                             {{tag}} <button type="submit" class="btn-close ms-1" name="tag" value="{{tag}}" aria-label="Close"></button>
                                         </div>
                                     </form>
-                                    
+
                                 {% endfor %}
 
                                 {% endwith %}
@@ -104,7 +106,7 @@
                 </div>
 
                 {% endif%}
-              
+
             </div>
         </div>
 

@@ -1,7 +1,7 @@
 {% load static %}
 <table id="{{ cat_obj.slug }}" class="table">
   <thead>
-      <tr> 
+      <tr>
           <th></th>
           <th>App</th>
           <th>Name</th>
@@ -28,7 +28,7 @@
         <span class="badge bg-secondary">
         {{ appinstance.status.latest.status_type }}
         </span>
-        
+
         {% if category == "serve" %}
         <span class="badge bg-info">
               {% if appinstance.access != "public" %}
@@ -59,21 +59,21 @@
                       Settings
                     </a>
                   {% else %}
-                    
+
                     <a class="dropdown-item default disabled">
                       <i class="bi bi-sliders2-vertical me-1"></i>
                       Settings
                     </a>
                   {% endif %}
-                    
+
                   {% if appinstance.app.user_can_delete %}
-                  
+
                     <a class="dropdown-item default bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
                       <i class="bi bi-trash me-1"></i>
                       Delete
                     </a>
                   {% else %}
-                    
+
                     <a class="dropdown-item default bg-danger text-white confirm-delete disabled">
                       <i class="bi bi-trash me-1"></i>
                       Delete

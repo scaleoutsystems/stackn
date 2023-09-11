@@ -22,7 +22,7 @@ describe("Test sign up", () => {
     })
 
     it("should create new user account with valid form input", () => {
- 
+
         cy.visit("/signup/");
         cy.get("title").should("have.text", "Sign Up | SciLifeLab Serve")
 

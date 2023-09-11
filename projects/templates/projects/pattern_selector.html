@@ -8,7 +8,7 @@ params:
 {% endcomment %}
 
 {% if request.user.id == project.owner.id %}
-    
+
 <button class="btn rounded-100 bg-white shadow-sm opacity-75 m-1 hover-opacity-100" data-bs-toggle="modal"
     data-bs-target="#modal-project-{{project.slug}}">
     <i class="bi bi-pen"></i>

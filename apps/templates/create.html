@@ -1,4 +1,7 @@
 {% extends 'projects/base.html' %}
+
+{% block title %}Create {{ app.name }}{% endblock %}
+
 {% load static %}
 {% load custom_tags %}
 
@@ -135,7 +138,7 @@
                         <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"
                             class="form-control">
                         {% endif %}
-                        
+
                         {% if subval.type == "password" %}
                         <label class="form-label">{{ subval.title }}</label>
                         <input type="text" id="{{ subkey }}" name="{{ key }}.{{ subkey }}" value="{{ subval.default }}"

@@ -31,7 +31,6 @@ def get_status_defs():
 # TODO: Is this view used?
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def index(request, user, project):
-    print("hello")
     category = "store"
     template = "index_apps.html"
 
@@ -114,12 +113,19 @@ class FilteredView(View):
             Apps.objects.filter(category=category, user_can_create=True).order_by("slug", "-revision").distinct("slug")
         )
 
+        def category2title(cat):
+            if cat == "compute":
+                return "Notebooks"
+            else:
+                return cat.capitalize()
+
         context = {
             "apps": apps_of_category,
             "appinstances": app_instances_of_category,
             "app_ids": app_ids,
             "project": project,
             "category": category,
+            "title": category2title(category),
         }
 
         return render(

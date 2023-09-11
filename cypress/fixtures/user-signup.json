@@ -1,5 +1,5 @@
 {
-    "username_prefix": "e2e_tests_signup_",
-    "password": "test12345",
-    "email": "no-reply-signup@scilifelab.se"
+  "email": "no-reply-signup@scilifelab.se",
+  "password": "test12345",
+  "username_prefix": "e2e_tests_signup_"
 }
