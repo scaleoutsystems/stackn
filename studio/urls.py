@@ -37,8 +37,8 @@ urlpatterns = (
         path("<user>/<project>/apps/", include("apps.urls", namespace="apps")),
         path("api/", include("api.urls", namespace="api")),
         # for django-wiki
-        path("wiki/notifications/", include("django_nyt.urls")),
-        path("wiki/", include("wiki.urls")),
+        path("docs/notifications/", include("django_nyt.urls")),
+        path("docs/", include("wiki.urls")),
     ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
