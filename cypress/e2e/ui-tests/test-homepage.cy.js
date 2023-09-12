@@ -20,8 +20,11 @@ describe("Test of the home page", () => {
         cy.url().should("include", "/models/")
     })
 
-    it.skip("should open the User guide page on link click", () => {
-        // TODO: complete when implemented
+    it("should open the User guide page on link click", () => {
+        cy.get("li.nav-item a").contains("User guide").click()
+        cy.url().should("include", "/docs/")
+        cy.get('[data-cy="sidebar-title"]').should('contain', 'user guide') // check that the sidebar title is there, comes from our templates
+        cy.get('#article-menu > .nav').contains("View") // check that the page menu is there, comes from django-wiki templates
     })
 
     it("should open the signup page on link click", () => {
