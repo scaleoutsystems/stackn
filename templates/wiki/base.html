@@ -23,6 +23,7 @@
                     <button class="btn btn-outline-success" type="submit">Search</button>
                   </form>
             </div>
+            {% if urlpath.root.get_descendants %}
             <nav id="GuideIndex">
             {% url 'wiki:get' path=urlpath as current_path %}
                 {% for child in urlpath.root.get_descendants %}
@@ -44,6 +45,7 @@
                   {% endif %}
                 {% endfor %}
         </nav>
+        {% endif %}
         </aside>
     </div>
     <div class="col-12 col-md-9 col-md-9 mt-4 mt-md-0">
