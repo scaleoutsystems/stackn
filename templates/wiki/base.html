@@ -14,8 +14,8 @@
 
 <div class="row">
 
-    <div class="col-12 col-md-3 sticky-top pt-2 fs-6">
-        <aside class="sticky-top pt-2 fs-6">
+    <div class="col-12 col-md-3 sticky-md-top pt-2">
+        <aside class="sticky-md-top py-2 border-bottom">
             <h4>SciLifeLab Serve user guide</h4>
             <div class="d-flex my-2 py-3 border-top">
                 <form class="d-flex" role="search" method="GET" action="{% spaceless %} {% url 'wiki:search' %} {% endspaceless %}">
@@ -24,16 +24,20 @@
                   </form>
             </div>
             <nav id="GuideIndex">
-            {% url 'wiki:get' path=urlpath.root.path as rootpath %}
+            {% url 'wiki:get' path=urlpath as current_path %}
                 {% for child in urlpath.root.get_descendants %}
                   {% if not child.is_deleted %}
                     {% with ''|center:child.level as range %}
                       {% for _ in range %}<ul class="my-0">{% endfor %}
                       {% url 'wiki:get' path=child.path as childpath %}
                       <li>
+                        {% if current_path|stringformat:"s" == childpath|stringformat:"s" %}
+                        <b>{{ child.article.current_revision.title }}</b>
+                        {% else %}
                         <a href="{{ childpath }}">
-                          {{ child.article.current_revision.title }}
+                          {{ child.article.current_revision.title }} {{ test }}
                         </a>
+                        {% endif %}
                       </li>
                       {% for _ in range %}</ul>{% endfor %}
                     {% endwith %}
@@ -42,7 +46,7 @@
         </nav>
         </aside>
     </div>
-    <div class="col-12 col-md-9">
+    <div class="col-12 col-md-9 col-md-9 mt-4 mt-md-0">
         <div class="container">
         {% wiki_messages %}
         <!-- Main page contents -->
