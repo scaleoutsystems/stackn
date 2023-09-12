@@ -1,0 +1,57 @@
+{% load i18n wiki_tags %}
+
+{% if user.is_superuser %}
+
+<div class="d-flex gap-2 my-2 justify-content-center">
+    <div class="btn-group" role="group">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans "Sub-articles for" %} {{ article.current_revision.title }}">
+            <i class="bi bi-diagram-3-fill"></i> Sub-articles
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% for child in children_slice %}
+                <a class="dropdown-item" href="{% url 'wiki:get' path=child.path %}">
+                  {{ child.article.current_revision.title }}
+                </a>
+              {% empty %}
+              <a class="dropdown-item" href="#"><em>{% trans "No sub-articles" %}</em></a>
+            {% endfor %}
+            {% if children_slice_more %}
+            <a class="dropdown-item" href="#"><em>{% trans "...and more" %}</em></a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'wiki:dir' path=urlpath.path %}">{% trans "Browse articles in this level" %} &raquo;</a>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans "Sub-articles for" %} {{ article.current_revision.title }}">
+            <i class="bi bi-file-earmark-fill"></i> Add a new article
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% if urlpath.parent %}
+            <a class="dropdown-item" href="{% url 'wiki:create' path=urlpath.parent.path %}" style="padding: 7px;">
+              <i class="bi bi-arrow-right-short"></i>
+              {% blocktrans with article.current_revision.title as title %}New article next to {{ title }}{% endblocktrans %}
+            </a>
+            {% endif %}
+            <a class="dropdown-item" href="{% url 'wiki:create' path=urlpath.path %}" style="padding: 7px;">
+              <i class="bi bi-arrow-down-short"></i>
+              {% blocktrans with article.current_revision.title as title %}New article below {{ title }}{% endblocktrans %}
+            </a>
+        </div>
+    </div>
+    <div class="btn-group" role="group">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Notifications (<span class="notification-cnt">0</span>)
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'wiki:deleted_list' %}">{% trans "Deleted articles" %}</a></li>
+            {% if "wiki.plugins.notifications"|plugin_enabled %}
+            {% include "wiki/plugins/notifications/menubaritem.html" %}
+            {% endif %}
+            {% if "wiki.plugins.globalhistory"|plugin_enabled %}
+            {% include "wiki/plugins/globalhistory/menubaritem.html" %}
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}

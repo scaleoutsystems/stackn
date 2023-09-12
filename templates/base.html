@@ -1,14 +1,13 @@
-{% load static %}
+{% load static sekizai_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <title>{% block title %}{% endblock %} | SciLifeLab Serve</title>
-
+    <!-- This is for django wiki -->
+    {% render_block "css" %}
     {% include 'common/common_head.html' %}
-
     {% block extra_head %} {% endblock %}
 </head>
 
@@ -117,6 +116,9 @@
     {% block extra_scripts %} {% endblock %}
 
     {% include 'common/analytics.html' %}
+
+    <!-- This is for django wiki -->
+    {% render_block "js" %}
 
 </body>
 

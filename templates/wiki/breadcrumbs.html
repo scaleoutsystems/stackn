@@ -1,0 +1,14 @@
+{% load i18n wiki_tags %}
+
+{% if urlpath.cached_ancestors %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+       {% for ancestor in urlpath.cached_ancestors %}
+      <li class="breadcrumb-item"><a href="{% url 'wiki:get' path=ancestor.path %}">{{ ancestor.article.current_revision.title|truncatechars:25 }}</a></li>
+       {% endfor %}
+       <li class="breadcrumb-item active" aria-current="page">{{ article.current_revision.title|truncatechars:25 }}</li>
+    </ol>
+</nav>
+
+{% endif %}
