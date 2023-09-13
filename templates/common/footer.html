@@ -5,10 +5,10 @@
     <div class="row pb-2">
             <div class="col-lg-2">
                 <ul class="list-unstyled">
-                    <li><a href="">Home</a></li>
-                    <li><a href="">Public apps</a></li>
-                    <li><a href="">Public models</a></li>
-                    <li><a href="">User guide</a></li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="{% url 'portal:index' %}">Public apps</a></li>
+                    <li><a href="{% url 'models:index' %}">Public models</a></li>
+                    <li><a href="/docs/">User guide</a></li>
                     <li><a href="{% url 'portal:teaching' %}">Teaching</a></li>
                     <li><a href="{% url 'portal:about' %}">About</a></li>
                     <li><a href="{% url 'portal:privacy' %}">Privacy policy</a></li>
