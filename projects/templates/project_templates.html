@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}New project{% endblock %}
+
 {% block content %}
 
 <div class="row">
@@ -10,7 +12,7 @@
 
 <div class="row g-4 pt-3">
     {% for template in templates %}
-    
+
     <div class="col-12 col-lg-6 col-xxl-4">
         <div class="card shadow border-0">
             <div class="card-body">
@@ -24,7 +26,7 @@
                                 </h3>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col d-flex align-items-center" style="min-height: 8rem;">
                                 <p>

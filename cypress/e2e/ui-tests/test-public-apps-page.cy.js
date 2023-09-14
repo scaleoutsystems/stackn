@@ -8,6 +8,7 @@ describe("Test of the public apps page", () => {
     it("should contain header with text Apps", () => {
 
         cy.get('h3').should('contain', 'Apps')
+        cy.get("title").should("have.text", "Apps | SciLifeLab Serve")
     })
 
 })

@@ -1,11 +1,8 @@
 #!/bin/bash
 
-# Delete all test users from e2e tests except for the contributor user
-docker exec studio bash -c "python manage.py dbshell -- \
-    -c \"DELETE FROM auth_user WHERE \
-    username = 'e2e_tests_login_tester' OR username LIKE 'e2e_tests_signup_%'; \" "
+# Delete all data from database
+# And restart the docker container
+# There are some unique setup instructions that Nikita could not replicate here
 
-# Create test user for login test
-docker exec studio bash -c "python manage.py shell \
-    -c \"from django.contrib.auth.models import User; \
-    user = User.objects.create_user('e2e_tests_login_tester', 'no-reply-login@scilifelab.se', 'test12345'); user.save(); \"  "
+docker exec studio bash -c "python manage.py flush --no-input"
+docker restart studio

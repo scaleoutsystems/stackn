@@ -37,7 +37,7 @@
                             <td scope="row">{{ user.username }}</td>
 
                             {% if project.owner.id == request.user.id %}
-                                <td class="d-flex justify-content-center">    
+                                <td class="d-flex justify-content-center">
                                     <button type="button" class="btn-close" aria-label="Close" data-bs-toggle="modal"
                                         data-bs-target="#revokeAccessModal-{{user.pk}}"></button>
                                 </td>

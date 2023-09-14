@@ -156,7 +156,7 @@
                             <td class="sorting_1">{{ model.name }}</td>
                             <td class="d-none d-xxl-table-cell">{{ model.version }}</td>
                             <td class="d-none d-xxl-table-cell">{{ model.uploaded_at | date:"d/n/y H:i" }}</td>
-                            <td><span class="badge 
+                            <td><span class="badge
                                         {% if model.status == 'CR' %}bg-warning
                                         {% elif model.status == 'DP' %}bg-success
                                         {% elif model.status == 'AR' %}bg-danger

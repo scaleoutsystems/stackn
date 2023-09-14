@@ -1,24 +1,21 @@
-<!-- It seems like this template is being used -->
 {% extends base_template %}
 
 {% load custom_tags %}
 
-{% block title %}Model {{ model.name }} Details{% endblock %}
+{% block title %}Private model{{ model.name }}{% endblock %}
+
 {% block content %}
 
 <div class="row">
     <div class="col">
-
-        <h3>
-            Model Details
-        </h3>
+        <h3>Model Details</h3>
     </div>
 </div>
 
-<div class="row pt-3">
+<div class="row">
     <div class="col-12 col-lg-12">
         <div class="card border-0 shadow">
-            <div class="card-header bg-white">
+            <div class="card-header bg-white p-3">
                 <h5 class="card-title mb-0">{{ model.name }}</h5>
                 <p>{{ model.description }}</p>
             </div>
@@ -62,7 +59,7 @@
                                     <div class="row">
                                         <div class="col-12 col-md-6">
 
-                                            {% include 'common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" required=True %}
+                                            {% include './common/autocomplete.html' with str_list=all_tags id_suffix="tags" name="tag" required=True %}
                                         </div>
                                         <div class="col-12 col-md-6 pt-3 pt-md-0">
 
@@ -106,7 +103,17 @@
                 </div>
 
                 {% endif%}
-
+                <hr>
+                <dl class="row">
+                    <dt class="col-4 col-xxl-3">Bucket</dt>
+                    <dd class="col-8 col-xxl-9">
+                        {{ model.bucket }}
+                    </dd>
+                    <dt class="col-4 col-xxl-3 mb-0">UID</dt>
+                    <dd class="col-8 col-xxl-9 mb-0">
+                        {{ model.uid }}
+                    </dd>
+                </dl>
             </div>
         </div>
 

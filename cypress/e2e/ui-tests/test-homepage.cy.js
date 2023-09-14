@@ -36,4 +36,8 @@ describe("Test of the home page", () => {
         cy.get("li.nav-item a").contains("Log in").click()
         cy.url().should("include", "accounts/login")
   })
+
+    it("should have proper title", () => {
+	cy.get("title").should("have.text", "Home | SciLifeLab Serve")
+    })
 })

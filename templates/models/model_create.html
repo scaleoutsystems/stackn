@@ -1,0 +1,115 @@
+{% extends 'projects/base.html' %}
+
+{% block title %}Create Model Object{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col">
+        <h3>Create Model Object</h3>
+    </div>
+</div>
+
+<div class="row py-3">
+    <div class="col-12 col-xl-6">
+        <div class="card shadow border-0">
+            <div class="card-body">
+                <form action="{% url 'models:create' request.user project.slug %}" method="POST">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col">
+                            <label for="name" class="form-label">Name</label>
+                            <input class="form-control" placeholder="Name" type="text" name="name" id="name">
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="description" class="form-label">Description</label>
+                            <input class="form-control" placeholder="Description" type="text" name="description"
+                                id="description">
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="id_release_type" class="form-label">{{form.release_type.label}}</label>
+                            {{form.release_type}}
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="version" class="form-label">Version</label>
+                            <input class="form-control" placeholder="Version" type="text" name="version" id="version"
+                                value="{{form.version.value}}">
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="id_access" class="form-label">{{form.access.label}}</label>
+                            {{form.access}}
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="id_path" class="form-label">Path</label>
+                            {{form.path}}
+                            <div class="form-text">{{form.path.help_text}}</div>
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="model-type" class="form-label">Model Type*</label>
+                            <select name="model-type" id="model-type" class="form-control" required>
+                                {% for object_type in object_types %}
+                                <option value="{{ object_type.name }}">{{ object_type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="app" class="form-label">App*</label><small> (where the trained models are
+                                located)</small>
+                            <select name="app" id="app" class="form-control" required>
+                                {% for app in apps %}
+                                <option value="{{ app.pk }}">{{ app.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <label for="volume" class="form-label">Persistent Volume*</label><small> (mounted to the
+                                above app)</small>
+                            <select name="volume" id="volume" class="form-control" required>
+                                {% for volume in volumes %}
+                                <option value="{{ volume.name }}">{{ volume.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col">
+                            <button class="btn btn-primary" type="submit" value="Submit">Create</button>
+                            <button class="btn btn-secondary float-end" type="submit"
+                                onclick="window.location='{{ request.headers.referer }}' ; return false;"
+                                value="Cancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -50,3 +50,8 @@ uvicorn==0.20.0
 # Pytest Django
 pytest-django==4.5.2
 pytest-cov==4.1.0
+
+# Mocking
+moto[ec2,s3,all]==4.2.2
+Flask==2.3.3
+flask-cors==4.0.0

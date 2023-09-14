@@ -8,13 +8,17 @@ describe("Test project contributor user functionality", () => {
 
     before(() => {
         // seed the db with: contributor user, a blank project
-        //cy.log("Seeding the db for the contributor tests. Running db-seed-contributor.sh");
+        cy.log("Seeding the db for the contributor tests. Running db-seed-contributor.sh");
+        cy.exec("./cypress/e2e/db-reset.sh")
+        cy.wait(60000)
+        cy.visit("/")
         cy.log("Running seed_contributor.py")
         cy.exec("./cypress/e2e/db-seed-contributor.sh")
     })
 
     beforeEach(() => {
         // username in fixture must match username in db-reset.sh
+        cy.log("Logging in as contributor user")
         cy.fixture('users.json').then(function (data) {
             users = data
 
@@ -31,8 +35,10 @@ describe("Test project contributor user functionality", () => {
         // Names of objects to create
         const project_name = "e2e-create-proj-test"
         const volume_name = "e2e-project-vol"
+        const project_title_name = project_name + " | SciLifeLab Serve"
 
         cy.visit("/projects/")
+        cy.get("title").should("have.text", "My projects | SciLifeLab Serve")
 
         // Click button for UI to create a new project
         cy.get("a").contains('New project').click()
@@ -51,6 +57,7 @@ describe("Test project contributor user functionality", () => {
             .then((href) => {
                 cy.log(href)
                 //cy.url().should("include", "/project-e2e-blank");
+                cy.get("title").should("have.text", project_title_name)
                 cy.get('h3').should('contain', project_name)
 
                 // Check that project settings are available

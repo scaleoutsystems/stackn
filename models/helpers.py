@@ -59,6 +59,7 @@ def add_pmo_to_publish(mdl, pmodel):
         pmo.obj.save(filename, fobj)
         fobj.close()
     except Exception as err:
+        raise err
         print(err)
 
     print("Created public model object")

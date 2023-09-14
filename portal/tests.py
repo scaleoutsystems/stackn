@@ -22,6 +22,7 @@ def test_index():
 
     # Check if it returns the correct status code
     assert response.status_code == 200
+    assert "<title>Apps | SciLifeLab Serve</title>" in response.content.decode()
 
 
 def test_home_view_class():
@@ -33,3 +34,34 @@ def test_home_view_class():
 
     # Check status code
     assert response.status_code == 200
+    assert "<title>Home | SciLifeLab Serve</title>" in response.content.decode()
+
+
+def test_about_view():
+    # Get correct request
+    request = RequestFactory().get(reverse("portal:about"))
+    response = views.about(request)
+
+    # Check status code
+    assert response.status_code == 200
+    assert "<title>About | SciLifeLab Serve</title>" in response.content.decode()
+
+
+def test_teaching_view():
+    # Get correct request
+    request = RequestFactory().get(reverse("portal:teaching"))
+    response = views.teaching(request)
+
+    # Check status code
+    assert response.status_code == 200
+    assert "<title>Teaching | SciLifeLab Serve</title>" in response.content.decode()
+
+
+def test_privacy_view():
+    # Get correct request
+    request = RequestFactory().get(reverse("portal:privacy"))
+    response = views.privacy(request)
+
+    # Check status code
+    assert response.status_code == 200
+    assert "<title>Privacy policy | SciLifeLab Serve</title>" in response.content.decode()

@@ -342,7 +342,7 @@ def index(request, user=None, project=None, id=0):
 @login_required
 @permission_required_or_403("can_view_project", (Project, "slug", "project"))
 def list(request, user, project):
-    template = "models_list.html"
+    template = "models/models_list.html"
 
     # Will be added to locals() which create a
     # dict context with local variables
@@ -704,7 +704,7 @@ def details_private(request, user, project, id):
     bucket = model.bucket
     uid = model.uid
 
-    return render(request, "models_details_private.html", locals())
+    return render(request, "models/models_details_private.html", locals())
 
 
 def details_public(request, id):

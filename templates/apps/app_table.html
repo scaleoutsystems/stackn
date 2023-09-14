@@ -1,0 +1,89 @@
+{% load static %}
+<table id="{{ cat_obj.slug }}" class="table">
+  <thead>
+      <tr>
+          <th></th>
+          <th>App</th>
+          <th>Name</th>
+          <th></th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+          <th></th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for appinstance in appinstances %}
+    <tr>
+        {% static 'images/logos/apps/' as static_url %}
+        <td><img src="{{static_url}}{{appinstance.app.logo|default:'default-logo.png'}}" class="img-fluid " style="max-height:25px;"></td>
+        <td>{{ appinstance.app.name }}</td>
+        <td>{{ appinstance.name }}</td>
+        {% if appinstance.table_field.url %}
+        <td><a href="{{ appinstance.table_field.url }}" target="_blank">Open <i class="bi bi-box-arrow-up-right"></i></a></td>
+        {% else %}
+        <td></td>
+        {% endif %}
+        <td id="status-{{ appinstance.pk }}">
+        <span class="badge bg-secondary">
+        {{ appinstance.status.latest.status_type }}
+        </span>
+
+        {% if category == "serve" %}
+        <span class="badge bg-info">
+              {% if appinstance.access != "public" %}
+              unpublished
+              {% else %}
+              published</span>
+          {% endif %}
+        {% endif %}
+        </td>
+        <td>{{ appinstance.created_on }}</td>
+        <td class="table-action">
+          <div class="dropdown show">
+              <a href="#" class="default" data-bs-toggle="dropdown" data-display="static">
+                  <i class="bi bi-three-dots-vertical"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end">
+                  <a class="dropdown-item default disabled" href="{% url 'apps:logs' request.user project.slug appinstance.pk %}">
+                    <i class="bi bi-activity me-1"></i>
+                    Logs (disabled)
+                  </a>
+
+                  {% include 'apps/app_table_publishable_link.html' %}
+
+                  {% if appinstance.app.user_can_edit %}
+
+                    <a class="dropdown-item default" href="{% url 'apps:appsettings' request.user project.slug appinstance.pk %}">
+                      <i class="bi bi-sliders2-vertical me-1"></i>
+                      Settings
+                    </a>
+                  {% else %}
+
+                    <a class="dropdown-item default disabled">
+                      <i class="bi bi-sliders2-vertical me-1"></i>
+                      Settings
+                    </a>
+                  {% endif %}
+
+                  {% if appinstance.app.user_can_delete %}
+
+                    <a class="dropdown-item default bg-danger text-white confirm-delete" href="{% url 'apps:delete' request.user project.slug category appinstance.pk %}">
+                      <i class="bi bi-trash me-1"></i>
+                      Delete
+                    </a>
+                  {% else %}
+
+                    <a class="dropdown-item default bg-danger text-white confirm-delete disabled">
+                      <i class="bi bi-trash me-1"></i>
+                      Delete
+                    </a>
+                  {% endif %}
+
+              </div>
+          </div>
+        </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

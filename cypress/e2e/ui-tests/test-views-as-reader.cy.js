@@ -10,7 +10,9 @@ describe("Test views as authenticated user", () => {
     cy.fixture('users.json').then(function (data) {
       users = data
     })
-
+    cy.exec("./cypress/e2e/db-reset.sh");
+    cy.wait(60000);
+    cy.exec("./cypress/e2e/db-seed-login.sh");
   })
 
   beforeEach(() => {
