@@ -8,7 +8,7 @@ AppInstance = apps.get_model(app_label=settings.APPINSTANCE_MODEL)
 Project = apps.get_model(app_label=settings.PROJECTS_MODEL)
 
 
-def index(request, id=0):
+def public_apps(request, id=0):
     try:
         projects = Project.objects.filter(Q(owner=request.user) | Q(authorized=request.user), status="active")
     except Exception:
