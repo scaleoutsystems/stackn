@@ -10,7 +10,7 @@
             <h3 class="mb-3" style="margin-right: 5px;">
                 Public apps
                 {% if published_apps|length > 0 %}
-                <small>{{ published_apps|length }}</small>
+                <span class="ghost-number">{{ published_apps|length }}</span>
                 {% endif %}
 
             </h3>
@@ -33,7 +33,7 @@
 
                 {% static 'images/logos/apps/' as static_url %}
 
-                <img width="200" class="img-fluid img-cover" src="{{static_url}}{{app.app.slug}}-logo.png"
+                <img height="50px"  class="img-fluid img-cover" src="{{static_url}}{{app.app.slug}}-logo.png"
                     alt="Card image cap">
             </div>
             <div class="card-body px-4 pt-2">
