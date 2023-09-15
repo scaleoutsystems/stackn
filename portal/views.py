@@ -71,7 +71,7 @@ def public_apps(request, id=0):
 
     request.session.modified = True
 
-    template = "portal/index.html"
+    template = "portal/apps.html"
     return render(request, template, locals())
 
 
