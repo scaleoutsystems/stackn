@@ -60,14 +60,26 @@ describe("Test project contributor user functionality", () => {
                 cy.get("title").should("have.text", project_title_name)
                 cy.get('h3').should('contain', project_name)
 
+                // TODO: add tests for all sections similar to Models below
+
+                // Section Models - Machine Learning Models
+                // Navigate to the create models view and cancel back again
+                cy.get("div#models").first("h5").should("contain", "Machine Learning Models")
+                cy.get("div#models").find("a.btn").click()
+                    .then((href) => {
+                        cy.url().should("include", "models/create")
+                        cy.get('h3').should("contain", "Create Model Object")
+                        cy.get("button").contains("Cancel").click()
+                            .then((href) => {
+                                cy.get('h3').should("contain", project_name)
+                        })
+                    })
+
                 // Check that project settings are available
                 cy.get('[data-cy="settings"]').click()
                 cy.url().should("include", "settings")
                 cy.get('h3').should('contain', 'Project settings')
             })
-
-        // TODO: add additional asserts
-
     })
 
     it.skip("can create a new mlflow project", () => {

@@ -37,7 +37,7 @@
 
 <div class="row g-4">
     {% for objs in resources %}
-    <div class="col-12 d-flex">
+    <div id="{{ objs.title|lower }}" class="col-12 d-flex">
         <div class="card w-100 border-0 shadow">
             <div class="card-header border-bottom-0 d-flex align-items-center justify-content-between py-3"
                 style="min-height: 3rem;">
@@ -185,8 +185,8 @@
         </div>
     </div>
     {% endfor %}
-    <div class="col-12 d-flex">
 
+    <div id="models" class="col-12 d-flex">
         <div class="card w-100 border-0 shadow">
             <div class="card-header border-bottom-0 d-flex align-items-center justify-content-between py-3"
                 style="min-height: 3rem;">
@@ -267,6 +267,39 @@
                     <p>No models have been uploaded to this project yet.</p>
                 </div>
                 {% endif %}
+                <div class="row g-2 py-2 mx-2">
+                    <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+                    <div class="card h-100">
+                    <div class="card-body">
+                        <div class="row g-0 w-100 h-100">
+                            <div class="col-8 d-flex align-items-bottom flex-column">
+                                <div class="pt-2">
+                                    <h5>Machine Learning Models</h5>
+                                </div>
+                                <div class="align-items-end d-flex h-100">
+                                    <div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <p></p>
+                                            </div>
+                                        </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <a class="btn btn-primary btn-sm"
+                                                    href="{% url 'models:create' request.user project.slug %}">Create</a>
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <img src="/static/images/logos/apps/netpolicy-logo.png" class="img-fluid float-end w-75" alt="App Logo">
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
