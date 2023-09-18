@@ -3,23 +3,23 @@
 ## Create a Project
 To get up and running with STACKn, start by creating a new Project template following the steps below:
 
-1. Click on the blue `+ New project` button in the top right corner.
+1. Click on the `+ New project` button in the top right corner.
 2. Select one of the available project templates by clicking on the `Create` button.
 3. Enter the project name (which is mandatory). You can still change the project template at this stage from the dedicated dropdown menu. The project description is optional.
-4. Finally, click on the blue `Create project` button.
+4. Finally, click on the `Create project` button.
 
 ![screen-gif](images/create-project.gif)
 
 ## Project Overview
 Once you have created a project, you can find it under the general tab called _Projects_. Here you will find the list of all your created projects. To get an overview of one of your project, click on the `Open` button.
 
-You will land on the project dashboard page, also called as the `Overview`. On the left side menu you can navigate through the various components/resources categories available within a STACKn project:
-- **_Objects_:** a list of model objects created under the current project
-- **_Compute_:** a series of components to be used for experimentation and training models with pre-configured data science environments.
+You will land on the project dashboard page, also called the `Overview`. On the left side menu you can navigate through the various components/resources categories available within a STACKn project:
+- **_Models_:** a list of model objects created under the current project
+- **_Notebooks_:** a series of components to be used for experimentation and training models with pre-configured data science environments.
 - **_Serve_:** the most common ML serving applications used for deploying your trained models
 - **_Store_:** project storage volumes, kubernetes persistent volume, object stores and databases for storing and sharing datasets.
 - **_Develop_:** standard developing IDE such as VisualStudio together with dedicate tools for the machine learning lifecycle .
-- [**_FEDn_:**](https://scaleoutsystems.github.io/fedn/) an open-source, modular and model agnostic framework for Federated Machine Learning. Scale seamlessly from pseudo-distributed development to real-world production networks in distributed, heterogeneous environments.
+<!-- - [**_FEDn_:**](https://scaleoutsystems.github.io/fedn/) an open-source, modular and model agnostic framework for Federated Machine Learning. Scale seamlessly from pseudo-distributed development to real-world production networks in distributed, heterogeneous environments. -->
 - **_Settings_:** the tab where a user can access the current project settings
 
 ![screen-gif](images/project-overview.gif)
@@ -34,7 +34,6 @@ Click on any of them to open the related dropdown menu and select which resource
 Alternatively you can create components by first selecting one of the components categories from the left side panel of a project, under the dashboard tab. Under each tab you can find several "Cards" associated to resources that can be created by clicking on the `Create` button:
 
 ![screen-gif](images/apps-from-side-panel.gif)
-
 
 ## Settings
 The `Settings` page contains all the information about your Project and its components. Some
