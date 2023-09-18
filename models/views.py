@@ -139,7 +139,7 @@ class ModelCreate(LoginRequiredMixin, PermissionRequiredMixin, View):
                 return redirect(redirect_url)
 
             # Copy model folder from pod to a temp location within studio pod
-            temp_folder_path = settings.BASE_DIR + "/tmp"  # which should be /app/tmp
+            temp_folder_path = str(settings.BASE_DIR) + "/tmp"  # which should be /app/tmp
             # Create and move into the new directory
             try:
                 os.mkdir(temp_folder_path)
@@ -681,7 +681,8 @@ def details_private(request, user, project, id):
             status="active",
             slug=project_slug,
         ).first()
-        base_template = "projects/base.html"
+        # base_template = "projects/base.html"
+        base_template = "base.html"
     except Exception as err:
         project = []
         print(err)
@@ -726,7 +727,8 @@ def details_public(request, id):
                     status="active",
                     slug=project_slug,
                 ).first()
-                base_template = "projects/base.html"
+                # base_template = "projects/base.html"
+                base_template = "base.html"
             except Exception as err:
                 project = []
                 print(err)
